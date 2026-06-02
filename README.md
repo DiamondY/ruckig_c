@@ -1,0 +1,194 @@
+# Ruckig C Rewrite
+
+This repository contains a pure C99 rewrite of the Ruckig Community trajectory generator. The source of truth for the implementation scope is `docs/c_rewrite_execution_plan.md`; the original C++ implementation under `original/ruckig-main` is kept unchanged and is used only as an oracle in tests.
+
+## Current Status
+
+Implemented and covered by fixed C/oracle tests plus deterministic random oracle stress:
+
+- C99 library target `ruckig_c`.
+- Public opaque C ABI in `include/ruckig_c/ruckig.h`.
+- Lifecycle, input/output/trajectory accessors, validation, optional min velocity/min acceleration/minimum duration setters.
+- First-order position trajectories.
+- Second-order position trajectories.
+- Second-order velocity trajectories.
+- Third-order velocity trajectories.
+- Third-order position trajectories, including blocked intervals and brake pre-trajectory handling.
+- Multi-DoF synchronization modes: `Time`, `TimeIfNecessary`, `Phase`, and `None`.
+- Continuous and discrete duration handling.
+- Directional min velocity/min acceleration limits.
+- Disabled DoF behavior.
+- Offline `ruckig_calculate`, online `ruckig_update`, `ruckig_output_pass_to_input`.
+- Trajectory duration, independent minimum durations, sampling, position extrema, and first-time-at-position helpers.
+- C examples for position, offline position, velocity, stop, and minimum duration.
+
+Recommended portability follow-ups for a wider CI release:
+
+- Linux/Clang sanitizer matrix and valgrind/memcheck where available.
+- Platform symbol-wrapper allocation audit where the toolchain supports it.
+- Waypoints, per-section constraints, cloud, Python/Rust bindings, and per-DoF control/sync overrides are intentionally outside the first public C API.
+
+## Build
+
+```sh
+cmake -S . -B build
+cmake --build build
+ctest --test-dir build --output-on-failure
+```
+
+Useful CMake options:
+
+- `BUILD_RUCKIG_C=ON` builds the C library.
+- `BUILD_RUCKIG_C_TESTS=ON` builds C unit tests and header compile tests.
+- `BUILD_RUCKIG_C_EXAMPLES=ON` builds C examples.
+- `BUILD_RUCKIG_C_ORACLE_TESTS=ON` builds the C++ differential oracle tests against `original/ruckig-main`.
+- `BUILD_RUCKIG_C_PERFORMANCE_TESTS=ON` builds the C/C++ oracle performance benchmark.
+- `RUCKIG_C_ENABLE_CALCULATION_DURATION=ON` records `ruckig_update` calculation duration in microseconds in `ruckig_output_get_calculation_duration`.
+- `BUILD_SHARED_LIBS=ON` builds a shared library instead of a static library.
+
+On Windows, the current verified CMake path uses LLVM clang/clang++ with the Visual Studio bundled Ninja. The oracle harness must compile `.c` sources with a C compiler and the original Ruckig sources with a C++ compiler. Current verification includes static-library and DLL/import-library builds; see `docs/verification_report.md`.
+
+## C API Shape
+
+The public API exposes opaque handle types:
+
+- `ruckig_t`
+- `ruckig_input_t`
+- `ruckig_output_t`
+- `ruckig_trajectory_t`
+
+Handles are created once for a fixed DoF count. Data vectors are accessed through preallocated arrays returned by accessors such as `ruckig_input_current_position_data` and `ruckig_input_max_velocity_data`.
+
+The public functions are annotated with `RUCKIG_C_API` for shared-library
+exports. Define `RUCKIG_C_STATIC_DEFINE` when consuming a manually built static
+library on Windows; the CMake target defines it automatically for static builds.
+
+Required input state and limit arrays:
+
+- Current state: `ruckig_input_current_position_data`, `ruckig_input_current_velocity_data`, `ruckig_input_current_acceleration_data`.
+- Target state: `ruckig_input_target_position_data`, `ruckig_input_target_velocity_data`, `ruckig_input_target_acceleration_data`.
+- Limits: `ruckig_input_max_velocity_data`, `ruckig_input_max_acceleration_data`, `ruckig_input_max_jerk_data`.
+- DoF enable flags: `ruckig_input_enabled_data`.
+
+Optional first-release fields:
+
+- `ruckig_input_set_min_velocity` / `ruckig_input_clear_min_velocity`.
+- `ruckig_input_set_min_acceleration` / `ruckig_input_clear_min_acceleration`.
+- `ruckig_input_set_minimum_duration` / `ruckig_input_clear_minimum_duration`.
+- Global mode setters: `ruckig_input_set_control_interface`, `ruckig_input_set_synchronization`, and `ruckig_input_set_duration_discretization`.
+
+Numerical inputs must be finite except where the C++ baseline accepts infinite acceleration or jerk limits to select lower-order solvers. Velocity, acceleration, and jerk maxima must be non-negative, directional minima must be non-positive, and enabled DoFs must satisfy the same current/target state limit checks as the C++ oracle when validation requests those checks.
+
+Basic offline usage:
+
+```c
+ruckig_t* otg = NULL;
+ruckig_input_t* input = NULL;
+ruckig_trajectory_t* trajectory = NULL;
+
+ruckig_create(&otg, 1, 0.01);
+ruckig_input_create(&input, 1);
+ruckig_trajectory_create(&trajectory, 1);
+
+ruckig_input_target_position_data(input)[0] = 2.0;
+ruckig_input_max_velocity_data(input)[0] = 2.0;
+ruckig_input_max_acceleration_data(input)[0] = 1.5;
+ruckig_input_max_jerk_data(input)[0] = 1.0;
+
+if (ruckig_calculate(otg, input, trajectory) == RUCKIG_WORKING) {
+    double position[1], velocity[1], acceleration[1];
+    ruckig_trajectory_at_time(trajectory, 0.5, position, velocity, acceleration, NULL, NULL);
+}
+
+ruckig_trajectory_destroy(trajectory);
+ruckig_input_destroy(input);
+ruckig_destroy(otg);
+```
+
+Online usage calls `ruckig_update`, reads `ruckig_output_new_*_data`, then calls `ruckig_output_pass_to_input` when the caller wants to feed the new state into the next cycle.
+
+## Memory Model
+
+Create functions allocate handles and all vectors owned by those handles. The intended release contract is that `ruckig_calculate`, `ruckig_update`, trajectory sampling, and root solvers do not allocate heap memory.
+
+The current implementation includes an internal allocation counter hook used by C tests. It verifies representative `ruckig_calculate`, `ruckig_update`, and `ruckig_trajectory_at_time` paths do not call the library's allocation helpers after lifecycle setup. CTest also runs a source-level allocation audit that rejects direct `malloc`/`calloc`/`realloc`/`free` calls outside `src/ruckig_c/alloc.c`.
+
+`ruckig_output_get_calculation_duration` returns `0.0` by default. Define `RUCKIG_C_ENABLE_CALCULATION_DURATION` or configure CMake with `-DRUCKIG_C_ENABLE_CALCULATION_DURATION=ON` to measure `ruckig_update` calculation duration in microseconds.
+
+Ownership rules:
+
+- Destroy functions accept `NULL`.
+- `ruckig_output_t` owns its internal trajectory.
+- A standalone `ruckig_trajectory_t` created by `ruckig_trajectory_create` is owned by the caller.
+- Accessor-returned arrays are borrowed pointers and remain valid until the owning handle is destroyed.
+
+## Thread Safety
+
+Independent handles can be used from independent threads. A single handle is not internally synchronized; callers must not mutate or use the same `ruckig_t`, input, output, or trajectory concurrently without external synchronization.
+
+## Result Codes
+
+The main non-error results are:
+
+- `RUCKIG_WORKING`
+- `RUCKIG_FINISHED`
+
+Common error results:
+
+- `RUCKIG_ERROR_INVALID_INPUT`
+- `RUCKIG_ERROR_ZERO_LIMITS`
+- `RUCKIG_ERROR_EXECUTION_TIME_CALCULATION`
+- `RUCKIG_ERROR_SYNCHRONIZATION_CALCULATION`
+- `RUCKIG_ERROR_UNSUPPORTED`
+
+`RUCKIG_ERROR_UNSUPPORTED` is reserved for public features outside the first-release API scope. Solver calculation failures return execution-time or synchronization calculation errors instead of being silently ignored.
+
+## Examples
+
+The C examples are in `examples/c`:
+
+- `01_position.c`
+- `02_position_offline.c`
+- `05_velocity.c`
+- `06_stop.c`
+- `07_minimum_duration.c`
+
+All examples are wired into CMake when `BUILD_RUCKIG_C_EXAMPLES=ON`.
+
+## Oracle Tests
+
+The oracle target compares the C implementation with the frozen original C++ implementation under `original/ruckig-main`. It covers fixed regressions and deterministic random stress cases, and prints profile details on mismatches. It is a test-only target; the `ruckig_c` library does not link the C++ oracle and must not depend on a C++ runtime.
+
+The oracle executable also accepts a deterministic random smoke-test mode:
+
+```sh
+ruckig_c_oracle_tests --random 100 --seed 1
+```
+
+The random generator covers first/second/third-order position and velocity cases, 1-3 DoF inputs, synchronization modes, continuous/discrete duration, directional limits, disabled DoFs, and general third-order position states. Development random coverage has been run with `100,000` trajectories for seeds `1`, `2`, and `41`; the release stress command has been run with `1,000,000` trajectories for seed `1`. See `docs/verification_report.md`.
+
+## Performance Benchmark
+
+`BUILD_RUCKIG_C_PERFORMANCE_TESTS=ON` enables `ruckig_c_performance_benchmark`, which measures C `ruckig_calculate` against the frozen C++ oracle on the same deterministic generated corpus.
+
+Example:
+
+```sh
+ruckig_c_performance_benchmark --samples 10000 --seed 1
+```
+
+The current development performance report is in `docs/performance_report.md`. Windows clang ASan/UBSan CMake tests pass when the LLVM sanitizer runtime directory is present in `PATH`. Linux/Clang sanitizer and platform symbol-wrapper allocation jobs are recommended additions for a broader CI matrix.
+
+## Verification
+
+Current CMake/Ninja and direct-clang verification evidence is recorded in `docs/verification_report.md`, including:
+
+- C unit tests.
+- C and C++ header compile tests.
+- Static and shared CMake builds.
+- Fixed oracle suite.
+- `100,000` development random oracle runs.
+- `1,000,000` release random oracle run.
+- C examples.
+- Internal allocation-counter checks and source-level allocation audit.
+- Windows clang ASan/UBSan CMake tests.
