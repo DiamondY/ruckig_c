@@ -161,7 +161,26 @@ jobs:
         run: cmake --build build-perf
 
       - name: Run benchmark
-        run: ./build-perf/ruckig_c_performance_benchmark --samples 10000 --seed 1 | tee linux-performance.txt
+        run: |
+          {
+            echo "uname: $(uname -a)"
+            echo "cpu_identifier: $(lscpu | sed -n 's/^Model name:[[:space:]]*//p' | head -n 1)"
+            echo "c_compiler: $(clang --version | head -n 1)"
+            echo "cxx_compiler: $(clang++ --version | head -n 1)"
+            echo "cmake_build_type: Release"
+            echo "cmake_generator: Ninja"
+            ./build-perf/ruckig_c_performance_benchmark --samples 10000 --seed 1
+          } | tee linux-performance.txt
+          {
+            echo "### Linux performance"
+            echo
+            echo '```text'
+            cat linux-performance.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          while IFS= read -r line; do
+            echo "::notice title=Linux performance::$line"
+          done < linux-performance.txt
 
       - name: Upload benchmark output
         uses: actions/upload-artifact@v4
