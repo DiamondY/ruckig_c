@@ -178,9 +178,38 @@ jobs:
             cat linux-performance.txt
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
-          while IFS= read -r line; do
-            echo "::notice title=Linux performance::$line"
-          done < linux-performance.txt
+          python3 - <<'PY'
+          import pathlib
+
+          values = {}
+          for line in pathlib.Path("linux-performance.txt").read_text().splitlines():
+              if ": " in line:
+                  key, value = line.split(": ", 1)
+                  values[key] = value
+
+          keys = [
+              "uname",
+              "cpu_identifier",
+              "c_compiler",
+              "cxx_compiler",
+              "cmake_build_type",
+              "cmake_generator",
+              "samples",
+              "seed",
+              "compiler",
+              "os",
+              "c_average_ns",
+              "c_p99_ns",
+              "c_worst_ns",
+              "oracle_average_ns",
+              "oracle_p99_ns",
+              "oracle_worst_ns",
+              "average_ratio_c_over_oracle",
+              "release_threshold_average_ratio",
+          ]
+          summary = " | ".join(f"{key}={values[key]}" for key in keys if key in values)
+          print(f"::notice title=Linux performance::{summary}")
+          PY
 
       - name: Upload benchmark output
         uses: actions/upload-artifact@v4
