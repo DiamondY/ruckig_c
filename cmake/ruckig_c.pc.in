@@ -7,5 +7,5 @@ Name: ruckig_c
 Description: Pure C99 rewrite of the Ruckig Community local trajectory generator
 Version: @PROJECT_VERSION@
 Libs: -L${libdir} -lruckig_c
-Libs.private: -lm
+Libs.private: @RUCKIG_C_PC_PRIVATE_LIBS@
 Cflags: -I${includedir}

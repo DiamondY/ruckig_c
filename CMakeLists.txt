@@ -21,6 +21,25 @@ set(RUCKIG_C_INSTALL_CMAKEDIR
   CACHE STRING "Install directory for ruckig_c CMake package files"
 )
 
+set(RUCKIG_C_PC_PRIVATE_LIBS "")
+if(NOT WIN32)
+  list(APPEND RUCKIG_C_PC_PRIVATE_LIBS "-lm")
+endif()
+if(CMAKE_C_COMPILER_ID MATCHES "Clang|GNU")
+  set(RUCKIG_C_PC_SANITIZERS "")
+  if(RUCKIG_C_ENABLE_ASAN)
+    list(APPEND RUCKIG_C_PC_SANITIZERS address)
+  endif()
+  if(RUCKIG_C_ENABLE_UBSAN)
+    list(APPEND RUCKIG_C_PC_SANITIZERS undefined)
+  endif()
+  if(RUCKIG_C_PC_SANITIZERS)
+    list(JOIN RUCKIG_C_PC_SANITIZERS "," RUCKIG_C_PC_SANITIZER_FLAGS)
+    list(APPEND RUCKIG_C_PC_PRIVATE_LIBS "-fsanitize=${RUCKIG_C_PC_SANITIZER_FLAGS}")
+  endif()
+endif()
+list(JOIN RUCKIG_C_PC_PRIVATE_LIBS " " RUCKIG_C_PC_PRIVATE_LIBS)
+
 set(RUCKIG_C_SOURCES
   src/ruckig_c/alloc.c
   src/ruckig_c/block.c
