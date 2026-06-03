@@ -210,9 +210,11 @@ Example:
 ruckig_c_performance_benchmark --samples 10000 --seed 1
 ```
 
-The current development performance report is in `docs/performance_report.md`. Windows clang ASan/UBSan CMake tests pass when the LLVM sanitizer runtime directory is present in `PATH`. Linux/Clang sanitizer and platform symbol-wrapper allocation jobs are recommended additions for a broader CI matrix.
-Linux performance data must be recorded in `docs/performance_report.md` before
-tagging a public `0.1.0` release; see `docs/release_checklist.md`.
+The current development performance report is in `docs/performance_report.md`.
+Windows clang ASan/UBSan CMake tests pass when the LLVM sanitizer runtime
+directory is present in `PATH`. Linux Clang ASan/UBSan, Valgrind, pkg-config
+consumer, and performance evidence is recorded in `docs/release_checklist.md`
+for the public `0.1.0` release gate.
 
 ## Verification
 

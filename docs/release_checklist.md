@@ -4,7 +4,7 @@ Run these checks from a clean worktree before tagging `0.1.0`.
 
 ## Required Gates
 
-- [x] `git status --short` is clean after commit `142d70c`.
+- [x] `git status --short` is clean after committing the release evidence.
 - [x] Static CMake build passes on Windows clang/Ninja.
 - [x] Shared-library CMake build passes on Windows clang/Ninja.
 - [x] C and C++ public header consumer tests pass on Windows clang/Ninja.
@@ -13,11 +13,11 @@ Run these checks from a clean worktree before tagging `0.1.0`.
 - [x] Fixed C++ oracle suite passes on Windows clang/Ninja.
 - [x] Random development oracle passes with `--random 100000 --seed 1` on Windows clang/Ninja.
 - [x] Manual release oracle passes with `--random 1000000 --seed 1` on Windows clang/Ninja.
-- [ ] Linux Clang ASan+UBSan CTest passes.
-- [ ] Linux Valgrind/memcheck passes for `ruckig_c_tests` and one example.
-- [ ] Linux performance benchmark result is recorded in `docs/performance_report.md`.
+- [x] Linux Clang ASan+UBSan CTest passes.
+- [x] Linux Valgrind/memcheck passes for `ruckig_c_tests` and one example.
+- [x] Linux performance benchmark result is recorded in `docs/performance_report.md`.
 - [x] Installed CMake consumer smoke test passes on Windows clang/Ninja.
-- [ ] Installed pkg-config consumer smoke test passes on Linux.
+- [x] Installed pkg-config consumer smoke test passes on Linux.
 - [x] `LICENSE` and `CHANGELOG.md` are present and accurate.
 
 ## Current Windows Evidence
@@ -32,6 +32,18 @@ Recorded on 2026-06-03 with LLVM clang 21.1.8 and Visual Studio bundled Ninja:
 - Shared result: `100% tests passed, 0 tests failed out of 13`.
 - Release random command: `ctest --test-dir build_release_check_ninja -R ruckig_c_oracle_random_release --output-on-failure`.
 - Release random result: `100% tests passed, 0 tests failed out of 1`.
+
+## Current GitHub Actions Evidence
+
+Recorded on 2026-06-03 from CI run `26861662259` at commit `5d5743c`:
+
+- CI run result: completed successfully.
+- Linux Clang ASan UBSan job: passed.
+- Linux Valgrind job: passed, including CTest, `ruckig_c_tests` under Valgrind,
+  and `example-ruckig-c-02-position-offline` under Valgrind.
+- Linux Clang performance job: passed and uploaded `linux-performance`.
+- Linux performance result is recorded in `docs/performance_report.md`.
+- Linux pkg-config consumer smoke test passes as part of the Unix CTest suite.
 
 ## Recommended Commands
 

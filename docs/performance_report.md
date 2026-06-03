@@ -95,7 +95,28 @@ compared within their own build contexts rather than mixed.
 - Both recorded Windows runs satisfy the PRD average-ratio threshold.
 - WMI CPU model lookup is denied in this workspace, so the report records the
   non-elevated `PROCESSOR_IDENTIFIER` value instead of a marketing CPU name.
-- A Linux benchmark is required before tagging a portable public `0.1.0`
-  release. Record at least one Linux GCC or Clang run with the same
-  `--samples 10000 --seed 1` command, compiler flags, CPU identifier, average,
-  p99, worst case, and C/oracle average ratio.
+
+## 2026-06-03 Linux Clang GitHub Actions Run
+
+- Source: GitHub Actions CI run `26861662259`, job `Linux Clang performance`.
+- Command: `./build-perf/ruckig_c_performance_benchmark --samples 10000 --seed 1`
+- OS: Linux, GitHub-hosted Ubuntu runner.
+- Kernel: `Linux runnervm3jyl0 6.17.0-1015-azure #15~24.04.1-Ubuntu SMP Wed May 6 22:37:49 UTC 2026 x86_64`
+- CPU identifier: `Intel(R) Xeon(R) Platinum 8370C CPU @ 2.80GHz`
+- Compiler: `Ubuntu clang version 18.1.3 (1ubuntu1)`
+- C++ compiler: `Ubuntu clang version 18.1.3 (1ubuntu1)`
+- CMake build type: `Release`
+- Generator: `Ninja`
+- Seed: `1`
+- Samples: `10000`
+
+| Metric | C implementation | C++ oracle |
+| --- | ---: | ---: |
+| Average | 629.858 ns | 541.758 ns |
+| p99 | 4925 ns | 4101 ns |
+| Worst | 40316 ns | 28661 ns |
+
+Average C/oracle ratio: `1.16262`.
+
+This Linux CI run is within the release threshold of average calculation time
+no worse than `1.5x` the C++ oracle on the same benchmark corpus.
