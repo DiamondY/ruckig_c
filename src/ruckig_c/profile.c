@@ -13,6 +13,7 @@ static const double profile_j_eps = 1e-12;
 static const double profile_p_precision = 1e-8;
 static const double profile_v_precision = 1e-8;
 static const double profile_a_precision = 1e-10;
+static const double profile_first_position_precision = 4.0 * DBL_EPSILON;
 static const double profile_t_max = 1e12;
 
 void ruckig_profile_init(ruckig_profile_t* profile) {
@@ -494,7 +495,7 @@ bool ruckig_profile_get_first_state_at_position(const ruckig_profile_t* profile,
             continue;
         }
 
-        if (fabs(profile->p[i] - position) < DBL_EPSILON && t_cum >= time_after) {
+        if (fabs(profile->p[i] - position) < profile_first_position_precision && t_cum >= time_after) {
             *time = t_cum;
             return true;
         }

@@ -294,30 +294,32 @@ void print_oracle_profile_details(
     const ruckig::Trajectory<ruckig::DynamicDOFs>& oracle_trajectory
 ) {
     const auto profiles = oracle_trajectory.get_profiles();
-    if (!profiles.empty() && !profiles[0].empty()) {
-        const auto& p = profiles[0][0];
-        std::cerr << test_case.name << ": oracle profile " << p.to_string() << '\n';
-        std::cerr << "t:";
-        for (double value: p.t) {
-            std::cerr << ' ' << value;
+    if (!profiles.empty()) {
+        for (size_t dof = 0; dof < profiles[0].size(); ++dof) {
+            const auto& p = profiles[0][dof];
+            std::cerr << test_case.name << ": oracle profile dof=" << dof << ' ' << p.to_string() << '\n';
+            std::cerr << "t:";
+            for (double value: p.t) {
+                std::cerr << ' ' << value;
+            }
+            std::cerr << "\nj:";
+            for (double value: p.j) {
+                std::cerr << ' ' << value;
+            }
+            std::cerr << "\na:";
+            for (double value: p.a) {
+                std::cerr << ' ' << value;
+            }
+            std::cerr << "\nv:";
+            for (double value: p.v) {
+                std::cerr << ' ' << value;
+            }
+            std::cerr << "\np:";
+            for (double value: p.p) {
+                std::cerr << ' ' << value;
+            }
+            std::cerr << '\n';
         }
-        std::cerr << "\nj:";
-        for (double value: p.j) {
-            std::cerr << ' ' << value;
-        }
-        std::cerr << "\na:";
-        for (double value: p.a) {
-            std::cerr << ' ' << value;
-        }
-        std::cerr << "\nv:";
-        for (double value: p.v) {
-            std::cerr << ' ' << value;
-        }
-        std::cerr << "\np:";
-        for (double value: p.p) {
-            std::cerr << ' ' << value;
-        }
-        std::cerr << '\n';
     }
 }
 
@@ -325,7 +327,8 @@ void compare_trajectory_queries(
     const CaseData& test_case,
     const ruckig::Trajectory<ruckig::DynamicDOFs>& oracle_trajectory,
     const ruckig_trajectory_t* c_trajectory,
-    double duration
+    double duration,
+    bool compare_first_time_queries
 ) {
     std::vector<ruckig::Bound> oracle_extrema(test_case.dofs);
     std::vector<ruckig_position_extrema_t> c_extrema(test_case.dofs);
@@ -350,6 +353,10 @@ void compare_trajectory_queries(
         }
     }
 
+    if (!compare_first_time_queries) {
+        return;
+    }
+
     for (size_t dof = 0; dof < test_case.dofs; ++dof) {
         std::vector<double> oracle_position(test_case.dofs);
         std::vector<double> oracle_velocity(test_case.dofs);
@@ -372,10 +379,37 @@ void compare_trajectory_queries(
                 continue;
             }
             if (c_found != oracle_time.has_value()) {
-                fail(test_case.name, "first-time-at-position found mismatch dof=" + std::to_string(dof)
-                    + " C=" + std::to_string(static_cast<int>(c_found))
-                    + " oracle=" + std::to_string(static_cast<int>(oracle_time.has_value()))
-                    + " query=" + std::to_string(query_position));
+                bool equivalent_boundary = false;
+                if (oracle_time.has_value()) {
+                    std::vector<double> c_position(test_case.dofs);
+                    const auto c_sample_result = ruckig_trajectory_at_time(
+                        c_trajectory,
+                        *oracle_time,
+                        c_position.data(),
+                        nullptr,
+                        nullptr,
+                        nullptr,
+                        nullptr
+                    );
+                    equivalent_boundary = c_sample_result == RUCKIG_WORKING
+                        && near(c_position[dof], query_position, kPositionTolerance);
+                } else if (c_found) {
+                    std::vector<double> oracle_position_at_c_time(test_case.dofs);
+                    std::vector<double> oracle_velocity_at_c_time(test_case.dofs);
+                    std::vector<double> oracle_acceleration_at_c_time(test_case.dofs);
+                    oracle_trajectory.at_time(c_time, oracle_position_at_c_time, oracle_velocity_at_c_time, oracle_acceleration_at_c_time);
+                    equivalent_boundary = near(oracle_position_at_c_time[dof], query_position, kPositionTolerance);
+                }
+                if (equivalent_boundary) {
+                    continue;
+                }
+                std::ostringstream message;
+                message.precision(17);
+                message << "first-time-at-position found mismatch dof=" << dof
+                    << " C=" << static_cast<int>(c_found)
+                    << " oracle=" << static_cast<int>(oracle_time.has_value())
+                    << " query=" << query_position;
+                fail(test_case.name, message.str());
                 continue;
             }
             if (c_found && !near(c_time, *oracle_time, kFirstTimeTolerance)) {
@@ -454,7 +488,7 @@ void compare_update_loop(const CaseData& test_case) {
     ruckig_destroy(c_otg);
 }
 
-void run_case(const CaseData& test_case) {
+void run_case(const CaseData& test_case, bool compare_first_time_queries = true) {
     ruckig::Ruckig<ruckig::DynamicDOFs> oracle_otg(test_case.dofs, test_case.delta_time);
     ruckig::InputParameter<ruckig::DynamicDOFs> oracle_input(test_case.dofs);
     ruckig::Trajectory<ruckig::DynamicDOFs> oracle_trajectory(test_case.dofs);
@@ -510,7 +544,7 @@ void run_case(const CaseData& test_case) {
             }
         }
         compare_samples(test_case, oracle_trajectory, c_trajectory, oracle_duration);
-        compare_trajectory_queries(test_case, oracle_trajectory, c_trajectory, oracle_duration);
+        compare_trajectory_queries(test_case, oracle_trajectory, c_trajectory, oracle_duration, compare_first_time_queries);
         if (failures == failures_before_samples) {
             compare_update_loop(test_case);
         }
@@ -689,6 +723,78 @@ CaseData make_random_case(RandomGenerator& rng, size_t index) {
     return test_case;
 }
 
+CaseData make_random_per_dof_case(RandomGenerator& rng, size_t index) {
+    const double inf = std::numeric_limits<double>::infinity();
+    CaseData test_case;
+    test_case.name = "random-per-dof-" + std::to_string(index);
+    test_case.dofs = 2;
+    test_case.delta_time = rng.coin() ? 0.01 : 0.05;
+    test_case.control_interface = rng.coin() ? RUCKIG_CONTROL_POSITION : RUCKIG_CONTROL_VELOCITY;
+    test_case.synchronization = rng.coin() ? RUCKIG_SYNCHRONIZATION_TIME : RUCKIG_SYNCHRONIZATION_NONE;
+    test_case.duration_discretization = rng.coin() ? RUCKIG_DURATION_CONTINUOUS : RUCKIG_DURATION_DISCRETE;
+    test_case.current_position.assign(2, 0.0);
+    test_case.current_velocity.assign(2, 0.0);
+    test_case.current_acceleration.assign(2, 0.0);
+    test_case.target_position.assign(2, 0.0);
+    test_case.target_velocity.assign(2, 0.0);
+    test_case.target_acceleration.assign(2, 0.0);
+    test_case.max_velocity.assign(2, 0.0);
+    test_case.max_acceleration.assign(2, 0.0);
+    test_case.max_jerk.assign(2, 0.0);
+
+    switch (rng.pick(5)) {
+        case 0:
+            test_case.per_dof_control_interface = {RUCKIG_CONTROL_POSITION, RUCKIG_CONTROL_VELOCITY};
+            test_case.per_dof_synchronization = {RUCKIG_SYNCHRONIZATION_TIME, RUCKIG_SYNCHRONIZATION_NONE};
+            test_case.target_position = {rng.range(0.5, 2.0), 0.0};
+            test_case.target_velocity = {0.0, rng.range(0.3, 1.0)};
+            test_case.max_velocity = {rng.range(1.0, 2.5), 0.0};
+            test_case.max_acceleration = {rng.range(1.0, 2.5), rng.range(1.0, 2.5)};
+            test_case.max_jerk = {rng.range(1.0, 2.5), rng.range(1.0, 2.5)};
+            break;
+        case 1:
+            test_case.per_dof_control_interface = {RUCKIG_CONTROL_VELOCITY, RUCKIG_CONTROL_POSITION};
+            test_case.per_dof_synchronization = {RUCKIG_SYNCHRONIZATION_NONE, RUCKIG_SYNCHRONIZATION_TIME};
+            test_case.target_position = {0.0, -rng.range(0.5, 2.0)};
+            test_case.target_velocity = {rng.range(-1.0, -0.3), 0.0};
+            test_case.max_velocity = {0.0, rng.range(1.0, 2.5)};
+            test_case.max_acceleration = {rng.range(1.0, 2.5), rng.range(1.0, 2.5)};
+            test_case.max_jerk = {rng.range(1.0, 2.5), rng.range(1.0, 2.5)};
+            break;
+        case 2:
+            test_case.per_dof_control_interface = {RUCKIG_CONTROL_POSITION, RUCKIG_CONTROL_POSITION};
+            test_case.per_dof_synchronization = {RUCKIG_SYNCHRONIZATION_TIME_IF_NECESSARY, RUCKIG_SYNCHRONIZATION_TIME};
+            test_case.target_position = {rng.range(0.5, 1.5), rng.range(1.0, 2.5)};
+            test_case.target_velocity = {0.0, rng.range(0.1, 0.4)};
+            test_case.max_velocity = {rng.range(1.0, 2.0), rng.range(1.0, 2.0)};
+            test_case.max_acceleration = {rng.range(1.0, 2.0), rng.range(1.0, 2.0)};
+            test_case.max_jerk = {rng.range(1.0, 2.0), rng.range(1.0, 2.0)};
+            break;
+        case 3:
+            test_case.per_dof_control_interface = {RUCKIG_CONTROL_POSITION, RUCKIG_CONTROL_POSITION};
+            test_case.per_dof_synchronization = {RUCKIG_SYNCHRONIZATION_NONE, RUCKIG_SYNCHRONIZATION_TIME};
+            test_case.enabled = {true, false};
+            test_case.current_position = {0.0, 0.0};
+            test_case.current_velocity = {0.0, 0.0};
+            test_case.current_acceleration = {0.0, 0.0};
+            test_case.target_position = {rng.range(0.5, 2.0), rng.range(5.0, 10.0)};
+            test_case.max_velocity = {rng.range(1.0, 2.0), rng.range(1.0, 2.0)};
+            test_case.max_acceleration = {rng.range(1.0, 2.0), rng.range(1.0, 2.0)};
+            test_case.max_jerk = {rng.range(1.0, 2.0), rng.range(1.0, 2.0)};
+            break;
+        default:
+            test_case.per_dof_control_interface = {RUCKIG_CONTROL_POSITION, RUCKIG_CONTROL_POSITION};
+            test_case.per_dof_synchronization = {RUCKIG_SYNCHRONIZATION_TIME, RUCKIG_SYNCHRONIZATION_NONE};
+            test_case.target_position = {rng.range(0.5, 1.5), rng.range(1.5, 3.0)};
+            test_case.max_velocity = {rng.range(1.0, 2.0), rng.range(1.0, 2.0)};
+            test_case.max_acceleration = {inf, rng.range(1.0, 2.0)};
+            test_case.max_jerk = {inf, inf};
+            break;
+    }
+
+    return test_case;
+}
+
 void run_random_cases(size_t count, std::uint64_t seed) {
     RandomGenerator rng(seed);
     const int failures_before = failures;
@@ -706,22 +812,42 @@ void run_random_cases(size_t count, std::uint64_t seed) {
     }
 }
 
+void run_random_per_dof_cases(size_t count, std::uint64_t seed) {
+    RandomGenerator rng(seed);
+    const int failures_before = failures;
+    for (size_t i = 0; i < count; ++i) {
+        const int case_failures_before = failures;
+        CaseData test_case = make_random_per_dof_case(rng, i);
+        run_case(test_case, false);
+        if (failures != case_failures_before) {
+            print_case_repro(test_case);
+            break;
+        }
+    }
+    if (failures == failures_before) {
+        std::cout << "Random per-DoF oracle comparisons passed: " << count << " seed " << seed << '\n';
+    }
+}
+
 } // namespace
 
 int main(int argc, char** argv) {
     const double inf = std::numeric_limits<double>::infinity();
     std::vector<CaseData> cases;
     size_t random_count = 0;
+    size_t random_per_dof_count = 0;
     std::uint64_t random_seed = 1;
 
     for (int i = 1; i < argc; ++i) {
         const std::string arg = argv[i];
         if (arg == "--random" && i + 1 < argc) {
             random_count = static_cast<size_t>(std::stoull(argv[++i]));
+        } else if (arg == "--random-per-dof" && i + 1 < argc) {
+            random_per_dof_count = static_cast<size_t>(std::stoull(argv[++i]));
         } else if (arg == "--seed" && i + 1 < argc) {
             random_seed = static_cast<std::uint64_t>(std::stoull(argv[++i]));
         } else {
-            std::cerr << "usage: " << argv[0] << " [--random N] [--seed S]\n";
+            std::cerr << "usage: " << argv[0] << " [--random N] [--random-per-dof N] [--seed S]\n";
             return 2;
         }
     }
@@ -1762,6 +1888,131 @@ int main(int argc, char** argv) {
         {RUCKIG_SYNCHRONIZATION_NONE, RUCKIG_SYNCHRONIZATION_TIME}
     });
 
+    cases.push_back(CaseData{
+        "per-dof-time-if-necessary-and-time",
+        2,
+        0.01,
+        RUCKIG_CONTROL_POSITION,
+        RUCKIG_SYNCHRONIZATION_TIME,
+        RUCKIG_DURATION_CONTINUOUS,
+        false,
+        0.0,
+        {0.0, 0.0},
+        {0.0, 0.0},
+        {0.0, 0.0},
+        {1.0, 3.0},
+        {0.0, 0.2},
+        {0.0, 0.0},
+        {1.2, 1.2},
+        {1.0, 1.0},
+        {2.0, 2.0},
+        {},
+        {},
+        {},
+        {},
+        {RUCKIG_SYNCHRONIZATION_TIME_IF_NECESSARY, RUCKIG_SYNCHRONIZATION_TIME}
+    });
+
+    cases.push_back(CaseData{
+        "per-dof-discrete-none-and-time",
+        2,
+        0.07,
+        RUCKIG_CONTROL_POSITION,
+        RUCKIG_SYNCHRONIZATION_TIME,
+        RUCKIG_DURATION_DISCRETE,
+        false,
+        0.0,
+        {0.0, 0.0},
+        {0.0, 0.0},
+        {0.0, 0.0},
+        {0.8, 2.3},
+        {0.0, 0.0},
+        {0.0, 0.0},
+        {1.1, 1.0},
+        {1.2, 1.0},
+        {1.6, 1.4},
+        {},
+        {},
+        {},
+        {},
+        {RUCKIG_SYNCHRONIZATION_NONE, RUCKIG_SYNCHRONIZATION_TIME}
+    });
+
+    cases.push_back(CaseData{
+        "per-dof-disabled-dof-overrides",
+        3,
+        0.01,
+        RUCKIG_CONTROL_POSITION,
+        RUCKIG_SYNCHRONIZATION_TIME,
+        RUCKIG_DURATION_CONTINUOUS,
+        false,
+        0.0,
+        {0.0, 1.0, -0.2},
+        {0.0, 0.4, 0.0},
+        {0.0, 0.15, 0.0},
+        {1.2, 10.0, -1.4},
+        {0.0, 0.8, 0.0},
+        {0.0, 0.0, 0.0},
+        {1.4, 0.0, 1.2},
+        {1.1, 1.0, 1.3},
+        {1.5, 1.0, 1.7},
+        {true, false, true},
+        {},
+        {},
+        {RUCKIG_CONTROL_POSITION, RUCKIG_CONTROL_VELOCITY, RUCKIG_CONTROL_POSITION},
+        {RUCKIG_SYNCHRONIZATION_TIME, RUCKIG_SYNCHRONIZATION_NONE, RUCKIG_SYNCHRONIZATION_TIME}
+    });
+
+    cases.push_back(CaseData{
+        "per-dof-mixed-order-mixed-control",
+        3,
+        0.01,
+        RUCKIG_CONTROL_POSITION,
+        RUCKIG_SYNCHRONIZATION_TIME,
+        RUCKIG_DURATION_CONTINUOUS,
+        false,
+        0.0,
+        {0.0, 0.0, 0.0},
+        {0.0, 0.0, 0.0},
+        {0.0, 0.0, 0.0},
+        {1.0, 0.0, -1.5},
+        {0.0, 0.7, 0.0},
+        {0.0, 0.0, 0.0},
+        {1.2, 0.0, 1.4},
+        {inf, 1.1, 1.2},
+        {inf, 1.7, inf},
+        {},
+        {},
+        {},
+        {RUCKIG_CONTROL_POSITION, RUCKIG_CONTROL_VELOCITY, RUCKIG_CONTROL_POSITION},
+        {RUCKIG_SYNCHRONIZATION_TIME, RUCKIG_SYNCHRONIZATION_NONE, RUCKIG_SYNCHRONIZATION_TIME}
+    });
+
+    cases.push_back(CaseData{
+        "per-dof-phase-and-time",
+        2,
+        0.01,
+        RUCKIG_CONTROL_POSITION,
+        RUCKIG_SYNCHRONIZATION_TIME,
+        RUCKIG_DURATION_CONTINUOUS,
+        false,
+        0.0,
+        {0.0, 0.0},
+        {0.0, 0.0},
+        {0.0, 0.0},
+        {1.0, 2.0},
+        {0.0, 0.0},
+        {0.0, 0.0},
+        {2.0, 2.0},
+        {2.0, 2.0},
+        {1.0, 1.0},
+        {},
+        {},
+        {},
+        {},
+        {RUCKIG_SYNCHRONIZATION_PHASE, RUCKIG_SYNCHRONIZATION_TIME}
+    });
+
     for (const auto& test_case: cases) {
         run_case(test_case);
     }
@@ -1774,6 +2025,13 @@ int main(int argc, char** argv) {
     std::cout << "Oracle comparisons passed: " << cases.size() << '\n';
     if (random_count > 0) {
         run_random_cases(random_count, random_seed);
+        if (failures != 0) {
+            std::cerr << failures << " oracle comparison failures\n";
+            return 1;
+        }
+    }
+    if (random_per_dof_count > 0) {
+        run_random_per_dof_cases(random_per_dof_count, random_seed);
         if (failures != 0) {
             std::cerr << failures << " oracle comparison failures\n";
             return 1;

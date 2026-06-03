@@ -228,6 +228,10 @@ if(BUILD_RUCKIG_C_EXAMPLES)
   target_link_libraries(example-ruckig-c-07-minimum-duration PRIVATE ruckig_c)
   add_test(NAME example_ruckig_c_07_minimum_duration COMMAND example-ruckig-c-07-minimum-duration)
 
+  add_executable(example-ruckig-c-08-per-dof-online examples/c/08_per_dof_online.c)
+  target_link_libraries(example-ruckig-c-08-per-dof-online PRIVATE ruckig_c)
+  add_test(NAME example_ruckig_c_08_per_dof_online COMMAND example-ruckig-c-08-per-dof-online)
+
   add_custom_target(ruckig_c_examples
     DEPENDS
       example-ruckig-c-00-minimal-offline
@@ -238,6 +242,7 @@ if(BUILD_RUCKIG_C_EXAMPLES)
       example-ruckig-c-05-velocity
       example-ruckig-c-06-stop
       example-ruckig-c-07-minimum-duration
+      example-ruckig-c-08-per-dof-online
   )
 endif()
 

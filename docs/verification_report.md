@@ -673,3 +673,73 @@ release_threshold_average_ratio: 1.5
 
 The final tag target still needs push CI and the manual GitHub Actions release
 random workflow evidence recorded before creating `v0.2.0`.
+
+## 2026-06-03 0.2.x Post-Release per-DoF Hardening
+
+This pass verifies the first post-`v0.2.0` hardening changes. It does not move
+or retag `v0.2.0`; the changes are intended for the following `0.2.x`
+maintenance line.
+
+Scope covered:
+
+- Additional fixed per-DoF oracle cases for `Phase`, `TimeIfNecessary`,
+  discrete `None`/`Time`, disabled DoFs, and mixed finite/infinite
+  acceleration/jerk with mixed control interfaces.
+- Controlled random per-DoF oracle mode:
+
+```powershell
+.\build_release_check_ninja\ruckig_c_oracle_tests.exe --random-per-dof 100000 --seed 1
+```
+
+Result:
+
+```text
+Oracle comparisons passed: 53
+Random per-DoF oracle comparisons passed: 100000 seed 1
+```
+
+Existing random oracle gate:
+
+```powershell
+.\build_release_check_ninja\ruckig_c_oracle_tests.exe --random 100000 --seed 1
+```
+
+Result:
+
+```text
+Oracle comparisons passed: 53
+Random oracle comparisons passed: 100000 seed 1
+```
+
+The per-DoF random mode preserves the existing `--random N --seed S` behavior.
+It compares result codes, durations, independent durations, trajectory samples,
+position extrema, and update-loop behavior. It intentionally leaves
+`get_first_time_at_position` boundary queries to the fixed suite because those
+queries can be sensitive to zero-duration segment and duplicate-position
+boundary choices while the sampled trajectories remain equivalent.
+
+Static release CTest excluding the long release random test:
+
+```powershell
+ctest --test-dir build_release_check_ninja --output-on-failure -E ruckig_c_oracle_random_release
+```
+
+Result:
+
+```text
+100% tests passed, 0 tests failed out of 18
+```
+
+This includes the new `example_ruckig_c_08_per_dof_online` CTest entry.
+
+Shared-library release CTest excluding the long release random test:
+
+```powershell
+ctest --test-dir build_release_check_shared --output-on-failure -E ruckig_c_oracle_random_release
+```
+
+Result:
+
+```text
+100% tests passed, 0 tests failed out of 17
+```

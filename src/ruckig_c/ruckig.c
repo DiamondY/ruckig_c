@@ -133,6 +133,19 @@ static bool has_phase_synchronized_dof(const ruckig_input_t* input) {
     return false;
 }
 
+static bool all_synchronized_dofs_are_phase_or_none(const ruckig_input_t* input) {
+    size_t dof;
+    for (dof = 0; dof < input->dofs; ++dof) {
+        const ruckig_synchronization_t synchronization = effective_synchronization(input, dof);
+        if (input->enabled[dof]
+            && synchronization != RUCKIG_SYNCHRONIZATION_PHASE
+            && synchronization != RUCKIG_SYNCHRONIZATION_NONE) {
+            return false;
+        }
+    }
+    return true;
+}
+
 static double finalize_trajectory_duration(
     const ruckig_t* otg,
     const ruckig_input_t* input,
@@ -371,10 +384,11 @@ static ruckig_result_t calculate_first_order_position(
     }
 
     sync_duration = finalize_trajectory_duration(otg, input, sync_duration);
-    apply_none_synchronization_duration(input, trajectory, &sync_duration, &limiting_dof);
     select_limiting_dof_for_duration(otg, input, trajectory, sync_duration, &limiting_dof);
+    apply_none_synchronization_duration(input, trajectory, &sync_duration, &limiting_dof);
 
-    if (calculate_position_phase_sync(input, trajectory, sync_duration, limiting_dof)) {
+    if (calculate_position_phase_sync(input, trajectory, sync_duration, limiting_dof)
+        && all_synchronized_dofs_are_phase_or_none(input)) {
         trajectory->duration = sync_duration;
         trajectory->cumulative_times[0] = sync_duration;
         trajectory->valid = true;
@@ -810,11 +824,12 @@ static ruckig_result_t calculate_no_jerk_position(
     }
 
     sync_duration = finalize_trajectory_duration(otg, input, sync_duration);
-    apply_none_synchronization_duration(input, trajectory, &sync_duration, &limiting_dof);
     select_limiting_dof_for_duration(otg, input, trajectory, sync_duration, &limiting_dof);
     sync_duration = adjust_duration_for_blocks(sync_duration, input, trajectory);
+    apply_none_synchronization_duration(input, trajectory, &sync_duration, &limiting_dof);
 
-    if (calculate_no_jerk_position_phase_sync(input, trajectory, sync_duration, limiting_dof)) {
+    if (calculate_no_jerk_position_phase_sync(input, trajectory, sync_duration, limiting_dof)
+        && all_synchronized_dofs_are_phase_or_none(input)) {
         trajectory->duration = sync_duration;
         trajectory->cumulative_times[0] = sync_duration;
         trajectory->valid = true;
@@ -894,10 +909,11 @@ static ruckig_result_t calculate_no_jerk_velocity(
     }
 
     sync_duration = finalize_trajectory_duration(otg, input, sync_duration);
-    apply_none_synchronization_duration(input, trajectory, &sync_duration, &limiting_dof);
     select_limiting_dof_for_duration(otg, input, trajectory, sync_duration, &limiting_dof);
+    apply_none_synchronization_duration(input, trajectory, &sync_duration, &limiting_dof);
 
-    if (calculate_velocity_phase_sync(input, trajectory, sync_duration, limiting_dof)) {
+    if (calculate_velocity_phase_sync(input, trajectory, sync_duration, limiting_dof)
+        && all_synchronized_dofs_are_phase_or_none(input)) {
         trajectory->duration = sync_duration;
         trajectory->cumulative_times[0] = sync_duration;
         trajectory->valid = true;
@@ -975,11 +991,12 @@ static ruckig_result_t calculate_velocity(
     }
 
     sync_duration = finalize_trajectory_duration(otg, input, sync_duration);
-    apply_none_synchronization_duration(input, trajectory, &sync_duration, &limiting_dof);
     select_limiting_dof_for_duration(otg, input, trajectory, sync_duration, &limiting_dof);
     sync_duration = adjust_duration_for_blocks(sync_duration, input, trajectory);
+    apply_none_synchronization_duration(input, trajectory, &sync_duration, &limiting_dof);
 
-    if (calculate_velocity_phase_sync(input, trajectory, sync_duration, limiting_dof)) {
+    if (calculate_velocity_phase_sync(input, trajectory, sync_duration, limiting_dof)
+        && all_synchronized_dofs_are_phase_or_none(input)) {
         trajectory->duration = sync_duration;
         trajectory->cumulative_times[0] = sync_duration;
         trajectory->valid = true;
@@ -1123,11 +1140,12 @@ static ruckig_result_t calculate_position(
     }
 
     sync_duration = finalize_trajectory_duration(otg, input, sync_duration);
-    apply_none_synchronization_duration(input, trajectory, &sync_duration, &limiting_dof);
     select_limiting_dof_for_duration(otg, input, trajectory, sync_duration, &limiting_dof);
     sync_duration = adjust_duration_for_blocks(sync_duration, input, trajectory);
+    apply_none_synchronization_duration(input, trajectory, &sync_duration, &limiting_dof);
 
-    if (calculate_position_phase_sync(input, trajectory, sync_duration, limiting_dof)) {
+    if (calculate_position_phase_sync(input, trajectory, sync_duration, limiting_dof)
+        && all_synchronized_dofs_are_phase_or_none(input)) {
         trajectory->duration = sync_duration;
         trajectory->cumulative_times[0] = sync_duration;
         trajectory->valid = true;

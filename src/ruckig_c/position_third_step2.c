@@ -864,6 +864,121 @@ static bool time_acc1(
     return false;
 }
 
+static bool time_acc0(
+    ruckig_profile_t* profile,
+    double tf,
+    double pd,
+    double v0,
+    double a0,
+    double vf,
+    double af,
+    double v_max,
+    double v_min,
+    double a_max,
+    double a_min,
+    double j_max
+) {
+    const double tf_tf = tf * tf;
+    const double vd = vf - v0;
+    const double ad = af - a0;
+    const double ad_ad = ad * ad;
+    const double a0_a0 = a0 * a0;
+    const double af_af = af * af;
+    const double a0_p3 = a0_a0 * a0;
+    const double af_p3 = af_af * af;
+    const double j_max_j_max = j_max * j_max;
+    const double g1 = -pd + tf * v0;
+    const double g2 = -2.0 * pd + tf * (v0 + vf);
+
+    if (fabs(j_max) < DBL_EPSILON) {
+        return false;
+    }
+
+    {
+        const double radicand = ad_ad / (2.0 * j_max_j_max)
+            - ad * (a_max - a0) / j_max_j_max
+            + (a_max * tf - vd) / j_max;
+
+        if (radicand >= 0.0) {
+            const double h1 = sqrt(radicand);
+
+            clear_times(profile);
+            profile->t[0] = (a_max - a0) / j_max;
+            profile->t[1] = tf - ad / j_max - 2.0 * h1;
+            profile->t[2] = h1;
+            profile->t[4] = (af - a_max) / j_max + h1;
+
+            if (ruckig_profile_check_with_timing(profile, RUCKIG_PROFILE_SIGNS_UDUD, RUCKIG_PROFILE_LIMITS_NONE, tf, j_max, v_max, v_min, a_max, a_min)) {
+                return true;
+            }
+        }
+    }
+
+    {
+        const double h0a = -a0_a0 + af_af - 2.0 * ad * a_max + 2.0 * j_max * (a_max * tf - vd);
+        const double h0b = a0_p3 + 2.0 * af_p3 - 6.0 * af_af * a_max
+            - 3.0 * a0_a0 * (af - j_max * tf)
+            - 3.0 * a0 * a_max * (a_max - 2.0 * af + 2.0 * j_max * tf)
+            - 3.0 * j_max * (j_max * (-2.0 * pd + a_max * tf_tf + 2.0 * tf * v0)
+                + a_max * (a_max * tf - 2.0 * vd))
+            + 3.0 * af * (a_max * a_max + 2.0 * a_max * j_max * tf - 2.0 * j_max * vd);
+        const double radicand = 4.0 * h0b * h0b - 18.0 * h0a * h0a * h0a;
+        const double h1 = 3.0 * j_max * h0a;
+
+        if (radicand >= 0.0 && fabs(h1) > DBL_EPSILON) {
+            const double h0 = fabs(j_max) * sqrt(radicand);
+
+            clear_times(profile);
+            profile->t[0] = (-a0 + a_max) / j_max;
+            profile->t[1] = (-a0_p3 + af_p3 + af_af * (-6.0 * a_max + 3.0 * j_max * tf)
+                    + a0_a0 * (-3.0 * af + 6.0 * a_max + 3.0 * j_max * tf)
+                    + 6.0 * af * (a_max * a_max - j_max * vd)
+                    + 3.0 * a0 * (af_af - 2.0 * (a_max * a_max + j_max * vd))
+                    - 6.0 * j_max * (a_max * (a_max * tf - 2.0 * vd) + j_max * g2))
+                / h1;
+            profile->t[2] = -(ad + h0 / h1) / (2.0 * j_max) + tf / 2.0 - profile->t[1] / 2.0;
+            profile->t[3] = h0 / (j_max * h1);
+            profile->t[6] = tf - (profile->t[0] + profile->t[1] + profile->t[2] + profile->t[3]);
+
+            if (ruckig_profile_check_with_timing(profile, RUCKIG_PROFILE_SIGNS_UDDU, RUCKIG_PROFILE_LIMITS_NONE, tf, j_max, v_max, v_min, a_max, a_min)) {
+                return true;
+            }
+        }
+    }
+
+    {
+        const double h0a = a0_p3 + 2.0 * af_p3 - 6.0 * (af_af + a_max * a_max) * a_max
+            - 6.0 * (a0 + af) * a_max * j_max * tf
+            + 9.0 * a_max * a_max * (af + j_max * tf)
+            + 3.0 * a0 * a_max * (-2.0 * af + 3.0 * a_max)
+            + 3.0 * a0_a0 * (af - 2.0 * a_max + j_max * tf)
+            - 6.0 * j_max_j_max * g1
+            + 6.0 * (af - a_max) * j_max * vd
+            - 3.0 * a_max * j_max_j_max * tf_tf;
+        const double h0b = a0_a0 + af_af
+            + 2.0 * (a_max * a_max - (a0 + af) * a_max + j_max * (vd - a_max * tf));
+        const double radicand = 4.0 * h0a * h0a - 18.0 * h0b * h0b * h0b;
+        const double h2 = 6.0 * j_max * h0b;
+
+        if (radicand >= 0.0 && fabs(h2) > DBL_EPSILON) {
+            const double h1 = fabs(j_max) / j_max * sqrt(radicand);
+
+            clear_times(profile);
+            profile->t[0] = (-a0 + a_max) / j_max;
+            profile->t[1] = ad / j_max - 2.0 * profile->t[0] - (2.0 * h0a - h1) / h2 + tf;
+            profile->t[2] = -(2.0 * h0a + h1) / h2;
+            profile->t[3] = (2.0 * h0a - h1) / h2;
+            profile->t[4] = tf - (profile->t[0] + profile->t[1] + profile->t[2] + profile->t[3]);
+
+            if (ruckig_profile_check_with_timing(profile, RUCKIG_PROFILE_SIGNS_UDDU, RUCKIG_PROFILE_LIMITS_ACC0, tf, j_max, v_max, v_min, a_max, a_min)) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
 static bool time_acc0_acc1(
     ruckig_profile_t* profile,
     double tf,
@@ -1379,7 +1494,7 @@ bool ruckig_position_third_step2_get_profile(
         profile->t[4] = tj;
         profile->t[6] = tj;
 
-        return ruckig_profile_check_with_timing_guarded(
+        if (ruckig_profile_check_with_timing_guarded(
             profile,
             RUCKIG_PROFILE_SIGNS_UDDU,
             RUCKIG_PROFILE_LIMITS_NONE,
@@ -1390,7 +1505,9 @@ bool ruckig_position_third_step2_get_profile(
             oriented_a_max,
             oriented_a_min,
             oriented_j_limit
-        );
+        )) {
+            return true;
+        }
     }
 
     if (time_acc0_acc1_vel(profile, tf, pd, v0, a0, vf, af, oriented_v_max, oriented_v_min, oriented_a_max, oriented_a_min, oriented_j_limit)) {
@@ -1437,6 +1554,10 @@ bool ruckig_position_third_step2_get_profile(
         return true;
     }
 
+    if (time_acc0(profile, tf, pd, v0, a0, vf, af, oriented_v_max, oriented_v_min, oriented_a_max, oriented_a_min, oriented_j_limit)) {
+        return true;
+    }
+
     if (time_acc1(profile, tf, pd, v0, a0, vf, af, oriented_v_max, oriented_v_min, oriented_a_max, oriented_a_min, oriented_j_limit)) {
         return true;
     }
@@ -1446,6 +1567,10 @@ bool ruckig_position_third_step2_get_profile(
     }
 
     if (time_acc0_acc1(profile, tf, pd, v0, a0, vf, af, reverse_v_max, reverse_v_min, reverse_a_max, reverse_a_min, reverse_j_limit)) {
+        return true;
+    }
+
+    if (time_acc0(profile, tf, pd, v0, a0, vf, af, reverse_v_max, reverse_v_min, reverse_a_max, reverse_a_min, reverse_j_limit)) {
         return true;
     }
 

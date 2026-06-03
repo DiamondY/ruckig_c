@@ -215,6 +215,7 @@ The C examples are in `examples/c`:
 - `05_velocity.c`
 - `06_stop.c`
 - `07_minimum_duration.c`
+- `08_per_dof_online.c`
 
 All examples are wired into CMake when `BUILD_RUCKIG_C_EXAMPLES=ON`.
 
@@ -226,6 +227,13 @@ The oracle executable also accepts a deterministic random smoke-test mode:
 
 ```sh
 ruckig_c_oracle_tests --random 100 --seed 1
+```
+
+For per-DoF override hardening, the oracle executable also supports a controlled
+manual/development random mode:
+
+```sh
+ruckig_c_oracle_tests --random-per-dof 100000 --seed 1
 ```
 
 The fixed oracle suite also covers per-DoF control-interface and

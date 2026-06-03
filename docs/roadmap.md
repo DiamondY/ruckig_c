@@ -40,7 +40,13 @@ follow-up work for stability and future feature planning.
   benchmarks with average, p99, worst, and C/oracle average ratio.
 - Keep per-DoF override hardening focused on oracle coverage, diagnostics, and
   examples without changing the public C API.
-- Add controlled per-DoF random oracle coverage as a development/manual gate
-  before considering it for routine CI.
+- Done after `0.2.0`: expanded fixed per-DoF oracle cases for Phase,
+  TimeIfNecessary, discrete None/Time, disabled DoFs, and mixed-order/mixed
+  control inputs.
+- Done after `0.2.0`: added controlled per-DoF random oracle coverage through
+  `ruckig_c_oracle_tests --random-per-dof N --seed S` as a development/manual
+  gate without changing the existing `--random` behavior.
+- Done after `0.2.0`: added C API regression coverage for per-DoF clear behavior
+  and update recalculation stability, plus an online per-DoF C example.
 - Keep waypoints, per-section constraints, cloud calculation, Python/Rust
   bindings, and upstream baseline upgrades as separate future projects.
