@@ -4,7 +4,7 @@ Run these checks from a clean worktree before tagging `0.1.0`.
 
 ## Required Gates
 
-- [ ] `git status --short` is clean.
+- [x] `git status --short` is clean after commit `142d70c`.
 - [x] Static CMake build passes on Windows clang/Ninja.
 - [x] Shared-library CMake build passes on Windows clang/Ninja.
 - [x] C and C++ public header consumer tests pass on Windows clang/Ninja.
