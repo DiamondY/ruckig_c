@@ -1,0 +1,182 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      release_random:
+        description: "Run the 1,000,000-case release oracle"
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
+
+jobs:
+  build-test:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows clang-cl C-only
+            os: windows-latest
+            c_compiler: clang-cl
+            cxx_compiler: clang-cl
+            oracle: "OFF"
+            performance: "OFF"
+          - name: Windows clang oracle
+            os: windows-latest
+            c_compiler: clang
+            cxx_compiler: clang++
+            oracle: "ON"
+            performance: "ON"
+          - name: Linux GCC C-only
+            os: ubuntu-latest
+            c_compiler: gcc
+            cxx_compiler: g++
+            oracle: "OFF"
+            performance: "OFF"
+          - name: Linux Clang oracle
+            os: ubuntu-latest
+            c_compiler: clang
+            cxx_compiler: clang++
+            oracle: "ON"
+            performance: "ON"
+          - name: macOS Clang C-only
+            os: macos-latest
+            c_compiler: clang
+            cxx_compiler: clang++
+            oracle: "OFF"
+            performance: "OFF"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Prepare MSVC environment
+        if: runner.os == 'Windows'
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Configure
+        run: >
+          cmake -S . -B build -G Ninja
+          -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
+          -DCMAKE_CXX_COMPILER=${{ matrix.cxx_compiler }}
+          -DBUILD_RUCKIG_C_ORACLE_TESTS=${{ matrix.oracle }}
+          -DBUILD_RUCKIG_C_PERFORMANCE_TESTS=${{ matrix.performance }}
+
+      - name: Build
+        run: cmake --build build --config Release
+
+      - name: Test
+        run: ctest --test-dir build --build-config Release --output-on-failure -E ruckig_c_oracle_random_release
+
+  linux-sanitizers:
+    name: Linux Clang ASan UBSan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure
+        run: >
+          cmake -S . -B build-san -G Ninja
+          -DCMAKE_BUILD_TYPE=Debug
+          -DCMAKE_C_COMPILER=clang
+          -DCMAKE_CXX_COMPILER=clang++
+          -DRUCKIG_C_ENABLE_ASAN=ON
+          -DRUCKIG_C_ENABLE_UBSAN=ON
+          -DBUILD_RUCKIG_C_ORACLE_TESTS=OFF
+          -DBUILD_RUCKIG_C_PERFORMANCE_TESTS=OFF
+
+      - name: Build
+        run: cmake --build build-san
+
+      - name: Test
+        run: ctest --test-dir build-san --output-on-failure
+
+  linux-valgrind:
+    name: Linux Valgrind
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Valgrind
+        run: sudo apt-get update && sudo apt-get install -y valgrind
+
+      - name: Configure
+        run: >
+          cmake -S . -B build-valgrind -G Ninja
+          -DCMAKE_BUILD_TYPE=RelWithDebInfo
+          -DCMAKE_C_COMPILER=gcc
+          -DCMAKE_CXX_COMPILER=g++
+          -DBUILD_RUCKIG_C_ORACLE_TESTS=OFF
+          -DBUILD_RUCKIG_C_PERFORMANCE_TESTS=OFF
+
+      - name: Build
+        run: cmake --build build-valgrind
+
+      - name: CTest
+        run: ctest --test-dir build-valgrind --output-on-failure
+
+      - name: Valgrind unit tests
+        run: valgrind --error-exitcode=1 --leak-check=full ./build-valgrind/ruckig_c_tests
+
+      - name: Valgrind example
+        run: valgrind --error-exitcode=1 --leak-check=full ./build-valgrind/example-ruckig-c-02-position-offline
+
+  linux-performance:
+    name: Linux Clang performance
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure
+        run: >
+          cmake -S . -B build-perf -G Ninja
+          -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_C_COMPILER=clang
+          -DCMAKE_CXX_COMPILER=clang++
+          -DBUILD_RUCKIG_C_ORACLE_TESTS=OFF
+          -DBUILD_RUCKIG_C_PERFORMANCE_TESTS=ON
+
+      - name: Build
+        run: cmake --build build-perf
+
+      - name: Run benchmark
+        run: ./build-perf/ruckig_c_performance_benchmark --samples 10000 --seed 1 | tee linux-performance.txt
+
+      - name: Upload benchmark output
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-performance
+          path: linux-performance.txt
+
+  release-random-oracle:
+    name: Manual release random oracle
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && inputs.release_random == 'true'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Prepare MSVC environment
+        if: runner.os == 'Windows'
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Configure
+        run: >
+          cmake -S . -B build-release-random -G Ninja
+          -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_C_COMPILER=clang
+          -DCMAKE_CXX_COMPILER=clang++
+          -DBUILD_RUCKIG_C_ORACLE_TESTS=ON
+          -DBUILD_RUCKIG_C_PERFORMANCE_TESTS=OFF
+
+      - name: Build
+        run: cmake --build build-release-random
+
+      - name: Run release random oracle
+        run: ctest --test-dir build-release-random --output-on-failure -R ruckig_c_oracle_random_release

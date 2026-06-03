@@ -1,0 +1,42 @@
+set(prefix "@CMAKE_CURRENT_BINARY_DIR@/consumer-install/pkgconfig")
+set(build_dir "@CMAKE_CURRENT_BINARY_DIR@/consumer-build/pkgconfig")
+set(exe "${build_dir}/ruckig_c_pkg_config_consumer@CMAKE_EXECUTABLE_SUFFIX@")
+
+file(REMOVE_RECURSE "${prefix}" "${build_dir}")
+file(MAKE_DIRECTORY "${build_dir}")
+
+execute_process(
+  COMMAND "@CMAKE_COMMAND@" --install "@CMAKE_BINARY_DIR@" --prefix "${prefix}"
+  RESULT_VARIABLE install_result
+)
+if(NOT install_result EQUAL 0)
+  message(FATAL_ERROR "pkg-config consumer install failed")
+endif()
+
+set(ENV{PKG_CONFIG_PATH} "${prefix}/@CMAKE_INSTALL_LIBDIR@/pkgconfig")
+execute_process(
+  COMMAND "@PKG_CONFIG_EXECUTABLE@" --cflags --libs ruckig_c
+  OUTPUT_VARIABLE pkg_flags
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+  RESULT_VARIABLE pkg_result
+)
+if(NOT pkg_result EQUAL 0)
+  message(FATAL_ERROR "pkg-config lookup failed")
+endif()
+
+separate_arguments(pkg_flags UNIX_COMMAND "${pkg_flags}")
+execute_process(
+  COMMAND "@CMAKE_C_COMPILER@" -std=c99 "@CMAKE_CURRENT_SOURCE_DIR@/test/consumer/pkg_config/main.c" ${pkg_flags} -o "${exe}"
+  RESULT_VARIABLE compile_result
+)
+if(NOT compile_result EQUAL 0)
+  message(FATAL_ERROR "pkg-config consumer compile failed")
+endif()
+
+execute_process(
+  COMMAND "${exe}"
+  RESULT_VARIABLE run_result
+)
+if(NOT run_result EQUAL 0)
+  message(FATAL_ERROR "pkg-config consumer run failed")
+endif()

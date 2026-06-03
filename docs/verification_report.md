@@ -321,3 +321,57 @@ workstation has no configured WSL distribution available for Linux execution.
 ### Performance
 
 See `docs/performance_report.md`.
+
+## 2026-06-03 Release-Readiness Follow-Up
+
+Environment:
+
+- OS: Windows
+- Compiler: clang 21.1.8, target `x86_64-pc-windows-msvc`
+- Generator: Ninja via Visual Studio bundled Ninja
+
+Static build with oracle and performance tests:
+
+```powershell
+cmake -S . -B build_release_check_ninja -G Ninja -DCMAKE_MAKE_PROGRAM="C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe" -DCMAKE_C_COMPILER="D:/Program Files/LLVM/bin/clang.exe" -DCMAKE_CXX_COMPILER="D:/Program Files/LLVM/bin/clang++.exe" -DBUILD_RUCKIG_C_ORACLE_TESTS=ON -DBUILD_RUCKIG_C_PERFORMANCE_TESTS=ON
+cmake --build build_release_check_ninja --config Release
+ctest --test-dir build_release_check_ninja --output-on-failure -E ruckig_c_oracle_random_release
+```
+
+Result:
+
+```text
+100% tests passed, 0 tests failed out of 14
+```
+
+This run includes the installed CMake consumer smoke test added for the
+`0.1.0` release checklist.
+
+Shared-library build with oracle tests:
+
+```powershell
+cmake -S . -B build_release_check_shared -G Ninja -DCMAKE_MAKE_PROGRAM="C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe" -DCMAKE_C_COMPILER="D:/Program Files/LLVM/bin/clang.exe" -DCMAKE_CXX_COMPILER="D:/Program Files/LLVM/bin/clang++.exe" -DBUILD_SHARED_LIBS=ON -DBUILD_RUCKIG_C_ORACLE_TESTS=ON -DBUILD_RUCKIG_C_PERFORMANCE_TESTS=OFF
+cmake --build build_release_check_shared --config Release
+ctest --test-dir build_release_check_shared --output-on-failure -E ruckig_c_oracle_random_release
+```
+
+Result:
+
+```text
+100% tests passed, 0 tests failed out of 13
+```
+
+Manual release random oracle:
+
+```powershell
+ctest --test-dir build_release_check_ninja -R ruckig_c_oracle_random_release --output-on-failure
+```
+
+Result:
+
+```text
+100% tests passed, 0 tests failed out of 1
+```
+
+The release random run executed `--random 1000000 --seed 1` and completed in
+about 262 seconds.

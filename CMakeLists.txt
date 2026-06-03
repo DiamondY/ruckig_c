@@ -4,6 +4,7 @@ project(ruckig_c_rewrite VERSION 0.1.0 LANGUAGES C)
 
 include(CTest)
 include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
 
 option(BUILD_RUCKIG_C "Build the pure C Ruckig library" ON)
 option(BUILD_RUCKIG_C_TESTS "Build pure C Ruckig tests" ON)
@@ -14,6 +15,11 @@ option(RUCKIG_C_ENABLE_ASAN "Enable AddressSanitizer for supported compilers" OF
 option(RUCKIG_C_ENABLE_UBSAN "Enable UndefinedBehaviorSanitizer for supported compilers" OFF)
 option(RUCKIG_C_ENABLE_CALCULATION_DURATION "Measure ruckig_update calculation duration in microseconds" OFF)
 option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
+
+set(RUCKIG_C_INSTALL_CMAKEDIR
+  "${CMAKE_INSTALL_LIBDIR}/cmake/ruckig_c"
+  CACHE STRING "Install directory for ruckig_c CMake package files"
+)
 
 set(RUCKIG_C_SOURCES
   src/ruckig_c/alloc.c
@@ -138,6 +144,29 @@ if(BUILD_RUCKIG_C_TESTS)
   ruckig_c_apply_sanitizers(ruckig_c_header_c)
   ruckig_c_apply_sanitizers(ruckig_c_header_cpp)
   add_test(NAME ruckig_c_header_cpp COMMAND ruckig_c_header_cpp)
+
+  configure_file(
+    test/cmake/test_cmake_consumer.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/test_cmake_consumer.cmake
+    @ONLY
+  )
+  add_test(NAME ruckig_c_cmake_consumer
+    COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/test_cmake_consumer.cmake
+  )
+
+  if(UNIX)
+    find_program(PKG_CONFIG_EXECUTABLE pkg-config)
+    if(PKG_CONFIG_EXECUTABLE)
+      configure_file(
+        test/cmake/test_pkg_config_consumer.cmake.in
+        ${CMAKE_CURRENT_BINARY_DIR}/test_pkg_config_consumer.cmake
+        @ONLY
+      )
+      add_test(NAME ruckig_c_pkg_config_consumer
+        COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/test_pkg_config_consumer.cmake
+      )
+    endif()
+  endif()
 endif()
 
 if(BUILD_RUCKIG_C_EXAMPLES)
@@ -246,6 +275,22 @@ if(BUILD_RUCKIG_C_PERFORMANCE_TESTS)
 endif()
 
 if(BUILD_RUCKIG_C)
+  configure_package_config_file(
+    cmake/ruckig_cConfig.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/ruckig_cConfig.cmake
+    INSTALL_DESTINATION ${RUCKIG_C_INSTALL_CMAKEDIR}
+  )
+  write_basic_package_version_file(
+    ${CMAKE_CURRENT_BINARY_DIR}/ruckig_cConfigVersion.cmake
+    VERSION ${PROJECT_VERSION}
+    COMPATIBILITY SameMajorVersion
+  )
+  configure_file(
+    cmake/ruckig_c.pc.in
+    ${CMAKE_CURRENT_BINARY_DIR}/ruckig_c.pc
+    @ONLY
+  )
+
   install(TARGETS ruckig_c
     EXPORT ruckig_c-targets
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
@@ -253,4 +298,17 @@ if(BUILD_RUCKIG_C)
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
   )
   install(DIRECTORY include/ruckig_c DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+  install(EXPORT ruckig_c-targets
+    NAMESPACE ruckig_c::
+    DESTINATION ${RUCKIG_C_INSTALL_CMAKEDIR}
+  )
+  install(FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/ruckig_cConfig.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/ruckig_cConfigVersion.cmake
+    DESTINATION ${RUCKIG_C_INSTALL_CMAKEDIR}
+  )
+  install(FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/ruckig_c.pc
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
+  )
 endif()

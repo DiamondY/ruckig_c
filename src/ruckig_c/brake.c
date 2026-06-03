@@ -110,6 +110,7 @@ void ruckig_brake_get_position_trajectory(
     }
     ruckig_brake_profile_init(brake);
 
+    /* Brake pre-trajectories move invalid or inevitably invalid states back inside limits before the main profile. */
     if (j_max == 0.0 || a_max == 0.0 || a_min == 0.0) {
         return;
     }
@@ -138,6 +139,7 @@ void ruckig_brake_get_second_order_position_trajectory(
     }
     ruckig_brake_profile_init(brake);
 
+    /* Second-order braking has no jerk phase; keep the branch order aligned with the C++ oracle. */
     if (a_max == 0.0 || a_min == 0.0) {
         return;
     }
@@ -163,6 +165,7 @@ void ruckig_brake_get_velocity_trajectory(
     }
     ruckig_brake_profile_init(brake);
 
+    /* Velocity control only brakes acceleration violations before solving the target velocity profile. */
     if (j_max == 0.0) {
         return;
     }

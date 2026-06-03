@@ -163,6 +163,7 @@ static double adjust_duration_for_blocks(
         return duration;
     }
 
+    /* Step1 profiles define forbidden synchronization intervals; advance to the next oracle-valid duration. */
     while (changed) {
         size_t dof;
         changed = false;
@@ -351,6 +352,7 @@ static bool calculate_no_jerk_position_phase_sync(
         return false;
     }
 
+    /* Phase sync scales non-limiting DoFs from the limiting profile; fall back to time sync on any mismatch. */
     limiting_profile = &trajectory->profiles[limiting_dof];
     pd_limiting = limiting_profile->pf - limiting_profile->p[0];
     if (fabs(pd_limiting) < 2.2204460492503131e-16
@@ -553,6 +555,7 @@ static bool calculate_velocity_phase_sync(
         return false;
     }
 
+    /* Velocity phase sync keeps the oracle's scale-source priority across target/current velocity and acceleration. */
     limiting_profile = &trajectory->profiles[limiting_dof];
     if (limiting_profile->brake.duration > 0.0 || limiting_profile->accel.duration > 0.0) {
         return false;

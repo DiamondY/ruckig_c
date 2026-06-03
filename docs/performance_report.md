@@ -95,5 +95,7 @@ compared within their own build contexts rather than mixed.
 - Both recorded Windows runs satisfy the PRD average-ratio threshold.
 - WMI CPU model lookup is denied in this workspace, so the report records the
   non-elevated `PROCESSOR_IDENTIFIER` value instead of a marketing CPU name.
-- A Linux/Clang CI benchmark is still recommended before tagging a portable
-  release.
+- A Linux benchmark is required before tagging a portable public `0.1.0`
+  release. Record at least one Linux GCC or Clang run with the same
+  `--samples 10000 --seed 1` command, compiler flags, CPU identifier, average,
+  p99, worst case, and C/oracle average ratio.

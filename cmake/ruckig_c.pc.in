@@ -1,0 +1,11 @@
+prefix=@CMAKE_INSTALL_PREFIX@
+exec_prefix=${prefix}
+libdir=${exec_prefix}/@CMAKE_INSTALL_LIBDIR@
+includedir=${prefix}/@CMAKE_INSTALL_INCLUDEDIR@
+
+Name: ruckig_c
+Description: Pure C99 rewrite of the Ruckig Community local trajectory generator
+Version: @PROJECT_VERSION@
+Libs: -L${libdir} -lruckig_c
+Libs.private: -lm
+Cflags: -I${includedir}

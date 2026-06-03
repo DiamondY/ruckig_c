@@ -63,6 +63,7 @@ bool ruckig_block_calculate(ruckig_block_t* block, ruckig_profile_t* valid_profi
         block_set_min_profile(block, &valid_profiles[0]);
         return true;
     } else if (valid_profile_count == 2) {
+        /* Preserve oracle candidate ordering: equal-duration alternatives collapse to the first profile. */
         if (fabs(profile_duration(&valid_profiles[0]) - profile_duration(&valid_profiles[1])) < 8.0 * DBL_EPSILON) {
             block_set_min_profile(block, &valid_profiles[0]);
             return true;
@@ -74,6 +75,7 @@ bool ruckig_block_calculate(ruckig_block_t* block, ruckig_profile_t* valid_profi
         return true;
 
     } else if (valid_profile_count == 4) {
+        /* Ruckig Step1 may emit a mirrored pair around a blocked interval; remove only the oracle-matched duplicate. */
         if (fabs(profile_duration(&valid_profiles[0]) - profile_duration(&valid_profiles[1])) < 32.0 * DBL_EPSILON
             && valid_profiles[0].direction != valid_profiles[1].direction) {
             remove_profile(valid_profiles, &valid_profile_count, 1);

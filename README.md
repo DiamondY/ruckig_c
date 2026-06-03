@@ -2,6 +2,10 @@
 
 This repository contains a pure C99 rewrite of the Ruckig Community trajectory generator. The source of truth for the implementation scope is `docs/c_rewrite_execution_plan.md`; the original C++ implementation under `original/ruckig-main` is kept unchanged and is used only as an oracle in tests.
 
+The rewrite targets Ruckig Community `0.17.3`. The upstream project in
+`original/ruckig-main` is MIT licensed, and this repository keeps that license
+at the root in `LICENSE`.
+
 ## Current Status
 
 Implemented and covered by fixed C/oracle tests plus deterministic random oracle stress:
@@ -22,9 +26,9 @@ Implemented and covered by fixed C/oracle tests plus deterministic random oracle
 - Trajectory duration, independent minimum durations, sampling, position extrema, and first-time-at-position helpers.
 - C examples for position, offline position, velocity, stop, and minimum duration.
 
-Recommended portability follow-ups for a wider CI release:
+Release-readiness follow-ups are tracked in `docs/release_checklist.md`.
+Current release scope intentionally excludes:
 
-- Linux/Clang sanitizer matrix and valgrind/memcheck where available.
 - Platform symbol-wrapper allocation audit where the toolchain supports it.
 - Waypoints, per-section constraints, cloud, Python/Rust bindings, and per-DoF control/sync overrides are intentionally outside the first public C API.
 
@@ -47,6 +51,35 @@ Useful CMake options:
 - `BUILD_SHARED_LIBS=ON` builds a shared library instead of a static library.
 
 On Windows, the current verified CMake path uses LLVM clang/clang++ with the Visual Studio bundled Ninja. The oracle harness must compile `.c` sources with a C compiler and the original Ruckig sources with a C++ compiler. Current verification includes static-library and DLL/import-library builds; see `docs/verification_report.md`.
+
+## Install and Consume
+
+Install the library and public headers with CMake:
+
+```sh
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build
+cmake --install build --prefix /path/to/prefix
+```
+
+Downstream CMake consumers can use the installed package:
+
+```cmake
+find_package(ruckig_c CONFIG REQUIRED)
+add_executable(app main.c)
+target_link_libraries(app PRIVATE ruckig_c::ruckig_c)
+```
+
+On systems with `pkg-config`, downstream C consumers can use:
+
+```sh
+cc main.c $(pkg-config --cflags --libs ruckig_c) -o app
+```
+
+The installed package exports the target `ruckig_c::ruckig_c`. Static CMake
+consumers receive `RUCKIG_C_STATIC_DEFINE` automatically from the target. When
+manually linking a static Windows build without CMake, define
+`RUCKIG_C_STATIC_DEFINE`; DLL consumers should not define it.
 
 ## C API Shape
 
@@ -178,6 +211,8 @@ ruckig_c_performance_benchmark --samples 10000 --seed 1
 ```
 
 The current development performance report is in `docs/performance_report.md`. Windows clang ASan/UBSan CMake tests pass when the LLVM sanitizer runtime directory is present in `PATH`. Linux/Clang sanitizer and platform symbol-wrapper allocation jobs are recommended additions for a broader CI matrix.
+Linux performance data must be recorded in `docs/performance_report.md` before
+tagging a public `0.1.0` release; see `docs/release_checklist.md`.
 
 ## Verification
 
@@ -192,3 +227,7 @@ Current CMake/Ninja and direct-clang verification evidence is recorded in `docs/
 - C examples.
 - Internal allocation-counter checks and source-level allocation audit.
 - Windows clang ASan/UBSan CMake tests.
+
+GitHub Actions CI covers Windows, Linux, and macOS routine checks. The
+`ruckig_c_oracle_random_release` test is intentionally excluded from routine
+CI and is available as a manual release gate.
