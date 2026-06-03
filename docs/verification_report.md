@@ -1015,3 +1015,47 @@ output, trajectory, validation, calculate, update, reset, and per-DoF APIs.
 The public header diff from `v0.2.0` contains version macro changes and the
 existing unsupported-scope comment cleanup only; no public functions, enum
 values, or result-code values changed.
+
+## 2026-06-04 0.2.1 Release Publication
+
+The `v0.2.1` release was published after the local closeout gate, push CI, and
+manual release-random workflow succeeded.
+
+Final release evidence:
+
+- Tag target commit: `dc09eb938484b407415e1d6b4f59a2242c18ba8b`.
+- Annotated tag object: `64909d4b9192116713ca961c228c499ca4429931`.
+- Push CI run id: `26898545004`, conclusion `success`.
+- Push CI URL: `https://github.com/DiamondY/ruckig_c/actions/runs/26898545004`.
+- Manual release random workflow run id: `26898859059`, conclusion `success`.
+- Manual release random URL:
+  `https://github.com/DiamondY/ruckig_c/actions/runs/26898859059`.
+- GitHub Release:
+  `https://github.com/DiamondY/ruckig_c/releases/tag/v0.2.1`.
+
+Successful push CI jobs:
+
+- `Windows clang-cl C-only`
+- `Windows clang oracle`
+- `Linux GCC C-only`
+- `Linux Clang oracle`
+- `macOS Clang C-only`
+- `Linux Clang ASan UBSan`
+- `Linux Valgrind`
+- `Linux Clang performance`
+
+Successful manual release random workflow jobs:
+
+- `Manual release random oracle`
+- `Windows clang-cl C-only`
+- `Windows clang oracle`
+- `Linux GCC C-only`
+- `Linux Clang oracle`
+- `macOS Clang C-only`
+- `Linux Clang ASan UBSan`
+- `Linux Valgrind`
+- `Linux Clang performance`
+
+The manual workflow Linux performance artifact id is `7390788705`. The push CI
+Linux performance artifact id is `7390652575`. Both workflows ran against
+commit `dc09eb938484b407415e1d6b4f59a2242c18ba8b`.

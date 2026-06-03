@@ -268,13 +268,40 @@ Average C/oracle ratio: `0.328289`.
 
 This local Windows release closeout run is within the release threshold of
 average calculation time no worse than `1.5x` the C++ oracle on the same
-benchmark corpus. Linux performance evidence must be recorded from the final
-push CI or another final Linux release-gate run before publishing `v0.2.1`.
+benchmark corpus.
+
+## 2026-06-04 Linux 0.2.1 Manual Release Workflow Run
+
+- Source: GitHub Actions workflow-dispatch run `26898859059`, job
+  `Linux Clang performance`.
+- Commit: `dc09eb938484b407415e1d6b4f59a2242c18ba8b`.
+- Artifact: `linux-performance`, artifact id `7390788705`.
+- Command: `./build-perf/ruckig_c_performance_benchmark --samples 10000 --seed 1`
+- OS: Linux, GitHub-hosted Ubuntu runner.
+- Kernel: `Linux runnervm3jyl0 6.17.0-1015-azure #15~24.04.1-Ubuntu SMP Wed May 6 22:37:49 UTC 2026 x86_64`.
+- CPU identifier: `AMD EPYC 7763 64-Core Processor`.
+- Compiler: `Ubuntu clang version 18.1.3 (1ubuntu1)`.
+- C++ compiler: `Ubuntu clang version 18.1.3 (1ubuntu1)`.
+- CMake build type: `Release`.
+- Generator: `Ninja`.
+- Seed: `1`.
+- Samples: `10000`.
+
+| Metric | C implementation | C++ oracle |
+| --- | ---: | ---: |
+| Average | 734.393 ns | 554.951 ns |
+| p99 | 5400 ns | 4178 ns |
+| Worst | 38813 ns | 26409 ns |
+
+Average C/oracle ratio: `1.32335`.
+
+This Linux manual release workflow run is within the release threshold of
+average calculation time no worse than `1.5x` the C++ oracle on the same
+benchmark corpus.
 
 ## 0.2.1 Benchmark Template
 
-Fill this section with remaining final `0.2.1` Linux or follow-up release
-evidence.
+Use this template for follow-up patch-release evidence.
 
 ### Windows clang release
 
