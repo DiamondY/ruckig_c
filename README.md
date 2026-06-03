@@ -1,6 +1,6 @@
 # Ruckig C Rewrite
 
-This repository contains a pure C99 rewrite of the Ruckig Community trajectory generator. The `ruckig_c` library does not link to or require a C++ runtime. The source of truth for the implementation scope is `docs/c_rewrite_execution_plan.md`; the original C++ implementation under `original/ruckig-main` is kept unchanged and is used only as an oracle in tests.
+This repository contains a pure C99 rewrite of the Ruckig Community trajectory generator. The `ruckig_c` library does not link to or require a C++ runtime. The current implementation scope is defined by this README, the public header, `docs/roadmap.md`, the release checklists, and `docs/upstream_baseline_policy.md`; `docs/c_rewrite_execution_plan.md` is retained as a historical execution plan. The original C++ implementation under `original/ruckig-main` is kept unchanged and is used only as a frozen oracle in tests, not as part of the C library runtime.
 
 The rewrite targets Ruckig Community `0.17.3`. The upstream project in
 `original/ruckig-main` is MIT licensed, and this repository keeps that license
@@ -84,6 +84,10 @@ The installed package exports the target `ruckig_c::ruckig_c`. Static CMake
 consumers receive `RUCKIG_C_STATIC_DEFINE` automatically from the target. When
 manually linking a static Windows build without CMake, define
 `RUCKIG_C_STATIC_DEFINE`; DLL consumers should not define it.
+
+Additional consumer and packaging notes are collected in `docs/packaging.md`,
+including installed CMake consumers, pkg-config consumers, Windows manual
+static linking, DLL consumers, and shared install-tree verification.
 
 ## C API Shape
 
@@ -230,11 +234,19 @@ ruckig_c_oracle_tests --random 100 --seed 1
 ```
 
 For per-DoF override hardening, the oracle executable also supports a controlled
-manual/development random mode:
+routine smoke mode and a larger manual/development stress mode:
+
+```sh
+ruckig_c_oracle_tests --random-per-dof 100 --seed 1
+```
 
 ```sh
 ruckig_c_oracle_tests --random-per-dof 100000 --seed 1
 ```
+
+The small per-DoF random smoke is suitable for routine CI when oracle tests are
+enabled. The larger stress command is intended for manual development and patch
+release gates.
 
 The fixed oracle suite also covers per-DoF control-interface and
 synchronization overrides. The random generator covers first/second/third-order

@@ -1,0 +1,131 @@
+set(prefix "@CMAKE_CURRENT_BINARY_DIR@/consumer-install/shared")
+set(shared_build_dir "@CMAKE_CURRENT_BINARY_DIR@/consumer-build/shared-library")
+set(cmake_build_dir "@CMAKE_CURRENT_BINARY_DIR@/consumer-build/shared-cmake")
+set(pkg_build_dir "@CMAKE_CURRENT_BINARY_DIR@/consumer-build/shared-pkgconfig")
+set(cmake_exe "${cmake_build_dir}/ruckig_c_consumer@CMAKE_EXECUTABLE_SUFFIX@")
+set(pkg_exe "${pkg_build_dir}/ruckig_c_pkg_config_consumer@CMAKE_EXECUTABLE_SUFFIX@")
+set(lib_dir "${prefix}/@CMAKE_INSTALL_LIBDIR@")
+set(generator_args -G "@CMAKE_GENERATOR@")
+if("@CMAKE_MAKE_PROGRAM@" STREQUAL "")
+  set(make_program_args "")
+else()
+  set(make_program_args "-DCMAKE_MAKE_PROGRAM=@CMAKE_MAKE_PROGRAM@")
+endif()
+
+file(REMOVE_RECURSE "${prefix}" "${shared_build_dir}" "${cmake_build_dir}" "${pkg_build_dir}")
+file(MAKE_DIRECTORY "${pkg_build_dir}")
+
+execute_process(
+  COMMAND
+    "@CMAKE_COMMAND@"
+    -S "@CMAKE_CURRENT_SOURCE_DIR@"
+    -B "${shared_build_dir}"
+    ${generator_args}
+    ${make_program_args}
+    "-DCMAKE_C_COMPILER=@CMAKE_C_COMPILER@"
+    "-DCMAKE_BUILD_TYPE=@CMAKE_BUILD_TYPE@"
+    -DBUILD_SHARED_LIBS=ON
+    -DBUILD_RUCKIG_C_TESTS=OFF
+    -DBUILD_RUCKIG_C_EXAMPLES=OFF
+    -DBUILD_RUCKIG_C_ORACLE_TESTS=OFF
+    -DBUILD_RUCKIG_C_PERFORMANCE_TESTS=OFF
+  RESULT_VARIABLE shared_configure_result
+)
+if(NOT shared_configure_result EQUAL 0)
+  message(FATAL_ERROR "shared install-tree configure failed")
+endif()
+
+execute_process(
+  COMMAND "@CMAKE_COMMAND@" --build "${shared_build_dir}"
+  RESULT_VARIABLE shared_build_result
+)
+if(NOT shared_build_result EQUAL 0)
+  message(FATAL_ERROR "shared install-tree build failed")
+endif()
+
+execute_process(
+  COMMAND "@CMAKE_COMMAND@" --install "${shared_build_dir}" --prefix "${prefix}"
+  RESULT_VARIABLE shared_install_result
+)
+if(NOT shared_install_result EQUAL 0)
+  message(FATAL_ERROR "shared install-tree install failed")
+endif()
+
+execute_process(
+  COMMAND
+    "@CMAKE_COMMAND@"
+    -S "@CMAKE_CURRENT_SOURCE_DIR@/test/consumer/cmake"
+    -B "${cmake_build_dir}"
+    ${generator_args}
+    ${make_program_args}
+    "-DCMAKE_C_COMPILER=@CMAKE_C_COMPILER@"
+    "-DCMAKE_BUILD_TYPE=@CMAKE_BUILD_TYPE@"
+    -DCMAKE_PREFIX_PATH=${prefix}
+  RESULT_VARIABLE cmake_configure_result
+)
+if(NOT cmake_configure_result EQUAL 0)
+  message(FATAL_ERROR "shared cmake consumer configure failed")
+endif()
+
+execute_process(
+  COMMAND "@CMAKE_COMMAND@" --build "${cmake_build_dir}"
+  RESULT_VARIABLE cmake_build_result
+)
+if(NOT cmake_build_result EQUAL 0)
+  message(FATAL_ERROR "shared cmake consumer build failed")
+endif()
+
+execute_process(
+  COMMAND
+    "@CMAKE_COMMAND@" -E env
+    "LD_LIBRARY_PATH=${lib_dir}:$ENV{LD_LIBRARY_PATH}"
+    "DYLD_LIBRARY_PATH=${lib_dir}:$ENV{DYLD_LIBRARY_PATH}"
+    "${cmake_exe}"
+  RESULT_VARIABLE cmake_run_result
+)
+if(NOT cmake_run_result EQUAL 0)
+  message(FATAL_ERROR "shared cmake consumer run failed")
+endif()
+
+set(ENV{PKG_CONFIG_PATH} "${prefix}/@CMAKE_INSTALL_LIBDIR@/pkgconfig")
+execute_process(
+  COMMAND "@PKG_CONFIG_EXECUTABLE@" --cflags ruckig_c
+  OUTPUT_VARIABLE pkg_cflags
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+  RESULT_VARIABLE pkg_cflags_result
+)
+if(NOT pkg_cflags_result EQUAL 0)
+  message(FATAL_ERROR "shared pkg-config cflags lookup failed")
+endif()
+
+execute_process(
+  COMMAND "@PKG_CONFIG_EXECUTABLE@" --libs ruckig_c
+  OUTPUT_VARIABLE pkg_libs
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+  RESULT_VARIABLE pkg_libs_result
+)
+if(NOT pkg_libs_result EQUAL 0)
+  message(FATAL_ERROR "shared pkg-config libs lookup failed")
+endif()
+
+separate_arguments(pkg_cflags UNIX_COMMAND "${pkg_cflags}")
+separate_arguments(pkg_libs UNIX_COMMAND "${pkg_libs}")
+execute_process(
+  COMMAND "@CMAKE_C_COMPILER@" -std=c99 ${pkg_cflags} "@CMAKE_CURRENT_SOURCE_DIR@/test/consumer/pkg_config/main.c" -o "${pkg_exe}" ${pkg_libs}
+  RESULT_VARIABLE pkg_compile_result
+)
+if(NOT pkg_compile_result EQUAL 0)
+  message(FATAL_ERROR "shared pkg-config consumer compile failed")
+endif()
+
+execute_process(
+  COMMAND
+    "@CMAKE_COMMAND@" -E env
+    "LD_LIBRARY_PATH=${lib_dir}:$ENV{LD_LIBRARY_PATH}"
+    "DYLD_LIBRARY_PATH=${lib_dir}:$ENV{DYLD_LIBRARY_PATH}"
+    "${pkg_exe}"
+  RESULT_VARIABLE pkg_run_result
+)
+if(NOT pkg_run_result EQUAL 0)
+  message(FATAL_ERROR "shared pkg-config consumer run failed")
+endif()

@@ -103,6 +103,28 @@ benchmark and a Linux clang release benchmark against the frozen C++ oracle.
 Use the existing benchmark executable and keep the release threshold at average
 C/oracle ratio `<= 1.5`.
 
+## 0.2.x Performance Trend Procedure
+
+Use the same benchmark corpus for each `0.2.x` patch release unless a release
+explicitly documents a corpus change:
+
+- Required release corpus: `--samples 10000 --seed 1`.
+- Optional development comparison corpora: `--samples 10000 --seed 2` and
+  `--samples 10000 --seed 41`.
+- Required platforms: Windows clang release and Linux clang release.
+- Required threshold: average C/oracle ratio `<= 1.5`.
+
+Store raw local or CI outputs outside version-controlled source unless the
+release process intentionally promotes a short excerpt into this report. Use a
+stable artifact convention such as:
+
+```text
+artifacts/performance/0.2.1/windows-clang-release.txt
+artifacts/performance/0.2.1/linux-clang-release.txt
+```
+
+Only the summarized release evidence should be committed to this report.
+
 Record this template for each run:
 
 ```text
@@ -193,3 +215,82 @@ Average C/oracle ratio: `0.286698`.
 This Windows release closeout run is within the release threshold of average
 calculation time no worse than `1.5x` the C++ oracle on the same benchmark
 corpus.
+
+## 2026-06-03 Windows 0.2.1 Preparation Smoke
+
+- Source: Local `0.2.1` preparation smoke on `main`; not final release
+  evidence.
+- Command:
+  `.\build_release_check_ninja\ruckig_c_performance_benchmark.exe --samples 10000 --seed 1`
+- OS: Windows.
+- CPU identifier: `Intel64 Family 6 Model 165 Stepping 5, GenuineIntel`.
+- C compiler: `clang 21.1.8`.
+- C++ compiler: `clang 21.1.8`.
+- CMake build type: `Release`.
+- Generator: Ninja.
+- Seed: `1`.
+- Samples: `10000`.
+
+| Metric | C implementation | C++ oracle |
+| --- | ---: | ---: |
+| Average | 1348.88 ns | 4670.15 ns |
+| p99 | 9100 ns | 19600 ns |
+| Worst | 20500 ns | 46300 ns |
+
+Average C/oracle ratio: `0.28883`.
+
+This preparation smoke is within the release threshold of average calculation
+time no worse than `1.5x` the C++ oracle on the same benchmark corpus. Final
+`0.2.1` release evidence must be rerun from the tag candidate commit.
+
+## 0.2.1 Benchmark Template
+
+Fill this section from the final `0.2.1` release candidate commit.
+
+### Windows clang release
+
+```text
+Source:
+Command:
+OS:
+CPU identifier:
+C compiler:
+C++ compiler:
+CMake build type:
+Generator:
+Samples:
+Seed:
+C average ns:
+C p99 ns:
+C worst ns:
+Oracle average ns:
+Oracle p99 ns:
+Oracle worst ns:
+Average C/oracle ratio:
+Release threshold:
+Result:
+```
+
+### Linux clang release
+
+```text
+Source:
+Command:
+OS:
+CPU identifier:
+C compiler:
+C++ compiler:
+CMake build type:
+Generator:
+Samples:
+Seed:
+C average ns:
+C p99 ns:
+C worst ns:
+Oracle average ns:
+Oracle p99 ns:
+Oracle worst ns:
+Average C/oracle ratio:
+Release threshold:
+Result:
+```

@@ -753,3 +753,126 @@ Result:
 ```text
 100% tests passed, 0 tests failed out of 17
 ```
+
+## 0.2.1 Release Preparation
+
+This section records initial `0.2.1` preparation evidence on `main`. It is not
+final release evidence; all gates must be rerun from the final `0.2.1` release
+candidate commit before tagging.
+
+The `0.2.1` preparation queue adds a routine per-DoF oracle smoke CTest:
+
+```text
+ruckig_c_oracle_tests --random-per-dof 100 --seed 1
+```
+
+This smoke test is intended to catch routine per-DoF regressions in oracle CI.
+It does not replace the manual/development
+`ruckig_c_oracle_tests --random-per-dof 100000 --seed 1` gate or the
+`--random 1000000 --seed 1` release random oracle.
+
+Fixed suite and smoke checks:
+
+```powershell
+.\build_release_check_ninja\ruckig_c_oracle_tests.exe
+.\build_release_check_ninja\ruckig_c_oracle_tests.exe --random 100 --seed 1
+.\build_release_check_ninja\ruckig_c_oracle_tests.exe --random-per-dof 100 --seed 1
+```
+
+Result:
+
+```text
+Oracle comparisons passed: 59
+Oracle comparisons passed: 59
+Random oracle comparisons passed: 100 seed 1
+Oracle comparisons passed: 59
+Random per-DoF oracle comparisons passed: 100 seed 1
+```
+
+The fixed suite now includes additional `0.2.1` regression coverage for
+large-magnitude positions, tiny nonzero limits, large discrete minimum
+duration, mixed first/second/third-order per-DoF inputs, explicit
+first-time-at-position boundaries, and disabled DoF per-DoF overrides under
+discrete duration.
+
+Static release CTest excluding the long release random test:
+
+```powershell
+ctest --test-dir build_release_check_ninja --output-on-failure -E ruckig_c_oracle_random_release
+```
+
+Result:
+
+```text
+100% tests passed, 0 tests failed out of 19
+```
+
+Shared-library release CTest excluding the long release random test:
+
+```powershell
+ctest --test-dir build_release_check_shared --output-on-failure -E ruckig_c_oracle_random_release
+```
+
+Result:
+
+```text
+100% tests passed, 0 tests failed out of 18
+```
+
+Development random oracle seeds:
+
+```powershell
+.\build_release_check_ninja\ruckig_c_oracle_tests.exe --random 100000 --seed 2
+.\build_release_check_ninja\ruckig_c_oracle_tests.exe --random 100000 --seed 41
+```
+
+Result:
+
+```text
+Oracle comparisons passed: 59
+Random oracle comparisons passed: 100000 seed 2
+Oracle comparisons passed: 59
+Random oracle comparisons passed: 100000 seed 41
+```
+
+Per-DoF development random oracle:
+
+```powershell
+.\build_release_check_ninja\ruckig_c_oracle_tests.exe --random-per-dof 100000 --seed 1
+```
+
+Result:
+
+```text
+Oracle comparisons passed: 59
+Random per-DoF oracle comparisons passed: 100000 seed 1
+```
+
+Windows performance smoke:
+
+```powershell
+.\build_release_check_ninja\ruckig_c_performance_benchmark.exe --samples 10000 --seed 1
+```
+
+Result:
+
+```text
+average_ratio_c_over_oracle: 0.28883
+release_threshold_average_ratio: 1.5
+```
+
+Release random oracle smoke from the same preparation worktree:
+
+```powershell
+ctest --test-dir build_release_check_ninja -R ruckig_c_oracle_random_release --output-on-failure
+```
+
+Result:
+
+```text
+100% tests passed, 0 tests failed out of 1
+```
+
+The release random oracle executed `--random 1000000 --seed 1` and completed in
+about 340 seconds. Final `0.2.1` release evidence must still be rerun from the
+tag candidate commit.

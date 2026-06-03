@@ -36,6 +36,11 @@ follow-up work for stability and future feature planning.
 
 ## 0.2.x Maintenance
 
+- Planned for `0.2.1`: documentation source-of-truth cleanup, routine per-DoF
+  random oracle smoke, post-`v0.2.0` hardening in the changelog, and consumer
+  packaging guidance.
+- Planned for `0.2.2`: broader numerical regression corpus, reusable
+  performance trend records, and API/ABI compatibility evidence.
 - Before each `0.2.x` patch release, record Windows and Linux release
   benchmarks with average, p99, worst, and C/oracle average ratio.
 - Keep per-DoF override hardening focused on oracle coverage, diagnostics, and
@@ -50,3 +55,16 @@ follow-up work for stability and future feature planning.
   and update recalculation stability, plus an online per-DoF C example.
 - Keep waypoints, per-section constraints, cloud calculation, Python/Rust
   bindings, and upstream baseline upgrades as separate future projects.
+
+## 0.3.0 Design Candidates
+
+- Evaluate Python or Rust bindings only after the C ABI has passed at least one
+  `0.2.x` patch cycle, `docs/api_compatibility.md` is complete, and CMake,
+  pkg-config, and shared/static consumer paths are stable.
+- Evaluate an upstream Ruckig baseline upgrade only as a separate project with
+  upstream diff review, source inventory update, tolerance review, oracle
+  corpus update, full random stress, and new performance baselines.
+- Keep waypoints, per-section constraints, and cloud calculation behind a
+  separate design document that defines the Community cloud/pro behavior
+  boundary, C API shape, and unsupported/partial behavior before any public API
+  is implemented.

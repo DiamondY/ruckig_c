@@ -11,8 +11,8 @@ upgrade project is approved and completed.
   baseline for all oracle comparisons.
 - Bug fixes in the C rewrite must be validated against the frozen oracle unless
   a documented oracle/platform tolerance exception is required.
-- Release closeout, per-DoF hardening, and ordinary bug-fix work must not
-  update the upstream baseline.
+- Release closeout, per-DoF hardening, bindings design, `0.2.x` patch-release
+  work, and ordinary bug-fix work must not update the upstream baseline.
 
 ## Upstream Upgrade Requirements
 

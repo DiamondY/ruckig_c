@@ -1,5 +1,14 @@
 # Ruckig C Rewrite Execution Plan
 
+Historical note: this document records the original `0.1.0` C rewrite plan and
+the first-release scope decisions. It is retained for traceability, but it is no
+longer the sole source of truth for current project scope. Current scope is
+defined by `README.md`, `include/ruckig_c/ruckig.h`, `docs/roadmap.md`, the
+active release checklists, and `docs/upstream_baseline_policy.md`. Per-DoF
+control-interface and synchronization overrides were intentionally out of scope
+for `0.1.0`, but they are implemented in `0.2.0`; see
+`docs/design_per_dof_overrides.md`.
+
 Document version: `0.1`
 
 Applies to: Ruckig Community `0.17.3` under `original/ruckig-main`

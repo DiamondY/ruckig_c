@@ -81,7 +81,7 @@ typedef struct ruckig ruckig_t;
 #endif
 
 /*
- * First-release scope:
+ * Current unsupported scope:
  * - No intermediate waypoints.
  * - No per-section constraints.
  * - No cloud API.

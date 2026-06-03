@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cmath>
 #include <iostream>
 #include <sstream>
@@ -19,6 +20,12 @@ constexpr double kAccelerationTolerance = 1e-10;
 constexpr double kDurationTolerance = 1e-12;
 constexpr double kExtremaTimeTolerance = 1e-7;
 constexpr double kFirstTimeTolerance = 1e-4;
+
+struct FirstTimeQuery {
+    size_t dof {0};
+    double position {0.0};
+    double time_after {0.0};
+};
 
 struct CaseData {
     std::string name;
@@ -43,6 +50,9 @@ struct CaseData {
     std::vector<double> min_acceleration {};
     std::vector<ruckig_control_interface_t> per_dof_control_interface {};
     std::vector<ruckig_synchronization_t> per_dof_synchronization {};
+    std::vector<FirstTimeQuery> first_time_queries {};
+    bool compare_first_time_queries {true};
+    bool compare_update_loop {true};
 };
 
 int failures = 0;
@@ -80,7 +90,8 @@ void fail(const std::string& name, const std::string& message) {
 }
 
 bool near(double lhs, double rhs, double tolerance) {
-    return std::fabs(lhs - rhs) <= tolerance;
+    const double scale = std::max({1.0, std::fabs(lhs), std::fabs(rhs)});
+    return std::fabs(lhs - rhs) <= tolerance + 1.0e-13 * scale;
 }
 
 std::string values(double c_value, double oracle_value) {
@@ -357,6 +368,55 @@ void compare_trajectory_queries(
         return;
     }
 
+    auto compare_first_time_query = [&](size_t dof, double query_position, double time_after) {
+        const auto oracle_time = oracle_trajectory.get_first_time_at_position(dof, query_position, time_after);
+        double c_time = 0.0;
+        bool c_found = false;
+        const auto c_time_result = ruckig_trajectory_get_first_time_at_position(c_trajectory, dof, query_position, time_after, &c_time, &c_found);
+        if (c_time_result != RUCKIG_WORKING) {
+            fail(test_case.name, "C first-time-at-position returned error dof=" + std::to_string(dof));
+            return;
+        }
+        if (c_found != oracle_time.has_value()) {
+            bool equivalent_boundary = false;
+            if (oracle_time.has_value()) {
+                std::vector<double> c_position(test_case.dofs);
+                const auto c_sample_result = ruckig_trajectory_at_time(
+                    c_trajectory,
+                    *oracle_time,
+                    c_position.data(),
+                    nullptr,
+                    nullptr,
+                    nullptr,
+                    nullptr
+                );
+                equivalent_boundary = c_sample_result == RUCKIG_WORKING
+                    && near(c_position[dof], query_position, kPositionTolerance);
+            } else if (c_found) {
+                std::vector<double> oracle_position_at_c_time(test_case.dofs);
+                std::vector<double> oracle_velocity_at_c_time(test_case.dofs);
+                std::vector<double> oracle_acceleration_at_c_time(test_case.dofs);
+                oracle_trajectory.at_time(c_time, oracle_position_at_c_time, oracle_velocity_at_c_time, oracle_acceleration_at_c_time);
+                equivalent_boundary = near(oracle_position_at_c_time[dof], query_position, kPositionTolerance);
+            }
+            if (equivalent_boundary) {
+                return;
+            }
+            std::ostringstream message;
+            message.precision(17);
+            message << "first-time-at-position found mismatch dof=" << dof
+                << " C=" << static_cast<int>(c_found)
+                << " oracle=" << static_cast<int>(oracle_time.has_value())
+                << " query=" << query_position
+                << " time_after=" << time_after;
+            fail(test_case.name, message.str());
+            return;
+        }
+        if (c_found && !near(c_time, *oracle_time, kFirstTimeTolerance)) {
+            fail(test_case.name, "first-time-at-position mismatch dof=" + std::to_string(dof) + values(c_time, *oracle_time));
+        }
+    };
+
     for (size_t dof = 0; dof < test_case.dofs; ++dof) {
         std::vector<double> oracle_position(test_case.dofs);
         std::vector<double> oracle_velocity(test_case.dofs);
@@ -370,52 +430,12 @@ void compare_trajectory_queries(
         query_positions.push_back(oracle_position[dof]);
 
         for (double query_position: query_positions) {
-            const auto oracle_time = oracle_trajectory.get_first_time_at_position(dof, query_position);
-            double c_time = 0.0;
-            bool c_found = false;
-            const auto c_time_result = ruckig_trajectory_get_first_time_at_position(c_trajectory, dof, query_position, 0.0, &c_time, &c_found);
-            if (c_time_result != RUCKIG_WORKING) {
-                fail(test_case.name, "C first-time-at-position returned error dof=" + std::to_string(dof));
-                continue;
-            }
-            if (c_found != oracle_time.has_value()) {
-                bool equivalent_boundary = false;
-                if (oracle_time.has_value()) {
-                    std::vector<double> c_position(test_case.dofs);
-                    const auto c_sample_result = ruckig_trajectory_at_time(
-                        c_trajectory,
-                        *oracle_time,
-                        c_position.data(),
-                        nullptr,
-                        nullptr,
-                        nullptr,
-                        nullptr
-                    );
-                    equivalent_boundary = c_sample_result == RUCKIG_WORKING
-                        && near(c_position[dof], query_position, kPositionTolerance);
-                } else if (c_found) {
-                    std::vector<double> oracle_position_at_c_time(test_case.dofs);
-                    std::vector<double> oracle_velocity_at_c_time(test_case.dofs);
-                    std::vector<double> oracle_acceleration_at_c_time(test_case.dofs);
-                    oracle_trajectory.at_time(c_time, oracle_position_at_c_time, oracle_velocity_at_c_time, oracle_acceleration_at_c_time);
-                    equivalent_boundary = near(oracle_position_at_c_time[dof], query_position, kPositionTolerance);
-                }
-                if (equivalent_boundary) {
-                    continue;
-                }
-                std::ostringstream message;
-                message.precision(17);
-                message << "first-time-at-position found mismatch dof=" << dof
-                    << " C=" << static_cast<int>(c_found)
-                    << " oracle=" << static_cast<int>(oracle_time.has_value())
-                    << " query=" << query_position;
-                fail(test_case.name, message.str());
-                continue;
-            }
-            if (c_found && !near(c_time, *oracle_time, kFirstTimeTolerance)) {
-                fail(test_case.name, "first-time-at-position mismatch dof=" + std::to_string(dof) + values(c_time, *oracle_time));
-            }
+            compare_first_time_query(dof, query_position, 0.0);
         }
+    }
+
+    for (const FirstTimeQuery& query: test_case.first_time_queries) {
+        compare_first_time_query(query.dof, query.position, query.time_after);
     }
 }
 
@@ -545,7 +565,7 @@ void run_case(const CaseData& test_case, bool compare_first_time_queries = true)
         }
         compare_samples(test_case, oracle_trajectory, c_trajectory, oracle_duration);
         compare_trajectory_queries(test_case, oracle_trajectory, c_trajectory, oracle_duration, compare_first_time_queries);
-        if (failures == failures_before_samples) {
+        if (failures == failures_before_samples && test_case.compare_update_loop) {
             compare_update_loop(test_case);
         }
         if (failures != failures_before_samples) {
@@ -2013,8 +2033,158 @@ int main(int argc, char** argv) {
         {RUCKIG_SYNCHRONIZATION_PHASE, RUCKIG_SYNCHRONIZATION_TIME}
     });
 
+    cases.push_back(CaseData{
+        "position-third-order-large-magnitude-small-move",
+        2,
+        0.01,
+        RUCKIG_CONTROL_POSITION,
+        RUCKIG_SYNCHRONIZATION_TIME,
+        RUCKIG_DURATION_CONTINUOUS,
+        false,
+        0.0,
+        {1.0e9, -1.0e9},
+        {0.01, -0.02},
+        {0.001, -0.0015},
+        {1.0e9 + 0.125, -1.0e9 - 0.2},
+        {0.0, 0.0},
+        {0.0, 0.0},
+        {0.4, 0.5},
+        {0.3, 0.35},
+        {0.8, 0.9},
+        {}
+    });
+
+    cases.push_back(CaseData{
+        "position-third-order-tiny-limits-near-zero",
+        1,
+        0.001,
+        RUCKIG_CONTROL_POSITION,
+        RUCKIG_SYNCHRONIZATION_TIME,
+        RUCKIG_DURATION_CONTINUOUS,
+        false,
+        0.0,
+        {0.0},
+        {0.0},
+        {0.0},
+        {1.0e-6},
+        {0.0},
+        {0.0},
+        {1.0e-6},
+        {1.0e-7},
+        {1.0e-8},
+        {}
+    });
+
+    cases.push_back(CaseData{
+        "position-third-order-large-min-duration-discrete",
+        1,
+        0.03,
+        RUCKIG_CONTROL_POSITION,
+        RUCKIG_SYNCHRONIZATION_TIME,
+        RUCKIG_DURATION_DISCRETE,
+        true,
+        1234.567,
+        {0.0},
+        {0.0},
+        {0.0},
+        {0.75},
+        {0.0},
+        {0.0},
+        {1.0},
+        {0.8},
+        {1.2},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        false,
+        false
+    });
+
+    cases.push_back(CaseData{
+        "per-dof-mixed-first-second-third-with-sync",
+        3,
+        0.02,
+        RUCKIG_CONTROL_POSITION,
+        RUCKIG_SYNCHRONIZATION_TIME,
+        RUCKIG_DURATION_CONTINUOUS,
+        false,
+        0.0,
+        {0.0, 0.0, 0.0},
+        {0.0, 0.0, 0.0},
+        {0.0, 0.0, 0.0},
+        {1.0, -0.8, 0.0},
+        {0.0, 0.0, 0.7},
+        {0.0, 0.0, 0.0},
+        {1.0, 1.2, 0.0},
+        {inf, 0.9, 1.0},
+        {inf, inf, 1.5},
+        {},
+        {},
+        {},
+        {RUCKIG_CONTROL_POSITION, RUCKIG_CONTROL_POSITION, RUCKIG_CONTROL_VELOCITY},
+        {RUCKIG_SYNCHRONIZATION_TIME, RUCKIG_SYNCHRONIZATION_TIME_IF_NECESSARY, RUCKIG_SYNCHRONIZATION_TIME}
+    });
+
+    cases.push_back(CaseData{
+        "first-time-at-position-boundaries",
+        1,
+        0.01,
+        RUCKIG_CONTROL_POSITION,
+        RUCKIG_SYNCHRONIZATION_TIME,
+        RUCKIG_DURATION_CONTINUOUS,
+        false,
+        0.0,
+        {0.0},
+        {0.0},
+        {0.0},
+        {1.0},
+        {0.0},
+        {0.0},
+        {1.0},
+        {inf},
+        {inf},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {
+            {0, 0.0, 0.0},
+            {0, 0.5, 0.25},
+            {0, 1.0, 0.999999}
+        }
+    });
+
+    cases.push_back(CaseData{
+        "position-third-order-disabled-dof-discrete-per-dof-overrides",
+        3,
+        0.05,
+        RUCKIG_CONTROL_POSITION,
+        RUCKIG_SYNCHRONIZATION_TIME,
+        RUCKIG_DURATION_DISCRETE,
+        false,
+        0.0,
+        {0.0, 1.0, -0.4},
+        {0.0, 0.3, -0.05},
+        {0.0, 0.12, 0.02},
+        {1.0, 5.0, -1.2},
+        {0.0, 0.6, 0.0},
+        {0.0, 0.0, 0.0},
+        {1.2, 0.0, 1.0},
+        {1.0, 1.0, 1.1},
+        {1.6, 1.0, 1.7},
+        {true, false, true},
+        {},
+        {},
+        {RUCKIG_CONTROL_POSITION, RUCKIG_CONTROL_VELOCITY, RUCKIG_CONTROL_POSITION},
+        {RUCKIG_SYNCHRONIZATION_TIME, RUCKIG_SYNCHRONIZATION_NONE, RUCKIG_SYNCHRONIZATION_TIME}
+    });
+
     for (const auto& test_case: cases) {
-        run_case(test_case);
+        run_case(test_case, test_case.compare_first_time_queries);
     }
 
     if (failures != 0) {

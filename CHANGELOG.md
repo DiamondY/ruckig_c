@@ -1,5 +1,31 @@
 # Changelog
 
+## 0.2.1 - Unreleased
+
+Added:
+
+- Routine per-DoF random oracle smoke coverage through
+  `ruckig_c_oracle_tests --random-per-dof 100 --seed 1`.
+- `0.2.1` release checklist template for patch-release evidence collection.
+- Packaging and consumer guidance for installed CMake, pkg-config, Windows
+  manual static linking, DLL consumers, and shared install-tree verification.
+- API/ABI compatibility policy documentation for `0.2.x` patch releases.
+
+Changed:
+
+- Clarified that `docs/c_rewrite_execution_plan.md` is a historical execution
+  plan, while current scope is defined by README, public header, roadmap,
+  release checklists, and upstream baseline policy.
+- Documented post-`v0.2.0` hardening on `main`, including the fixed oracle suite
+  increasing from 48 release-time cases to 59 cases, controlled
+  `--random-per-dof N --seed S` stress, per-DoF clear behavior regression,
+  per-DoF update recalculation stability regression, and
+  `examples/c/08_per_dof_online.c`.
+- Added fixed oracle regression coverage for large-magnitude positions,
+  tiny nonzero limits, large discrete minimum duration, mixed first/second/third
+  order per-DoF inputs, explicit first-time-at-position boundaries, and
+  disabled DoF per-DoF overrides under discrete duration.
+
 ## 0.2.0 - 2026-06-03
 
 Added:
@@ -31,6 +57,10 @@ Still deferred:
   bindings, Rust bindings, and upstream baseline upgrades.
 
 ## 0.1.1 - Unreleased
+
+This section is retained only for a possible `v0.1` maintenance branch. These
+stability changes are already present on `main` through the `0.2.0` mainline
+release or later `0.2.x` hardening work.
 
 Added:
 

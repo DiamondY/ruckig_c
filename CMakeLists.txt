@@ -187,6 +187,14 @@ if(BUILD_RUCKIG_C_TESTS)
       add_test(NAME ruckig_c_pkg_config_consumer
         COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/test_pkg_config_consumer.cmake
       )
+      configure_file(
+        test/cmake/test_shared_install_consumer.cmake.in
+        ${CMAKE_CURRENT_BINARY_DIR}/test_shared_install_consumer.cmake
+        @ONLY
+      )
+      add_test(NAME ruckig_c_shared_install_consumer
+        COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/test_shared_install_consumer.cmake
+      )
     endif()
   endif()
 endif()
@@ -277,6 +285,7 @@ if(BUILD_RUCKIG_C_ORACLE_TESTS)
   ruckig_c_apply_sanitizers(ruckig_c_oracle_tests)
   add_test(NAME ruckig_c_oracle_tests COMMAND ruckig_c_oracle_tests)
   add_test(NAME ruckig_c_oracle_random_smoke COMMAND ruckig_c_oracle_tests --random 100 --seed 1)
+  add_test(NAME ruckig_c_oracle_random_per_dof_smoke COMMAND ruckig_c_oracle_tests --random-per-dof 100 --seed 1)
   add_test(NAME ruckig_c_oracle_random_development COMMAND ruckig_c_oracle_tests --random 100000 --seed 1)
   add_test(NAME ruckig_c_oracle_random_release COMMAND ruckig_c_oracle_tests --random 1000000 --seed 1)
 endif()
