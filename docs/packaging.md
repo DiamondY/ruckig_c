@@ -52,6 +52,18 @@ CMake target consumers should not define this manually because the exported
 static target propagates it. DLL consumers must not define
 `RUCKIG_C_STATIC_DEFINE`.
 
+Manual smoke command template from a release-check build:
+
+```powershell
+clang -std=c99 -DRUCKIG_C_STATIC_DEFINE -I include -c examples\c\00_minimal_offline.c -o build_release_check_ninja\manual_static_consumer.obj
+clang -nostartfiles -nostdlib -fuse-ld=lld-link build_release_check_ninja\manual_static_consumer.obj build_release_check_ninja\ruckig_c.lib -Xlinker /subsystem:console -o build_release_check_ninja\manual_static_consumer.exe -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32 -loldnames
+.\build_release_check_ninja\manual_static_consumer.exe
+```
+
+The second command mirrors the Windows clang/Ninja release-check link mode.
+Toolchains that use a different C runtime may need equivalent system-runtime
+libraries for math functions such as `cbrt`.
+
 ## DLL Consumers
 
 DLL consumers include the same public header and link against the import
@@ -61,6 +73,17 @@ placing it next to the executable or adding its directory to `PATH`.
 
 The shared-library release gate covers the DLL/import-library build path and
 runs header consumers plus examples against the shared library.
+
+Manual DLL consumer smoke command template from a shared release-check build:
+
+```powershell
+clang -std=c99 -I include examples\c\00_minimal_offline.c build_release_check_shared\ruckig_c.lib -o build_release_check_shared\dll_consumer.exe
+$env:PATH = (Resolve-Path build_release_check_shared).Path + ";" + $env:PATH
+.\build_release_check_shared\dll_consumer.exe
+```
+
+The exact import-library filename may vary by generator and toolchain; use the
+import library produced next to `ruckig_c.dll`.
 
 ## Shared Install-Tree Verification
 

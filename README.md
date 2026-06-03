@@ -29,8 +29,9 @@ Implemented and covered by fixed C/oracle tests plus deterministic random oracle
   velocity, stop, and minimum duration.
 
 Release-readiness evidence is tracked in `docs/release_checklist.md` for
-`0.1.0` and `docs/release_checklist_0.2.0.md` for `0.2.0`. The post-release
-stability queue is tracked in `docs/roadmap.md`. Current release scope
+`0.1.0`, `docs/release_checklist_0.2.0.md` for `0.2.0`, and
+`docs/release_checklist_0.2.1.md` for `0.2.1`. The post-release stability
+queue is tracked in `docs/roadmap.md`. Current release scope
 intentionally excludes:
 
 - Waypoints, per-section constraints, cloud, and Python/Rust bindings remain
@@ -111,7 +112,7 @@ Required input state and limit arrays:
 - Limits: `ruckig_input_max_velocity_data`, `ruckig_input_max_acceleration_data`, `ruckig_input_max_jerk_data`.
 - DoF enable flags: `ruckig_input_enabled_data`.
 
-Optional first-release fields:
+Optional input fields:
 
 - `ruckig_input_set_min_velocity` / `ruckig_input_clear_min_velocity`.
 - `ruckig_input_set_min_acceleration` / `ruckig_input_clear_min_acceleration`.
@@ -270,9 +271,9 @@ ruckig_c_performance_benchmark --samples 10000 --seed 1
 The current development performance report is in `docs/performance_report.md`.
 Windows clang ASan/UBSan CMake tests pass when the LLVM sanitizer runtime
 directory is present in `PATH`. Linux Clang ASan/UBSan, Valgrind, pkg-config
-consumer, and performance evidence is recorded in `docs/release_checklist.md`
-for the public `0.1.0` release gate and in
-`docs/release_checklist_0.2.0.md` for the `0.2.0` release gate.
+consumer, and performance evidence is recorded in release checklists under
+`docs/`, including `docs/release_checklist.md`,
+`docs/release_checklist_0.2.0.md`, and `docs/release_checklist_0.2.1.md`.
 
 ## Verification
 

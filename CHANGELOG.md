@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.2.1 - Unreleased
+## 0.2.1 - 2026-06-04
 
 Added:
 
@@ -25,6 +25,11 @@ Changed:
   tiny nonzero limits, large discrete minimum duration, mixed first/second/third
   order per-DoF inputs, explicit first-time-at-position boundaries, and
   disabled DoF per-DoF overrides under discrete duration.
+
+Still deferred:
+
+- Intermediate waypoints, per-section constraints, cloud calculation, Python
+  bindings, Rust bindings, and upstream baseline upgrades.
 
 ## 0.2.0 - 2026-06-03
 

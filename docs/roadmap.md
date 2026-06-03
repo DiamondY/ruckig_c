@@ -36,11 +36,12 @@ follow-up work for stability and future feature planning.
 
 ## 0.2.x Maintenance
 
-- Planned for `0.2.1`: documentation source-of-truth cleanup, routine per-DoF
-  random oracle smoke, post-`v0.2.0` hardening in the changelog, and consumer
-  packaging guidance.
-- Planned for `0.2.2`: broader numerical regression corpus, reusable
-  performance trend records, and API/ABI compatibility evidence.
+- Done for `0.2.1`: documentation source-of-truth cleanup, routine per-DoF
+  random oracle smoke, post-`v0.2.0` hardening in the changelog, consumer
+  packaging guidance, and API/ABI compatibility documentation.
+- Planned for `0.2.2`: automated or semi-automated exported-symbol evidence,
+  broader consumer smoke automation, and continued numerical regression corpus
+  expansion when new edge cases are found.
 - Before each `0.2.x` patch release, record Windows and Linux release
   benchmarks with average, p99, worst, and C/oracle average ratio.
 - Keep per-DoF override hardening focused on oracle coverage, diagnostics, and
@@ -57,6 +58,10 @@ follow-up work for stability and future feature planning.
   bindings, and upstream baseline upgrades as separate future projects.
 
 ## 0.3.0 Design Candidates
+
+The `0.3.0` line is design-only until a separate proposal is accepted. It must
+not change public API, solver dispatch, or the frozen oracle baseline during
+`0.2.x` patch work.
 
 - Evaluate Python or Rust bindings only after the C ABI has passed at least one
   `0.2.x` patch cycle, `docs/api_compatibility.md` is complete, and CMake,

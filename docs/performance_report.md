@@ -243,9 +243,38 @@ This preparation smoke is within the release threshold of average calculation
 time no worse than `1.5x` the C++ oracle on the same benchmark corpus. Final
 `0.2.1` release evidence must be rerun from the tag candidate commit.
 
+## 2026-06-04 Windows 0.2.1 Local Release Closeout Run
+
+- Source: Local `0.2.1` release closeout gate; final commit hash to be recorded
+  after commit creation.
+- Command:
+  `.\build_release_check_ninja\ruckig_c_performance_benchmark.exe --samples 10000 --seed 1`
+- OS: Windows.
+- CPU identifier: `Intel64 Family 6 Model 165 Stepping 5, GenuineIntel`.
+- C compiler: `clang 21.1.8`.
+- C++ compiler: `clang 21.1.8`.
+- CMake build type: Release-check Ninja build directory.
+- Generator: Ninja.
+- Seed: `1`.
+- Samples: `10000`.
+
+| Metric | C implementation | C++ oracle |
+| --- | ---: | ---: |
+| Average | 1506.44 ns | 4588.76 ns |
+| p99 | 10000 ns | 19500 ns |
+| Worst | 25800 ns | 53400 ns |
+
+Average C/oracle ratio: `0.328289`.
+
+This local Windows release closeout run is within the release threshold of
+average calculation time no worse than `1.5x` the C++ oracle on the same
+benchmark corpus. Linux performance evidence must be recorded from the final
+push CI or another final Linux release-gate run before publishing `v0.2.1`.
+
 ## 0.2.1 Benchmark Template
 
-Fill this section from the final `0.2.1` release candidate commit.
+Fill this section with remaining final `0.2.1` Linux or follow-up release
+evidence.
 
 ### Windows clang release
 

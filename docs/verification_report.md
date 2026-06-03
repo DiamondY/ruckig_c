@@ -876,3 +876,142 @@ Result:
 The release random oracle executed `--random 1000000 --seed 1` and completed in
 about 340 seconds. Final `0.2.1` release evidence must still be rerun from the
 tag candidate commit.
+
+## 2026-06-04 0.2.1 Local Release Closeout
+
+This pass verifies the local `0.2.1` release closeout after bumping the project
+version to `0.2.1` and converting the changelog entry to a dated release entry.
+Remote CI, manual workflow-dispatch, tag, and GitHub Release evidence must be
+recorded after the release closeout commit is pushed.
+
+Environment:
+
+- OS: Windows.
+- Compiler: clang 21.1.8, target `x86_64-pc-windows-msvc`.
+- CMake build directories: `build_release_check_ninja` and
+  `build_release_check_shared`.
+- Previous commit before closeout edits:
+  `134637212a09ae232e9cf4f4559471b82d1bc98d`.
+
+Static release CTest excluding the long release random test:
+
+```powershell
+ctest --test-dir build_release_check_ninja --output-on-failure -E ruckig_c_oracle_random_release
+```
+
+Result:
+
+```text
+100% tests passed, 0 tests failed out of 19
+```
+
+Shared-library release CTest excluding the long release random test:
+
+```powershell
+ctest --test-dir build_release_check_shared --output-on-failure -E ruckig_c_oracle_random_release
+```
+
+Result:
+
+```text
+100% tests passed, 0 tests failed out of 18
+```
+
+Fixed oracle suite:
+
+```powershell
+.\build_release_check_ninja\ruckig_c_oracle_tests.exe
+```
+
+Result:
+
+```text
+Oracle comparisons passed: 59
+```
+
+Development random oracle runs:
+
+```powershell
+.\build_release_check_ninja\ruckig_c_oracle_tests.exe --random 100000 --seed 1
+.\build_release_check_ninja\ruckig_c_oracle_tests.exe --random 100000 --seed 2
+.\build_release_check_ninja\ruckig_c_oracle_tests.exe --random 100000 --seed 41
+```
+
+Results:
+
+```text
+Oracle comparisons passed: 59
+Random oracle comparisons passed: 100000 seed 1
+Oracle comparisons passed: 59
+Random oracle comparisons passed: 100000 seed 2
+Oracle comparisons passed: 59
+Random oracle comparisons passed: 100000 seed 41
+```
+
+Per-DoF development random oracle:
+
+```powershell
+.\build_release_check_ninja\ruckig_c_oracle_tests.exe --random-per-dof 100000 --seed 1
+```
+
+Result:
+
+```text
+Oracle comparisons passed: 59
+Random per-DoF oracle comparisons passed: 100000 seed 1
+```
+
+Release random oracle:
+
+```powershell
+ctest --test-dir build_release_check_ninja -R ruckig_c_oracle_random_release --output-on-failure
+```
+
+Result:
+
+```text
+100% tests passed, 0 tests failed out of 1
+```
+
+The release random oracle executed `--random 1000000 --seed 1` and completed in
+340.14 seconds.
+
+Windows manual static consumer smoke:
+
+```powershell
+clang -std=c99 -DRUCKIG_C_STATIC_DEFINE -I include -c examples\c\00_minimal_offline.c -o build_release_check_ninja\manual_static_consumer.obj
+clang -nostartfiles -nostdlib -fuse-ld=lld-link build_release_check_ninja\manual_static_consumer.obj build_release_check_ninja\ruckig_c.lib -Xlinker /subsystem:console -o build_release_check_ninja\manual_static_consumer.exe -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32 -loldnames
+.\build_release_check_ninja\manual_static_consumer.exe
+```
+
+Result:
+
+```text
+duration 1.000000 position 0.500000
+```
+
+Windows DLL consumer smoke:
+
+```powershell
+clang -std=c99 -I include examples\c\00_minimal_offline.c build_release_check_shared\ruckig_c.lib -o build_release_check_shared\dll_consumer.exe
+$env:PATH=(Resolve-Path build_release_check_shared).Path + ';' + $env:PATH
+.\build_release_check_shared\dll_consumer.exe
+```
+
+Result:
+
+```text
+duration 1.000000 position 0.500000
+```
+
+Windows DLL exported symbols were reviewed with:
+
+```powershell
+llvm-readobj --coff-exports build_release_check_shared\ruckig_c.dll
+```
+
+Result: 66 public `ruckig_*` exports were found, including lifecycle, input,
+output, trajectory, validation, calculate, update, reset, and per-DoF APIs.
+The public header diff from `v0.2.0` contains version macro changes and the
+existing unsupported-scope comment cleanup only; no public functions, enum
+values, or result-code values changed.
