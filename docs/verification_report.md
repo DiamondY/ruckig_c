@@ -571,3 +571,26 @@ Result:
 
 The release random rerun executed `--random 1000000 --seed 1` and completed in
 about 267 seconds.
+
+GitHub Actions push CI for the same commit:
+
+- Commit: `bc72bcbed4560694c32c4c6d42136081654b2961`
+- Run id: `26883640106`
+- Run URL: `https://github.com/DiamondY/ruckig_c/actions/runs/26883640106`
+- Run status: `completed`
+- Run conclusion: `success`
+
+Successful jobs:
+
+- `Linux Clang ASan UBSan`
+- `Windows clang-cl C-only`
+- `Linux Valgrind`
+- `macOS Clang C-only`
+- `Linux GCC C-only`
+- `Linux Clang performance`
+- `Windows clang oracle`
+- `Linux Clang oracle`
+
+The `Manual release random oracle` job was skipped in the push-triggered CI
+run, as expected. The `0.2.0` release-random evidence above comes from the local
+Windows clang/Ninja run of `--random 1000000 --seed 1`.
