@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.1.1 - Unreleased
+
+Added:
+
+- Fixed oracle regression cases for 3 DoF high-frequency online updates,
+  near-limit velocity control, very small discrete `delta_time`, mixed
+  disabled/active DoFs, discrete minimum duration, and directional lower-limit
+  edge values.
+- C API diagnostic tests for invalid numerical inputs, zero-limit error paths,
+  finite/infinite solver selection semantics, and `Synchronization::None`
+  behavior.
+- Minimal offline and online C examples wired into CMake and CTest.
+- API diagnostics documentation in `docs/api_diagnostics.md`.
+- Patch-release performance recording procedure in `docs/performance_report.md`.
+- Frozen upstream baseline policy in `docs/upstream_baseline_policy.md`.
+- Per-DoF override design gate in `docs/design_per_dof_overrides.md`.
+
+Changed:
+
+- Fixed oracle suite now contains 44 deterministic cases.
+- CMake example tests now include the minimal offline and online examples.
+
 ## 0.1.0 - 2026-06-03
 
 Initial public release for the pure C99 rewrite of Ruckig Community `0.17.3`

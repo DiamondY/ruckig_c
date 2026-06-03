@@ -286,6 +286,136 @@ static void test_validation(void) {
     ruckig_destroy(otg);
 }
 
+static void test_invalid_input_diagnostics(void) {
+    ruckig_t* otg = NULL;
+    ruckig_input_t* input = NULL;
+    double min_values[2] = {-1.0, -1.0};
+    double positive_min_values[2] = {-1.0, 0.1};
+
+    CHECK_EQ_INT(ruckig_create(&otg, 2, 0.01), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_input_create(&input, 2), RUCKIG_WORKING);
+
+    ruckig_input_target_position_data(input)[0] = 1.0;
+    ruckig_input_target_position_data(input)[1] = -1.0;
+    ruckig_input_max_velocity_data(input)[0] = 1.0;
+    ruckig_input_max_velocity_data(input)[1] = 1.0;
+    ruckig_input_max_acceleration_data(input)[0] = 1.0;
+    ruckig_input_max_acceleration_data(input)[1] = 1.0;
+    ruckig_input_max_jerk_data(input)[0] = 1.0;
+    ruckig_input_max_jerk_data(input)[1] = 1.0;
+
+    CHECK_EQ_INT(ruckig_validate_input(otg, input, true, true), RUCKIG_WORKING);
+
+    ruckig_input_current_position_data(input)[0] = NAN;
+    CHECK_EQ_INT(ruckig_validate_input(otg, input, true, true), RUCKIG_ERROR_INVALID_INPUT);
+    ruckig_input_current_position_data(input)[0] = 0.0;
+
+    ruckig_input_target_acceleration_data(input)[1] = NAN;
+    CHECK_EQ_INT(ruckig_validate_input(otg, input, true, true), RUCKIG_ERROR_INVALID_INPUT);
+    ruckig_input_target_acceleration_data(input)[1] = 0.0;
+
+    ruckig_input_max_velocity_data(input)[0] = -1.0;
+    CHECK_EQ_INT(ruckig_validate_input(otg, input, true, true), RUCKIG_ERROR_INVALID_INPUT);
+    ruckig_input_max_velocity_data(input)[0] = 1.0;
+
+    ruckig_input_max_acceleration_data(input)[0] = -1.0;
+    CHECK_EQ_INT(ruckig_validate_input(otg, input, true, true), RUCKIG_ERROR_INVALID_INPUT);
+    ruckig_input_max_acceleration_data(input)[0] = 1.0;
+
+    ruckig_input_max_jerk_data(input)[0] = -1.0;
+    CHECK_EQ_INT(ruckig_validate_input(otg, input, true, true), RUCKIG_ERROR_INVALID_INPUT);
+    ruckig_input_max_jerk_data(input)[0] = 1.0;
+
+    CHECK_EQ_INT(ruckig_input_set_min_velocity(input, positive_min_values, 2), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_validate_input(otg, input, true, true), RUCKIG_ERROR_INVALID_INPUT);
+    CHECK_EQ_INT(ruckig_input_set_min_velocity(input, min_values, 2), RUCKIG_WORKING);
+
+    CHECK_EQ_INT(ruckig_input_set_min_acceleration(input, positive_min_values, 2), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_validate_input(otg, input, true, true), RUCKIG_ERROR_INVALID_INPUT);
+    CHECK_EQ_INT(ruckig_input_set_min_acceleration(input, min_values, 2), RUCKIG_WORKING);
+
+    ruckig_input_target_velocity_data(input)[0] = 2.0;
+    CHECK_EQ_INT(ruckig_validate_input(otg, input, true, false), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_validate_input(otg, input, true, true), RUCKIG_ERROR_INVALID_INPUT);
+    ruckig_input_target_velocity_data(input)[0] = 0.0;
+
+    ruckig_input_current_velocity_data(input)[0] = 2.0;
+    CHECK_EQ_INT(ruckig_validate_input(otg, input, false, true), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_validate_input(otg, input, true, true), RUCKIG_ERROR_INVALID_INPUT);
+
+    ruckig_input_destroy(input);
+    ruckig_destroy(otg);
+}
+
+static void test_zero_limit_error_paths(void) {
+    ruckig_t* otg = NULL;
+    ruckig_input_t* input = NULL;
+    ruckig_trajectory_t* trajectory = NULL;
+
+    CHECK_EQ_INT(ruckig_create(&otg, 1, 0.1), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_input_create(&input, 1), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_trajectory_create(&trajectory, 1), RUCKIG_WORKING);
+
+    ruckig_input_target_position_data(input)[0] = 1.0;
+    ruckig_input_max_velocity_data(input)[0] = 0.0;
+    CHECK_EQ_INT(ruckig_calculate(otg, input, trajectory), RUCKIG_ERROR_ZERO_LIMITS);
+
+    ruckig_input_max_velocity_data(input)[0] = 1.0;
+    ruckig_input_max_acceleration_data(input)[0] = 0.0;
+    ruckig_input_max_jerk_data(input)[0] = INFINITY;
+    CHECK_EQ_INT(ruckig_calculate(otg, input, trajectory), RUCKIG_ERROR_ZERO_LIMITS);
+
+    ruckig_input_max_acceleration_data(input)[0] = 1.0;
+    ruckig_input_max_jerk_data(input)[0] = 0.0;
+    CHECK_EQ_INT(ruckig_calculate(otg, input, trajectory), RUCKIG_ERROR_ZERO_LIMITS);
+
+    ruckig_trajectory_destroy(trajectory);
+    ruckig_input_destroy(input);
+    ruckig_destroy(otg);
+}
+
+static void test_finite_infinite_limit_semantics(void) {
+    ruckig_t* otg = NULL;
+    ruckig_input_t* input = NULL;
+    ruckig_trajectory_t* trajectory = NULL;
+
+    CHECK_EQ_INT(ruckig_create(&otg, 1, 0.1), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_input_create(&input, 1), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_trajectory_create(&trajectory, 1), RUCKIG_WORKING);
+
+    ruckig_input_target_position_data(input)[0] = 1.0;
+    ruckig_input_max_velocity_data(input)[0] = 1.0;
+    ruckig_input_max_acceleration_data(input)[0] = INFINITY;
+    ruckig_input_max_jerk_data(input)[0] = INFINITY;
+    CHECK_EQ_INT(ruckig_calculate(otg, input, trajectory), RUCKIG_WORKING);
+    CHECK_NEAR(ruckig_trajectory_get_duration(trajectory), 1.0, 1e-12);
+
+    ruckig_input_max_acceleration_data(input)[0] = 1.0;
+    ruckig_input_max_jerk_data(input)[0] = INFINITY;
+    CHECK_EQ_INT(ruckig_calculate(otg, input, trajectory), RUCKIG_WORKING);
+    CHECK_NEAR(ruckig_trajectory_get_duration(trajectory), 2.0, 1e-12);
+
+    ruckig_input_max_jerk_data(input)[0] = 1.0;
+    CHECK_EQ_INT(ruckig_calculate(otg, input, trajectory), RUCKIG_WORKING);
+    CHECK_TRUE(ruckig_trajectory_get_duration(trajectory) > 2.0);
+
+    CHECK_EQ_INT(ruckig_input_set_control_interface(input, RUCKIG_CONTROL_VELOCITY), RUCKIG_WORKING);
+    ruckig_input_target_position_data(input)[0] = 0.0;
+    ruckig_input_target_velocity_data(input)[0] = 1.0;
+    ruckig_input_max_acceleration_data(input)[0] = 1.0;
+    ruckig_input_max_jerk_data(input)[0] = INFINITY;
+    CHECK_EQ_INT(ruckig_calculate(otg, input, trajectory), RUCKIG_WORKING);
+    CHECK_NEAR(ruckig_trajectory_get_duration(trajectory), 1.0, 1e-12);
+
+    ruckig_input_max_jerk_data(input)[0] = 1.0;
+    CHECK_EQ_INT(ruckig_calculate(otg, input, trajectory), RUCKIG_WORKING);
+    CHECK_NEAR(ruckig_trajectory_get_duration(trajectory), 2.0, 1e-12);
+
+    ruckig_trajectory_destroy(trajectory);
+    ruckig_input_destroy(input);
+    ruckig_destroy(otg);
+}
+
 static void test_first_order_calculate_and_trajectory(void) {
     ruckig_t* otg = NULL;
     ruckig_input_t* input = NULL;
@@ -764,6 +894,39 @@ static void test_first_order_none_discrete_duration_keeps_independent_time(void)
     ruckig_destroy(otg);
 }
 
+static void test_synchronization_none_with_disabled_dof(void) {
+    ruckig_t* otg = NULL;
+    ruckig_input_t* input = NULL;
+    ruckig_trajectory_t* trajectory = NULL;
+    double independent[3] = {0.0, 0.0, 0.0};
+
+    CHECK_EQ_INT(ruckig_create(&otg, 3, 0.1), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_input_create(&input, 3), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_trajectory_create(&trajectory, 3), RUCKIG_WORKING);
+
+    CHECK_EQ_INT(ruckig_input_set_synchronization(input, RUCKIG_SYNCHRONIZATION_NONE), RUCKIG_WORKING);
+    ruckig_input_target_position_data(input)[0] = 1.0;
+    ruckig_input_target_position_data(input)[1] = 3.0;
+    ruckig_input_target_position_data(input)[2] = 100.0;
+    ruckig_input_max_velocity_data(input)[0] = 1.0;
+    ruckig_input_max_velocity_data(input)[1] = 1.0;
+    ruckig_input_max_velocity_data(input)[2] = 0.5;
+    ruckig_input_current_velocity_data(input)[2] = 0.2;
+    ruckig_input_current_acceleration_data(input)[2] = 0.1;
+    CHECK_EQ_INT(ruckig_input_set_dof_enabled(input, 2, false), RUCKIG_WORKING);
+
+    CHECK_EQ_INT(ruckig_calculate(otg, input, trajectory), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_trajectory_get_independent_min_durations(trajectory, independent, 3), RUCKIG_WORKING);
+    CHECK_NEAR(independent[0], 1.0, 1e-12);
+    CHECK_NEAR(independent[1], 3.0, 1e-12);
+    CHECK_NEAR(independent[2], 0.0, 0.0);
+    CHECK_NEAR(ruckig_trajectory_get_duration(trajectory), 3.0, 1e-12);
+
+    ruckig_trajectory_destroy(trajectory);
+    ruckig_input_destroy(input);
+    ruckig_destroy(otg);
+}
+
 static void test_second_order_phase_sync(void) {
     ruckig_t* otg = NULL;
     ruckig_input_t* input = NULL;
@@ -1126,6 +1289,9 @@ void run_api_tests(void) {
     test_optional_setters_and_pass_to_input();
     test_dof_mismatch_and_invalid_discrete_duration();
     test_validation();
+    test_invalid_input_diagnostics();
+    test_zero_limit_error_paths();
+    test_finite_infinite_limit_semantics();
     test_first_order_calculate_and_trajectory();
     test_first_order_update();
     test_update_recalculates_on_changed_target();
@@ -1135,6 +1301,7 @@ void run_api_tests(void) {
     test_second_order_minimum_duration();
     test_second_order_discrete_duration();
     test_first_order_none_discrete_duration_keeps_independent_time();
+    test_synchronization_none_with_disabled_dof();
     test_second_order_phase_sync();
     test_second_order_time_if_necessary_zero_target();
     test_second_order_time_if_necessary_nonzero_target();

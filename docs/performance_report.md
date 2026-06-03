@@ -96,6 +96,48 @@ compared within their own build contexts rather than mixed.
 - WMI CPU model lookup is denied in this workspace, so the report records the
   non-elevated `PROCESSOR_IDENTIFIER` value instead of a marketing CPU name.
 
+## Patch Release Procedure
+
+Every `0.1.x` patch release must record a Windows clang release benchmark and a
+Linux clang release benchmark against the frozen C++ oracle. Use the existing
+benchmark executable and keep the release threshold at average C/oracle ratio
+`<= 1.5`.
+
+Record this template for each run:
+
+```text
+- Source:
+- Command:
+- OS:
+- Kernel/build:
+- CPU identifier:
+- C compiler:
+- C++ compiler:
+- CMake build type:
+- Generator:
+- Seed:
+- Samples:
+- C average ns:
+- C p99 ns:
+- C worst ns:
+- Oracle average ns:
+- Oracle p99 ns:
+- Oracle worst ns:
+- Average C/oracle ratio:
+- Release threshold:
+- Result:
+```
+
+The GitHub Actions `Linux Clang performance` job uploads
+`linux-performance.txt`; copy the final release-gate output into this report
+before tagging. On Windows, run:
+
+```powershell
+.\build-release\ruckig_c_performance_benchmark.exe --samples 10000 --seed 1
+```
+
+or the equivalent executable path for the release-check build directory.
+
 ## 2026-06-03 Linux Clang GitHub Actions Run
 
 - Source: GitHub Actions CI run `26861662259`, job `Linux Clang performance`.

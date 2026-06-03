@@ -424,3 +424,75 @@ Result:
 
 The release random rerun executed `--random 1000000 --seed 1` and completed in
 about 262 seconds.
+
+## 2026-06-03 0.1.x Stability Follow-Up
+
+This pass verifies the `0.1.1` stability queue additions: expanded fixed oracle
+regressions, C API diagnostics coverage, minimal examples, and release-process
+documentation.
+
+Static release CTest excluding the long release random test:
+
+```powershell
+cmake --build build_release_check_ninja --config Release
+ctest --test-dir build_release_check_ninja --output-on-failure -E ruckig_c_oracle_random_release
+```
+
+Result:
+
+```text
+100% tests passed, 0 tests failed out of 16
+```
+
+This includes the two new C examples:
+
+- `example_ruckig_c_00_minimal_offline`
+- `example_ruckig_c_03_minimal_online`
+
+The fixed oracle suite now reports:
+
+```text
+Oracle comparisons passed: 44
+```
+
+Shared-library release CTest excluding the long release random test:
+
+```powershell
+cmake --build build_release_check_shared --config Release
+ctest --test-dir build_release_check_shared --output-on-failure -E ruckig_c_oracle_random_release
+```
+
+Result:
+
+```text
+100% tests passed, 0 tests failed out of 15
+```
+
+Additional deterministic random oracle runs:
+
+```powershell
+.\build_release_check_ninja\ruckig_c_oracle_tests.exe --random 100000 --seed 2
+.\build_release_check_ninja\ruckig_c_oracle_tests.exe --random 100000 --seed 41
+```
+
+Results:
+
+```text
+Random oracle comparisons passed: 100000 seed 2
+Random oracle comparisons passed: 100000 seed 41
+```
+
+Manual release random oracle rerun:
+
+```powershell
+ctest --test-dir build_release_check_ninja -R ruckig_c_oracle_random_release --output-on-failure
+```
+
+Result:
+
+```text
+100% tests passed, 0 tests failed out of 1
+```
+
+The release random rerun executed `--random 1000000 --seed 1` and completed in
+about 260 seconds.

@@ -196,6 +196,10 @@ if(BUILD_RUCKIG_C_EXAMPLES)
     message(FATAL_ERROR "BUILD_RUCKIG_C_EXAMPLES requires BUILD_RUCKIG_C")
   endif()
 
+  add_executable(example-ruckig-c-00-minimal-offline examples/c/00_minimal_offline.c)
+  target_link_libraries(example-ruckig-c-00-minimal-offline PRIVATE ruckig_c)
+  add_test(NAME example_ruckig_c_00_minimal_offline COMMAND example-ruckig-c-00-minimal-offline)
+
   add_executable(example-ruckig-c-01-position examples/c/01_position.c)
   target_link_libraries(example-ruckig-c-01-position PRIVATE ruckig_c)
   add_test(NAME example_ruckig_c_01_position COMMAND example-ruckig-c-01-position)
@@ -203,6 +207,10 @@ if(BUILD_RUCKIG_C_EXAMPLES)
   add_executable(example-ruckig-c-02-position-offline examples/c/02_position_offline.c)
   target_link_libraries(example-ruckig-c-02-position-offline PRIVATE ruckig_c)
   add_test(NAME example_ruckig_c_02_position_offline COMMAND example-ruckig-c-02-position-offline)
+
+  add_executable(example-ruckig-c-03-minimal-online examples/c/03_minimal_online.c)
+  target_link_libraries(example-ruckig-c-03-minimal-online PRIVATE ruckig_c)
+  add_test(NAME example_ruckig_c_03_minimal_online COMMAND example-ruckig-c-03-minimal-online)
 
   add_executable(example-ruckig-c-05-velocity examples/c/05_velocity.c)
   target_link_libraries(example-ruckig-c-05-velocity PRIVATE ruckig_c)
@@ -218,8 +226,10 @@ if(BUILD_RUCKIG_C_EXAMPLES)
 
   add_custom_target(ruckig_c_examples
     DEPENDS
+      example-ruckig-c-00-minimal-offline
       example-ruckig-c-01-position
       example-ruckig-c-02-position-offline
+      example-ruckig-c-03-minimal-online
       example-ruckig-c-05-velocity
       example-ruckig-c-06-stop
       example-ruckig-c-07-minimum-duration

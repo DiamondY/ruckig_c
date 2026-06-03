@@ -1168,6 +1168,113 @@ int main(int argc, char** argv) {
     });
 
     cases.push_back(CaseData{
+        "position-third-order-3d-online-high-frequency",
+        3,
+        0.001,
+        RUCKIG_CONTROL_POSITION,
+        RUCKIG_SYNCHRONIZATION_TIME,
+        RUCKIG_DURATION_CONTINUOUS,
+        false,
+        0.0,
+        {0.0, -0.25, 0.4},
+        {0.05, -0.03, 0.02},
+        {0.01, -0.02, 0.015},
+        {0.8, -0.7, 1.1},
+        {0.0, 0.05, -0.04},
+        {0.0, 0.01, -0.015},
+        {1.2, 1.1, 1.4},
+        {1.5, 1.4, 1.6},
+        {2.0, 1.8, 2.2},
+        {}
+    });
+
+    cases.push_back(CaseData{
+        "position-third-order-small-delta-time-discrete",
+        1,
+        0.0001,
+        RUCKIG_CONTROL_POSITION,
+        RUCKIG_SYNCHRONIZATION_TIME,
+        RUCKIG_DURATION_DISCRETE,
+        false,
+        0.0,
+        {0.0},
+        {0.02},
+        {-0.01},
+        {0.35},
+        {0.0},
+        {0.0},
+        {0.8},
+        {1.1},
+        {1.7},
+        {}
+    });
+
+    cases.push_back(CaseData{
+        "position-third-order-mixed-disabled-active-3d",
+        3,
+        0.01,
+        RUCKIG_CONTROL_POSITION,
+        RUCKIG_SYNCHRONIZATION_TIME,
+        RUCKIG_DURATION_CONTINUOUS,
+        false,
+        0.0,
+        {0.0, 1.0, -0.5},
+        {0.0, 0.4, -0.1},
+        {0.0, 0.2, 0.05},
+        {1.2, 100.0, -1.4},
+        {0.0, 0.0, 0.0},
+        {0.0, 0.0, 0.0},
+        {1.4, 0.7, 1.2},
+        {1.1, 0.8, 1.3},
+        {1.5, 1.0, 1.7},
+        {true, false, true}
+    });
+
+    cases.push_back(CaseData{
+        "position-third-order-discrete-minimum-duration-3d",
+        3,
+        0.07,
+        RUCKIG_CONTROL_POSITION,
+        RUCKIG_SYNCHRONIZATION_TIME,
+        RUCKIG_DURATION_DISCRETE,
+        true,
+        1.23,
+        {0.0, 0.1, -0.2},
+        {0.0, 0.0, 0.0},
+        {0.0, 0.0, 0.0},
+        {0.9, -0.6, 1.1},
+        {0.0, 0.0, 0.0},
+        {0.0, 0.0, 0.0},
+        {1.0, 1.2, 1.1},
+        {1.3, 1.1, 1.4},
+        {1.8, 1.6, 2.0},
+        {}
+    });
+
+    cases.push_back(CaseData{
+        "position-third-order-directional-min-edge",
+        1,
+        0.01,
+        RUCKIG_CONTROL_POSITION,
+        RUCKIG_SYNCHRONIZATION_TIME,
+        RUCKIG_DURATION_CONTINUOUS,
+        false,
+        0.0,
+        {0.0},
+        {0.0},
+        {0.0},
+        {-0.35},
+        {0.0},
+        {0.0},
+        {1.0},
+        {1.0},
+        {1.0},
+        {},
+        {-1.0e-6},
+        {-1.0e-6}
+    });
+
+    cases.push_back(CaseData{
         "position-second-order-disabled-dof",
         2,
         0.1,
@@ -1361,6 +1468,27 @@ int main(int argc, char** argv) {
         {0.0},
         {1.0},
         {1.0},
+        {}
+    });
+
+    cases.push_back(CaseData{
+        "velocity-third-order-near-limits",
+        1,
+        0.005,
+        RUCKIG_CONTROL_VELOCITY,
+        RUCKIG_SYNCHRONIZATION_TIME,
+        RUCKIG_DURATION_CONTINUOUS,
+        false,
+        0.0,
+        {0.0},
+        {0.94},
+        {0.48},
+        {0.0},
+        {-0.92},
+        {-0.47},
+        {0.0},
+        {0.5},
+        {1.4},
         {}
     });
 

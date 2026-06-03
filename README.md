@@ -112,6 +112,9 @@ Optional first-release fields:
 
 Numerical inputs must be finite except where the C++ baseline accepts infinite acceleration or jerk limits to select lower-order solvers. Velocity, acceleration, and jerk maxima must be non-negative, directional minima must be non-positive, and enabled DoFs must satisfy the same current/target state limit checks as the C++ oracle when validation requests those checks.
 
+For detailed error-code and limit-selection notes, see
+`docs/api_diagnostics.md`.
+
 Basic offline usage:
 
 ```c
@@ -192,8 +195,10 @@ Common error results:
 
 The C examples are in `examples/c`:
 
+- `00_minimal_offline.c`
 - `01_position.c`
 - `02_position_offline.c`
+- `03_minimal_online.c`
 - `05_velocity.c`
 - `06_stop.c`
 - `07_minimum_duration.c`
