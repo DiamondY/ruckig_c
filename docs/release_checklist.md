@@ -22,7 +22,10 @@ Run these checks from a clean worktree before tagging `0.1.0`.
 
 ## Current Windows Evidence
 
-Recorded on 2026-06-03 with LLVM clang 21.1.8 and Visual Studio bundled Ninja:
+Recorded on 2026-06-03 with LLVM clang 21.1.8 and Visual Studio bundled Ninja.
+The final local release pass in this workspace was run at pre-tag commit
+`86056d2d527396f8758faf841b2d3cad9133e2ad` before the documentation-only
+release closeout commit:
 
 - Static build directory: `build_release_check_ninja`.
 - Static command: `ctest --test-dir build_release_check_ninja --output-on-failure -E ruckig_c_oracle_random_release`.
@@ -32,10 +35,15 @@ Recorded on 2026-06-03 with LLVM clang 21.1.8 and Visual Studio bundled Ninja:
 - Shared result: `100% tests passed, 0 tests failed out of 13`.
 - Release random command: `ctest --test-dir build_release_check_ninja -R ruckig_c_oracle_random_release --output-on-failure`.
 - Release random result: `100% tests passed, 0 tests failed out of 1`.
+- Final local rerun result: static `14/14`, shared `13/13`, and release random
+  `1/1` all passed on 2026-06-03.
 
 ## Current GitHub Actions Evidence
 
-Recorded on 2026-06-03 from CI run `26861662259` at commit `5d5743c`:
+Recorded on 2026-06-03 from CI run `26861662259` at commit `5d5743c`.
+This is the latest recorded cross-platform release evidence available in this
+workspace; repeat the workflow after any post-evidence source change before
+publishing the final tag:
 
 - CI run result: completed successfully.
 - Linux Clang ASan UBSan job: passed.
@@ -93,6 +101,14 @@ Performance benchmark:
 GitHub Actions also runs a `Linux Clang performance` job that uploads
 `linux-performance.txt`. Copy that output into `docs/performance_report.md`
 before tagging.
+
+## Release Notes
+
+Use `docs/release_notes_0.1.0.md` as the base text for the GitHub Release.
+Before publishing, add the final tagged commit hash and final CI run id to the
+release page. The exact final commit cannot be self-recorded inside the same
+commit that carries this checklist; resolve it from `v0.1.0^{commit}` after
+tagging.
 
 ## Scope Lock
 

@@ -1,0 +1,51 @@
+# ruckig_c 0.1.0 Release Notes
+
+`ruckig_c 0.1.0` is the first public release of the pure C99 rewrite of
+Ruckig Community `0.17.3` local state-to-state trajectory generation. The C
+library does not link to the frozen C++ oracle and does not require a C++
+runtime.
+
+## Supported
+
+- Public opaque C ABI in `include/ruckig_c/ruckig.h`.
+- Offline `ruckig_calculate` and online `ruckig_update`.
+- Runtime dynamic DoF handles.
+- Position and velocity control for first-, second-, and third-order supported local trajectories.
+- Multi-DoF synchronization modes `Time`, `TimeIfNecessary`, `Phase`, and `None`.
+- Continuous and discrete duration handling.
+- Directional min velocity/min acceleration limits, disabled DoFs, and global minimum duration.
+- Trajectory duration, independent minimum durations, sampling, position extrema, and first-time-at-position queries.
+- Static/shared CMake builds, C examples, installed CMake package metadata, and pkg-config metadata.
+
+## Deferred
+
+- Intermediate waypoints.
+- Per-section constraints.
+- Cloud calculation.
+- Python and Rust bindings.
+- Per-DoF control-interface and synchronization overrides.
+
+These are outside the `0.1.0` public C API scope and must not be treated as
+silently ignored inputs.
+
+## Verification Summary
+
+Release evidence is recorded in:
+
+- `docs/release_checklist.md`
+- `docs/verification_report.md`
+- `docs/performance_report.md`
+
+The release gate covers Windows static/shared builds, C/C++ public header
+consumers, C examples, allocation auditing, fixed oracle comparisons,
+deterministic random oracle stress, Linux ASan/UBSan, Linux Valgrind, installed
+CMake consumer checks, Linux pkg-config consumer checks, and C/C++ oracle
+performance benchmarks.
+
+## Integration Notes
+
+- For offline `ruckig_calculate`, `RUCKIG_WORKING` means calculation succeeded and the trajectory can be queried.
+- `ruckig_trajectory_at_time` requires a non-NULL `position` output array.
+- Accessor-returned arrays are borrowed pointers owned by their handle.
+- CMake static consumers receive `RUCKIG_C_STATIC_DEFINE` from the exported target.
+- Manual Windows static consumers must define `RUCKIG_C_STATIC_DEFINE`; DLL consumers must not define it.

@@ -375,3 +375,52 @@ Result:
 
 The release random run executed `--random 1000000 --seed 1` and completed in
 about 262 seconds.
+
+## 2026-06-03 Final Local Release Closeout
+
+Environment:
+
+- OS: Windows
+- Compiler/build directories: existing Windows clang/Ninja release check
+  directories `build_release_check_ninja` and `build_release_check_shared`.
+- Pre-tag commit before documentation-only closeout:
+  `86056d2d527396f8758faf841b2d3cad9133e2ad`.
+
+Static release CTest rerun excluding the long release random test:
+
+```powershell
+ctest --test-dir build_release_check_ninja --output-on-failure -E ruckig_c_oracle_random_release
+```
+
+Result:
+
+```text
+100% tests passed, 0 tests failed out of 14
+```
+
+Shared-library release CTest rerun excluding the long release random test:
+
+```powershell
+ctest --test-dir build_release_check_shared --output-on-failure -E ruckig_c_oracle_random_release
+```
+
+Result:
+
+```text
+100% tests passed, 0 tests failed out of 13
+```
+
+Manual release random oracle rerun:
+
+```powershell
+ctest --test-dir build_release_check_ninja -R ruckig_c_oracle_random_release --output-on-failure
+```
+
+Result:
+
+```text
+100% tests passed, 0 tests failed out of 1
+```
+
+The release random rerun executed `--random 1000000 --seed 1` and completed in
+about 262 seconds.

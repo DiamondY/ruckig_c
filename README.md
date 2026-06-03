@@ -1,6 +1,6 @@
 # Ruckig C Rewrite
 
-This repository contains a pure C99 rewrite of the Ruckig Community trajectory generator. The source of truth for the implementation scope is `docs/c_rewrite_execution_plan.md`; the original C++ implementation under `original/ruckig-main` is kept unchanged and is used only as an oracle in tests.
+This repository contains a pure C99 rewrite of the Ruckig Community trajectory generator. The `ruckig_c` library does not link to or require a C++ runtime. The source of truth for the implementation scope is `docs/c_rewrite_execution_plan.md`; the original C++ implementation under `original/ruckig-main` is kept unchanged and is used only as an oracle in tests.
 
 The rewrite targets Ruckig Community `0.17.3`. The upstream project in
 `original/ruckig-main` is MIT licensed, and this repository keeps that license
@@ -26,10 +26,10 @@ Implemented and covered by fixed C/oracle tests plus deterministic random oracle
 - Trajectory duration, independent minimum durations, sampling, position extrema, and first-time-at-position helpers.
 - C examples for position, offline position, velocity, stop, and minimum duration.
 
-Release-readiness follow-ups are tracked in `docs/release_checklist.md`.
-Current release scope intentionally excludes:
+Release-readiness evidence is tracked in `docs/release_checklist.md`. The
+post-release stability queue is tracked in `docs/roadmap.md`. Current release
+scope intentionally excludes:
 
-- Platform symbol-wrapper allocation audit where the toolchain supports it.
 - Waypoints, per-section constraints, cloud, Python/Rust bindings, and per-DoF control/sync overrides are intentionally outside the first public C API.
 
 ## Build
@@ -138,7 +138,19 @@ ruckig_input_destroy(input);
 ruckig_destroy(otg);
 ```
 
-Online usage calls `ruckig_update`, reads `ruckig_output_new_*_data`, then calls `ruckig_output_pass_to_input` when the caller wants to feed the new state into the next cycle.
+For offline `ruckig_calculate`, `RUCKIG_WORKING` is the successful result that
+means the trajectory is valid and can be queried. `RUCKIG_FINISHED` is used by
+the online update loop once the sampled time has passed the trajectory
+duration.
+
+`ruckig_trajectory_at_time` requires a non-NULL `position` output array with at
+least the trajectory DoF count. `velocity`, `acceleration`, `jerk`, and
+`section` may be `NULL` when the caller does not need those outputs.
+
+Online usage calls `ruckig_update`, reads `ruckig_output_new_*_data`, then calls
+`ruckig_output_pass_to_input` when the caller wants to feed the new state into
+the next cycle. The caller should read the output arrays before mutating or
+destroying the owning output handle.
 
 ## Memory Model
 
@@ -153,7 +165,7 @@ Ownership rules:
 - Destroy functions accept `NULL`.
 - `ruckig_output_t` owns its internal trajectory.
 - A standalone `ruckig_trajectory_t` created by `ruckig_trajectory_create` is owned by the caller.
-- Accessor-returned arrays are borrowed pointers and remain valid until the owning handle is destroyed.
+- Accessor-returned arrays are borrowed pointers. They remain valid until the owning handle is destroyed, and output-owned trajectory pointers remain valid until the next successful `ruckig_update` with that output handle.
 
 ## Thread Safety
 

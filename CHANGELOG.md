@@ -2,8 +2,8 @@
 
 ## 0.1.0 - 2026-06-03
 
-Initial public release candidate for the pure C99 rewrite of Ruckig Community
-local trajectory generation.
+Initial public release for the pure C99 rewrite of Ruckig Community `0.17.3`
+local state-to-state trajectory generation.
 
 Added:
 
@@ -29,5 +29,14 @@ Verification:
 
 - Windows clang/clang-cl validation is recorded in `docs/verification_report.md`.
 - Linux/macOS and sanitizer/memcheck gates are captured in CI and
-  `docs/release_checklist.md`; their release results should be recorded before
-  tagging.
+  `docs/release_checklist.md`.
+- Performance results against the frozen C++ oracle are recorded in
+  `docs/performance_report.md`.
+
+Known scope limitations:
+
+- The C library does not implement intermediate waypoints, per-section
+  constraints, cloud calculation, Python/Rust bindings, or per-DoF
+  control/synchronization overrides in `0.1.0`.
+- `original/ruckig-main` remains a frozen test oracle and is not linked into
+  the C library.
