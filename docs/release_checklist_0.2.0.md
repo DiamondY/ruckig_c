@@ -23,14 +23,14 @@ Run these checks from a clean worktree before tagging `v0.2.0`.
 
 ## Required Gates
 
-- [ ] `git status --short --branch` is clean before the final local gate.
-- [ ] Static CMake release tests pass on Windows clang/Ninja.
-- [ ] Shared-library release tests pass on Windows clang/Ninja.
-- [ ] Fixed C++ oracle suite passes.
-- [ ] Development random oracle passes with `--random 100000 --seed 2`.
-- [ ] Development random oracle passes with `--random 100000 --seed 41`.
-- [ ] Release random oracle passes with `--random 1000000 --seed 1`.
-- [ ] Windows release performance benchmark average ratio is `<= 1.5`.
+- [x] `git status --short --branch` is clean before the final local gate.
+- [x] Static CMake release tests pass on Windows clang/Ninja.
+- [x] Shared-library release tests pass on Windows clang/Ninja.
+- [x] Fixed C++ oracle suite passes.
+- [x] Development random oracle passes with `--random 100000 --seed 2`.
+- [x] Development random oracle passes with `--random 100000 --seed 41`.
+- [x] Release random oracle passes with `--random 1000000 --seed 1`.
+- [x] Windows release performance benchmark average ratio is `<= 1.5`.
 - [ ] GitHub Actions push CI passes for the release evidence commit.
 - [ ] GitHub Actions manual release random oracle passes with
   `release_random=true`.
@@ -55,6 +55,11 @@ The tag commit cannot be self-recorded inside the same commit that carries this
 checklist. Resolve it from the annotated tag after tagging and verify that the
 tag target is the evidence commit.
 
+Local release-gate evidence below was recorded on documentation release-closeout
+commit `4b04212eba8b793805275702c333ed41cf65de20`. The only later expected
+changes before tagging are evidence-document updates and CI metadata; push CI
+and the manual release-random workflow must still pass on the final tag target.
+
 ### Local Windows Static Release
 
 Command:
@@ -66,7 +71,7 @@ ctest --test-dir build_release_check_ninja --output-on-failure -E ruckig_c_oracl
 Result:
 
 ```text
-Pending final release gate.
+100% tests passed, 0 tests failed out of 17
 ```
 
 ### Local Windows Shared Release
@@ -80,7 +85,7 @@ ctest --test-dir build_release_check_shared --output-on-failure -E ruckig_c_orac
 Result:
 
 ```text
-Pending final release gate.
+100% tests passed, 0 tests failed out of 16
 ```
 
 ### Development Random Oracle
@@ -95,7 +100,10 @@ Commands:
 Result:
 
 ```text
-Pending final release gate.
+Oracle comparisons passed: 48
+Random oracle comparisons passed: 100000 seed 2
+Oracle comparisons passed: 48
+Random oracle comparisons passed: 100000 seed 41
 ```
 
 ### Release Random Oracle
@@ -109,8 +117,11 @@ ctest --test-dir build_release_check_ninja -R ruckig_c_oracle_random_release --o
 Result:
 
 ```text
-Pending final release gate.
+100% tests passed, 0 tests failed out of 1
 ```
+
+The release random oracle executed `--random 1000000 --seed 1` and completed in
+about 267 seconds.
 
 ### Windows Performance
 
@@ -123,7 +134,19 @@ Command:
 Result:
 
 ```text
-Pending final release gate.
+Ruckig C performance benchmark
+samples: 10000
+seed: 1
+compiler: clang 21.1.8
+os: Windows
+c_average_ns: 1345.11
+c_p99_ns: 9100
+c_worst_ns: 20200
+oracle_average_ns: 4691.73
+oracle_p99_ns: 20000
+oracle_worst_ns: 46500
+average_ratio_c_over_oracle: 0.286698
+release_threshold_average_ratio: 1.5
 ```
 
 ### GitHub Actions

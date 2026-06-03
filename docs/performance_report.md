@@ -162,3 +162,30 @@ Average C/oracle ratio: `1.16262`.
 
 This Linux CI run is within the release threshold of average calculation time
 no worse than `1.5x` the C++ oracle on the same benchmark corpus.
+
+## 2026-06-03 Windows 0.2.0 Release Closeout Run
+
+- Source: Local release closeout gate at commit
+  `4b04212eba8b793805275702c333ed41cf65de20`.
+- Command:
+  `.\build_release_check_ninja\ruckig_c_performance_benchmark.exe --samples 10000 --seed 1`
+- OS: Windows.
+- CPU identifier: `Intel64 Family 6 Model 165 Stepping 5, GenuineIntel`.
+- C compiler: `clang 21.1.8`.
+- C++ compiler: `clang 21.1.8`.
+- CMake build type: `Release`.
+- Generator: Ninja.
+- Seed: `1`.
+- Samples: `10000`.
+
+| Metric | C implementation | C++ oracle |
+| --- | ---: | ---: |
+| Average | 1345.11 ns | 4691.73 ns |
+| p99 | 9100 ns | 20000 ns |
+| Worst | 20200 ns | 46500 ns |
+
+Average C/oracle ratio: `0.286698`.
+
+This Windows release closeout run is within the release threshold of average
+calculation time no worse than `1.5x` the C++ oracle on the same benchmark
+corpus.

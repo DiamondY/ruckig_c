@@ -594,3 +594,82 @@ Successful jobs:
 The `Manual release random oracle` job was skipped in the push-triggered CI
 run, as expected. The `0.2.0` release-random evidence above comes from the local
 Windows clang/Ninja run of `--random 1000000 --seed 1`.
+
+## 2026-06-03 0.2.0 Release Closeout Local Gate
+
+This pass verifies the `0.2.0` release documentation closeout commit before the
+final CI/tag gate.
+
+- Commit: `4b04212eba8b793805275702c333ed41cf65de20`
+- Branch state before local gate: clean, `main...ruckig_c/main [ahead 1]`
+
+Static release CTest excluding the long release random test:
+
+```powershell
+ctest --test-dir build_release_check_ninja --output-on-failure -E ruckig_c_oracle_random_release
+```
+
+Result:
+
+```text
+100% tests passed, 0 tests failed out of 17
+```
+
+Shared-library release CTest excluding the long release random test:
+
+```powershell
+ctest --test-dir build_release_check_shared --output-on-failure -E ruckig_c_oracle_random_release
+```
+
+Result:
+
+```text
+100% tests passed, 0 tests failed out of 16
+```
+
+Additional deterministic random oracle runs:
+
+```powershell
+.\build_release_check_ninja\ruckig_c_oracle_tests.exe --random 100000 --seed 2
+.\build_release_check_ninja\ruckig_c_oracle_tests.exe --random 100000 --seed 41
+```
+
+Results:
+
+```text
+Oracle comparisons passed: 48
+Random oracle comparisons passed: 100000 seed 2
+Oracle comparisons passed: 48
+Random oracle comparisons passed: 100000 seed 41
+```
+
+Manual release random oracle rerun:
+
+```powershell
+ctest --test-dir build_release_check_ninja -R ruckig_c_oracle_random_release --output-on-failure
+```
+
+Result:
+
+```text
+100% tests passed, 0 tests failed out of 1
+```
+
+The release random rerun executed `--random 1000000 --seed 1` and completed in
+about 267 seconds.
+
+Windows release performance:
+
+```powershell
+.\build_release_check_ninja\ruckig_c_performance_benchmark.exe --samples 10000 --seed 1
+```
+
+Result:
+
+```text
+average_ratio_c_over_oracle: 0.286698
+release_threshold_average_ratio: 1.5
+```
+
+The final tag target still needs push CI and the manual GitHub Actions release
+random workflow evidence recorded before creating `v0.2.0`.
