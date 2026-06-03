@@ -98,10 +98,10 @@ compared within their own build contexts rather than mixed.
 
 ## Patch Release Procedure
 
-Every `0.1.x` patch release must record a Windows clang release benchmark and a
-Linux clang release benchmark against the frozen C++ oracle. Use the existing
-benchmark executable and keep the release threshold at average C/oracle ratio
-`<= 1.5`.
+Every `0.1.x` and `0.2.x` patch release must record a Windows clang release
+benchmark and a Linux clang release benchmark against the frozen C++ oracle.
+Use the existing benchmark executable and keep the release threshold at average
+C/oracle ratio `<= 1.5`.
 
 Record this template for each run:
 

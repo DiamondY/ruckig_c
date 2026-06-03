@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.2.0 - Unreleased
+## 0.2.0 - 2026-06-03
 
 Added:
 
@@ -16,6 +16,8 @@ Added:
   recalculation, and the no-allocation runtime contract with per-DoF settings
   enabled.
 - Minimal per-DoF override C example wired into CMake and CTest.
+- The `0.1.1` stability queue additions are included in this `0.2.0` mainline
+  release.
 
 Changed:
 

@@ -1,6 +1,6 @@
 # Ruckig C Post-Release Roadmap
 
-This roadmap keeps the `0.1.0` release scope locked while preserving concrete
+This roadmap keeps shipped release scope locked while preserving concrete
 follow-up work for stability and future feature planning.
 
 ## 0.1.x Stability Queue
@@ -30,5 +30,17 @@ follow-up work for stability and future feature planning.
 - Done for `0.2.0`: fixed oracle cases compare mixed per-DoF control and
   synchronization settings against the frozen C++ baseline.
 - Defer waypoints and per-section constraints until a separate design addresses the Community cloud/pro behavior boundary.
-- Defer Python and Rust bindings until the C ABI has stabilized through `0.1.x`.
+- Defer Python and Rust bindings until the C ABI has stabilized through a
+  `0.2.x` patch cycle.
 - Treat any upstream Ruckig baseline update as a separate project with source inventory, tolerance review, oracle corpus updates, full random stress, and new performance baselines.
+
+## 0.2.x Maintenance
+
+- Before each `0.2.x` patch release, record Windows and Linux release
+  benchmarks with average, p99, worst, and C/oracle average ratio.
+- Keep per-DoF override hardening focused on oracle coverage, diagnostics, and
+  examples without changing the public C API.
+- Add controlled per-DoF random oracle coverage as a development/manual gate
+  before considering it for routine CI.
+- Keep waypoints, per-section constraints, cloud calculation, Python/Rust
+  bindings, and upstream baseline upgrades as separate future projects.

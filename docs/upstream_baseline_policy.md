@@ -1,17 +1,18 @@
 # Upstream Baseline Policy
 
 `original/ruckig-main` is frozen as the Ruckig Community `0.17.3` oracle
-baseline for `ruckig_c 0.1.x`.
+baseline for `ruckig_c 0.1.x` and `0.2.x` until an explicit upstream baseline
+upgrade project is approved and completed.
 
 ## Rules
 
 - Ordinary maintenance commits must not modify files under `original/ruckig-main`.
-- `0.1.x` stability work must use the frozen baseline for all oracle
-  comparisons.
+- `0.1.x` stability work and `0.2.x` maintenance work must use the frozen
+  baseline for all oracle comparisons.
 - Bug fixes in the C rewrite must be validated against the frozen oracle unless
   a documented oracle/platform tolerance exception is required.
-- Per-DoF override design and implementation work must not update the upstream
-  baseline.
+- Release closeout, per-DoF hardening, and ordinary bug-fix work must not
+  update the upstream baseline.
 
 ## Upstream Upgrade Requirements
 
@@ -27,4 +28,4 @@ Any future Ruckig baseline upgrade must be a separate project. It must include:
 - New Windows and Linux performance baselines.
 
 The upgrade must not be mixed with bug fixes, release hardening, bindings,
-waypoints, or per-DoF override implementation.
+waypoints, or per-DoF override hardening.

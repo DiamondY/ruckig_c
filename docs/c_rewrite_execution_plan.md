@@ -741,7 +741,7 @@ Sampling strategy:
 
 ## 9. Unsupported Feature Behavior
 
-For first release:
+For first release (`0.1.0` historical scope):
 
 1. If `intermediate_positions` are passed, return `RUCKIG_ERROR_UNSUPPORTED`.
 2. If per-section constraints are passed, return `RUCKIG_ERROR_UNSUPPORTED`.
@@ -750,6 +750,11 @@ For first release:
    return `RUCKIG_ERROR_UNSUPPORTED`.
 5. Do not silently ignore unsupported fields.
 6. Document every unsupported field in the public header.
+
+Per-DoF control-interface and synchronization overrides were implemented
+separately for `0.2.0`; see `docs/design_per_dof_overrides.md`. Waypoints,
+per-section constraints, cloud calculation, and Python/Rust bindings remain
+unsupported.
 
 ## 10. Memory and Real-Time Requirements
 

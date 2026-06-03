@@ -28,9 +28,10 @@ Implemented and covered by fixed C/oracle tests plus deterministic random oracle
 - C examples for position, offline position, online update, per-DoF overrides,
   velocity, stop, and minimum duration.
 
-Release-readiness evidence is tracked in `docs/release_checklist.md`. The
-post-release stability queue is tracked in `docs/roadmap.md`. Current release
-scope intentionally excludes:
+Release-readiness evidence is tracked in `docs/release_checklist.md` for
+`0.1.0` and `docs/release_checklist_0.2.0.md` for `0.2.0`. The post-release
+stability queue is tracked in `docs/roadmap.md`. Current release scope
+intentionally excludes:
 
 - Waypoints, per-section constraints, cloud, and Python/Rust bindings remain
   intentionally outside the public C API.
@@ -250,7 +251,8 @@ The current development performance report is in `docs/performance_report.md`.
 Windows clang ASan/UBSan CMake tests pass when the LLVM sanitizer runtime
 directory is present in `PATH`. Linux Clang ASan/UBSan, Valgrind, pkg-config
 consumer, and performance evidence is recorded in `docs/release_checklist.md`
-for the public `0.1.0` release gate.
+for the public `0.1.0` release gate and in
+`docs/release_checklist_0.2.0.md` for the `0.2.0` release gate.
 
 ## Verification
 
