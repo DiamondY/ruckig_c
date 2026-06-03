@@ -1,6 +1,9 @@
 # Ruckig C 0.2.0 Release Checklist
 
-Run these checks from a clean worktree before tagging `v0.2.0`.
+This checklist records the release evidence for `v0.2.0`. The release tag was
+created before the post-release documentation audit could self-record the final
+tag metadata, so the final confirmation below is recorded on `main` after the
+published tag. The tag itself remains unchanged.
 
 ## Scope
 
@@ -31,16 +34,16 @@ Run these checks from a clean worktree before tagging `v0.2.0`.
 - [x] Development random oracle passes with `--random 100000 --seed 41`.
 - [x] Release random oracle passes with `--random 1000000 --seed 1`.
 - [x] Windows release performance benchmark average ratio is `<= 1.5`.
-- [ ] GitHub Actions push CI passes for the release evidence commit.
-- [ ] GitHub Actions manual release random oracle passes with
+- [x] GitHub Actions push CI passes for the release evidence commit.
+- [x] GitHub Actions manual release random oracle passes with
   `release_random=true`.
-- [ ] Linux Clang ASan+UBSan passes.
-- [ ] Linux Valgrind passes.
-- [ ] Linux Clang performance benchmark passes and is recorded.
-- [ ] Installed CMake consumer smoke test passes.
-- [ ] Linux pkg-config consumer smoke test passes.
-- [ ] `v0.2.0` annotated tag points at the release evidence commit.
-- [ ] GitHub Release `ruckig_c 0.2.0` is published with notes from
+- [x] Linux Clang ASan+UBSan passes.
+- [x] Linux Valgrind passes.
+- [x] Linux Clang performance benchmark passes and is recorded.
+- [x] Installed CMake consumer smoke test passes.
+- [x] Linux pkg-config consumer smoke test passes.
+- [x] `v0.2.0` annotated tag points at the release evidence commit.
+- [x] GitHub Release `ruckig_c 0.2.0` is published with notes from
   `docs/release_notes_0.2.0.md`.
 
 ## Release Evidence
@@ -48,17 +51,25 @@ Run these checks from a clean worktree before tagging `v0.2.0`.
 Final release commit:
 
 ```text
-Resolve from: git rev-parse v0.2.0^{commit}
+7ae8d4c2d05c6ea02547d6387de207df59826650
 ```
 
-The tag commit cannot be self-recorded inside the same commit that carries this
-checklist. Resolve it from the annotated tag after tagging and verify that the
-tag target is the evidence commit.
+Annotated tag object:
+
+```text
+c2da0df996a447fea46084a0a34133c6c6aa3931
+```
+
+Tag verification:
+
+```text
+refs/tags/v0.2.0 -> tag object c2da0df996a447fea46084a0a34133c6c6aa3931
+tag object -> commit 7ae8d4c2d05c6ea02547d6387de207df59826650
+```
 
 Local release-gate evidence below was recorded on documentation release-closeout
-commit `4b04212eba8b793805275702c333ed41cf65de20`. The only later expected
-changes before tagging are evidence-document updates and CI metadata; push CI
-and the manual release-random workflow must still pass on the final tag target.
+commit `4b04212eba8b793805275702c333ed41cf65de20` and then finalized on release
+evidence commit `7ae8d4c2d05c6ea02547d6387de207df59826650`.
 
 ### Local Windows Static Release
 
@@ -151,14 +162,22 @@ release_threshold_average_ratio: 1.5
 
 ### GitHub Actions
 
-- Push CI run id: pending.
-- Push CI run URL: pending.
-- Push CI conclusion: pending.
-- Manual release random run id: pending.
-- Manual release random run URL: pending.
-- Manual release random conclusion: pending.
+- Push CI run id: `26887345035`.
+- Push CI run URL:
+  `https://github.com/DiamondY/ruckig_c/actions/runs/26887345035`.
+- Push CI commit:
+  `7ae8d4c2d05c6ea02547d6387de207df59826650`.
+- Push CI conclusion: `success`.
+- Manual release random run id: `26887625326`.
+- Manual release random run URL:
+  `https://github.com/DiamondY/ruckig_c/actions/runs/26887625326`.
+- Manual release random commit:
+  `7ae8d4c2d05c6ea02547d6387de207df59826650`.
+- Manual release random conclusion: `success`.
+- GitHub Release URL:
+  `https://github.com/DiamondY/ruckig_c/releases/tag/v0.2.0`.
 
-Expected successful jobs:
+Successful release push CI jobs:
 
 - `Windows clang-cl C-only`
 - `Windows clang oracle`
@@ -168,12 +187,27 @@ Expected successful jobs:
 - `Linux Clang ASan UBSan`
 - `Linux Valgrind`
 - `Linux Clang performance`
+
+Successful manual release random workflow jobs:
+
 - `Manual release random oracle`
+- `Windows clang-cl C-only`
+- `Windows clang oracle`
+- `Linux GCC C-only`
+- `Linux Clang oracle`
+- `macOS Clang C-only`
+- `Linux Clang ASan UBSan`
+- `Linux Valgrind`
+- `Linux Clang performance`
 
 ### Linux Performance
 
-Copy the final `linux-performance.txt` artifact from the release push CI into
-`docs/performance_report.md` before tagging.
+- Push CI Linux performance artifact id: `7385683968`.
+- Manual release random Linux performance artifact id: `7385807486`.
+- Both artifacts were generated from commit
+  `7ae8d4c2d05c6ea02547d6387de207df59826650`.
+- `docs/performance_report.md` records the Linux Clang performance benchmark
+  procedure and release-gate Linux/Windows performance evidence.
 
 ## Release Commands
 

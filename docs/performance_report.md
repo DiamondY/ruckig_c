@@ -129,8 +129,9 @@ Record this template for each run:
 ```
 
 The GitHub Actions `Linux Clang performance` job uploads
-`linux-performance.txt`; copy the final release-gate output into this report
-before tagging. On Windows, run:
+`linux-performance.txt` and emits a `Linux performance` check-run annotation.
+Record the final release-gate output or annotation in this report. On Windows,
+run:
 
 ```powershell
 .\build-release\ruckig_c_performance_benchmark.exe --samples 10000 --seed 1
@@ -138,13 +139,16 @@ before tagging. On Windows, run:
 
 or the equivalent executable path for the release-check build directory.
 
-## 2026-06-03 Linux Clang GitHub Actions Run
+## 2026-06-03 Linux 0.2.0 Release Push CI Run
 
-- Source: GitHub Actions CI run `26861662259`, job `Linux Clang performance`.
+- Source: GitHub Actions CI run `26887345035`, job `Linux Clang performance`
+  (`79303225672`).
+- Commit: `7ae8d4c2d05c6ea02547d6387de207df59826650`.
+- Artifact: `linux-performance`, artifact id `7385683968`.
 - Command: `./build-perf/ruckig_c_performance_benchmark --samples 10000 --seed 1`
 - OS: Linux, GitHub-hosted Ubuntu runner.
 - Kernel: `Linux runnervm3jyl0 6.17.0-1015-azure #15~24.04.1-Ubuntu SMP Wed May 6 22:37:49 UTC 2026 x86_64`
-- CPU identifier: `Intel(R) Xeon(R) Platinum 8370C CPU @ 2.80GHz`
+- CPU identifier: `AMD EPYC 7763 64-Core Processor`
 - Compiler: `Ubuntu clang version 18.1.3 (1ubuntu1)`
 - C++ compiler: `Ubuntu clang version 18.1.3 (1ubuntu1)`
 - CMake build type: `Release`
@@ -154,11 +158,11 @@ or the equivalent executable path for the release-check build directory.
 
 | Metric | C implementation | C++ oracle |
 | --- | ---: | ---: |
-| Average | 629.858 ns | 541.758 ns |
-| p99 | 4925 ns | 4101 ns |
-| Worst | 40316 ns | 28661 ns |
+| Average | 703.93 ns | 551.239 ns |
+| p99 | 5330 ns | 4168 ns |
+| Worst | 21060 ns | 15900 ns |
 
-Average C/oracle ratio: `1.16262`.
+Average C/oracle ratio: `1.277`.
 
 This Linux CI run is within the release threshold of average calculation time
 no worse than `1.5x` the C++ oracle on the same benchmark corpus.

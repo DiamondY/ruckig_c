@@ -671,8 +671,18 @@ average_ratio_c_over_oracle: 0.286698
 release_threshold_average_ratio: 1.5
 ```
 
-The final tag target still needs push CI and the manual GitHub Actions release
-random workflow evidence recorded before creating `v0.2.0`.
+Final release evidence:
+
+- Tag target commit: `7ae8d4c2d05c6ea02547d6387de207df59826650`.
+- Annotated tag object: `c2da0df996a447fea46084a0a34133c6c6aa3931`.
+- Push CI run id: `26887345035`, conclusion `success`.
+- Manual release random workflow run id: `26887625326`, conclusion `success`.
+- GitHub Release:
+  `https://github.com/DiamondY/ruckig_c/releases/tag/v0.2.0`.
+
+The push CI and manual release random workflow both ran against the final tag
+target commit. The push CI manual-release-random job was skipped as expected;
+the workflow-dispatch run executed `Manual release random oracle` successfully.
 
 ## 2026-06-03 0.2.x Post-Release per-DoF Hardening
 
