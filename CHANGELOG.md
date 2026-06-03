@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.2 - Unreleased
+
+Added:
+
+- `0.3.0-design` priority evaluation documenting that `0.2.x` package,
+  consumer, ABI, performance, and regression evidence should mature before
+  bindings work; Python bindings should be evaluated before Rust bindings once
+  prerequisites are met.
+
 ## 0.2.1 - 2026-06-04
 
 Added:

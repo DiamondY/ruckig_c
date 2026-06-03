@@ -63,6 +63,10 @@ The `0.3.0` line is design-only until a separate proposal is accepted. It must
 not change public API, solver dispatch, or the frozen oracle baseline during
 `0.2.x` patch work.
 
+- Current priority decision is recorded in
+  `docs/design_0.3.0_priorities.md`: finish `0.2.x` package, consumer, ABI,
+  performance, and regression evidence before starting bindings; evaluate
+  Python bindings before Rust bindings once prerequisites are met.
 - Evaluate Python or Rust bindings only after the C ABI has passed at least one
   `0.2.x` patch cycle, `docs/api_compatibility.md` is complete, and CMake,
   pkg-config, and shared/static consumer paths are stable.
