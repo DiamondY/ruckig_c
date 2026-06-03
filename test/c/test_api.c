@@ -132,6 +132,79 @@ static void test_input_defaults_and_accessors(void) {
     ruckig_input_destroy(input);
 }
 
+static void test_per_dof_setters_and_clear(void) {
+    ruckig_t* otg = NULL;
+    ruckig_input_t* input = NULL;
+    ruckig_output_t* output = NULL;
+    ruckig_trajectory_t* trajectory = NULL;
+    ruckig_control_interface_t per_control[2] = {RUCKIG_CONTROL_POSITION, RUCKIG_CONTROL_VELOCITY};
+    ruckig_control_interface_t invalid_control[2] = {RUCKIG_CONTROL_POSITION, (ruckig_control_interface_t)99};
+    ruckig_synchronization_t per_sync[2] = {RUCKIG_SYNCHRONIZATION_TIME, RUCKIG_SYNCHRONIZATION_NONE};
+    ruckig_synchronization_t invalid_sync[2] = {RUCKIG_SYNCHRONIZATION_TIME, (ruckig_synchronization_t)99};
+    double per_duration = 0.0;
+    double global_duration = 0.0;
+
+    CHECK_EQ_INT(ruckig_create(&otg, 2, 0.01), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_input_create(&input, 2), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_output_create(&output, 2), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_trajectory_create(&trajectory, 2), RUCKIG_WORKING);
+
+    CHECK_EQ_INT(ruckig_input_set_per_dof_control_interface(NULL, per_control, 2), RUCKIG_ERROR_INVALID_INPUT);
+    CHECK_EQ_INT(ruckig_input_set_per_dof_control_interface(input, NULL, 2), RUCKIG_ERROR_INVALID_INPUT);
+    CHECK_EQ_INT(ruckig_input_set_per_dof_control_interface(input, per_control, 1), RUCKIG_ERROR_INVALID_INPUT);
+    CHECK_EQ_INT(ruckig_input_set_per_dof_control_interface(input, invalid_control, 2), RUCKIG_ERROR_INVALID_INPUT);
+    CHECK_EQ_INT(ruckig_input_set_per_dof_synchronization(NULL, per_sync, 2), RUCKIG_ERROR_INVALID_INPUT);
+    CHECK_EQ_INT(ruckig_input_set_per_dof_synchronization(input, NULL, 2), RUCKIG_ERROR_INVALID_INPUT);
+    CHECK_EQ_INT(ruckig_input_set_per_dof_synchronization(input, per_sync, 1), RUCKIG_ERROR_INVALID_INPUT);
+    CHECK_EQ_INT(ruckig_input_set_per_dof_synchronization(input, invalid_sync, 2), RUCKIG_ERROR_INVALID_INPUT);
+    ruckig_input_clear_per_dof_control_interface(NULL);
+    ruckig_input_clear_per_dof_synchronization(NULL);
+
+    ruckig_input_target_position_data(input)[0] = 1.0;
+    ruckig_input_target_position_data(input)[1] = 0.0;
+    ruckig_input_target_velocity_data(input)[0] = 0.0;
+    ruckig_input_target_velocity_data(input)[1] = 0.8;
+    ruckig_input_max_velocity_data(input)[0] = 1.5;
+    ruckig_input_max_velocity_data(input)[1] = 0.0;
+    ruckig_input_max_acceleration_data(input)[0] = 1.2;
+    ruckig_input_max_acceleration_data(input)[1] = 1.1;
+    ruckig_input_max_jerk_data(input)[0] = 2.0;
+    ruckig_input_max_jerk_data(input)[1] = 1.7;
+
+    CHECK_EQ_INT(ruckig_input_set_per_dof_control_interface(input, per_control, 2), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_calculate(otg, input, trajectory), RUCKIG_WORKING);
+    per_duration = ruckig_trajectory_get_duration(trajectory);
+    CHECK_TRUE(per_duration > 0.0);
+
+    ruckig_input_clear_per_dof_control_interface(input);
+    CHECK_EQ_INT(ruckig_calculate(otg, input, trajectory), RUCKIG_ERROR_INVALID_INPUT);
+
+    CHECK_EQ_INT(ruckig_input_set_per_dof_control_interface(input, per_control, 2), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_update(otg, input, output), RUCKIG_WORKING);
+    CHECK_TRUE(ruckig_output_new_calculation(output));
+    ruckig_input_clear_per_dof_control_interface(input);
+    CHECK_EQ_INT(ruckig_update(otg, input, output), RUCKIG_ERROR_INVALID_INPUT);
+
+    ruckig_input_target_position_data(input)[1] = 3.0;
+    ruckig_input_target_velocity_data(input)[1] = 0.0;
+    ruckig_input_max_velocity_data(input)[1] = 1.0;
+    ruckig_input_max_acceleration_data(input)[1] = 1.0;
+    ruckig_input_max_jerk_data(input)[1] = 2.0;
+    ruckig_reset(otg);
+    CHECK_EQ_INT(ruckig_input_set_per_dof_synchronization(input, per_sync, 2), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_calculate(otg, input, trajectory), RUCKIG_WORKING);
+    per_duration = ruckig_trajectory_get_duration(trajectory);
+    ruckig_input_clear_per_dof_synchronization(input);
+    CHECK_EQ_INT(ruckig_calculate(otg, input, trajectory), RUCKIG_WORKING);
+    global_duration = ruckig_trajectory_get_duration(trajectory);
+    CHECK_TRUE(global_duration >= per_duration);
+
+    ruckig_trajectory_destroy(trajectory);
+    ruckig_output_destroy(output);
+    ruckig_input_destroy(input);
+    ruckig_destroy(otg);
+}
+
 static void test_optional_setters_and_pass_to_input(void) {
     ruckig_input_t* input = NULL;
     ruckig_output_t* output = NULL;
@@ -1231,6 +1304,8 @@ static void test_no_allocation_in_realtime_paths(void) {
     ruckig_input_t* input = NULL;
     ruckig_output_t* output = NULL;
     ruckig_trajectory_t* trajectory = NULL;
+    ruckig_control_interface_t per_control[1] = {RUCKIG_CONTROL_POSITION};
+    ruckig_synchronization_t per_sync[1] = {RUCKIG_SYNCHRONIZATION_TIME};
     double position[1] = {0.0};
     double velocity[1] = {0.0};
     double acceleration[1] = {0.0};
@@ -1245,6 +1320,8 @@ static void test_no_allocation_in_realtime_paths(void) {
     ruckig_input_max_velocity_data(input)[0] = 1.0;
     ruckig_input_max_acceleration_data(input)[0] = 1.0;
     ruckig_input_max_jerk_data(input)[0] = INFINITY;
+    CHECK_EQ_INT(ruckig_input_set_per_dof_control_interface(input, per_control, 1), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_input_set_per_dof_synchronization(input, per_sync, 1), RUCKIG_WORKING);
 
     ruckig_allocation_counters_reset();
     allocations_before = ruckig_allocation_count();
@@ -1286,6 +1363,7 @@ void run_api_tests(void) {
     test_create_destroy();
     test_null_handles_and_invalid_queries();
     test_input_defaults_and_accessors();
+    test_per_dof_setters_and_clear();
     test_optional_setters_and_pass_to_input();
     test_dof_mismatch_and_invalid_discrete_duration();
     test_validation();

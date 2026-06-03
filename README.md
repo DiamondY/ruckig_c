@@ -19,18 +19,21 @@ Implemented and covered by fixed C/oracle tests plus deterministic random oracle
 - Third-order velocity trajectories.
 - Third-order position trajectories, including blocked intervals and brake pre-trajectory handling.
 - Multi-DoF synchronization modes: `Time`, `TimeIfNecessary`, `Phase`, and `None`.
+- Per-DoF control-interface and synchronization overrides.
 - Continuous and discrete duration handling.
 - Directional min velocity/min acceleration limits.
 - Disabled DoF behavior.
 - Offline `ruckig_calculate`, online `ruckig_update`, `ruckig_output_pass_to_input`.
 - Trajectory duration, independent minimum durations, sampling, position extrema, and first-time-at-position helpers.
-- C examples for position, offline position, velocity, stop, and minimum duration.
+- C examples for position, offline position, online update, per-DoF overrides,
+  velocity, stop, and minimum duration.
 
 Release-readiness evidence is tracked in `docs/release_checklist.md`. The
 post-release stability queue is tracked in `docs/roadmap.md`. Current release
 scope intentionally excludes:
 
-- Waypoints, per-section constraints, cloud, Python/Rust bindings, and per-DoF control/sync overrides are intentionally outside the first public C API.
+- Waypoints, per-section constraints, cloud, and Python/Rust bindings remain
+  intentionally outside the public C API.
 
 ## Build
 
@@ -109,6 +112,14 @@ Optional first-release fields:
 - `ruckig_input_set_min_acceleration` / `ruckig_input_clear_min_acceleration`.
 - `ruckig_input_set_minimum_duration` / `ruckig_input_clear_minimum_duration`.
 - Global mode setters: `ruckig_input_set_control_interface`, `ruckig_input_set_synchronization`, and `ruckig_input_set_duration_discretization`.
+
+Per-DoF override setters:
+
+- `ruckig_input_set_per_dof_control_interface` / `ruckig_input_clear_per_dof_control_interface`.
+- `ruckig_input_set_per_dof_synchronization` / `ruckig_input_clear_per_dof_synchronization`.
+
+When a per-DoF vector is enabled, its `count` must match the input DoF count.
+Clearing a per-DoF vector restores the matching global setter behavior.
 
 Numerical inputs must be finite except where the C++ baseline accepts infinite acceleration or jerk limits to select lower-order solvers. Velocity, acceleration, and jerk maxima must be non-negative, directional minima must be non-positive, and enabled DoFs must satisfy the same current/target state limit checks as the C++ oracle when validation requests those checks.
 
@@ -199,6 +210,7 @@ The C examples are in `examples/c`:
 - `01_position.c`
 - `02_position_offline.c`
 - `03_minimal_online.c`
+- `04_per_dof_override.c`
 - `05_velocity.c`
 - `06_stop.c`
 - `07_minimum_duration.c`
@@ -215,7 +227,14 @@ The oracle executable also accepts a deterministic random smoke-test mode:
 ruckig_c_oracle_tests --random 100 --seed 1
 ```
 
-The random generator covers first/second/third-order position and velocity cases, 1-3 DoF inputs, synchronization modes, continuous/discrete duration, directional limits, disabled DoFs, and general third-order position states. Development random coverage has been run with `100,000` trajectories for seeds `1`, `2`, and `41`; the release stress command has been run with `1,000,000` trajectories for seed `1`. See `docs/verification_report.md`.
+The fixed oracle suite also covers per-DoF control-interface and
+synchronization overrides. The random generator covers first/second/third-order
+position and velocity cases, 1-3 DoF inputs, synchronization modes,
+continuous/discrete duration, directional limits, disabled DoFs, and general
+third-order position states. Development random coverage has been run with
+`100,000` trajectories for seeds `1`, `2`, and `41`; the release stress command
+has been run with `1,000,000` trajectories for seed `1`. See
+`docs/verification_report.md`.
 
 ## Performance Benchmark
 

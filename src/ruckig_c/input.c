@@ -12,6 +12,14 @@ static bool* allocate_bool_vector(size_t count) {
     return (bool*)ruckig_calloc(count, sizeof(bool));
 }
 
+static ruckig_control_interface_t* allocate_control_interface_vector(size_t count) {
+    return (ruckig_control_interface_t*)ruckig_calloc(count, sizeof(ruckig_control_interface_t));
+}
+
+static ruckig_synchronization_t* allocate_synchronization_vector(size_t count) {
+    return (ruckig_synchronization_t*)ruckig_calloc(count, sizeof(ruckig_synchronization_t));
+}
+
 static bool allocate_input_vectors(ruckig_input_t* input) {
     const size_t n = input->dofs;
     input->current_position = allocate_double_vector(n);
@@ -26,17 +34,22 @@ static bool allocate_input_vectors(ruckig_input_t* input) {
     input->enabled = allocate_bool_vector(n);
     input->min_velocity = allocate_double_vector(n);
     input->min_acceleration = allocate_double_vector(n);
+    input->per_dof_control_interface = allocate_control_interface_vector(n);
+    input->per_dof_synchronization = allocate_synchronization_vector(n);
 
     return input->current_position && input->current_velocity && input->current_acceleration
         && input->target_position && input->target_velocity && input->target_acceleration
         && input->max_velocity && input->max_acceleration && input->max_jerk
-        && input->enabled && input->min_velocity && input->min_acceleration;
+        && input->enabled && input->min_velocity && input->min_acceleration
+        && input->per_dof_control_interface && input->per_dof_synchronization;
 }
 
 static void initialize_input_defaults(ruckig_input_t* input) {
     size_t i;
     input->control_interface = RUCKIG_CONTROL_POSITION;
     input->synchronization = RUCKIG_SYNCHRONIZATION_TIME;
+    input->has_per_dof_control_interface = false;
+    input->has_per_dof_synchronization = false;
     input->duration_discretization = RUCKIG_DURATION_CONTINUOUS;
     input->has_min_velocity = false;
     input->has_min_acceleration = false;
@@ -47,6 +60,8 @@ static void initialize_input_defaults(ruckig_input_t* input) {
         input->max_acceleration[i] = INFINITY;
         input->max_jerk[i] = INFINITY;
         input->enabled[i] = true;
+        input->per_dof_control_interface[i] = RUCKIG_CONTROL_POSITION;
+        input->per_dof_synchronization[i] = RUCKIG_SYNCHRONIZATION_TIME;
     }
 }
 
@@ -90,6 +105,8 @@ void ruckig_input_destroy(ruckig_input_t* input) {
     ruckig_free(input->enabled);
     ruckig_free(input->min_velocity);
     ruckig_free(input->min_acceleration);
+    ruckig_free(input->per_dof_control_interface);
+    ruckig_free(input->per_dof_synchronization);
     ruckig_free(input);
 }
 
@@ -151,6 +168,56 @@ ruckig_result_t ruckig_input_set_synchronization(
     }
     input->synchronization = synchronization;
     return RUCKIG_WORKING;
+}
+
+ruckig_result_t ruckig_input_set_per_dof_control_interface(
+    ruckig_input_t* input,
+    const ruckig_control_interface_t* values,
+    size_t count
+) {
+    size_t i;
+    if (!input || !values || count != input->dofs || count == 0) {
+        return RUCKIG_ERROR_INVALID_INPUT;
+    }
+    for (i = 0; i < count; ++i) {
+        if (values[i] != RUCKIG_CONTROL_POSITION && values[i] != RUCKIG_CONTROL_VELOCITY) {
+            return RUCKIG_ERROR_INVALID_INPUT;
+        }
+    }
+    memcpy(input->per_dof_control_interface, values, sizeof(ruckig_control_interface_t) * count);
+    input->has_per_dof_control_interface = true;
+    return RUCKIG_WORKING;
+}
+
+void ruckig_input_clear_per_dof_control_interface(ruckig_input_t* input) {
+    if (input) {
+        input->has_per_dof_control_interface = false;
+    }
+}
+
+ruckig_result_t ruckig_input_set_per_dof_synchronization(
+    ruckig_input_t* input,
+    const ruckig_synchronization_t* values,
+    size_t count
+) {
+    size_t i;
+    if (!input || !values || count != input->dofs || count == 0) {
+        return RUCKIG_ERROR_INVALID_INPUT;
+    }
+    for (i = 0; i < count; ++i) {
+        if (values[i] < RUCKIG_SYNCHRONIZATION_TIME || values[i] > RUCKIG_SYNCHRONIZATION_NONE) {
+            return RUCKIG_ERROR_INVALID_INPUT;
+        }
+    }
+    memcpy(input->per_dof_synchronization, values, sizeof(ruckig_synchronization_t) * count);
+    input->has_per_dof_synchronization = true;
+    return RUCKIG_WORKING;
+}
+
+void ruckig_input_clear_per_dof_synchronization(ruckig_input_t* input) {
+    if (input) {
+        input->has_per_dof_synchronization = false;
+    }
 }
 
 ruckig_result_t ruckig_input_set_duration_discretization(
@@ -232,6 +299,10 @@ void ruckig_input_clear_minimum_duration(ruckig_input_t* input) {
     }
 }
 
+static ruckig_control_interface_t effective_control_interface(const ruckig_input_t* input, size_t dof) {
+    return input->has_per_dof_control_interface ? input->per_dof_control_interface[dof] : input->control_interface;
+}
+
 static double v_at_a_zero(double v0, double a0, double j) {
     return v0 + (a0 * a0) / (2.0 * j);
 }
@@ -259,6 +330,7 @@ ruckig_result_t ruckig_validate_input(
         const double af = input->target_acceleration[dof];
         const double v0 = input->current_velocity[dof];
         const double vf = input->target_velocity[dof];
+        const ruckig_control_interface_t control_interface = effective_control_interface(input, dof);
 
         if (isnan(j_max) || j_max < 0.0 || isnan(a_max) || a_max < 0.0 || isnan(a_min) || a_min > 0.0) {
             return RUCKIG_ERROR_INVALID_INPUT;
@@ -273,7 +345,7 @@ ruckig_result_t ruckig_validate_input(
             return RUCKIG_ERROR_INVALID_INPUT;
         }
 
-        if (input->control_interface == RUCKIG_CONTROL_POSITION) {
+        if (control_interface == RUCKIG_CONTROL_POSITION) {
             const double p0 = input->current_position[dof];
             const double pf = input->target_position[dof];
             const double v_max = input->max_velocity[dof];
@@ -327,9 +399,13 @@ ruckig_result_t ruckig_input_copy_state(const ruckig_input_t* src, ruckig_input_
     memcpy(dst->enabled, src->enabled, sizeof(bool) * n);
     memcpy(dst->min_velocity, src->min_velocity, sizeof(double) * n);
     memcpy(dst->min_acceleration, src->min_acceleration, sizeof(double) * n);
+    memcpy(dst->per_dof_control_interface, src->per_dof_control_interface, sizeof(ruckig_control_interface_t) * n);
+    memcpy(dst->per_dof_synchronization, src->per_dof_synchronization, sizeof(ruckig_synchronization_t) * n);
     dst->has_min_velocity = src->has_min_velocity;
     dst->has_min_acceleration = src->has_min_acceleration;
     dst->has_minimum_duration = src->has_minimum_duration;
+    dst->has_per_dof_control_interface = src->has_per_dof_control_interface;
+    dst->has_per_dof_synchronization = src->has_per_dof_synchronization;
     dst->minimum_duration = src->minimum_duration;
     dst->control_interface = src->control_interface;
     dst->synchronization = src->synchronization;
@@ -361,6 +437,26 @@ static bool bool_arrays_equal(const bool* lhs, const bool* rhs, size_t count) {
     return true;
 }
 
+static bool control_interface_arrays_equal(const ruckig_control_interface_t* lhs, const ruckig_control_interface_t* rhs, size_t count) {
+    size_t i;
+    for (i = 0; i < count; ++i) {
+        if (lhs[i] != rhs[i]) {
+            return false;
+        }
+    }
+    return true;
+}
+
+static bool synchronization_arrays_equal(const ruckig_synchronization_t* lhs, const ruckig_synchronization_t* rhs, size_t count) {
+    size_t i;
+    for (i = 0; i < count; ++i) {
+        if (lhs[i] != rhs[i]) {
+            return false;
+        }
+    }
+    return true;
+}
+
 bool ruckig_input_equals(const ruckig_input_t* lhs, const ruckig_input_t* rhs) {
     const size_t n = lhs && rhs ? lhs->dofs : 0;
     if (!lhs || !rhs || lhs->dofs != rhs->dofs) {
@@ -373,6 +469,8 @@ bool ruckig_input_equals(const ruckig_input_t* lhs, const ruckig_input_t* rhs) {
         && lhs->has_min_velocity == rhs->has_min_velocity
         && lhs->has_min_acceleration == rhs->has_min_acceleration
         && lhs->has_minimum_duration == rhs->has_minimum_duration
+        && lhs->has_per_dof_control_interface == rhs->has_per_dof_control_interface
+        && lhs->has_per_dof_synchronization == rhs->has_per_dof_synchronization
         && (!lhs->has_minimum_duration || lhs->minimum_duration == rhs->minimum_duration)
         && double_arrays_equal(lhs->current_position, rhs->current_position, n)
         && double_arrays_equal(lhs->current_velocity, rhs->current_velocity, n)
@@ -385,5 +483,7 @@ bool ruckig_input_equals(const ruckig_input_t* lhs, const ruckig_input_t* rhs) {
         && double_arrays_equal(lhs->max_jerk, rhs->max_jerk, n)
         && (!lhs->has_min_velocity || double_arrays_equal(lhs->min_velocity, rhs->min_velocity, n))
         && (!lhs->has_min_acceleration || double_arrays_equal(lhs->min_acceleration, rhs->min_acceleration, n))
+        && (!lhs->has_per_dof_control_interface || control_interface_arrays_equal(lhs->per_dof_control_interface, rhs->per_dof_control_interface, n))
+        && (!lhs->has_per_dof_synchronization || synchronization_arrays_equal(lhs->per_dof_synchronization, rhs->per_dof_synchronization, n))
         && bool_arrays_equal(lhs->enabled, rhs->enabled, n);
 }

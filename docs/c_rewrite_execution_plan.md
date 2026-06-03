@@ -116,9 +116,10 @@ public API commitment for these features. Ruckig Community `0.17.3` does not
 include the Pro local waypoint implementation, and this rewrite must not infer
 or recreate that proprietary behavior.
 
-The first release supports global control interface and global synchronization
-settings only. Per-DoF control-interface and per-DoF synchronization overrides
-from the C++ API are deferred and must not be silently emulated.
+The first `0.1.0` release supports global control interface and global
+synchronization settings only. Per-DoF control-interface and per-DoF
+synchronization overrides from the C++ API were deferred for `0.1.0` and are
+implemented separately in `0.2.0`; see `docs/design_per_dof_overrides.md`.
 
 ## 5. Proposed C API
 
@@ -130,9 +131,9 @@ Version macros:
 
 ```c
 #define RUCKIG_C_VERSION_MAJOR 0
-#define RUCKIG_C_VERSION_MINOR 1
+#define RUCKIG_C_VERSION_MINOR 2
 #define RUCKIG_C_VERSION_PATCH 0
-#define RUCKIG_C_VERSION_STRING "0.1.0"
+#define RUCKIG_C_VERSION_STRING "0.2.0"
 ```
 
 Core public types:

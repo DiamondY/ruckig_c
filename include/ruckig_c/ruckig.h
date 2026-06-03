@@ -9,9 +9,9 @@ extern "C" {
 #endif
 
 #define RUCKIG_C_VERSION_MAJOR 0
-#define RUCKIG_C_VERSION_MINOR 1
+#define RUCKIG_C_VERSION_MINOR 2
 #define RUCKIG_C_VERSION_PATCH 0
-#define RUCKIG_C_VERSION_STRING "0.1.0"
+#define RUCKIG_C_VERSION_STRING "0.2.0"
 
 #ifndef RUCKIG_C_API
 #  if defined(RUCKIG_C_STATIC_DEFINE)
@@ -86,7 +86,6 @@ typedef struct ruckig ruckig_t;
  * - No per-section constraints.
  * - No cloud API.
  * - No Python or Rust bindings in this C ABI.
- * - No per-DoF control-interface or synchronization overrides.
  *
  * These unsupported features are intentionally not exposed as public setters.
  * If compatibility entry points are added later, they must fail explicitly with
@@ -180,6 +179,22 @@ RUCKIG_C_API ruckig_result_t ruckig_input_set_synchronization(
     ruckig_input_t* input,
     ruckig_synchronization_t synchronization
 );
+
+RUCKIG_C_API ruckig_result_t ruckig_input_set_per_dof_control_interface(
+    ruckig_input_t* input,
+    const ruckig_control_interface_t* values,
+    size_t count
+);
+
+RUCKIG_C_API void ruckig_input_clear_per_dof_control_interface(ruckig_input_t* input);
+
+RUCKIG_C_API ruckig_result_t ruckig_input_set_per_dof_synchronization(
+    ruckig_input_t* input,
+    const ruckig_synchronization_t* values,
+    size_t count
+);
+
+RUCKIG_C_API void ruckig_input_clear_per_dof_synchronization(ruckig_input_t* input);
 
 RUCKIG_C_API ruckig_result_t ruckig_input_set_duration_discretization(
     ruckig_input_t* input,

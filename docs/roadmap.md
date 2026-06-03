@@ -24,9 +24,11 @@ follow-up work for stability and future feature planning.
 
 ## 0.2.0 Feature Planning
 
-- Evaluate per-DoF control-interface and synchronization overrides before waypoints or bindings.
-- Produce a dedicated design document before adding any public `0.2.0` API; see `docs/design_per_dof_overrides.md`.
-- Define how per-DoF overrides are represented in C, how they inherit global defaults, how unsupported combinations fail, and how the oracle harness compares them.
+- Done for `0.2.0`: per-DoF control-interface and synchronization overrides
+  implemented after the dedicated design document in
+  `docs/design_per_dof_overrides.md`.
+- Done for `0.2.0`: fixed oracle cases compare mixed per-DoF control and
+  synchronization settings against the frozen C++ baseline.
 - Defer waypoints and per-section constraints until a separate design addresses the Community cloud/pro behavior boundary.
 - Defer Python and Rust bindings until the C ABI has stabilized through `0.1.x`.
 - Treat any upstream Ruckig baseline update as a separate project with source inventory, tolerance review, oracle corpus updates, full random stress, and new performance baselines.

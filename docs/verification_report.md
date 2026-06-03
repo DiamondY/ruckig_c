@@ -496,3 +496,78 @@ Result:
 
 The release random rerun executed `--random 1000000 --seed 1` and completed in
 about 260 seconds.
+
+## 2026-06-03 0.2.0 Per-DoF Override Implementation
+
+This pass verifies the `0.2.0` per-DoF control-interface and synchronization
+override implementation. It includes public C API setters/clearers, mixed
+position/velocity control dispatch, mixed `Time`/`None` synchronization
+dispatch, fixed C++ oracle cases, C API boundary tests, no-allocation coverage
+with per-DoF settings enabled, and the new C example.
+
+Static release CTest excluding the long release random test:
+
+```powershell
+cmake --build build_release_check_ninja --config Release
+ctest --test-dir build_release_check_ninja --output-on-failure -E ruckig_c_oracle_random_release
+```
+
+Result:
+
+```text
+100% tests passed, 0 tests failed out of 17
+```
+
+This includes the new C example:
+
+- `example_ruckig_c_04_per_dof_override`
+
+The fixed oracle suite now reports:
+
+```text
+Oracle comparisons passed: 48
+```
+
+Shared-library release CTest excluding the long release random test:
+
+```powershell
+cmake --build build_release_check_shared --config Release
+ctest --test-dir build_release_check_shared --output-on-failure -E ruckig_c_oracle_random_release
+```
+
+Result:
+
+```text
+100% tests passed, 0 tests failed out of 16
+```
+
+Additional deterministic random oracle runs:
+
+```powershell
+.\build_release_check_ninja\ruckig_c_oracle_tests.exe --random 100000 --seed 2
+.\build_release_check_ninja\ruckig_c_oracle_tests.exe --random 100000 --seed 41
+```
+
+Results:
+
+```text
+Oracle comparisons passed: 48
+Random oracle comparisons passed: 100000 seed 2
+Oracle comparisons passed: 48
+Random oracle comparisons passed: 100000 seed 41
+```
+
+Manual release random oracle rerun:
+
+```powershell
+ctest --test-dir build_release_check_ninja -R ruckig_c_oracle_random_release --output-on-failure
+```
+
+Result:
+
+```text
+100% tests passed, 0 tests failed out of 1
+```
+
+The release random rerun executed `--random 1000000 --seed 1` and completed in
+about 267 seconds.

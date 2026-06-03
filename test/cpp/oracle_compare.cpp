@@ -41,6 +41,8 @@ struct CaseData {
     std::vector<bool> enabled {};
     std::vector<double> min_velocity {};
     std::vector<double> min_acceleration {};
+    std::vector<ruckig_control_interface_t> per_dof_control_interface {};
+    std::vector<ruckig_synchronization_t> per_dof_synchronization {};
 };
 
 int failures = 0;
@@ -162,6 +164,35 @@ void fill_oracle_input(const CaseData& test_case, ruckig::InputParameter<ruckig:
     if (test_case.has_minimum_duration) {
         input.minimum_duration = test_case.minimum_duration;
     }
+    if (!test_case.per_dof_control_interface.empty()) {
+        std::vector<ruckig::ControlInterface> per_dof(test_case.per_dof_control_interface.size());
+        for (size_t i = 0; i < per_dof.size(); ++i) {
+            per_dof[i] = test_case.per_dof_control_interface[i] == RUCKIG_CONTROL_VELOCITY
+                ? ruckig::ControlInterface::Velocity
+                : ruckig::ControlInterface::Position;
+        }
+        input.per_dof_control_interface = per_dof;
+    }
+    if (!test_case.per_dof_synchronization.empty()) {
+        std::vector<ruckig::Synchronization> per_dof(test_case.per_dof_synchronization.size());
+        for (size_t i = 0; i < per_dof.size(); ++i) {
+            switch (test_case.per_dof_synchronization[i]) {
+                case RUCKIG_SYNCHRONIZATION_TIME:
+                    per_dof[i] = ruckig::Synchronization::Time;
+                    break;
+                case RUCKIG_SYNCHRONIZATION_TIME_IF_NECESSARY:
+                    per_dof[i] = ruckig::Synchronization::TimeIfNecessary;
+                    break;
+                case RUCKIG_SYNCHRONIZATION_PHASE:
+                    per_dof[i] = ruckig::Synchronization::Phase;
+                    break;
+                case RUCKIG_SYNCHRONIZATION_NONE:
+                    per_dof[i] = ruckig::Synchronization::None;
+                    break;
+            }
+        }
+        input.per_dof_synchronization = per_dof;
+    }
 }
 
 void fill_c_input(const CaseData& test_case, ruckig_input_t* input) {
@@ -170,6 +201,20 @@ void fill_c_input(const CaseData& test_case, ruckig_input_t* input) {
     ruckig_input_set_duration_discretization(input, test_case.duration_discretization);
     if (test_case.has_minimum_duration) {
         ruckig_input_set_minimum_duration(input, test_case.minimum_duration);
+    }
+    if (!test_case.per_dof_control_interface.empty()) {
+        ruckig_input_set_per_dof_control_interface(
+            input,
+            test_case.per_dof_control_interface.data(),
+            test_case.per_dof_control_interface.size()
+        );
+    }
+    if (!test_case.per_dof_synchronization.empty()) {
+        ruckig_input_set_per_dof_synchronization(
+            input,
+            test_case.per_dof_synchronization.data(),
+            test_case.per_dof_synchronization.size()
+        );
     }
 
     copy_vector(ruckig_input_current_position_data(input), test_case.current_position);
@@ -488,6 +533,26 @@ void print_case_repro(const CaseData& test_case) {
         << " sync=" << static_cast<int>(test_case.synchronization)
         << " discrete=" << static_cast<int>(test_case.duration_discretization)
         << '\n';
+    auto print_control_vector = [](const char* label, const std::vector<ruckig_control_interface_t>& values) {
+        if (values.empty()) {
+            return;
+        }
+        std::cerr << label << ':';
+        for (auto value: values) {
+            std::cerr << ' ' << static_cast<int>(value);
+        }
+        std::cerr << '\n';
+    };
+    auto print_sync_vector = [](const char* label, const std::vector<ruckig_synchronization_t>& values) {
+        if (values.empty()) {
+            return;
+        }
+        std::cerr << label << ':';
+        for (auto value: values) {
+            std::cerr << ' ' << static_cast<int>(value);
+        }
+        std::cerr << '\n';
+    };
     auto print_vector = [](const char* label, const std::vector<double>& values) {
         std::cerr << label << ':';
         for (double value: values) {
@@ -504,6 +569,8 @@ void print_case_repro(const CaseData& test_case) {
     print_vector("max_velocity", test_case.max_velocity);
     print_vector("max_acceleration", test_case.max_acceleration);
     print_vector("max_jerk", test_case.max_jerk);
+    print_control_vector("per_dof_control_interface", test_case.per_dof_control_interface);
+    print_sync_vector("per_dof_synchronization", test_case.per_dof_synchronization);
 }
 
 CaseData make_random_case(RandomGenerator& rng, size_t index) {
@@ -1595,6 +1662,104 @@ int main(int argc, char** argv) {
         {1.2457942579019192, 1.0851441673204831},
         {1.3710032459860537, 1.1638368312831098},
         {}
+    });
+
+    cases.push_back(CaseData{
+        "per-dof-global-position-one-velocity-override",
+        2,
+        0.01,
+        RUCKIG_CONTROL_POSITION,
+        RUCKIG_SYNCHRONIZATION_TIME,
+        RUCKIG_DURATION_CONTINUOUS,
+        false,
+        0.0,
+        {0.0, 0.0},
+        {0.0, 0.0},
+        {0.0, 0.0},
+        {1.0, 0.0},
+        {0.0, 0.8},
+        {0.0, 0.0},
+        {1.5, 0.0},
+        {1.2, 1.1},
+        {2.0, 1.7},
+        {},
+        {},
+        {},
+        {RUCKIG_CONTROL_POSITION, RUCKIG_CONTROL_VELOCITY}
+    });
+
+    cases.push_back(CaseData{
+        "per-dof-global-velocity-one-position-override",
+        2,
+        0.01,
+        RUCKIG_CONTROL_VELOCITY,
+        RUCKIG_SYNCHRONIZATION_TIME,
+        RUCKIG_DURATION_CONTINUOUS,
+        false,
+        0.0,
+        {0.0, 0.0},
+        {0.0, 0.0},
+        {0.0, 0.0},
+        {0.0, -1.0},
+        {0.7, 0.0},
+        {0.0, 0.0},
+        {0.0, 1.3},
+        {1.0, 1.1},
+        {1.6, 1.8},
+        {},
+        {},
+        {},
+        {RUCKIG_CONTROL_VELOCITY, RUCKIG_CONTROL_POSITION}
+    });
+
+    cases.push_back(CaseData{
+        "per-dof-global-time-one-none-sync",
+        2,
+        0.01,
+        RUCKIG_CONTROL_POSITION,
+        RUCKIG_SYNCHRONIZATION_TIME,
+        RUCKIG_DURATION_CONTINUOUS,
+        false,
+        0.0,
+        {0.0, 0.0},
+        {0.0, 0.0},
+        {0.0, 0.0},
+        {1.0, 3.0},
+        {0.0, 0.0},
+        {0.0, 0.0},
+        {1.0, 1.0},
+        {1.0, 1.0},
+        {2.0, 2.0},
+        {},
+        {},
+        {},
+        {},
+        {RUCKIG_SYNCHRONIZATION_TIME, RUCKIG_SYNCHRONIZATION_NONE}
+    });
+
+    cases.push_back(CaseData{
+        "per-dof-global-none-one-time-sync",
+        2,
+        0.01,
+        RUCKIG_CONTROL_POSITION,
+        RUCKIG_SYNCHRONIZATION_NONE,
+        RUCKIG_DURATION_CONTINUOUS,
+        false,
+        0.0,
+        {0.0, 0.0},
+        {0.0, 0.0},
+        {0.0, 0.0},
+        {1.0, 3.0},
+        {0.0, 0.0},
+        {0.0, 0.0},
+        {1.0, 1.0},
+        {1.0, 1.0},
+        {2.0, 2.0},
+        {},
+        {},
+        {},
+        {},
+        {RUCKIG_SYNCHRONIZATION_NONE, RUCKIG_SYNCHRONIZATION_TIME}
     });
 
     for (const auto& test_case: cases) {

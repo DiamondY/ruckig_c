@@ -1,9 +1,9 @@
 # Ruckig C API Diagnostics
 
 This document explains common public API failures and limit-selection behavior
-for `ruckig_c 0.1.x`. It describes the current C API only; waypoints,
-per-section constraints, cloud calculation, language bindings, and per-DoF
-control/synchronization overrides remain outside the `0.1.x` scope.
+for `ruckig_c`. It describes the current C API only; waypoints, per-section
+constraints, cloud calculation, and language bindings remain outside the
+supported scope.
 
 ## Successful Offline Calculation
 
@@ -31,10 +31,23 @@ or numerical inputs that cannot be validated. Common causes include:
 - `RUCKIG_DURATION_DISCRETE` with a non-positive `delta_time`.
 - Current or target state outside limits when the corresponding validation flag
   is enabled.
+- Per-DoF control-interface or synchronization setters called with a `NULL`
+  values pointer, a `count` that differs from the input DoF count, or an enum
+  value outside the public range.
 
 `ruckig_validate_input(otg, input, check_current, check_target)` only enforces
 current-state and target-state limit checks when the matching flag is `true`.
 `ruckig_calculate` validates target state limits.
+
+## Per-DoF Overrides
+
+Global setters define the default control-interface and synchronization mode.
+When a per-DoF vector is enabled, each DoF uses its own value from that vector.
+Use `ruckig_input_clear_per_dof_control_interface` or
+`ruckig_input_clear_per_dof_synchronization` to restore global-only behavior.
+
+Per-DoF storage is allocated during input creation. Setting or clearing per-DoF
+vectors does not allocate during `ruckig_calculate` or `ruckig_update`.
 
 ## Zero Limits
 

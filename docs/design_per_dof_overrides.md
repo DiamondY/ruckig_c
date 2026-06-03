@@ -1,8 +1,8 @@
 # Per-DoF Overrides Design
 
-This document defines the planned `0.2.0` design for per-DoF control-interface
-and synchronization overrides. It is a design gate only; merging this document
-does not add public API or implementation behavior.
+This document records the `0.2.0` design for per-DoF control-interface and
+synchronization overrides. The design gate has been implemented in the public C
+API and is verified against the frozen C++ oracle with fixed cases.
 
 ## Goals
 
@@ -15,7 +15,7 @@ does not add public API or implementation behavior.
 
 ## Public API Shape
 
-The planned C API additions are:
+The C API additions are:
 
 ```c
 ruckig_result_t ruckig_input_set_per_dof_control_interface(
@@ -59,30 +59,28 @@ The C++ oracle fields are:
 - `InputParameter::per_dof_control_interface`
 - `InputParameter::per_dof_synchronization`
 
-The oracle target should extend `CaseData` with optional per-DoF vectors and
-fill both the C++ input fields and the new C setters. Random per-DoF generation
-should remain disabled until the fixed cases are stable.
+The oracle target extends `CaseData` with optional per-DoF vectors and fills
+both the C++ input fields and the C setters. Random per-DoF generation remains
+disabled; fixed cases are used to keep the initial `0.2.0` surface focused.
 
-Required fixed oracle cases:
+Fixed oracle cases:
 
 - Global position with one velocity-control DoF override.
 - Global velocity with one position-control DoF override.
 - Global `Time` synchronization with one `None` DoF override.
 - Global `None` synchronization with one `Time` DoF override.
 - Clear per-DoF settings and verify behavior returns to the equivalent
-  global-only input.
+  global-only input in C API tests.
 
 ## Implementation Notes
 
-- Add optional vector flags and preallocated storage to the internal input
+- Optional vector flags and preallocated storage live in the internal input
   struct only; do not expose struct fields publicly.
-- Include per-DoF flags and values in input copy and equality checks.
-- Route solver dispatch through effective per-DoF settings, matching
+- Per-DoF flags and values are included in input copy and equality checks.
+- Solver dispatch uses effective per-DoF settings, matching
   `calculator_target.hpp` in the frozen C++ oracle.
 - Keep formula-heavy step1/step2 solver files unchanged unless an oracle
   mismatch proves a local fix is required.
-- Return `RUCKIG_ERROR_UNSUPPORTED` for any combination that cannot be matched
-  to the frozen oracle safely.
 
 ## Still Deferred
 

@@ -24,6 +24,10 @@ struct ruckig_input {
     size_t dofs;
     ruckig_control_interface_t control_interface;
     ruckig_synchronization_t synchronization;
+    bool has_per_dof_control_interface;
+    ruckig_control_interface_t* per_dof_control_interface;
+    bool has_per_dof_synchronization;
+    ruckig_synchronization_t* per_dof_synchronization;
     ruckig_duration_discretization_t duration_discretization;
     double* current_position;
     double* current_velocity;

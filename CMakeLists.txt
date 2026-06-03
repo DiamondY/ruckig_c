@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(ruckig_c_rewrite VERSION 0.1.0 LANGUAGES C)
+project(ruckig_c_rewrite VERSION 0.2.0 LANGUAGES C)
 
 include(CTest)
 include(GNUInstallDirs)
@@ -212,6 +212,10 @@ if(BUILD_RUCKIG_C_EXAMPLES)
   target_link_libraries(example-ruckig-c-03-minimal-online PRIVATE ruckig_c)
   add_test(NAME example_ruckig_c_03_minimal_online COMMAND example-ruckig-c-03-minimal-online)
 
+  add_executable(example-ruckig-c-04-per-dof-override examples/c/04_per_dof_override.c)
+  target_link_libraries(example-ruckig-c-04-per-dof-override PRIVATE ruckig_c)
+  add_test(NAME example_ruckig_c_04_per_dof_override COMMAND example-ruckig-c-04-per-dof-override)
+
   add_executable(example-ruckig-c-05-velocity examples/c/05_velocity.c)
   target_link_libraries(example-ruckig-c-05-velocity PRIVATE ruckig_c)
   add_test(NAME example_ruckig_c_05_velocity COMMAND example-ruckig-c-05-velocity)
@@ -230,6 +234,7 @@ if(BUILD_RUCKIG_C_EXAMPLES)
       example-ruckig-c-01-position
       example-ruckig-c-02-position-offline
       example-ruckig-c-03-minimal-online
+      example-ruckig-c-04-per-dof-override
       example-ruckig-c-05-velocity
       example-ruckig-c-06-stop
       example-ruckig-c-07-minimum-duration

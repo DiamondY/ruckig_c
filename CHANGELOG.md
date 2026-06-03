@@ -1,5 +1,33 @@
 # Changelog
 
+## 0.2.0 - Unreleased
+
+Added:
+
+- Public per-DoF control-interface override setters and clearers:
+  `ruckig_input_set_per_dof_control_interface` and
+  `ruckig_input_clear_per_dof_control_interface`.
+- Public per-DoF synchronization override setters and clearers:
+  `ruckig_input_set_per_dof_synchronization` and
+  `ruckig_input_clear_per_dof_synchronization`.
+- Fixed C++ oracle cases for mixed position/velocity control overrides and
+  mixed `Time`/`None` synchronization overrides.
+- C API tests for invalid per-DoF setter inputs, clear behavior, update
+  recalculation, and the no-allocation runtime contract with per-DoF settings
+  enabled.
+- Minimal per-DoF override C example wired into CMake and CTest.
+
+Changed:
+
+- Fixed oracle suite now contains 48 deterministic cases.
+- The target calculator dispatch now uses effective per-DoF control and
+  synchronization settings when per-DoF vectors are enabled.
+
+Still deferred:
+
+- Intermediate waypoints, per-section constraints, cloud calculation, Python
+  bindings, Rust bindings, and upstream baseline upgrades.
+
 ## 0.1.1 - Unreleased
 
 Added:
