@@ -1,47 +1,48 @@
 # Ruckig C 0.2.2 Release Checklist
 
-This checklist is the future `v0.2.2` patch-release evidence template. Open
-`[ ]` items are release gates to fill from the final release candidate commit;
-they do not indicate current implementation defects.
+This checklist records the `v0.2.2` patch-release closeout evidence. Local
+release-candidate gates were rerun after the version bump and dated changelog
+entry. Remote CI, manual workflow, tag, and GitHub Release evidence must be
+recorded after the release closeout commit is pushed.
 
 ## Scope
 
 - [ ] Final commit hash recorded.
-- [ ] Version is `0.2.2` in `CMakeLists.txt` if a `v0.2.2` tag is being cut.
-- [ ] Version macros in `include/ruckig_c/ruckig.h` are `0.2.2` if a
+- [x] Version is `0.2.2` in `CMakeLists.txt` if a `v0.2.2` tag is being cut.
+- [x] Version macros in `include/ruckig_c/ruckig.h` are `0.2.2` if a
   `v0.2.2` tag is being cut.
-- [ ] `CHANGELOG.md` has a dated `0.2.2` release entry.
-- [ ] No public C API additions unless separately approved.
-- [ ] Public header diff reviewed against `v0.2.1`.
+- [x] `CHANGELOG.md` has a dated `0.2.2` release entry.
+- [x] No public C API additions unless separately approved.
+- [x] Public header diff reviewed against `v0.2.1`.
 - [ ] Linux exported-symbol snapshot reviewed.
-- [ ] Windows exported-symbol snapshot reviewed.
-- [ ] Result-code and enum numeric values unchanged.
-- [ ] No unintended public API additions.
-- [ ] Intermediate waypoints remain unsupported.
-- [ ] Per-section constraints remain unsupported.
-- [ ] Cloud calculation remains unsupported.
-- [ ] Python and Rust bindings remain deferred.
-- [ ] `original/ruckig-main` remains frozen as the Ruckig Community `0.17.3`
+- [x] Windows exported-symbol snapshot reviewed.
+- [x] Result-code and enum numeric values unchanged.
+- [x] No unintended public API additions.
+- [x] Intermediate waypoints remain unsupported.
+- [x] Per-section constraints remain unsupported.
+- [x] Cloud calculation remains unsupported.
+- [x] Python and Rust bindings remain deferred.
+- [x] `original/ruckig-main` remains frozen as the Ruckig Community `0.17.3`
   oracle baseline.
 
 ## Required Gates
 
-- [ ] `git status --short --branch` is clean before release closeout edits.
+- [x] `git status --short --branch` is clean before release closeout edits.
 - [ ] `git status --short --branch` is clean after the release closeout commit
   and before tagging.
-- [ ] Static CMake release tests pass on Windows clang/Ninja.
-- [ ] Shared-library release tests pass on Windows clang/Ninja.
-- [ ] Fixed C++ oracle suite passes and reports the final case count.
-- [ ] Routine per-DoF random smoke passes with `--random-per-dof 100 --seed 1`.
-- [ ] Ordinary development random oracle passes with `--random 100000 --seed 1`.
-- [ ] Ordinary development random oracle passes with `--random 100000 --seed 2`.
-- [ ] Ordinary development random oracle passes with `--random 100000 --seed 41`.
-- [ ] Per-DoF development random oracle passes with
+- [x] Static CMake release tests pass on Windows clang/Ninja.
+- [x] Shared-library release tests pass on Windows clang/Ninja.
+- [x] Fixed C++ oracle suite passes and reports the final case count.
+- [x] Routine per-DoF random smoke passes with `--random-per-dof 100 --seed 1`.
+- [x] Ordinary development random oracle passes with `--random 100000 --seed 1`.
+- [x] Ordinary development random oracle passes with `--random 100000 --seed 2`.
+- [x] Ordinary development random oracle passes with `--random 100000 --seed 41`.
+- [x] Per-DoF development random oracle passes with
   `--random-per-dof 100000 --seed 1`.
-- [ ] Release random oracle passes with `--random 1000000 --seed 1`.
-- [ ] Windows release performance benchmark average ratio is `<= 1.5`.
+- [x] Release random oracle passes with `--random 1000000 --seed 1`.
+- [x] Windows release performance benchmark average ratio is `<= 1.5`.
 - [ ] Linux release performance benchmark average ratio is `<= 1.5`.
-- [ ] Windows performance trend is compared against the `0.2.1` Windows
+- [x] Windows performance trend is compared against the `0.2.1` Windows
   release baseline.
 - [ ] Linux performance trend is compared against the `0.2.1` Linux release
   baseline.
@@ -50,15 +51,15 @@ they do not indicate current implementation defects.
   `release_random=true`.
 - [ ] Linux Clang ASan+UBSan passes.
 - [ ] Linux Valgrind passes.
-- [ ] Installed CMake consumer smoke test passes.
+- [x] Installed CMake consumer smoke test passes.
 - [ ] Linux pkg-config consumer smoke test passes.
 - [ ] Unix shared install-tree consumer CTest
   `ruckig_c_shared_install_consumer` passes where `pkg-config` is available.
-- [ ] Windows manual static consumer smoke test
+- [x] Windows manual static consumer smoke test
   `ruckig_c_windows_manual_static_consumer` passes where enabled.
-- [ ] Windows DLL consumer smoke test `ruckig_c_windows_dll_consumer` passes
+- [x] Windows DLL consumer smoke test `ruckig_c_windows_dll_consumer` passes
   where enabled.
-- [ ] Shared build exported-symbol target `ruckig_c_exported_symbols` produces
+- [x] Shared build exported-symbol target `ruckig_c_exported_symbols` produces
   a review artifact.
 - [ ] GitHub Actions `Linux exported symbols` and `Windows exported symbols`
   jobs upload ABI review artifacts.
@@ -69,34 +70,63 @@ they do not indicate current implementation defects.
 
 ```text
 Final release commit:
+To be recorded after the release closeout commit is created.
 Annotated tag object:
+To be recorded after tagging.
 Tag target commit:
+To be recorded after tagging.
 Push CI run id:
+To be recorded after push CI completes.
 Push CI URL:
+To be recorded after push CI completes.
 Push CI conclusion:
+To be recorded after push CI completes.
 Manual release random run id:
+To be recorded after workflow dispatch.
 Manual release random URL:
+To be recorded after workflow dispatch.
 Manual release random conclusion:
+To be recorded after workflow dispatch.
 Windows static CTest result:
+100% tests passed, 0 tests failed out of 20.
 Windows shared CTest result:
+100% tests passed, 0 tests failed out of 20.
 Fixed oracle suite result:
+Oracle comparisons passed: 64.
 Ordinary random seed 1 result:
+Oracle comparisons passed: 64; Random oracle comparisons passed: 100000 seed 1.
 Ordinary random seed 2 result:
+Oracle comparisons passed: 64; Random oracle comparisons passed: 100000 seed 2.
 Ordinary random seed 41 result:
+Oracle comparisons passed: 64; Random oracle comparisons passed: 100000 seed 41.
 Per-DoF random seed 1 result:
+Oracle comparisons passed: 64; Random per-DoF oracle comparisons passed: 100000 seed 1.
 Release random oracle result:
+100% tests passed, 0 tests failed out of 1; `--random 1000000 --seed 1` completed in 50.04 seconds.
 Windows performance result:
+average_ratio_c_over_oracle: 1.08231; threshold: 1.5.
 Linux performance result:
+To be recorded from the release commit push CI or manual workflow artifact.
 Windows/Linux performance trend versus 0.2.1:
+Windows local release ratio changed from `0.328289` in `0.2.1` to `1.08231` in `0.2.2`; both are below the `1.5` threshold. Linux trend is to be recorded from CI.
 Consumer automation result:
+Installed CMake consumer, Windows manual static consumer, and Windows DLL consumer passed in local release-check CTest. Linux pkg-config and shared install-tree consumers are to be recorded from CI.
 Linux exported-symbol artifact:
+To be recorded from CI artifact.
 Windows exported-symbol artifact:
+`build_release_check_shared/artifacts/abi/0.2.2/windows-exports.txt`.
 Linux exported-symbol CI artifact:
+To be recorded after push CI completes.
 Windows exported-symbol CI artifact:
+To be recorded after push CI completes.
 Exported symbol review result:
+Windows DLL exports reviewed with `llvm-readobj --coff-exports`; 66 public `ruckig_*` exports found, including lifecycle, input, output, trajectory, validation, calculate, update, reset, and per-DoF APIs.
 Public header diff review result:
+Public header diff from `v0.2.1` contains only version macro changes from `0.2.1` to `0.2.2`; no public functions, enum values, or result-code values changed.
 Enum/result-code review result:
+Enum and result-code numeric values unchanged from `v0.2.1`.
 GitHub Release URL:
+To be recorded after GitHub Release publication.
 ```
 
 ## ABI Review Commands

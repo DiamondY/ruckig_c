@@ -30,8 +30,9 @@ Implemented and covered by fixed C/oracle tests plus deterministic random oracle
 
 Release-readiness evidence is tracked in `docs/release_checklist.md` for
 `0.1.0`, `docs/release_checklist_0.2.0.md` for `0.2.0`, and
-`docs/release_checklist_0.2.1.md` for `0.2.1`. `v0.2.1` is the latest
-published release, and `main` is currently the `0.2.2 - Unreleased`
+`docs/release_checklist_0.2.1.md` for `0.2.1`, and
+`docs/release_checklist_0.2.2.md` for `0.2.2`. `v0.2.2` is the latest
+published release, and `main` is currently the `0.2.x`
 maintenance line. The post-release stability queue is tracked in
 `docs/roadmap.md`. Current release scope
 intentionally excludes:

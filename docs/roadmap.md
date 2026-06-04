@@ -39,13 +39,16 @@ follow-up work for stability and future feature planning.
 - Done for `0.2.1`: documentation source-of-truth cleanup, routine per-DoF
   random oracle smoke, post-`v0.2.0` hardening in the changelog, consumer
   packaging guidance, and API/ABI compatibility documentation.
-- In progress for `0.2.2`: automated exported-symbol evidence through the
-  shared-build `ruckig_c_exported_symbols` target, Windows static/DLL consumer
-  smoke scripts where supported by the release-check toolchain, and continued
-  fixed oracle regression corpus expansion.
-- Planned for `0.2.2`: record final ABI/exported-symbol, consumer, random
-  oracle, and performance trend evidence in `docs/release_checklist_0.2.2.md`
-  from the release candidate commit.
+- Done for `0.2.2`: automated exported-symbol evidence through the
+  shared-build `ruckig_c_exported_symbols` target and GitHub Actions
+  Linux/Windows exported-symbol artifact jobs.
+- Done for `0.2.2`: Windows static/DLL consumer smoke scripts where supported
+  by the release-check toolchain and continued fixed oracle regression corpus
+  expansion.
+- Planned for `0.2.3`: compare exported symbols against the `v0.2.2`
+  baseline in warning/evidence mode, strengthen existing consumer paths without
+  adding package-manager recipes, and continue targeted fixed oracle regression
+  expansion after the `v0.2.2` release scope is closed.
 - Before each `0.2.x` patch release, record Windows and Linux release
   benchmarks with average, p99, worst, and C/oracle average ratio.
 - Keep per-DoF override hardening focused on oracle coverage, diagnostics, and

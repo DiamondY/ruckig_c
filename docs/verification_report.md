@@ -1193,3 +1193,129 @@ The Windows export snapshot contains 66 public `ruckig_*` exports, including
 `ruckig_input_set_per_dof_control_interface`,
 `ruckig_input_set_per_dof_synchronization`, and
 `ruckig_trajectory_at_time`.
+
+## 2026-06-04 0.2.2 Local Release Closeout
+
+This pass verifies the local `0.2.2` release closeout after bumping the project
+version to `0.2.2` and converting the changelog entry to a dated release entry.
+Remote push CI, manual workflow-dispatch, tag, and GitHub Release evidence must
+be recorded after the release closeout commit is pushed.
+
+Local static release-check CTest:
+
+```powershell
+ctest --test-dir build_release_check_ninja --output-on-failure -E ruckig_c_oracle_random_release
+```
+
+Result:
+
+```text
+100% tests passed, 0 tests failed out of 20
+```
+
+Local shared release-check CTest:
+
+```powershell
+ctest --test-dir build_release_check_shared --output-on-failure -E ruckig_c_oracle_random_release
+```
+
+Result:
+
+```text
+100% tests passed, 0 tests failed out of 20
+```
+
+Fixed oracle suite:
+
+```powershell
+.\build_release_check_ninja\ruckig_c_oracle_tests.exe
+```
+
+Result:
+
+```text
+Oracle comparisons passed: 64
+```
+
+Development random oracle:
+
+```powershell
+.\build_release_check_ninja\ruckig_c_oracle_tests.exe --random 100000 --seed 2
+.\build_release_check_ninja\ruckig_c_oracle_tests.exe --random 100000 --seed 41
+```
+
+Result:
+
+```text
+Oracle comparisons passed: 64
+Random oracle comparisons passed: 100000 seed 2
+Oracle comparisons passed: 64
+Random oracle comparisons passed: 100000 seed 41
+```
+
+The seed `1` development random oracle passed inside both static and shared
+CTest runs through `ruckig_c_oracle_random_development`.
+
+Per-DoF development random oracle:
+
+```powershell
+.\build_release_check_ninja\ruckig_c_oracle_tests.exe --random-per-dof 100000 --seed 1
+```
+
+Result:
+
+```text
+Oracle comparisons passed: 64
+Random per-DoF oracle comparisons passed: 100000 seed 1
+```
+
+Release random oracle:
+
+```powershell
+ctest --test-dir build_release_check_ninja -R ruckig_c_oracle_random_release --output-on-failure
+```
+
+Result:
+
+```text
+100% tests passed, 0 tests failed out of 1
+```
+
+The release random oracle executed `--random 1000000 --seed 1` and completed in
+50.04 seconds.
+
+Windows consumer automation:
+
+```powershell
+ctest --test-dir build_release_check_ninja --output-on-failure -E ruckig_c_oracle_random_release
+ctest --test-dir build_release_check_shared --output-on-failure -E ruckig_c_oracle_random_release
+```
+
+Result:
+
+```text
+ruckig_c_windows_manual_static_consumer passed in the static CTest run.
+ruckig_c_windows_dll_consumer passed in the shared CTest run.
+```
+
+Exported-symbol evidence:
+
+```powershell
+cmake --build build_release_check_shared --target ruckig_c_exported_symbols
+```
+
+Result:
+
+```text
+Wrote exported symbols to E:/Yww/DownLoad/source/ruckig_c/build_release_check_shared/artifacts/abi/0.2.2/windows-exports.txt
+```
+
+The Windows export snapshot contains 66 public `ruckig_*` exports, including
+`ruckig_create`, `ruckig_calculate`, `ruckig_update`,
+`ruckig_input_set_per_dof_control_interface`,
+`ruckig_input_set_per_dof_synchronization`, and
+`ruckig_trajectory_at_time`.
+
+Public header diff from `v0.2.1` contains only version macro changes from
+`0.2.1` to `0.2.2`; public functions, enum numeric values, and result-code
+numeric values are unchanged. `original/ruckig-main` remains unchanged.
