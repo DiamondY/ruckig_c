@@ -524,3 +524,87 @@ This local release closeout run is within the release threshold of average
 calculation time no worse than `1.5x` the C++ oracle on the same benchmark
 corpus. Linux `0.2.3` release evidence must be recorded from push CI or the
 manual release workflow.
+
+## 2026-06-04 Linux 0.2.3 Manual Release Workflow Run
+
+- Source: GitHub Actions workflow-dispatch run `26956708717`, job
+  `Linux Clang performance`.
+- Commit: `833dde30417539dd7f09d04734c9fdbd38b8d32e`.
+- Command: `./build-perf/ruckig_c_performance_benchmark --samples 10000 --seed 1`.
+- OS: Linux, GitHub-hosted Ubuntu runner.
+- CPU identifier: `AMD EPYC 7763 64-Core Processor`.
+- C compiler: `Ubuntu clang version 18.1.3 (1ubuntu1)`.
+- C++ compiler: `Ubuntu clang version 18.1.3 (1ubuntu1)`.
+- CMake build type: `Release`.
+- Generator: `Ninja`.
+- Seed: `1`.
+- Samples: `10000`.
+
+| Metric | C implementation | C++ oracle |
+| --- | ---: | ---: |
+| Average | 700.273 ns | 554.33 ns |
+| p99 | 5290 ns | 4178 ns |
+| Worst | 43451 ns | 20318 ns |
+
+Average C/oracle ratio: `1.26328`.
+
+The benchmark job completed successfully and is below the release threshold of
+average calculation time no worse than `1.5x` the C++ oracle on the same
+benchmark corpus.
+
+## 0.2.4 Benchmark Template
+
+Use the same required corpus, `--samples 10000 --seed 1`, for `0.2.4`. Compare
+Windows results only against the `0.2.3` Windows benchmark context and Linux
+results only against the `0.2.3` Linux benchmark context; do not compare
+absolute timings across platforms or runner classes.
+
+### Windows clang release
+
+```text
+Source:
+Command:
+OS:
+CPU identifier:
+C compiler:
+C++ compiler:
+CMake build type:
+Generator:
+Samples:
+Seed:
+C average ns:
+C p99 ns:
+C worst ns:
+Oracle average ns:
+Oracle p99 ns:
+Oracle worst ns:
+Average C/oracle ratio:
+0.2.3 same-platform baseline ratio:
+Release threshold:
+Result:
+```
+
+### Linux clang release
+
+```text
+Source:
+Command:
+OS:
+CPU identifier:
+C compiler:
+C++ compiler:
+CMake build type:
+Generator:
+Samples:
+Seed:
+C average ns:
+C p99 ns:
+C worst ns:
+Oracle average ns:
+Oracle p99 ns:
+Oracle worst ns:
+Average C/oracle ratio:
+0.2.3 same-platform baseline ratio:
+Release threshold:
+Result:
+```

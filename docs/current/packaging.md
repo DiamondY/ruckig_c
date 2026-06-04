@@ -79,8 +79,8 @@ Current Windows toolchain status:
 
 - `clang` with the MSVC linker environment: verified by local release-check
   CTest.
-- `clang-cl`: verified for C-only CMake target consumption in CI; manual
-  static command-line linking is not yet separately verified.
+- `clang-cl`: verified for C-only CMake target consumption and standalone
+  manual static-link smoke in CI.
 - MSVC `cl`: not yet verified as a standalone manual static-link smoke.
 - MinGW: not yet verified.
 
@@ -120,8 +120,8 @@ Current Windows DLL consumer status:
 
 - `clang` with the MSVC linker environment: verified by local shared
   release-check CTest.
-- `clang-cl`: verified for C-only CMake target consumption in CI; standalone
-  DLL import-library smoke is not yet separately verified.
+- `clang-cl`: verified through a shared C-only CI job that builds the DLL,
+  links the import library, updates the process `PATH`, and runs the consumer.
 - MSVC `cl`: not yet verified as a standalone DLL consumer smoke.
 - MinGW: not yet verified.
 

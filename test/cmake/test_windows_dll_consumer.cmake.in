@@ -15,16 +15,30 @@ endif()
 file(REMOVE_RECURSE "${build_dir}")
 file(MAKE_DIRECTORY "${build_dir}")
 
-execute_process(
-  COMMAND
-    "@CMAKE_C_COMPILER@"
-    -std=c99
-    -I "@CMAKE_CURRENT_SOURCE_DIR@/include"
-    "@CMAKE_CURRENT_SOURCE_DIR@/examples/c/00_minimal_offline.c"
-    "${RUCKIG_C_IMPORT_LIBRARY}"
-    -o "${exe}"
-  RESULT_VARIABLE compile_result
-)
+if("@CMAKE_C_COMPILER_FRONTEND_VARIANT@" STREQUAL "MSVC")
+  execute_process(
+    COMMAND
+      "@CMAKE_C_COMPILER@"
+      /nologo
+      /TC
+      "/I@CMAKE_CURRENT_SOURCE_DIR@/include"
+      "@CMAKE_CURRENT_SOURCE_DIR@/examples/c/00_minimal_offline.c"
+      "${RUCKIG_C_IMPORT_LIBRARY}"
+      "/Fe:${exe}"
+    RESULT_VARIABLE compile_result
+  )
+else()
+  execute_process(
+    COMMAND
+      "@CMAKE_C_COMPILER@"
+      -std=c99
+      -I "@CMAKE_CURRENT_SOURCE_DIR@/include"
+      "@CMAKE_CURRENT_SOURCE_DIR@/examples/c/00_minimal_offline.c"
+      "${RUCKIG_C_IMPORT_LIBRARY}"
+      -o "${exe}"
+    RESULT_VARIABLE compile_result
+  )
+endif()
 if(NOT compile_result EQUAL 0)
   message(FATAL_ERROR "Windows DLL consumer compile/link failed")
 endif()

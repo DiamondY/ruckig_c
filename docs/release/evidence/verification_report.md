@@ -1562,3 +1562,74 @@ Local consumer evidence:
 - Windows DLL consumer passed in local shared release-check CTest.
 - Linux pkg-config and Unix shared install-tree consumers must be recorded from
   CI or a Unix release gate.
+
+## 2026-06-04 0.2.3 Release Publication
+
+The `v0.2.3` release was published after the local closeout gate, push CI, and
+manual release-random workflow completed successfully.
+
+Release identity:
+
+- Final release commit: `833dde30417539dd7f09d04734c9fdbd38b8d32e`.
+- Annotated tag object: `b5c2979b97853cec56992ef13e73ac2e18653424`.
+- Tag target commit: `833dde30417539dd7f09d04734c9fdbd38b8d32e`.
+- Push CI run id: `26956280658`, conclusion `success`.
+- Push CI URL:
+  `https://github.com/DiamondY/ruckig_c/actions/runs/26956280658`.
+- Manual release random workflow run id: `26956708717`, conclusion `success`.
+- Manual release random URL:
+  `https://github.com/DiamondY/ruckig_c/actions/runs/26956708717`.
+- GitHub Release URL:
+  `https://github.com/DiamondY/ruckig_c/releases/tag/v0.2.3`.
+
+Successful push CI jobs:
+
+- `Windows clang-cl C-only`
+- `Windows clang oracle`
+- `Linux GCC C-only`
+- `Linux Clang oracle`
+- `macOS Clang C-only`
+- `Linux Clang ASan UBSan`
+- `Linux Valgrind`
+- `Linux Clang performance`
+- `Linux exported symbols`
+- `Windows exported symbols`
+
+Successful manual release random workflow jobs:
+
+- `Manual release random oracle`
+- `Windows clang-cl C-only`
+- `Windows clang oracle`
+- `Linux GCC C-only`
+- `Linux Clang oracle`
+- `macOS Clang C-only`
+- `Linux Clang ASan UBSan`
+- `Linux Valgrind`
+- `Linux Clang performance`
+- `Linux exported symbols`
+- `Windows exported symbols`
+
+The manual workflow ran against commit
+`833dde30417539dd7f09d04734c9fdbd38b8d32e`. Its Linux performance job reported
+`average_ratio_c_over_oracle: 1.26328`, below the `1.5` release threshold, and
+the manual release random oracle job completed successfully in 59 seconds.
+
+## 2026-06-04 0.2.4 Maintenance Start
+
+This pass starts the `0.2.4 - Unreleased` maintenance queue after publishing
+`v0.2.3`. It does not change the public C API and does not modify
+`original/ruckig-main`.
+
+Implemented maintenance setup:
+
+- Added tracked `v0.2.3` Linux and Windows exported-symbol baselines under
+  `docs/abi/v0.2.3/`.
+- Updated the shared-build ABI comparison helper to compare current exports
+  against the `v0.2.3` baseline and write `0.2.4` build-tree artifacts.
+- Kept ABI comparison in warning/evidence mode for `0.2.4`; it is not a strict
+  CI fail gate.
+- Added `docs/release/checklists/0.2.4.md`.
+- Extended Windows consumer smoke scripts to support both GNU-like `clang` and
+  `clang-cl` frontend modes.
+- Added Windows `clang-cl` shared C-only CI coverage so DLL/import-library
+  consumer smoke also runs under the MSVC frontend variant.

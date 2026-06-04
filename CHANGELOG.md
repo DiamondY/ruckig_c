@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.2.4 - Unreleased
+
+Added:
+
+- `v0.2.3` Linux and Windows exported-symbol baselines for `0.2.4`
+  warning/evidence-only ABI comparison.
+- Windows `clang-cl` shared C-only CI coverage so the DLL/import-library
+  consumer smoke also runs under the MSVC frontend variant.
+
+Changed:
+
+- Windows static and DLL consumer smoke scripts now support both GNU-like
+  `clang` and `clang-cl` frontend modes.
+- `0.2.4` ABI comparison remains warning/evidence only; it is not a strict CI
+  fail gate.
+
+Still deferred:
+
+- Intermediate waypoints, per-section constraints, cloud calculation, Python
+  binding implementation, Rust bindings, and upstream baseline upgrades.
+
 ## 0.2.3 - 2026-06-04
 
 Added:

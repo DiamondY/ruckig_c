@@ -89,6 +89,28 @@ release has used the warning/evidence mode successfully on Windows and Linux,
 and after the project has a documented exception process for intentional public
 ABI changes.
 
+## 0.2.4 Baseline Comparison
+
+The `v0.2.3` release rolls the exported-symbol baseline forward for the next
+maintenance line:
+
+```text
+docs/abi/v0.2.3/linux-symbols.txt
+docs/abi/v0.2.3/windows-symbols.txt
+```
+
+Shared builds now write comparison artifacts under an `0.2.4` build-tree path,
+for example:
+
+```text
+build_release_check_shared/artifacts/abi/0.2.4/windows-exports.txt
+build_release_check_shared/artifacts/abi/0.2.4/windows-export-diff.txt
+```
+
+The `0.2.4` comparison remains warning/evidence only. Differences must be
+reviewed before release and recorded in the release checklist, but the helper
+is not a strict CI fail gate.
+
 ## Public Header Diff
 
 Review the public header against the previous release tag:

@@ -13,45 +13,63 @@ endif()
 file(REMOVE_RECURSE "${build_dir}")
 file(MAKE_DIRECTORY "${build_dir}")
 
-execute_process(
-  COMMAND
-    "@CMAKE_C_COMPILER@"
-    -std=c99
-    -DRUCKIG_C_STATIC_DEFINE
-    -I "@CMAKE_CURRENT_SOURCE_DIR@/include"
-    -c "@CMAKE_CURRENT_SOURCE_DIR@/examples/c/00_minimal_offline.c"
-    -o "${obj}"
-  RESULT_VARIABLE compile_result
-)
-if(NOT compile_result EQUAL 0)
-  message(FATAL_ERROR "Windows manual static consumer compile failed")
-endif()
+if("@CMAKE_C_COMPILER_FRONTEND_VARIANT@" STREQUAL "MSVC")
+  execute_process(
+    COMMAND
+      "@CMAKE_C_COMPILER@"
+      /nologo
+      /TC
+      /DRUCKIG_C_STATIC_DEFINE
+      "/I@CMAKE_CURRENT_SOURCE_DIR@/include"
+      "@CMAKE_CURRENT_SOURCE_DIR@/examples/c/00_minimal_offline.c"
+      "${RUCKIG_C_STATIC_LIBRARY}"
+      "/Fe:${exe}"
+    RESULT_VARIABLE build_result
+  )
+  if(NOT build_result EQUAL 0)
+    message(FATAL_ERROR "Windows clang-cl manual static consumer build failed")
+  endif()
+else()
+  execute_process(
+    COMMAND
+      "@CMAKE_C_COMPILER@"
+      -std=c99
+      -DRUCKIG_C_STATIC_DEFINE
+      -I "@CMAKE_CURRENT_SOURCE_DIR@/include"
+      -c "@CMAKE_CURRENT_SOURCE_DIR@/examples/c/00_minimal_offline.c"
+      -o "${obj}"
+    RESULT_VARIABLE compile_result
+  )
+  if(NOT compile_result EQUAL 0)
+    message(FATAL_ERROR "Windows manual static consumer compile failed")
+  endif()
 
-execute_process(
-  COMMAND
-    "@CMAKE_C_COMPILER@"
-    -nostartfiles
-    -nostdlib
-    -fuse-ld=lld-link
-    "${obj}"
-    "${RUCKIG_C_STATIC_LIBRARY}"
-    -Xlinker /subsystem:console
-    -o "${exe}"
-    -lkernel32
-    -luser32
-    -lgdi32
-    -lwinspool
-    -lshell32
-    -lole32
-    -loleaut32
-    -luuid
-    -lcomdlg32
-    -ladvapi32
-    -loldnames
-  RESULT_VARIABLE link_result
-)
-if(NOT link_result EQUAL 0)
-  message(FATAL_ERROR "Windows manual static consumer link failed")
+  execute_process(
+    COMMAND
+      "@CMAKE_C_COMPILER@"
+      -nostartfiles
+      -nostdlib
+      -fuse-ld=lld-link
+      "${obj}"
+      "${RUCKIG_C_STATIC_LIBRARY}"
+      -Xlinker /subsystem:console
+      -o "${exe}"
+      -lkernel32
+      -luser32
+      -lgdi32
+      -lwinspool
+      -lshell32
+      -lole32
+      -loleaut32
+      -luuid
+      -lcomdlg32
+      -ladvapi32
+      -loldnames
+    RESULT_VARIABLE link_result
+  )
+  if(NOT link_result EQUAL 0)
+    message(FATAL_ERROR "Windows manual static consumer link failed")
+  endif()
 endif()
 
 execute_process(

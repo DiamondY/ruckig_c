@@ -47,13 +47,11 @@ follow-up work for stability and future feature planning.
   expansion.
 - Done for `0.2.2`: published `v0.2.2` with final tag, GitHub Release, push
   CI, manual release-random workflow, performance, consumer, and ABI evidence.
-- In progress for `0.2.3`: compare exported symbols against the `v0.2.2`
-  baseline in warning/evidence mode, strengthen existing consumer paths without
-  adding package-manager recipes, and continue targeted fixed oracle regression
-  expansion after the `v0.2.2` release scope is closed.
-- Planned for `0.2.3`: keep ABI comparison as evidence-only, record package
-  manager feasibility without adding recipes, and require all new numerical
-  behavior to pass frozen C++ oracle comparison.
+- Done for `0.2.3`: published `v0.2.3` with final tag, GitHub Release, push
+  CI, manual release-random workflow, performance, consumer, and ABI evidence.
+- In progress for `0.2.4`: compare exported symbols against the `v0.2.3`
+  baseline in warning/evidence mode, keep package-manager work as feasibility
+  only, and strengthen Windows `clang-cl` static/DLL consumer smoke coverage.
 - Before each `0.2.x` patch release, record Windows and Linux release
   benchmarks with average, p99, worst, and C/oracle average ratio.
 - Keep per-DoF override hardening focused on oracle coverage, diagnostics, and

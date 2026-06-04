@@ -28,30 +28,42 @@ jobs:
             cxx_compiler: clang-cl
             oracle: "OFF"
             performance: "OFF"
+            shared: "OFF"
+          - name: Windows clang-cl shared C-only
+            os: windows-latest
+            c_compiler: clang-cl
+            cxx_compiler: clang-cl
+            oracle: "OFF"
+            performance: "OFF"
+            shared: "ON"
           - name: Windows clang oracle
             os: windows-latest
             c_compiler: clang
             cxx_compiler: clang++
             oracle: "ON"
             performance: "ON"
+            shared: "OFF"
           - name: Linux GCC C-only
             os: ubuntu-latest
             c_compiler: gcc
             cxx_compiler: g++
             oracle: "OFF"
             performance: "OFF"
+            shared: "OFF"
           - name: Linux Clang oracle
             os: ubuntu-latest
             c_compiler: clang
             cxx_compiler: clang++
             oracle: "ON"
             performance: "ON"
+            shared: "OFF"
           - name: macOS Clang C-only
             os: macos-latest
             c_compiler: clang
             cxx_compiler: clang++
             oracle: "OFF"
             performance: "OFF"
+            shared: "OFF"
 
     steps:
       - uses: actions/checkout@v4
@@ -76,6 +88,7 @@ jobs:
           -DCMAKE_CXX_COMPILER=${{ matrix.cxx_compiler }}
           -DBUILD_RUCKIG_C_ORACLE_TESTS=${{ matrix.oracle }}
           -DBUILD_RUCKIG_C_PERFORMANCE_TESTS=${{ matrix.performance }}
+          -DBUILD_SHARED_LIBS=${{ matrix.shared }}
 
       - name: Build
         run: cmake --build build --config Release
@@ -228,12 +241,12 @@ jobs:
             os: ubuntu-latest
             c_compiler: clang
             cxx_compiler: clang++
-            artifact_path: build-shared/artifacts/abi/0.2.3/*
+            artifact_path: build-shared/artifacts/abi/0.2.4/*
           - name: Windows exported symbols
             os: windows-latest
             c_compiler: clang
             cxx_compiler: clang++
-            artifact_path: build-shared/artifacts/abi/0.2.3/*
+            artifact_path: build-shared/artifacts/abi/0.2.4/*
 
     steps:
       - uses: actions/checkout@v4
@@ -263,7 +276,7 @@ jobs:
         run: cmake --build build-shared --target ruckig_c_compare_exported_symbols --config Release
 
       - name: Print exported-symbol snapshot
-        run: cat build-shared/artifacts/abi/0.2.3/*
+        run: cat build-shared/artifacts/abi/0.2.4/*
         shell: bash
 
       - name: Upload exported-symbol snapshot

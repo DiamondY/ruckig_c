@@ -199,31 +199,29 @@ if(BUILD_RUCKIG_C_TESTS)
   endif()
 
   if(WIN32 AND CMAKE_C_COMPILER_ID MATCHES "Clang")
-    if(NOT "${CMAKE_C_COMPILER_FRONTEND_VARIANT}" STREQUAL "MSVC")
-      if(BUILD_SHARED_LIBS)
-        configure_file(
-          test/cmake/test_windows_dll_consumer.cmake.in
-          ${CMAKE_CURRENT_BINARY_DIR}/test_windows_dll_consumer.cmake
-          @ONLY
-        )
-        add_test(NAME ruckig_c_windows_dll_consumer
-          COMMAND ${CMAKE_COMMAND}
-            "-DRUCKIG_C_IMPORT_LIBRARY=$<TARGET_LINKER_FILE:ruckig_c>"
-            "-DRUCKIG_C_DLL_DIR=$<TARGET_FILE_DIR:ruckig_c>"
-            -P ${CMAKE_CURRENT_BINARY_DIR}/test_windows_dll_consumer.cmake
-        )
-      else()
-        configure_file(
-          test/cmake/test_windows_static_consumer.cmake.in
-          ${CMAKE_CURRENT_BINARY_DIR}/test_windows_static_consumer.cmake
-          @ONLY
-        )
-        add_test(NAME ruckig_c_windows_manual_static_consumer
-          COMMAND ${CMAKE_COMMAND}
-            "-DRUCKIG_C_STATIC_LIBRARY=$<TARGET_LINKER_FILE:ruckig_c>"
-            -P ${CMAKE_CURRENT_BINARY_DIR}/test_windows_static_consumer.cmake
-        )
-      endif()
+    if(BUILD_SHARED_LIBS)
+      configure_file(
+        test/cmake/test_windows_dll_consumer.cmake.in
+        ${CMAKE_CURRENT_BINARY_DIR}/test_windows_dll_consumer.cmake
+        @ONLY
+      )
+      add_test(NAME ruckig_c_windows_dll_consumer
+        COMMAND ${CMAKE_COMMAND}
+          "-DRUCKIG_C_IMPORT_LIBRARY=$<TARGET_LINKER_FILE:ruckig_c>"
+          "-DRUCKIG_C_DLL_DIR=$<TARGET_FILE_DIR:ruckig_c>"
+          -P ${CMAKE_CURRENT_BINARY_DIR}/test_windows_dll_consumer.cmake
+      )
+    else()
+      configure_file(
+        test/cmake/test_windows_static_consumer.cmake.in
+        ${CMAKE_CURRENT_BINARY_DIR}/test_windows_static_consumer.cmake
+        @ONLY
+      )
+      add_test(NAME ruckig_c_windows_manual_static_consumer
+        COMMAND ${CMAKE_COMMAND}
+          "-DRUCKIG_C_STATIC_LIBRARY=$<TARGET_LINKER_FILE:ruckig_c>"
+          -P ${CMAKE_CURRENT_BINARY_DIR}/test_windows_static_consumer.cmake
+      )
     endif()
   endif()
 endif()
@@ -361,10 +359,10 @@ if(BUILD_RUCKIG_C AND BUILD_SHARED_LIBS)
   elseif(APPLE)
     set(RUCKIG_C_ABI_PLATFORM "macos")
   endif()
-  set(RUCKIG_C_ABI_OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/artifacts/abi/0.2.3")
+  set(RUCKIG_C_ABI_OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/artifacts/abi/0.2.4")
   set(RUCKIG_C_ABI_EXPORTS_FILE "${RUCKIG_C_ABI_OUTPUT_DIR}/${RUCKIG_C_ABI_PLATFORM}-exports.txt")
   set(RUCKIG_C_ABI_DIFF_FILE "${RUCKIG_C_ABI_OUTPUT_DIR}/${RUCKIG_C_ABI_PLATFORM}-export-diff.txt")
-  set(RUCKIG_C_ABI_BASELINE_FILE "${CMAKE_CURRENT_SOURCE_DIR}/docs/abi/v0.2.2/${RUCKIG_C_ABI_PLATFORM}-symbols.txt")
+  set(RUCKIG_C_ABI_BASELINE_FILE "${CMAKE_CURRENT_SOURCE_DIR}/docs/abi/v0.2.3/${RUCKIG_C_ABI_PLATFORM}-symbols.txt")
   add_custom_command(
     OUTPUT ${RUCKIG_C_ABI_EXPORTS_FILE}
     COMMAND ${CMAKE_COMMAND}
