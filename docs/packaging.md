@@ -75,6 +75,15 @@ The automated smoke uses `examples/c/00_minimal_offline.c`, defines
 `RUCKIG_C_STATIC_DEFINE`, links the static `ruckig_c` archive, and runs the
 resulting executable.
 
+Current Windows toolchain status:
+
+- `clang` with the MSVC linker environment: verified by local release-check
+  CTest.
+- `clang-cl`: verified for C-only CMake target consumption in CI; manual
+  static command-line linking is not yet separately verified.
+- MSVC `cl`: not yet verified as a standalone manual static-link smoke.
+- MinGW: not yet verified.
+
 ## DLL Consumers
 
 DLL consumers include the same public header and link against the import
@@ -107,6 +116,15 @@ The automated smoke compiles `examples/c/00_minimal_offline.c` without
 `RUCKIG_C_STATIC_DEFINE`, links the import library, adds the DLL directory to
 the process `PATH`, and runs the executable.
 
+Current Windows DLL consumer status:
+
+- `clang` with the MSVC linker environment: verified by local shared
+  release-check CTest.
+- `clang-cl`: verified for C-only CMake target consumption in CI; standalone
+  DLL import-library smoke is not yet separately verified.
+- MSVC `cl`: not yet verified as a standalone DLL consumer smoke.
+- MinGW: not yet verified.
+
 ## Shared Install-Tree Verification
 
 For shared install-tree checks:
@@ -131,3 +149,7 @@ The likely package-manager integration paths are vcpkg, Conan, Homebrew,
 CMake FetchContent, and vendored subdirectory use. These should be evaluated
 after `0.2.x` has completed at least one patch cycle with stable public ABI
 evidence.
+
+See `docs/package_manager_feasibility.md` for the recommended evaluation order.
+No vcpkg, Conan, Homebrew, FetchContent, or vendored-subdirectory recipe is part
+of the current `0.2.x` release scope.

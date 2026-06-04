@@ -361,18 +361,37 @@ if(BUILD_RUCKIG_C AND BUILD_SHARED_LIBS)
   elseif(APPLE)
     set(RUCKIG_C_ABI_PLATFORM "macos")
   endif()
+  set(RUCKIG_C_ABI_OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/artifacts/abi/0.2.3")
+  set(RUCKIG_C_ABI_EXPORTS_FILE "${RUCKIG_C_ABI_OUTPUT_DIR}/${RUCKIG_C_ABI_PLATFORM}-exports.txt")
+  set(RUCKIG_C_ABI_DIFF_FILE "${RUCKIG_C_ABI_OUTPUT_DIR}/${RUCKIG_C_ABI_PLATFORM}-export-diff.txt")
+  set(RUCKIG_C_ABI_BASELINE_FILE "${CMAKE_CURRENT_SOURCE_DIR}/docs/abi/v0.2.2/${RUCKIG_C_ABI_PLATFORM}-symbols.txt")
   add_custom_command(
-    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/artifacts/abi/0.2.2/${RUCKIG_C_ABI_PLATFORM}-exports.txt
+    OUTPUT ${RUCKIG_C_ABI_EXPORTS_FILE}
     COMMAND ${CMAKE_COMMAND}
       "-DRUCKIG_C_SHARED_LIBRARY=$<TARGET_FILE:ruckig_c>"
-      "-DRUCKIG_C_OUTPUT_FILE=${CMAKE_CURRENT_BINARY_DIR}/artifacts/abi/0.2.2/${RUCKIG_C_ABI_PLATFORM}-exports.txt"
+      "-DRUCKIG_C_OUTPUT_FILE=${RUCKIG_C_ABI_EXPORTS_FILE}"
       -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/generate_exported_symbols.cmake
     DEPENDS ruckig_c
     VERBATIM
   )
   add_custom_target(ruckig_c_exported_symbols
-    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/artifacts/abi/0.2.2/${RUCKIG_C_ABI_PLATFORM}-exports.txt
+    DEPENDS ${RUCKIG_C_ABI_EXPORTS_FILE}
   )
+  if(EXISTS "${RUCKIG_C_ABI_BASELINE_FILE}")
+    add_custom_command(
+      OUTPUT ${RUCKIG_C_ABI_DIFF_FILE}
+      COMMAND ${CMAKE_COMMAND}
+        "-DRUCKIG_C_CURRENT_EXPORTS=${RUCKIG_C_ABI_EXPORTS_FILE}"
+        "-DRUCKIG_C_BASELINE_SYMBOLS=${RUCKIG_C_ABI_BASELINE_FILE}"
+        "-DRUCKIG_C_DIFF_OUTPUT=${RUCKIG_C_ABI_DIFF_FILE}"
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/compare_exported_symbols.cmake
+      DEPENDS ${RUCKIG_C_ABI_EXPORTS_FILE} ${RUCKIG_C_ABI_BASELINE_FILE}
+      VERBATIM
+    )
+    add_custom_target(ruckig_c_compare_exported_symbols
+      DEPENDS ${RUCKIG_C_ABI_DIFF_FILE}
+    )
+  endif()
 endif()
 
 if(BUILD_RUCKIG_C)

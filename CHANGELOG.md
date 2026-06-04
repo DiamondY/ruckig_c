@@ -1,5 +1,34 @@
 # Changelog
 
+## 0.2.3 - Unreleased
+
+Added:
+
+- Non-strict exported-symbol baseline comparison against the `v0.2.2`
+  baseline for Linux and Windows shared builds. The comparison is warning and
+  evidence only; it is not yet a strict CI fail gate.
+- `0.2.3` release checklist template with ABI baseline comparison, consumer
+  matrix, numerical regression, performance trend, and release-random evidence
+  fields.
+- Package-manager feasibility notes for vcpkg, Conan, Homebrew, FetchContent,
+  and vendored subdirectory use. No package-manager recipe is implemented.
+- Additional fixed C++ oracle regression cases for higher-DoF per-DoF
+  synchronization, disabled DoFs, discrete minimum-duration edge cases, tiny
+  nonzero limits with large position magnitude, long online update loops, and
+  repeated first-time-at-position boundary queries.
+
+Changed:
+
+- Expanded Python binding feasibility design to select `cffi` ABI mode as the
+  default prototype path and document prototype acceptance criteria.
+- Clarified that `0.2.3` maintenance keeps `original/ruckig-main` frozen and
+  does not add public C API.
+
+Still deferred:
+
+- Intermediate waypoints, per-section constraints, cloud calculation, Python
+  binding implementation, Rust bindings, and upstream baseline upgrades.
+
 ## 0.2.2 - 2026-06-04
 
 Added:

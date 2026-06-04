@@ -33,6 +33,11 @@ checking, and more runtime error surface around array sizes and ownership.
 without compiling an extension module. It is a strong candidate for the first
 prototype if packaging a shared library is already reliable across platforms.
 
+Default prototype choice: use `cffi` ABI mode first. It keeps the prototype on
+the existing pure C ABI, avoids compiling a CPython extension during feasibility
+work, and lets the project validate ownership, array, error, and packaging
+questions before committing to a wheel build strategy.
+
 ### CPython Extension
 
 A CPython extension can provide the tightest user experience and fastest array
@@ -107,6 +112,21 @@ The design must answer:
 ## Decision
 
 The next binding-related step is a Python feasibility prototype design, not
-implementation in the `0.2.x` maintenance line. Rust bindings should remain
-deferred until Python feasibility clarifies the ownership, packaging, and error
-model for one high-level FFI layer.
+implementation in the `0.2.x` maintenance line. The default prototype route is
+`cffi` ABI mode loading a built `ruckig_c` shared library. `ctypes` remains a
+fallback if `cffi` packaging friction is higher than expected. CPython
+extensions and `pybind11` remain deferred.
+
+Prototype acceptance criteria for a later implementation project:
+
+- Create and destroy `ruckig_t`, `ruckig_input_t`, `ruckig_output_t`, and
+  `ruckig_trajectory_t` handles.
+- Run offline `ruckig_calculate`.
+- Run an online `ruckig_update` loop with `ruckig_output_pass_to_input`.
+- Set and read fixed-size DoF vectors through list or tuple copy-in/copy-out.
+- Propagate `RUCKIG_WORKING` and `RUCKIG_FINISHED` as normal control flow.
+- Map error result codes to a documented Python enum or exception strategy.
+- Demonstrate wrapper lifecycle tests with no leaked handles.
+
+Rust bindings should remain deferred until Python feasibility clarifies the
+ownership, packaging, and error model for one high-level FFI layer.

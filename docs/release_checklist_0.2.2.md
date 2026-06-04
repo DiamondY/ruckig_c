@@ -2,8 +2,8 @@
 
 This checklist records the `v0.2.2` patch-release closeout evidence. Local
 release-candidate gates were rerun after the version bump and dated changelog
-entry. Remote CI, manual workflow, tag, and GitHub Release evidence must be
-recorded after the release closeout commit is pushed.
+entry. Remote CI, manual workflow, tag, and GitHub Release evidence has been
+recorded for the final release commit.
 
 ## Scope
 
@@ -47,7 +47,7 @@ recorded after the release closeout commit is pushed.
 - [x] Linux performance trend is compared against the `0.2.1` Linux release
   baseline.
 - [x] GitHub Actions push CI passes for the release evidence commit.
-- [ ] GitHub Actions manual release random oracle passes with
+- [x] GitHub Actions manual release random oracle passes with
   `release_random=true`.
 - [x] Linux Clang ASan+UBSan passes.
 - [x] Linux Valgrind passes.
@@ -63,30 +63,30 @@ recorded after the release closeout commit is pushed.
   a review artifact.
 - [x] GitHub Actions `Linux exported symbols` and `Windows exported symbols`
   jobs upload ABI review artifacts.
-- [ ] `v0.2.2` annotated tag points at the final release evidence commit.
-- [ ] GitHub Release `ruckig_c 0.2.2` is published.
+- [x] `v0.2.2` annotated tag points at the final release evidence commit.
+- [x] GitHub Release `ruckig_c 0.2.2` is published.
 
 ## Evidence To Record
 
 ```text
 Final release commit:
-To be recorded after the final tag target commit is selected.
+15c896497fc5973fc19129c6fe59b2fd4da9533f.
 Annotated tag object:
-To be recorded after tagging.
+49b04e26776c6c787e97fb6223a03240031dd97a.
 Tag target commit:
-To be recorded after tagging.
+15c896497fc5973fc19129c6fe59b2fd4da9533f.
 Push CI run id:
-To be recorded after the final tag target commit push CI completes.
+26935069765.
 Push CI URL:
-To be recorded after the final tag target commit push CI completes.
+https://github.com/DiamondY/ruckig_c/actions/runs/26935069765.
 Push CI conclusion:
-To be recorded after the final tag target commit push CI completes.
+success.
 Manual release random run id:
-To be recorded after workflow dispatch.
+26935519342.
 Manual release random URL:
-To be recorded after workflow dispatch.
+https://github.com/DiamondY/ruckig_c/actions/runs/26935519342.
 Manual release random conclusion:
-To be recorded after workflow dispatch.
+success.
 Windows static CTest result:
 100% tests passed, 0 tests failed out of 20.
 Windows shared CTest result:
@@ -106,19 +106,19 @@ Release random oracle result:
 Windows performance result:
 average_ratio_c_over_oracle: 1.08231; threshold: 1.5.
 Linux performance result:
-To be recorded from the final tag target commit push CI or manual workflow artifact. The benchmark program enforces `average_ratio_c_over_oracle <= 1.5`.
+Final push CI artifact `7404574237` and manual workflow artifact `7404750529`; both Linux Clang performance jobs completed successfully and the benchmark program enforces `average_ratio_c_over_oracle <= 1.5`.
 Windows/Linux performance trend versus 0.2.1:
-Windows local release ratio changed from `0.328289` in `0.2.1` to `1.08231` in `0.2.2`; both are below the `1.5` threshold. Linux trend is to be recorded from final CI artifacts.
+Windows local release ratio changed from `0.328289` in `0.2.1` to a final-commit post-publication rerun ratio of `1.39707` in `0.2.2`; both are below the `1.5` threshold. Linux performance artifacts `7404574237` and `7404750529` are final-commit evidence.
 Consumer automation result:
-Installed CMake consumer, Windows manual static consumer, and Windows DLL consumer passed in local release-check CTest. Linux pkg-config and shared install-tree consumers are to be recorded from final push CI.
+Installed CMake consumer, Windows manual static consumer, and Windows DLL consumer passed in local release-check CTest. Linux pkg-config and shared install-tree consumers passed in final push CI.
 Linux exported-symbol artifact:
-To be recorded from final push CI artifact.
+Push CI artifact `7404571215`; manual workflow artifact `7404748851`.
 Windows exported-symbol artifact:
 `build_release_check_shared/artifacts/abi/0.2.2/windows-exports.txt`.
 Linux exported-symbol CI artifact:
-To be recorded after final push CI completes.
+7404571215.
 Windows exported-symbol CI artifact:
-To be recorded after final push CI completes.
+7404578412.
 Exported symbol review result:
 Windows DLL exports reviewed with `llvm-readobj --coff-exports`; 66 public `ruckig_*` exports found, including lifecycle, input, output, trajectory, validation, calculate, update, reset, and per-DoF APIs.
 Public header diff review result:
@@ -126,7 +126,7 @@ Public header diff from `v0.2.1` contains only version macro changes from `0.2.1
 Enum/result-code review result:
 Enum and result-code numeric values unchanged from `v0.2.1`.
 GitHub Release URL:
-To be recorded after GitHub Release publication.
+https://github.com/DiamondY/ruckig_c/releases/tag/v0.2.2.
 ```
 
 ## ABI Review Commands

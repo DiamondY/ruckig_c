@@ -60,6 +60,35 @@ comments, or documentation-only changes. Any public symbol addition, removal,
 signature change, enum numeric-value change, or result-code numeric-value
 change requires a separate design and version decision before release.
 
+## 0.2.3 Baseline Comparison
+
+The `v0.2.2` release established the first tracked exported-symbol baseline:
+
+```text
+docs/abi/v0.2.2/linux-symbols.txt
+docs/abi/v0.2.2/windows-symbols.txt
+```
+
+On shared builds, `ruckig_c_compare_exported_symbols` compares the current
+generated export snapshot against the platform baseline:
+
+```powershell
+cmake --build build_release_check_shared --target ruckig_c_compare_exported_symbols
+```
+
+The comparison normalizes `ruckig_*` symbol names, writes a diff summary under
+the build tree, for example
+`build_release_check_shared/artifacts/abi/0.2.3/windows-export-diff.txt`, and
+emits only a warning when differences are found. This is intentional for
+`0.2.3`: the comparison is release evidence and review support, not a strict CI
+fail gate. The diff summary should be reviewed before release and recorded in
+the release checklist.
+
+Upgrade the comparison to a strict fail gate only after at least one patch
+release has used the warning/evidence mode successfully on Windows and Linux,
+and after the project has a documented exception process for intentional public
+ABI changes.
+
 ## Public Header Diff
 
 Review the public header against the previous release tag:

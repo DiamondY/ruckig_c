@@ -1319,3 +1319,143 @@ The Windows export snapshot contains 66 public `ruckig_*` exports, including
 Public header diff from `v0.2.1` contains only version macro changes from
 `0.2.1` to `0.2.2`; public functions, enum numeric values, and result-code
 numeric values are unchanged. `original/ruckig-main` remains unchanged.
+
+## 2026-06-04 0.2.2 Release Publication
+
+The `v0.2.2` release was published after the local closeout gate, push CI, and
+manual release-random workflow succeeded.
+
+Final release evidence:
+
+- Tag target commit: `15c896497fc5973fc19129c6fe59b2fd4da9533f`.
+- Annotated tag object: `49b04e26776c6c787e97fb6223a03240031dd97a`.
+- Push CI run id: `26935069765`, conclusion `success`.
+- Push CI URL: `https://github.com/DiamondY/ruckig_c/actions/runs/26935069765`.
+- Manual release random workflow run id: `26935519342`, conclusion `success`.
+- Manual release random URL:
+  `https://github.com/DiamondY/ruckig_c/actions/runs/26935519342`.
+- GitHub Release:
+  `https://github.com/DiamondY/ruckig_c/releases/tag/v0.2.2`.
+
+Successful push CI jobs:
+
+- `Windows clang-cl C-only`
+- `Windows clang oracle`
+- `Linux GCC C-only`
+- `Linux Clang oracle`
+- `macOS Clang C-only`
+- `Linux Clang ASan UBSan`
+- `Linux Valgrind`
+- `Linux Clang performance`
+- `Linux exported symbols`
+- `Windows exported symbols`
+
+Successful manual release random workflow jobs:
+
+- `Manual release random oracle`
+- `Windows clang-cl C-only`
+- `Windows clang oracle`
+- `Linux GCC C-only`
+- `Linux Clang oracle`
+- `macOS Clang C-only`
+- `Linux Clang ASan UBSan`
+- `Linux Valgrind`
+- `Linux Clang performance`
+- `Linux exported symbols`
+- `Windows exported symbols`
+
+The push CI artifacts are `7404574237` for Linux performance, `7404571215`
+for Linux exported symbols, and `7404578412` for Windows exported symbols.
+The manual workflow artifacts are `7404750529` for Linux performance,
+`7404748851` for Linux exported symbols, and `7404752979` for Windows exported
+symbols. Both workflows ran against commit
+`15c896497fc5973fc19129c6fe59b2fd4da9533f`.
+
+## 2026-06-04 0.2.3 Maintenance Preparation
+
+This pass starts the `0.2.3 - Unreleased` maintenance queue after publishing
+`v0.2.2`. It does not change the public C API and does not modify
+`original/ruckig-main`.
+
+Implemented maintenance coverage:
+
+- Added tracked `v0.2.2` Linux and Windows exported-symbol baselines under
+  `docs/abi/v0.2.2/`.
+- Added `ruckig_c_compare_exported_symbols`, a warning/evidence-only shared
+  build target that compares current exports against the `v0.2.2` baseline and
+  writes a normalized diff artifact.
+- Extended CI exported-symbol jobs to upload both current export snapshots and
+  comparison diff summaries.
+- Added `docs/release_checklist_0.2.3.md`.
+- Added `docs/package_manager_feasibility.md` without adding package-manager
+  recipes.
+- Expanded Python bindings feasibility design to select `cffi` ABI mode as the
+  default prototype path, still design-only.
+- Expanded fixed oracle coverage for higher-DoF mixed synchronization,
+  disabled DoFs, per-DoF overrides, discrete minimum-duration edges, tiny
+  nonzero limits with large position magnitude, long online update loops, and
+  repeated first-time-at-position boundary queries.
+
+Local fixed oracle suite after the new cases:
+
+```powershell
+.\build_release_check_ninja\ruckig_c_oracle_tests.exe
+```
+
+Result:
+
+```text
+Oracle comparisons passed: 70
+```
+
+Static and shared release-check CTest:
+
+```powershell
+ctest --test-dir build_release_check_ninja --output-on-failure -E ruckig_c_oracle_random_release
+ctest --test-dir build_release_check_shared --output-on-failure -E ruckig_c_oracle_random_release
+```
+
+Result:
+
+```text
+100% tests passed, 0 tests failed out of 20
+100% tests passed, 0 tests failed out of 20
+```
+
+Development random oracle runs:
+
+```powershell
+.\build_release_check_ninja\ruckig_c_oracle_tests.exe --random 100000 --seed 1
+.\build_release_check_ninja\ruckig_c_oracle_tests.exe --random 100000 --seed 2
+.\build_release_check_ninja\ruckig_c_oracle_tests.exe --random 100000 --seed 41
+.\build_release_check_ninja\ruckig_c_oracle_tests.exe --random-per-dof 100000 --seed 1
+```
+
+Result:
+
+```text
+Oracle comparisons passed: 70
+Random oracle comparisons passed: 100000 seed 1
+Oracle comparisons passed: 70
+Random oracle comparisons passed: 100000 seed 2
+Oracle comparisons passed: 70
+Random oracle comparisons passed: 100000 seed 41
+Oracle comparisons passed: 70
+Random per-DoF oracle comparisons passed: 100000 seed 1
+```
+
+Local Windows exported-symbol baseline comparison:
+
+```powershell
+cmake --build build_release_check_shared --target ruckig_c_compare_exported_symbols
+```
+
+Result:
+
+```text
+Exported symbols match the baseline
+```
+
+The generated comparison artifact reports 66 current symbols, 66 baseline
+symbols, 0 added symbols, and 0 removed symbols. The comparison remains
+warning/evidence only for `0.2.3`.

@@ -33,6 +33,11 @@ experimentation and API ergonomics feedback. Rust bindings remain a follow-up
 candidate after the C ABI evidence has proved stable enough for another typed
 FFI layer.
 
+The Python feasibility document selects `cffi` ABI mode as the default
+prototype route. That decision is still design-only: it does not add binding
+code, change the public C header, change solver behavior, or alter packaging
+outputs during `0.2.x`.
+
 ## Upstream Baseline Upgrade
 
 An upstream Ruckig baseline upgrade is lower priority than bindings design and

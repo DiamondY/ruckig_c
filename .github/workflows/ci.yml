@@ -228,12 +228,12 @@ jobs:
             os: ubuntu-latest
             c_compiler: clang
             cxx_compiler: clang++
-            artifact_path: build-shared/artifacts/abi/0.2.2/linux-exports.txt
+            artifact_path: build-shared/artifacts/abi/0.2.3/*
           - name: Windows exported symbols
             os: windows-latest
             c_compiler: clang
             cxx_compiler: clang++
-            artifact_path: build-shared/artifacts/abi/0.2.2/windows-exports.txt
+            artifact_path: build-shared/artifacts/abi/0.2.3/*
 
     steps:
       - uses: actions/checkout@v4
@@ -259,8 +259,11 @@ jobs:
       - name: Generate exported-symbol snapshot
         run: cmake --build build-shared --target ruckig_c_exported_symbols --config Release
 
+      - name: Compare exported-symbol snapshot
+        run: cmake --build build-shared --target ruckig_c_compare_exported_symbols --config Release
+
       - name: Print exported-symbol snapshot
-        run: cat "${{ matrix.artifact_path }}"
+        run: cat build-shared/artifacts/abi/0.2.3/*
         shell: bash
 
       - name: Upload exported-symbol snapshot
