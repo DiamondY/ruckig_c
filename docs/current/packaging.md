@@ -150,6 +150,6 @@ CMake FetchContent, and vendored subdirectory use. These should be evaluated
 after `0.2.x` has completed at least one patch cycle with stable public ABI
 evidence.
 
-See `docs/package_manager_feasibility.md` for the recommended evaluation order.
+See `docs/design/package_manager_feasibility.md` for the recommended evaluation order.
 No vcpkg, Conan, Homebrew, FetchContent, or vendored-subdirectory recipe is part
 of the current `0.2.x` release scope.

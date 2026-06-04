@@ -75,7 +75,7 @@ Added:
 
 Changed:
 
-- Clarified that `docs/c_rewrite_execution_plan.md` is a historical execution
+- Clarified that `docs/historical/c_rewrite_execution_plan.md` is a historical execution
   plan, while current scope is defined by README, public header, roadmap,
   release checklists, and upstream baseline policy.
 - Documented post-`v0.2.0` hardening on `main`, including the fixed oracle suite
@@ -139,10 +139,10 @@ Added:
   finite/infinite solver selection semantics, and `Synchronization::None`
   behavior.
 - Minimal offline and online C examples wired into CMake and CTest.
-- API diagnostics documentation in `docs/api_diagnostics.md`.
-- Patch-release performance recording procedure in `docs/performance_report.md`.
-- Frozen upstream baseline policy in `docs/upstream_baseline_policy.md`.
-- Per-DoF override design gate in `docs/design_per_dof_overrides.md`.
+- API diagnostics documentation in `docs/current/api_diagnostics.md`.
+- Patch-release performance recording procedure in `docs/release/evidence/performance_report.md`.
+- Frozen upstream baseline policy in `docs/current/upstream_baseline_policy.md`.
+- Per-DoF override design gate in `docs/design/per_dof_overrides.md`.
 
 Changed:
 
@@ -176,11 +176,11 @@ Deferred:
 
 Verification:
 
-- Windows clang/clang-cl validation is recorded in `docs/verification_report.md`.
+- Windows clang/clang-cl validation is recorded in `docs/release/evidence/verification_report.md`.
 - Linux/macOS and sanitizer/memcheck gates are captured in CI and
-  `docs/release_checklist.md`.
+  `docs/release/checklists/0.1.0.md`.
 - Performance results against the frozen C++ oracle are recorded in
-  `docs/performance_report.md`.
+  `docs/release/evidence/performance_report.md`.
 
 Known scope limitations:
 

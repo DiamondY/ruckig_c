@@ -3,11 +3,11 @@
 Historical note: this document records the original `0.1.0` C rewrite plan and
 the first-release scope decisions. It is retained for traceability, but it is no
 longer the sole source of truth for current project scope. Current scope is
-defined by `README.md`, `include/ruckig_c/ruckig.h`, `docs/roadmap.md`, the
-active release checklists, and `docs/upstream_baseline_policy.md`. Per-DoF
+defined by `README.md`, `include/ruckig_c/ruckig.h`, `docs/current/roadmap.md`, the
+active release checklists, and `docs/current/upstream_baseline_policy.md`. Per-DoF
 control-interface and synchronization overrides were intentionally out of scope
 for `0.1.0`, but they are implemented in `0.2.0`; see
-`docs/design_per_dof_overrides.md`.
+`docs/design/per_dof_overrides.md`.
 
 Document version: `0.1`
 
@@ -128,7 +128,7 @@ or recreate that proprietary behavior.
 The first `0.1.0` release supports global control interface and global
 synchronization settings only. Per-DoF control-interface and per-DoF
 synchronization overrides from the C++ API were deferred for `0.1.0` and are
-implemented separately in `0.2.0`; see `docs/design_per_dof_overrides.md`.
+implemented separately in `0.2.0`; see `docs/design/per_dof_overrides.md`.
 
 ## 5. Proposed C API
 
@@ -557,7 +557,7 @@ Tasks:
 
 1. Port `ruckig_profile_t`.
 2. Port profile boundary setters.
-3. Port profile check functions. Use `docs/tech_ref_profile_check_conversion.md` as the implementation checklist for the required `profile_check*` function families.
+3. Port profile check functions. Use `docs/technical/profile_check_conversion.md` as the implementation checklist for the required `profile_check*` function families.
 4. Port internal profile position extrema calculations (`Profile::get_position_extrema`).
 5. Port internal profile first-state-at-position helper (`Profile::get_first_state_at_position`).
 6. Port `ruckig_brake_profile_t`.
@@ -761,7 +761,7 @@ For first release (`0.1.0` historical scope):
 6. Document every unsupported field in the public header.
 
 Per-DoF control-interface and synchronization overrides were implemented
-separately for `0.2.0`; see `docs/design_per_dof_overrides.md`. Waypoints,
+separately for `0.2.0`; see `docs/design/per_dof_overrides.md`. Waypoints,
 per-section constraints, cloud calculation, and Python/Rust bindings remain
 unsupported.
 
@@ -1035,11 +1035,11 @@ The following reference documents were moved from the previous plan version. The
 
 These reference documents are implementation aids, not scope-defining documents. If a technical reference conflicts with this execution plan, this execution plan takes precedence.
 
-1. **`docs/tech_ref_profile_check_conversion.md`** - Profile `check<>()` template specialization conversion to C `switch`-based function. Referenced heavily in Phase 2 profile port.
+1. **`docs/technical/profile_check_conversion.md`** - Profile `check<>()` template specialization conversion to C `switch`-based function. Referenced heavily in Phase 2 profile port.
 
-2. **`docs/tech_ref_callback_conversion.md`** - Lambda callback patterns (`state_to_integrate_from`) converted to C function-pointer + userdata patterns. Referenced in Phase 5 trajectory port.
+2. **`docs/technical/callback_conversion.md`** - Lambda callback patterns (`state_to_integrate_from`) converted to C function-pointer + userdata patterns. Referenced in Phase 5 trajectory port.
 
-3. **`docs/tech_ref_cpp_to_c_conversion_table.md`** - Quick-lookup equivalence table for C++ STL types, syntax features, math functions, and header replacements. Used during all phases.
+3. **`docs/technical/cpp_to_c_conversion_table.md`** - Quick-lookup equivalence table for C++ STL types, syntax features, math functions, and header replacements. Used during all phases.
 
 ---
 

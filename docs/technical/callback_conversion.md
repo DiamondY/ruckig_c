@@ -5,7 +5,7 @@ Document version: `0.1`
 Applies to: Ruckig Community `0.17.3` under `original/ruckig-main`
 
 Priority: implementation reference for Phase 5 only. It does not define public
-API scope. If this document conflicts with `docs/c_rewrite_execution_plan.md`,
+API scope. If this document conflicts with `docs/historical/c_rewrite_execution_plan.md`,
 the execution plan takes precedence.
 
 ## Purpose

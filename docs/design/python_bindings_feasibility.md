@@ -14,7 +14,7 @@ evidence for:
 - Exported-symbol evidence generated on Windows and Linux.
 - Stable installed CMake, pkg-config, static, DLL, and shared install-tree
   consumer paths.
-- `docs/api_compatibility.md` used as part of a release closeout.
+- `docs/current/api_compatibility.md` used as part of a release closeout.
 - Windows and Linux performance records below the `1.5` average-ratio
   threshold.
 

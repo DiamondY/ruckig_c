@@ -1,6 +1,6 @@
 # Ruckig C Rewrite
 
-This repository contains a pure C99 rewrite of the Ruckig Community trajectory generator. The `ruckig_c` library does not link to or require a C++ runtime. The current implementation scope is defined by this README, the public header, `docs/roadmap.md`, the release checklists, and `docs/upstream_baseline_policy.md`; `docs/c_rewrite_execution_plan.md` is retained as a historical execution plan. The original C++ implementation under `original/ruckig-main` is kept unchanged and is used only as a frozen oracle in tests, not as part of the C library runtime.
+This repository contains a pure C99 rewrite of the Ruckig Community trajectory generator. The `ruckig_c` library does not link to or require a C++ runtime. The documentation entry point is `docs/index.md`; current implementation scope is defined by this README, the public header, `docs/current/roadmap.md`, and `docs/current/upstream_baseline_policy.md`. `docs/historical/c_rewrite_execution_plan.md` is retained as a historical execution plan. The original C++ implementation under `original/ruckig-main` is kept unchanged and is used only as a frozen oracle in tests, not as part of the C library runtime.
 
 The rewrite targets Ruckig Community `0.17.3`. The upstream project in
 `original/ruckig-main` is MIT licensed, and this repository keeps that license
@@ -28,14 +28,11 @@ Implemented and covered by fixed C/oracle tests plus deterministic random oracle
 - C examples for position, offline position, online update, per-DoF overrides,
   velocity, stop, and minimum duration.
 
-Release-readiness evidence is tracked in `docs/release_checklist.md` for
-`0.1.0`, `docs/release_checklist_0.2.0.md` for `0.2.0`,
-`docs/release_checklist_0.2.1.md` for `0.2.1`, and
-`docs/release_checklist_0.2.2.md` for `0.2.2`. `v0.2.2` is the latest
+Release-readiness evidence is tracked under `docs/release/`; see
+`docs/index.md` for the organized documentation map. `v0.2.2` is the latest
 published release, and `main` is currently the `0.2.3 - Unreleased`
 maintenance line. The post-release stability queue is tracked in
-`docs/roadmap.md`. Current release scope
-intentionally excludes:
+`docs/current/roadmap.md`. Current release scope intentionally excludes:
 
 - Waypoints, per-section constraints, cloud, and Python/Rust bindings remain
   intentionally outside the public C API.
@@ -58,7 +55,7 @@ Useful CMake options:
 - `RUCKIG_C_ENABLE_CALCULATION_DURATION=ON` records `ruckig_update` calculation duration in microseconds in `ruckig_output_get_calculation_duration`.
 - `BUILD_SHARED_LIBS=ON` builds a shared library instead of a static library.
 
-On Windows, the current verified CMake path uses LLVM clang/clang++ with the Visual Studio bundled Ninja. The oracle harness must compile `.c` sources with a C compiler and the original Ruckig sources with a C++ compiler. Current verification includes static-library and DLL/import-library builds; see `docs/verification_report.md`.
+On Windows, the current verified CMake path uses LLVM clang/clang++ with the Visual Studio bundled Ninja. The oracle harness must compile `.c` sources with a C compiler and the original Ruckig sources with a C++ compiler. Current verification includes static-library and DLL/import-library builds; see `docs/release/evidence/verification_report.md`.
 
 ## Install and Consume
 
@@ -89,11 +86,11 @@ consumers receive `RUCKIG_C_STATIC_DEFINE` automatically from the target. When
 manually linking a static Windows build without CMake, define
 `RUCKIG_C_STATIC_DEFINE`; DLL consumers should not define it.
 
-Additional consumer and packaging notes are collected in `docs/packaging.md`,
+Additional consumer and packaging notes are collected in `docs/current/packaging.md`,
 including installed CMake consumers, pkg-config consumers, Windows manual
 static linking, DLL consumers, and shared install-tree verification.
 Patch-release API/ABI review notes, including exported-symbol snapshot
-generation, are collected in `docs/api_compatibility.md`.
+generation, are collected in `docs/current/api_compatibility.md`.
 
 ## C API Shape
 
@@ -135,7 +132,7 @@ Clearing a per-DoF vector restores the matching global setter behavior.
 Numerical inputs must be finite except where the C++ baseline accepts infinite acceleration or jerk limits to select lower-order solvers. Velocity, acceleration, and jerk maxima must be non-negative, directional minima must be non-positive, and enabled DoFs must satisfy the same current/target state limit checks as the C++ oracle when validation requests those checks.
 
 For detailed error-code and limit-selection notes, see
-`docs/api_diagnostics.md`.
+`docs/current/api_diagnostics.md`.
 
 Basic offline usage:
 
@@ -263,7 +260,7 @@ continuous/discrete duration, directional limits, disabled DoFs, and general
 third-order position states. Development random coverage has been run with
 `100,000` trajectories for seeds `1`, `2`, and `41`; the release stress command
 has been run with `1,000,000` trajectories for seed `1`. See
-`docs/verification_report.md`.
+`docs/release/evidence/verification_report.md`.
 
 ## Performance Benchmark
 
@@ -275,17 +272,15 @@ Example:
 ruckig_c_performance_benchmark --samples 10000 --seed 1
 ```
 
-The current development performance report is in `docs/performance_report.md`.
-Windows clang ASan/UBSan CMake tests pass when the LLVM sanitizer runtime
-directory is present in `PATH`. Linux Clang ASan/UBSan, Valgrind, pkg-config
-consumer, and performance evidence is recorded in release checklists under
-`docs/`, including `docs/release_checklist.md`,
-`docs/release_checklist_0.2.0.md`, `docs/release_checklist_0.2.1.md`, and the
-future `docs/release_checklist_0.2.2.md` template.
+The current development performance report is in
+`docs/release/evidence/performance_report.md`. Windows clang ASan/UBSan CMake
+tests pass when the LLVM sanitizer runtime directory is present in `PATH`.
+Linux Clang ASan/UBSan, Valgrind, pkg-config consumer, and performance evidence
+is recorded in the release checklists under `docs/release/checklists/`.
 
 ## Verification
 
-Current CMake/Ninja and direct-clang verification evidence is recorded in `docs/verification_report.md`, including:
+Current CMake/Ninja and direct-clang verification evidence is recorded in `docs/release/evidence/verification_report.md`, including:
 
 - C unit tests.
 - C and C++ header compile tests.
