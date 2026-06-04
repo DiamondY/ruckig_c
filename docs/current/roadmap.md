@@ -51,12 +51,11 @@ follow-up work for stability and future feature planning.
   CI, manual release-random workflow, performance, consumer, and ABI evidence.
 - Done for `0.2.4`: published `v0.2.4` with final tag, GitHub Release, push
   CI, manual release-random workflow, performance, consumer, and ABI evidence.
-- In progress for `0.2.5`: final planned `0.2.x` stabilization release before
-  `0.3.0-design`. It rolls exported-symbol comparison to the `v0.2.4`
-  baseline, designs strict ABI diff gate prerequisites while keeping
-  warning/evidence mode by default, expands Windows standalone consumer matrix
-  notes, keeps package-manager work as feasibility only, and adds a small set
-  of targeted fixed oracle regressions.
+- Done for `0.2.5`: published `v0.2.5` as the final planned `0.2.x`
+  stabilization release before `0.3.0-design`, with final tag, GitHub Release,
+  push CI, manual release-random workflow, performance, consumer, and ABI
+  evidence.
+- `0.2.x` planned maintenance is complete.
 - Reserve `0.2.6` only for emergency patch work after `v0.2.5`; it is not the
   default post-release route.
 - Track `very large duration + exact target first-time-at-position` as a
@@ -78,10 +77,9 @@ follow-up work for stability and future feature planning.
 
 ## 0.3.0 Design Candidates
 
-After `v0.2.5` is published, the default next mainline stage is
-`0.3.0-design`. The `0.3.0` line is design-only until a separate proposal is
-accepted. It must not change public API, solver dispatch, or the frozen oracle
-baseline during `0.2.x` patch work.
+The default mainline stage is now `0.3.0-design`. The `0.3.0` line is
+design-only until a separate proposal is accepted. It must not change public
+API, solver dispatch, or the frozen oracle baseline during design evaluation.
 
 - Current priority decision is recorded in
   `docs/design/0.3.0_priorities.md`: finish `0.2.x` package, consumer, ABI,
@@ -102,3 +100,9 @@ baseline during `0.2.x` patch work.
   separate design document that defines the Community cloud/pro behavior
   boundary, C API shape, and unsupported/partial behavior before any public API
   is implemented.
+- First `0.3.0-design` priorities:
+  1. Python `cffi` ABI-mode prototype design and prototype plan.
+  2. vcpkg feasibility prototype plan.
+  3. Strict ABI diff gate design.
+  4. Upstream baseline upgrade evaluation as a separate project.
+  5. Rust binding feasibility after Python feasibility results.

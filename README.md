@@ -29,11 +29,11 @@ Implemented and covered by fixed C/oracle tests plus deterministic random oracle
   velocity, stop, and minimum duration.
 
 Release-readiness evidence is tracked under `docs/release/`; see
-`docs/index.md` for the organized documentation map. `v0.2.4` is the latest
-published release, and `main` is currently the `0.2.5 - Unreleased`
-maintenance line. `0.2.5` is planned as the final `0.2.x` stabilization
-release before `0.3.0-design`, and the C API is intentionally frozen before
-that transition. The post-release stability queue is tracked in
+`docs/index.md` for the organized documentation map. `v0.2.5` is the latest
+published release and the final planned `0.2.x` stabilization baseline.
+`main` is currently the `0.3.0-design - Unreleased` line. The C API remains
+frozen while `0.3.0` work is in design evaluation. The post-release stability
+queue is tracked in
 `docs/current/roadmap.md`. Current release scope intentionally excludes:
 
 - Waypoints, per-section constraints, cloud, and Python/Rust bindings remain

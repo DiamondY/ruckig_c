@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.3.0-design - Unreleased
+
+Changed:
+
+- `main` now tracks the `0.3.0-design` line after publishing `v0.2.5` as the
+  final planned `0.2.x` stabilization release.
+- ABI comparison baselines now roll forward to `docs/abi/v0.2.5/`; strict ABI
+  diff failure remains design-only and is not enabled by default.
+
+Still deferred:
+
+- Intermediate waypoints, per-section constraints, cloud calculation, Python
+  binding implementation, Rust bindings, package-manager recipes, strict ABI
+  fail gates, and upstream baseline upgrades.
+
 ## 0.2.5 - 2026-06-05
 
 `0.2.5` is planned as the final `0.2.x` stabilization release before

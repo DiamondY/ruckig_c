@@ -1844,3 +1844,94 @@ can proceed after publication, Rust bindings remain deferred, vcpkg feasibility
 is first among package-manager investigations, strict ABI diff failure remains
 design-only, upstream baseline upgrade remains a separate project, and
 waypoints/per-section/cloud remain behind separate public API design gates.
+
+## 2026-06-05 0.2.5 Release Publication
+
+The `v0.2.5` release was published after the local closeout gate, push CI, and
+manual release-random workflow completed successfully.
+
+Release identity:
+
+- Final release commit: `c45a6ece69921c26419efcaefe10eed87de03605`.
+- Annotated tag object: `7f11fb1e7ad3b513c3911c16a7699fc0bcd0b9bf`.
+- Tag target commit: `c45a6ece69921c26419efcaefe10eed87de03605`.
+- Push CI run id: `26965537200`, conclusion `success`.
+- Push CI URL:
+  `https://github.com/DiamondY/ruckig_c/actions/runs/26965537200`.
+- Manual release random workflow run id: `26965856552`, conclusion `success`.
+- Manual release random URL:
+  `https://github.com/DiamondY/ruckig_c/actions/runs/26965856552`.
+- GitHub Release URL:
+  `https://github.com/DiamondY/ruckig_c/releases/tag/v0.2.5`.
+
+Successful push CI jobs:
+
+- `Windows clang-cl C-only`
+- `Windows clang-cl shared C-only`
+- `Windows clang oracle`
+- `Linux GCC C-only`
+- `Linux Clang oracle`
+- `macOS Clang C-only`
+- `Linux Clang ASan UBSan`
+- `Linux Valgrind`
+- `Linux Clang performance`
+- `Linux exported symbols`
+- `Windows exported symbols`
+
+Successful manual release random workflow jobs:
+
+- `Manual release random oracle`
+- `Windows clang-cl C-only`
+- `Windows clang-cl shared C-only`
+- `Windows clang oracle`
+- `Linux GCC C-only`
+- `Linux Clang oracle`
+- `macOS Clang C-only`
+- `Linux Clang ASan UBSan`
+- `Linux Valgrind`
+- `Linux Clang performance`
+- `Linux exported symbols`
+- `Windows exported symbols`
+
+The manual workflow ran against commit
+`c45a6ece69921c26419efcaefe10eed87de03605`. Its Linux performance job reported
+`average_ratio_c_over_oracle: 1.30314`, below the `1.5` release threshold, and
+the manual release random oracle job completed successfully.
+
+Exported-symbol publication evidence:
+
+```text
+Windows exported-symbol comparison: 66 current symbols, 66 baseline symbols, 0 added, 0 removed.
+Linux exported-symbol comparison: 127 current symbols, 66 baseline symbols, 61 added, 0 removed.
+```
+
+The Linux additions are implementation-internal `ruckig_*` symbols visible from
+the Linux shared library while strict symbol visibility remains design-only.
+They are not public header additions. The `v0.2.5` Linux ABI baseline saved
+under `docs/abi/v0.2.5/linux-symbols.txt` records the actual release export set
+so future comparison can detect drift from this state.
+
+## 2026-06-05 0.3.0-design Transition Validation
+
+This pass moves `main` to `0.3.0-design - Unreleased` after publishing
+`v0.2.5`. It does not change the public C API, does not implement bindings,
+does not add package-manager recipes, does not modify solver behavior, and
+does not modify `original/ruckig-main`.
+
+Post-release changes:
+
+- Added `CHANGELOG.md` section `0.3.0-design - Unreleased`.
+- Updated README and roadmap to identify `v0.2.5` as the latest release and
+  final planned `0.2.x` stabilization baseline.
+- Added `docs/abi/v0.2.5/` exported-symbol baselines.
+- Moved ABI comparison baseline to `docs/abi/v0.2.5/`.
+- Moved next-stage ABI artifacts to `artifacts/abi/0.3.0-design/`.
+
+Local transition validation:
+
+```text
+Static CTest excluding release random: 100% tests passed, 0 tests failed out of 20.
+Windows ABI comparison against docs/abi/v0.2.5: exported symbols match the baseline.
+docs/abi/v0.2.5/linux-symbols.txt: 127 symbols.
+docs/abi/v0.2.5/windows-symbols.txt: 66 symbols.
+```

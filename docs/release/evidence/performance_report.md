@@ -122,7 +122,7 @@ Current same-platform release baselines:
 | `0.2.2` | `1.39707` | Pass, artifact ids `7404574237` and `7404750529` | Final Windows tag-target rerun and manual Linux release workflow evidence; the Linux ratio was not excerpted into tracked docs. |
 | `0.2.3` | `1.08893` | `1.26328` | Final Windows closeout and manual Linux release workflow evidence. |
 | `0.2.4` | `1.4087` | `1.29012` | Final Windows closeout and manual Linux release workflow evidence. |
-| `0.2.5` | `1.16244` | Pending | Final planned pre-`0.3.0` stabilization baseline; Linux final evidence is pending push CI or manual release workflow. |
+| `0.2.5` | `1.16244` | `1.30314` | Final planned pre-`0.3.0` stabilization baseline from local Windows closeout and manual Linux release workflow evidence. |
 
 Store raw local or CI outputs outside version-controlled source unless the
 release process intentionally promotes a short excerpt into this report. Use a
@@ -689,7 +689,38 @@ The same-platform `0.2.4` Windows release baseline ratio was `1.4087`. This
 local release closeout run is within the release threshold of average
 calculation time no worse than `1.5x` the C++ oracle on the same benchmark
 corpus. It is the Windows final pre-`0.3.0` performance baseline for `0.2.x`;
-the Linux final baseline is pending push CI or manual release workflow evidence.
+the Linux final baseline is recorded in the manual release workflow section
+below.
+
+## 2026-06-05 Linux 0.2.5 Manual Release Workflow Run
+
+- Source: GitHub Actions workflow-dispatch run `26965856552`, job
+  `Linux Clang performance`.
+- Commit: `c45a6ece69921c26419efcaefe10eed87de03605`.
+- Command: `./build-perf/ruckig_c_performance_benchmark --samples 10000 --seed 1`.
+- OS: Linux, GitHub-hosted Ubuntu runner.
+- Kernel/build:
+  `Linux runnervm3jyl0 6.17.0-1015-azure #15~24.04.1-Ubuntu SMP Wed May 6 22:37:49 UTC 2026 x86_64`.
+- CPU identifier: `AMD EPYC 9V74 80-Core Processor`.
+- C compiler: `Ubuntu clang version 18.1.3 (1ubuntu1)`.
+- C++ compiler: `Ubuntu clang version 18.1.3 (1ubuntu1)`.
+- CMake build type: `Release`.
+- Generator: `Ninja`.
+- Seed: `1`.
+- Samples: `10000`.
+
+| Metric | C implementation | C++ oracle |
+| --- | ---: | ---: |
+| Average | 760.728 ns | 583.765 ns |
+| p99 | 5719 ns | 4467 ns |
+| Worst | 21011 ns | 21373 ns |
+
+Average C/oracle ratio: `1.30314`.
+
+The same-platform `0.2.4` Linux release baseline ratio was `1.29012`. This
+manual release workflow run is within the release threshold of average
+calculation time no worse than `1.5x` the C++ oracle on the same benchmark
+corpus. It is the Linux final pre-`0.3.0` performance baseline for `0.2.x`.
 
 ### Windows clang release
 

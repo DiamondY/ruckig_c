@@ -111,7 +111,7 @@ The `0.2.4` comparison remains warning/evidence only. Differences must be
 reviewed before release and recorded in the release checklist, but the helper
 is not a strict CI fail gate.
 
-## 0.2.5 Strict Gate Design
+## 0.2.5 Strict Gate Design And Pre-0.3.0 Baseline
 
 The `v0.2.4` release rolls the exported-symbol baseline forward again:
 
@@ -148,6 +148,30 @@ Strict exported-symbol diff failure is still not enabled in `v0.2.5`. It can
 continue as a `0.3.0-design` topic or future emergency patch design item after
 the exception process and reproducibility requirements below are satisfied.
 
+After publishing `v0.2.5`, `docs/abi/v0.2.5/` is the active comparison
+baseline for `0.3.0-design`:
+
+```text
+docs/abi/v0.2.5/linux-symbols.txt
+docs/abi/v0.2.5/windows-symbols.txt
+```
+
+The Linux `v0.2.5` baseline records the actual shared-library export set from
+the release workflow. It includes implementation-internal `ruckig_*` symbols
+that are currently visible on Linux because strict symbol visibility is not yet
+enforced. Treat this as ABI evidence for drift review, not as approval to use
+those internal symbols as public API. The public C API remains the declarations
+in `include/ruckig_c/ruckig.h`.
+
+Shared builds on `main` now write next-stage comparison artifacts under:
+
+```text
+build_release_check_shared/artifacts/abi/0.3.0-design/windows-exports.txt
+build_release_check_shared/artifacts/abi/0.3.0-design/windows-export-diff.txt
+build-shared/artifacts/abi/0.3.0-design/linux-exports.txt
+build-shared/artifacts/abi/0.3.0-design/linux-export-diff.txt
+```
+
 Strict exported-symbol diff enforcement can be enabled only after all of these
 conditions are true:
 
@@ -172,10 +196,12 @@ Draft ABI exception policy:
 
 ## Public Header Diff
 
-Review the public header against the previous release tag:
+Review the public header against the previous release tag. For the
+`0.3.0-design` line, compare against the final planned `0.2.x` stabilization
+baseline:
 
 ```powershell
-git -c safe.directory=E:/Yww/DownLoad/source/ruckig_c diff v0.2.4 -- include/ruckig_c/ruckig.h
+git -c safe.directory=E:/Yww/DownLoad/source/ruckig_c diff v0.2.5 -- include/ruckig_c/ruckig.h
 ```
 
 For `0.2.x` patch releases, expected changes are limited to version macros and
