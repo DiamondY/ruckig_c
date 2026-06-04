@@ -70,17 +70,17 @@ recorded after the release closeout commit is pushed.
 
 ```text
 Final release commit:
-00b41b26199908b6176a1992cb47646dc81b714c
+To be recorded after the final tag target commit is selected.
 Annotated tag object:
 To be recorded after tagging.
 Tag target commit:
 To be recorded after tagging.
 Push CI run id:
-26934110269
+To be recorded after the final tag target commit push CI completes.
 Push CI URL:
-https://github.com/DiamondY/ruckig_c/actions/runs/26934110269
+To be recorded after the final tag target commit push CI completes.
 Push CI conclusion:
-success
+To be recorded after the final tag target commit push CI completes.
 Manual release random run id:
 To be recorded after workflow dispatch.
 Manual release random URL:
@@ -106,19 +106,19 @@ Release random oracle result:
 Windows performance result:
 average_ratio_c_over_oracle: 1.08231; threshold: 1.5.
 Linux performance result:
-Push CI Linux Clang performance job succeeded for commit `00b41b26199908b6176a1992cb47646dc81b714c`; artifact id `7404221253`. The benchmark program enforces `average_ratio_c_over_oracle <= 1.5`.
+To be recorded from the final tag target commit push CI or manual workflow artifact. The benchmark program enforces `average_ratio_c_over_oracle <= 1.5`.
 Windows/Linux performance trend versus 0.2.1:
-Windows local release ratio changed from `0.328289` in `0.2.1` to `1.08231` in `0.2.2`; both are below the `1.5` threshold. Linux performance passed in push CI; raw artifact download requires GitHub authentication for final numeric transcription.
+Windows local release ratio changed from `0.328289` in `0.2.1` to `1.08231` in `0.2.2`; both are below the `1.5` threshold. Linux trend is to be recorded from final CI artifacts.
 Consumer automation result:
-Installed CMake consumer, Windows manual static consumer, and Windows DLL consumer passed in local release-check CTest. Linux pkg-config and shared install-tree consumers passed in push CI.
+Installed CMake consumer, Windows manual static consumer, and Windows DLL consumer passed in local release-check CTest. Linux pkg-config and shared install-tree consumers are to be recorded from final push CI.
 Linux exported-symbol artifact:
-GitHub Actions `Linux exported symbols` artifact id `7404216558`.
+To be recorded from final push CI artifact.
 Windows exported-symbol artifact:
 `build_release_check_shared/artifacts/abi/0.2.2/windows-exports.txt`.
 Linux exported-symbol CI artifact:
-Artifact id `7404216558`; download requires GitHub authentication.
+To be recorded after final push CI completes.
 Windows exported-symbol CI artifact:
-Artifact id `7404217248`; download requires GitHub authentication.
+To be recorded after final push CI completes.
 Exported symbol review result:
 Windows DLL exports reviewed with `llvm-readobj --coff-exports`; 66 public `ruckig_*` exports found, including lifecycle, input, output, trajectory, validation, calculate, update, reset, and per-DoF APIs.
 Public header diff review result:
