@@ -114,6 +114,15 @@ explicitly documents a corpus change:
 - Required platforms: Windows clang release and Linux clang release.
 - Required threshold: average C/oracle ratio `<= 1.5`.
 
+Current same-platform release baselines:
+
+| Release | Windows clang ratio/evidence | Linux clang ratio/evidence | Notes |
+| --- | ---: | ---: | --- |
+| `0.2.1` | `0.328289` | `1.32335` | Final local Windows closeout and manual Linux release workflow evidence. |
+| `0.2.2` | `1.39707` | Pass, artifact ids `7404574237` and `7404750529` | Final Windows tag-target rerun and manual Linux release workflow evidence; the Linux ratio was not excerpted into tracked docs. |
+| `0.2.3` | `1.08893` | `1.26328` | Final Windows closeout and manual Linux release workflow evidence. |
+| `0.2.4` | Pending | Pending | Compare only against the `0.2.3` same-platform baselines. |
+
 Store raw local or CI outputs outside version-controlled source unless the
 release process intentionally promotes a short excerpt into this report. Use a
 stable artifact convention such as:
