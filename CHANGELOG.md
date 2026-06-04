@@ -16,6 +16,11 @@ Changed:
 - `0.2.4` ABI comparison remains warning/evidence only; it is not a strict CI
   fail gate.
 
+Fixed:
+
+- Windows `clang-cl` manual static consumer smoke now uses the dynamic CRT mode
+  expected by the CMake-built static library, avoiding mixed CRT link failures.
+
 Still deferred:
 
 - Intermediate waypoints, per-section constraints, cloud calculation, Python

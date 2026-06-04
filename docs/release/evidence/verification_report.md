@@ -1633,3 +1633,16 @@ Implemented maintenance setup:
   `clang-cl` frontend modes.
 - Added Windows `clang-cl` shared C-only CI coverage so DLL/import-library
   consumer smoke also runs under the MSVC frontend variant.
+
+Follow-up consumer-smoke verification:
+
+- Push CI run id: `26958358278`, conclusion `success`.
+- Push CI URL:
+  `https://github.com/DiamondY/ruckig_c/actions/runs/26958358278`.
+- Commit: `79139d9a2581129f02c66ef0325921d709279b0d`.
+- `Windows clang-cl C-only` passed with the manual static consumer smoke using
+  the MSVC frontend dynamic CRT mode.
+- `Windows clang-cl shared C-only` passed with the DLL/import-library consumer
+  smoke.
+- Linux and Windows exported-symbol jobs completed successfully; ABI comparison
+  remains warning/evidence only for `0.2.4`.
