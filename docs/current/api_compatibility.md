@@ -111,12 +111,57 @@ The `0.2.4` comparison remains warning/evidence only. Differences must be
 reviewed before release and recorded in the release checklist, but the helper
 is not a strict CI fail gate.
 
+## 0.2.5 Strict Gate Design
+
+The `v0.2.4` release rolls the exported-symbol baseline forward again:
+
+```text
+docs/abi/v0.2.4/linux-symbols.txt
+docs/abi/v0.2.4/windows-symbols.txt
+```
+
+Shared builds now write comparison artifacts under an `0.2.5` build-tree path,
+for example:
+
+```text
+build_release_check_shared/artifacts/abi/0.2.5/windows-exports.txt
+build_release_check_shared/artifacts/abi/0.2.5/windows-export-diff.txt
+```
+
+The `0.2.5` objective is to design a strict ABI diff gate, not to enable strict
+CI failure immediately. The default remains warning/evidence-only so release
+maintainers can review public header diffs, exported-symbol diffs, enum values,
+and result-code values before deciding whether the process is mature enough to
+fail CI automatically.
+
+Strict exported-symbol diff enforcement can be enabled only after all of these
+conditions are true:
+
+- At least two consecutive patch releases have generated Linux and Windows ABI
+  evidence from the release process.
+- The baseline files can be regenerated reproducibly from the release tag.
+- Public header diff review has been completed and recorded for those releases.
+- An exception process exists for intentional ABI changes.
+- CI output exposes a machine-readable diff summary that is easy to audit.
+
+Draft ABI exception policy:
+
+- Allowed without separate version decision: version macro changes, comments,
+  documentation-only edits, and release-evidence text.
+- Forbidden in `0.2.x` patch releases: public function removal, public function
+  signature changes, enum numeric-value changes, result-code numeric-value
+  changes, and unreviewed exported-symbol removal.
+- New public API in `0.2.x` requires a separate design and version decision,
+  plus `CHANGELOG.md` and API compatibility documentation updates.
+- Solver behavior changes require an oracle-proven bug fix and a retained
+  regression case.
+
 ## Public Header Diff
 
 Review the public header against the previous release tag:
 
 ```powershell
-git -c safe.directory=E:/Yww/DownLoad/source/ruckig_c diff v0.2.3 -- include/ruckig_c/ruckig.h
+git -c safe.directory=E:/Yww/DownLoad/source/ruckig_c diff v0.2.4 -- include/ruckig_c/ruckig.h
 ```
 
 For `0.2.x` patch releases, expected changes are limited to version macros and

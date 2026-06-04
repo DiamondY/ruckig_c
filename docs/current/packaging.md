@@ -81,8 +81,21 @@ Current Windows toolchain status:
   CTest.
 - `clang-cl`: verified for C-only CMake target consumption and standalone
   manual static-link smoke in CI.
-- MSVC `cl`: not yet verified as a standalone manual static-link smoke.
+- MSVC `cl`: planned as a standalone manual static-link smoke; not yet part of
+  routine CI.
 - MinGW: not yet verified.
+
+Planned MSVC `cl` standalone static smoke:
+
+```powershell
+cl /nologo /std:c11 /DRUCKIG_C_STATIC_DEFINE /I include examples\c\00_minimal_offline.c build_release_check_ninja\ruckig_c.lib /Fe:build_release_check_ninja\msvc_static_consumer.exe
+.\build_release_check_ninja\msvc_static_consumer.exe
+```
+
+This smoke must run from a Developer Command Prompt or an equivalent
+environment where `cl`, the Windows SDK, and the C runtime libraries are
+available. It is a manual or CMake-scripted gate until CI evidence proves the
+toolchain is stable enough for routine execution.
 
 ## DLL Consumers
 
@@ -122,8 +135,23 @@ Current Windows DLL consumer status:
   release-check CTest.
 - `clang-cl`: verified through a shared C-only CI job that builds the DLL,
   links the import library, updates the process `PATH`, and runs the consumer.
-- MSVC `cl`: not yet verified as a standalone DLL consumer smoke.
+- MSVC `cl`: planned as a standalone DLL/import-library smoke; not yet part of
+  routine CI.
 - MinGW: not yet verified.
+
+Planned MSVC `cl` standalone DLL smoke:
+
+```powershell
+cl /nologo /std:c11 /I include examples\c\00_minimal_offline.c build_release_check_shared\ruckig_c.lib /Fe:build_release_check_shared\msvc_dll_consumer.exe
+$env:PATH = (Resolve-Path build_release_check_shared).Path + ";" + $env:PATH
+.\build_release_check_shared\msvc_dll_consumer.exe
+```
+
+Do not define `RUCKIG_C_STATIC_DEFINE` for this DLL consumer path.
+
+MinGW feasibility remains separate from MSVC-style consumers. It should be
+validated as two independent smokes, one static and one DLL/import-library,
+before documentation or CI implies support.
 
 ## Shared Install-Tree Verification
 

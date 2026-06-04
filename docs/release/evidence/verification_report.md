@@ -1710,3 +1710,93 @@ Local consumer evidence:
 - Windows DLL consumer passed in local shared release-check CTest.
 - Linux pkg-config and Unix shared install-tree consumers must be recorded from
   push CI or a Unix release gate.
+
+## 2026-06-04 0.2.4 Release Publication
+
+The `v0.2.4` release was published after the local closeout gate, push CI, and
+manual release-random workflow completed successfully.
+
+Release identity:
+
+- Final release commit: `3a65ce47449e4e9fe6708b57c9dc95d7151f2188`.
+- Annotated tag object: `f71e18e95685ebccbe621e37aa115237d70f5bad`.
+- Tag target commit: `3a65ce47449e4e9fe6708b57c9dc95d7151f2188`.
+- Push CI run id: `26961897352`, conclusion `success`.
+- Push CI URL:
+  `https://github.com/DiamondY/ruckig_c/actions/runs/26961897352`.
+- Manual release random workflow run id: `26962279739`, conclusion `success`.
+- Manual release random URL:
+  `https://github.com/DiamondY/ruckig_c/actions/runs/26962279739`.
+- GitHub Release URL:
+  `https://github.com/DiamondY/ruckig_c/releases/tag/v0.2.4`.
+
+Successful push CI jobs:
+
+- `Windows clang-cl C-only`
+- `Windows clang-cl shared C-only`
+- `Windows clang oracle`
+- `Linux GCC C-only`
+- `Linux Clang oracle`
+- `macOS Clang C-only`
+- `Linux Clang ASan UBSan`
+- `Linux Valgrind`
+- `Linux Clang performance`
+- `Linux exported symbols`
+- `Windows exported symbols`
+
+Successful manual release random workflow jobs:
+
+- `Manual release random oracle`
+- `Windows clang-cl C-only`
+- `Windows clang-cl shared C-only`
+- `Windows clang oracle`
+- `Linux GCC C-only`
+- `Linux Clang oracle`
+- `macOS Clang C-only`
+- `Linux Clang ASan UBSan`
+- `Linux Valgrind`
+- `Linux Clang performance`
+- `Linux exported symbols`
+- `Windows exported symbols`
+
+The manual workflow ran against commit
+`3a65ce47449e4e9fe6708b57c9dc95d7151f2188`. Its Linux performance job reported
+`average_ratio_c_over_oracle: 1.29012`, below the `1.5` release threshold, and
+the manual release random oracle job completed successfully.
+
+## 2026-06-04 0.2.5 Maintenance Start
+
+This pass starts the `0.2.5 - Unreleased` maintenance queue after publishing
+`v0.2.4`. It does not change the public C API and does not modify
+`original/ruckig-main`.
+
+Implemented maintenance setup:
+
+- Added tracked `v0.2.4` Linux and Windows exported-symbol baselines under
+  `docs/abi/v0.2.4/`.
+- Updated the shared-build ABI comparison helper to compare current exports
+  against the `v0.2.4` baseline and write `0.2.5` build-tree artifacts.
+- Kept ABI comparison in warning/evidence mode by default while documenting
+  strict gate prerequisites and an exception-policy draft.
+- Added `docs/release/checklists/0.2.5.md`.
+- Expanded Windows standalone consumer matrix documentation for planned MSVC
+  `cl` static/DLL smokes and MinGW feasibility status.
+- Expanded package-manager feasibility notes without adding package-manager
+  recipes.
+- Expanded Python binding feasibility notes without adding binding code.
+- Added targeted fixed oracle regression cases for the `0.2.5` queue; the fixed
+  suite now reports 74 cases locally.
+
+Local maintenance validation:
+
+```text
+Static CTest excluding release random: 100% tests passed, 0 tests failed out of 20.
+Shared CTest excluding release random: 100% tests passed, 0 tests failed out of 20.
+Fixed oracle suite: Oracle comparisons passed: 74.
+Random oracle seed 1: Oracle comparisons passed: 74; Random oracle comparisons passed: 100000 seed 1.
+Random oracle seed 2: Oracle comparisons passed: 74; Random oracle comparisons passed: 100000 seed 2.
+Random oracle seed 41: Oracle comparisons passed: 74; Random oracle comparisons passed: 100000 seed 41.
+Per-DoF random seed 1: Oracle comparisons passed: 74; Random per-DoF oracle comparisons passed: 100000 seed 1.
+Windows performance maintenance ratio: 1.25602; threshold: 1.5.
+Windows exported-symbol baseline comparison: 66 current symbols, 66 baseline symbols, 0 added, 0 removed.
+```

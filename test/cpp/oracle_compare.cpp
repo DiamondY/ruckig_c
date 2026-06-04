@@ -2452,6 +2452,112 @@ int main(int argc, char** argv) {
     });
 
     cases.push_back(CaseData{
+        "per-dof-8d-discrete-min-duration-time-if-necessary",
+        8,
+        0.04,
+        RUCKIG_CONTROL_POSITION,
+        RUCKIG_SYNCHRONIZATION_TIME,
+        RUCKIG_DURATION_DISCRETE,
+        true,
+        2.36,
+        {0.0, 0.15, -0.25, 0.35, -0.45, 0.55, -0.65, 0.75},
+        {0.0, 0.01, -0.012, 0.014, -0.016, 0.018, -0.02, 0.022},
+        {0.0, 0.001, -0.0012, 0.0014, -0.0016, 0.0018, -0.002, 0.0022},
+        {0.7, -0.55, 0.6, -0.75, 0.8, -0.4, 0.5, -0.9},
+        {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
+        {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
+        {1.0, 1.1, 1.05, 1.15, 1.2, 0.95, 1.25, 1.3},
+        {0.8, 0.85, 0.82, 0.88, 0.9, 0.78, 0.92, 0.95},
+        {1.3, 1.35, 1.32, 1.38, 1.4, 1.28, 1.42, 1.45},
+        {},
+        {},
+        {},
+        {},
+        {RUCKIG_SYNCHRONIZATION_TIME_IF_NECESSARY, RUCKIG_SYNCHRONIZATION_TIME_IF_NECESSARY, RUCKIG_SYNCHRONIZATION_NONE, RUCKIG_SYNCHRONIZATION_TIME_IF_NECESSARY, RUCKIG_SYNCHRONIZATION_TIME, RUCKIG_SYNCHRONIZATION_TIME_IF_NECESSARY, RUCKIG_SYNCHRONIZATION_NONE, RUCKIG_SYNCHRONIZATION_TIME_IF_NECESSARY}
+    });
+
+    cases.push_back(CaseData{
+        "position-disabled-dof-long-online-constant-acceleration",
+        5,
+        0.0005,
+        RUCKIG_CONTROL_POSITION,
+        RUCKIG_SYNCHRONIZATION_TIME,
+        RUCKIG_DURATION_CONTINUOUS,
+        false,
+        0.0,
+        {0.0, 1.0, -0.2, -1.0, 0.4},
+        {0.01, 0.2, -0.015, -0.25, 0.02},
+        {0.001, 0.05, -0.0015, -0.04, 0.002},
+        {0.16, 3.0, -0.22, -2.0, 0.35},
+        {0.0, 0.5, 0.0, -0.4, 0.0},
+        {0.0, 0.0, 0.0, 0.0, 0.0},
+        {0.35, 0.0, 0.32, 0.0, 0.34},
+        {0.3, 0.8, 0.28, 0.9, 0.29},
+        {0.7, 1.0, 0.68, 1.1, 0.69},
+        {true, false, true, false, true},
+        {},
+        {},
+        {},
+        {RUCKIG_SYNCHRONIZATION_TIME, RUCKIG_SYNCHRONIZATION_NONE, RUCKIG_SYNCHRONIZATION_TIME_IF_NECESSARY, RUCKIG_SYNCHRONIZATION_NONE, RUCKIG_SYNCHRONIZATION_TIME}
+    });
+
+    cases.push_back(CaseData{
+        "position-large-duration-first-time-boundary",
+        1,
+        0.1,
+        RUCKIG_CONTROL_POSITION,
+        RUCKIG_SYNCHRONIZATION_TIME,
+        RUCKIG_DURATION_CONTINUOUS,
+        true,
+        20.0,
+        {0.0},
+        {0.0},
+        {0.0},
+        {1.0},
+        {0.0},
+        {0.0},
+        {1.0},
+        {1.0},
+        {1.0},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {
+            {0, 0.0, 0.0},
+            {0, 1.0, 0.0},
+            {0, 1.0, 19.0}
+        },
+        {0.1, 10.0, 19.9}
+    });
+
+    cases.push_back(CaseData{
+        "per-dof-mixed-order-none-phase-edge",
+        4,
+        0.02,
+        RUCKIG_CONTROL_POSITION,
+        RUCKIG_SYNCHRONIZATION_TIME,
+        RUCKIG_DURATION_CONTINUOUS,
+        false,
+        0.0,
+        {0.0, -0.2, 0.0, 0.4},
+        {0.0, 0.03, 0.0, -0.04},
+        {0.0, 0.0, 0.0, 0.003},
+        {0.6, -0.6, 0.0, -0.3},
+        {0.0, 0.0, 0.45, 0.0},
+        {0.0, 0.0, 0.0, 0.0},
+        {0.8, 0.9, 0.0, 1.0},
+        {inf, 0.7, 0.8, 0.75},
+        {inf, inf, 1.2, 1.3},
+        {},
+        {},
+        {},
+        {RUCKIG_CONTROL_POSITION, RUCKIG_CONTROL_POSITION, RUCKIG_CONTROL_VELOCITY, RUCKIG_CONTROL_POSITION},
+        {RUCKIG_SYNCHRONIZATION_NONE, RUCKIG_SYNCHRONIZATION_PHASE, RUCKIG_SYNCHRONIZATION_TIME_IF_NECESSARY, RUCKIG_SYNCHRONIZATION_NONE}
+    });
+
+    cases.push_back(CaseData{
         "first-time-repeated-position-boundary-fixed",
         1,
         0.01,

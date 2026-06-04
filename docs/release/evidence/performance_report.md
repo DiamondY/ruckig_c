@@ -121,7 +121,7 @@ Current same-platform release baselines:
 | `0.2.1` | `0.328289` | `1.32335` | Final local Windows closeout and manual Linux release workflow evidence. |
 | `0.2.2` | `1.39707` | Pass, artifact ids `7404574237` and `7404750529` | Final Windows tag-target rerun and manual Linux release workflow evidence; the Linux ratio was not excerpted into tracked docs. |
 | `0.2.3` | `1.08893` | `1.26328` | Final Windows closeout and manual Linux release workflow evidence. |
-| `0.2.4` | `1.4087` | Pending | Windows local closeout is below threshold; Linux release evidence is pending push CI or manual workflow. |
+| `0.2.4` | `1.4087` | `1.29012` | Final Windows closeout and manual Linux release workflow evidence. |
 
 Store raw local or CI outputs outside version-controlled source unless the
 release process intentionally promotes a short excerpt into this report. Use a
@@ -594,8 +594,72 @@ Average C/oracle ratio: `1.4087`.
 The same-platform `0.2.3` Windows release baseline ratio was `1.08893`. This
 local release closeout run is within the release threshold of average
 calculation time no worse than `1.5x` the C++ oracle on the same benchmark
-corpus. Linux `0.2.4` release evidence must be recorded from push CI or the
-manual release workflow.
+corpus.
+
+## 2026-06-04 Linux 0.2.4 Manual Release Workflow Run
+
+- Source: GitHub Actions workflow-dispatch run `26962279739`, job
+  `Linux Clang performance`.
+- Commit: `3a65ce47449e4e9fe6708b57c9dc95d7151f2188`.
+- Command: `./build-perf/ruckig_c_performance_benchmark --samples 10000 --seed 1`.
+- OS: Linux, GitHub-hosted Ubuntu runner.
+- Kernel/build:
+  `Linux runnervm3jyl0 6.17.0-1015-azure #15~24.04.1-Ubuntu SMP Wed May 6 22:37:49 UTC 2026 x86_64`.
+- CPU identifier: `AMD EPYC 7763 64-Core Processor`.
+- C compiler: `Ubuntu clang version 18.1.3 (1ubuntu1)`.
+- C++ compiler: `Ubuntu clang version 18.1.3 (1ubuntu1)`.
+- CMake build type: `Release`.
+- Generator: `Ninja`.
+- Seed: `1`.
+- Samples: `10000`.
+
+| Metric | C implementation | C++ oracle |
+| --- | ---: | ---: |
+| Average | 717.002 ns | 555.765 ns |
+| p99 | 5350 ns | 4158 ns |
+| Worst | 39313 ns | 22522 ns |
+
+Average C/oracle ratio: `1.29012`.
+
+The same-platform `0.2.3` Linux release baseline ratio was `1.26328`. This
+manual release workflow run is within the release threshold of average
+calculation time no worse than `1.5x` the C++ oracle on the same benchmark
+corpus.
+
+## 0.2.5 Benchmark Template
+
+Use the same required corpus, `--samples 10000 --seed 1`, for `0.2.5`. Compare
+Windows results only against the `0.2.4` Windows benchmark context and Linux
+results only against the `0.2.4` Linux benchmark context; do not compare
+absolute timings across platforms or runner classes.
+
+## 2026-06-04 Windows 0.2.5 Maintenance Preparation Run
+
+- Source: Local `0.2.5 - Unreleased` maintenance preparation after adding ABI
+  baseline comparison, documentation updates, and targeted fixed oracle cases.
+- Command:
+  `.\build_release_check_ninja\ruckig_c_performance_benchmark.exe --samples 10000 --seed 1`
+- OS: Windows.
+- CPU identifier: `Intel64 Family 6 Model 165 Stepping 5, GenuineIntel`.
+- C compiler: `clang 21.1.8`.
+- C++ compiler: `clang 21.1.8`.
+- CMake build type: Release-check Ninja build directory.
+- Generator: Ninja.
+- Seed: `1`.
+- Samples: `10000`.
+
+| Metric | C implementation | C++ oracle |
+| --- | ---: | ---: |
+| Average | 641.05 ns | 510.38 ns |
+| p99 | 4700 ns | 3800 ns |
+| Worst | 16800 ns | 20600 ns |
+
+Average C/oracle ratio: `1.25602`.
+
+The same-platform `0.2.4` Windows release baseline ratio was `1.4087`. This
+maintenance preparation run is within the release threshold of average
+calculation time no worse than `1.5x` the C++ oracle on the same benchmark
+corpus.
 
 ### Windows clang release
 

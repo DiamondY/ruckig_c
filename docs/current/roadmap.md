@@ -49,9 +49,13 @@ follow-up work for stability and future feature planning.
   CI, manual release-random workflow, performance, consumer, and ABI evidence.
 - Done for `0.2.3`: published `v0.2.3` with final tag, GitHub Release, push
   CI, manual release-random workflow, performance, consumer, and ABI evidence.
-- In progress for `0.2.4`: compare exported symbols against the `v0.2.3`
-  baseline in warning/evidence mode, keep package-manager work as feasibility
-  only, and strengthen Windows `clang-cl` static/DLL consumer smoke coverage.
+- Done for `0.2.4`: published `v0.2.4` with final tag, GitHub Release, push
+  CI, manual release-random workflow, performance, consumer, and ABI evidence.
+- In progress for `0.2.5`: roll exported-symbol comparison to the `v0.2.4`
+  baseline, design strict ABI diff gate prerequisites while keeping
+  warning/evidence mode by default, expand Windows standalone consumer matrix
+  notes, keep package-manager work as feasibility only, and add a small set of
+  targeted fixed oracle regressions.
 - Before each `0.2.x` patch release, record Windows and Linux release
   benchmarks with average, p99, worst, and C/oracle average ratio.
 - Keep per-DoF override hardening focused on oracle coverage, diagnostics, and

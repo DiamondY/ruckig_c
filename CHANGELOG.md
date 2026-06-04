@@ -1,5 +1,38 @@
 # Changelog
 
+## 0.2.5 - Unreleased
+
+Added:
+
+- `v0.2.4` Linux and Windows exported-symbol baselines for `0.2.5`
+  warning/evidence-only ABI comparison.
+- `0.2.5` release checklist with strict ABI gate design fields, consumer
+  matrix evidence, performance trend comparison, and targeted oracle regression
+  gates.
+- Targeted fixed C++ oracle regression cases for high-DoF discrete
+  minimum-duration synchronization, disabled-DoF online updates, large-duration
+  first-time boundaries, and mixed first/second/third-order
+  synchronization edges.
+
+Changed:
+
+- `0.2.5` ABI work is still warning/evidence-only by default; strict ABI diff
+  enforcement remains a design target until the documented prerequisites are
+  satisfied.
+- Expanded Windows consumer documentation for existing `clang`/`clang-cl`
+  coverage, planned MSVC `cl` standalone static/DLL smoke gates, and MinGW
+  feasibility status.
+- Expanded package-manager feasibility notes with vcpkg first, Conan second,
+  Homebrew third, and FetchContent/vendored subdirectory guidance only.
+- Expanded Python binding feasibility notes for the future `cffi` ABI-mode
+  prototype without adding binding implementation.
+
+Still deferred:
+
+- Intermediate waypoints, per-section constraints, cloud calculation, Python
+  binding implementation, Rust bindings, package-manager recipes, strict ABI
+  fail gates, and upstream baseline upgrades.
+
 ## 0.2.4 - 2026-06-04
 
 Added:

@@ -52,3 +52,5 @@ Historical rewrite plans and release evidence are retained for traceability.
   comparison helper.
 - `abi/v0.2.3/` - exported-symbol baselines used by the `0.2.4` ABI
   comparison helper.
+- `abi/v0.2.4/` - exported-symbol baselines used by the `0.2.5` ABI
+  comparison helper.
