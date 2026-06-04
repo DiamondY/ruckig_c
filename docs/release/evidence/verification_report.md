@@ -1646,3 +1646,67 @@ Follow-up consumer-smoke verification:
   smoke.
 - Linux and Windows exported-symbol jobs completed successfully; ABI comparison
   remains warning/evidence only for `0.2.4`.
+
+## 2026-06-04 0.2.4 Local Release Closeout
+
+This pass verifies the local `0.2.4` release closeout after bumping the project
+version to `0.2.4` and converting the changelog entry to a dated release entry.
+Remote push CI, manual release-random, tag, and GitHub Release evidence are
+recorded after publication.
+
+Version and scope:
+
+- `CMakeLists.txt` project version: `0.2.4`.
+- Public header version macros: `0.2.4`.
+- No public C API additions were made.
+- `original/ruckig-main` remains unchanged from `v0.2.3`.
+- Intermediate waypoints, per-section constraints, cloud calculation, Python
+  binding implementation, Rust bindings, and upstream baseline upgrades remain
+  deferred.
+
+Local release gates:
+
+```text
+Static CTest excluding release random: 100% tests passed, 0 tests failed out of 20.
+Shared CTest excluding release random: 100% tests passed, 0 tests failed out of 20.
+Fixed oracle suite: Oracle comparisons passed: 70.
+Random oracle seed 1: Oracle comparisons passed: 70; Random oracle comparisons passed: 100000 seed 1.
+Random oracle seed 2: Oracle comparisons passed: 70; Random oracle comparisons passed: 100000 seed 2.
+Random oracle seed 41: Oracle comparisons passed: 70; Random oracle comparisons passed: 100000 seed 41.
+Per-DoF random seed 1: Oracle comparisons passed: 70; Random per-DoF oracle comparisons passed: 100000 seed 1.
+Release random oracle: 100% tests passed, 0 tests failed out of 1; passed in 48.88 seconds.
+Windows performance ratio: 1.4087; threshold: 1.5.
+```
+
+Local Windows exported-symbol baseline comparison:
+
+```text
+Exported-symbol baseline comparison
+current_symbol_count: 66
+baseline_symbol_count: 66
+added_symbol_count: 0
+removed_symbol_count: 0
+Exported symbols match the baseline
+```
+
+The generated artifacts are:
+
+```text
+build_release_check_shared/artifacts/abi/0.2.4/windows-exports.txt
+build_release_check_shared/artifacts/abi/0.2.4/windows-export-diff.txt
+```
+
+Public header diff review:
+
+```text
+The diff from v0.2.3 contains only version macro changes from 0.2.3 to 0.2.4.
+Public functions, enum numeric values, and result-code numeric values are unchanged.
+```
+
+Local consumer evidence:
+
+- Installed CMake consumer passed in local release-check CTest.
+- Windows manual static consumer passed in local release-check CTest.
+- Windows DLL consumer passed in local shared release-check CTest.
+- Linux pkg-config and Unix shared install-tree consumers must be recorded from
+  push CI or a Unix release gate.

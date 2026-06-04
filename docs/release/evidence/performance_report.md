@@ -121,7 +121,7 @@ Current same-platform release baselines:
 | `0.2.1` | `0.328289` | `1.32335` | Final local Windows closeout and manual Linux release workflow evidence. |
 | `0.2.2` | `1.39707` | Pass, artifact ids `7404574237` and `7404750529` | Final Windows tag-target rerun and manual Linux release workflow evidence; the Linux ratio was not excerpted into tracked docs. |
 | `0.2.3` | `1.08893` | `1.26328` | Final Windows closeout and manual Linux release workflow evidence. |
-| `0.2.4` | Pending | Pending | Compare only against the `0.2.3` same-platform baselines. |
+| `0.2.4` | `1.4087` | Pending | Windows local closeout is below threshold; Linux release evidence is pending push CI or manual workflow. |
 
 Store raw local or CI outputs outside version-controlled source unless the
 release process intentionally promotes a short excerpt into this report. Use a
@@ -567,6 +567,35 @@ Use the same required corpus, `--samples 10000 --seed 1`, for `0.2.4`. Compare
 Windows results only against the `0.2.3` Windows benchmark context and Linux
 results only against the `0.2.3` Linux benchmark context; do not compare
 absolute timings across platforms or runner classes.
+
+## 2026-06-04 Windows 0.2.4 Local Release Closeout Run
+
+- Source: Local `0.2.4` release closeout gate after bumping the project version
+  to `0.2.4`.
+- Command:
+  `.\build_release_check_ninja\ruckig_c_performance_benchmark.exe --samples 10000 --seed 1`
+- OS: Windows.
+- CPU identifier: `Intel64 Family 6 Model 165 Stepping 5, GenuineIntel`.
+- C compiler: `clang 21.1.8`.
+- C++ compiler: `clang 21.1.8`.
+- CMake build type: Release-check Ninja build directory.
+- Generator: Ninja.
+- Seed: `1`.
+- Samples: `10000`.
+
+| Metric | C implementation | C++ oracle |
+| --- | ---: | ---: |
+| Average | 984.85 ns | 699.12 ns |
+| p99 | 6900 ns | 5200 ns |
+| Worst | 28800 ns | 220100 ns |
+
+Average C/oracle ratio: `1.4087`.
+
+The same-platform `0.2.3` Windows release baseline ratio was `1.08893`. This
+local release closeout run is within the release threshold of average
+calculation time no worse than `1.5x` the C++ oracle on the same benchmark
+corpus. Linux `0.2.4` release evidence must be recorded from push CI or the
+manual release workflow.
 
 ### Windows clang release
 

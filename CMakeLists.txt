@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(ruckig_c_rewrite VERSION 0.2.3 LANGUAGES C)
+project(ruckig_c_rewrite VERSION 0.2.4 LANGUAGES C)
 
 include(CTest)
 include(GNUInstallDirs)
