@@ -39,6 +39,22 @@ cc main.c $(pkg-config --cflags --static --libs ruckig_c) -o app
 The existing `ruckig_c_pkg_config_consumer` CTest verifies the installed
 pkg-config path on Unix systems that provide `pkg-config`.
 
+## Consumer Matrix Summary
+
+| Toolchain/path | Status |
+| --- | --- |
+| clang static | verified |
+| clang DLL | verified |
+| clang-cl static | verified in CI |
+| clang-cl DLL | verified in CI |
+| MSVC cl static | documented, not yet CI-verified |
+| MSVC cl DLL | documented, not yet CI-verified |
+| MinGW static | not yet verified |
+| MinGW DLL | not yet verified |
+| CMake installed package | verified |
+| pkg-config | verified on Unix CI |
+| shared install-tree | verified on Unix CI |
+
 ## Windows Manual Static Link
 
 When manually linking a static Windows build without CMake, define

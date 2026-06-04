@@ -134,6 +134,20 @@ maintainers can review public header diffs, exported-symbol diffs, enum values,
 and result-code values before deciding whether the process is mature enough to
 fail CI automatically.
 
+`v0.2.5` is the planned final `0.2.x` stabilization release before
+`0.3.0-design`, so its release artifacts should be treated as the pre-`0.3.0`
+C ABI baseline. After publication, save Linux and Windows exported-symbol
+baselines under:
+
+```text
+docs/abi/v0.2.5/linux-symbols.txt
+docs/abi/v0.2.5/windows-symbols.txt
+```
+
+Strict exported-symbol diff failure is still not enabled in `v0.2.5`. It can
+continue as a `0.3.0-design` topic or future emergency patch design item after
+the exception process and reproducibility requirements below are satisfied.
+
 Strict exported-symbol diff enforcement can be enabled only after all of these
 conditions are true:
 

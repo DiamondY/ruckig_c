@@ -1,6 +1,9 @@
 # Changelog
 
-## 0.2.5 - Unreleased
+## 0.2.5 - 2026-06-05
+
+`0.2.5` is planned as the final `0.2.x` stabilization release before
+`0.3.0-design`.
 
 Added:
 
@@ -9,6 +12,9 @@ Added:
 - `0.2.5` release checklist with strict ABI gate design fields, consumer
   matrix evidence, performance trend comparison, and targeted oracle regression
   gates.
+- `0.3.0` readiness decision document covering the post-`v0.2.5` design entry
+  criteria, binding/package-manager priorities, ABI gate status, and deferred
+  feature boundaries.
 - Targeted fixed C++ oracle regression cases for high-DoF discrete
   minimum-duration synchronization, disabled-DoF online updates, large-duration
   first-time boundaries, and mixed first/second/third-order

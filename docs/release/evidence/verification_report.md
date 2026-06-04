@@ -1800,3 +1800,47 @@ Per-DoF random seed 1: Oracle comparisons passed: 74; Random per-DoF oracle comp
 Windows performance maintenance ratio: 1.25602; threshold: 1.5.
 Windows exported-symbol baseline comparison: 66 current symbols, 66 baseline symbols, 0 added, 0 removed.
 ```
+
+## 2026-06-05 0.2.5 Local Release Closeout
+
+This pass prepares `v0.2.5` as the final planned `0.2.x` stabilization release
+before `0.3.0-design`. It does not add public C API, does not enable strict ABI
+failure, does not add binding or package-manager implementation, and does not
+modify `original/ruckig-main`.
+
+Release candidate state:
+
+- `CMakeLists.txt` project version: `0.2.5`.
+- `include/ruckig_c/ruckig.h` version macros: `0.2.5`.
+- `CHANGELOG.md` entry: `0.2.5 - 2026-06-05`.
+- Public header diff against `v0.2.4`: version macro changes only.
+- Fixed oracle suite count: `74`.
+- Strict ABI gate: warning/evidence-only.
+- MSVC `cl` standalone static/DLL consumer paths: documented, not yet
+  CI-verified.
+- MinGW static/DLL consumer paths: not yet verified.
+- `0.2.6`: emergency patch reserve only.
+
+Local release validation:
+
+```text
+Static CTest excluding release random: 100% tests passed, 0 tests failed out of 20.
+Shared CTest excluding release random: 100% tests passed, 0 tests failed out of 20.
+Fixed oracle suite: Oracle comparisons passed: 74.
+Random oracle seed 1: Oracle comparisons passed: 74; Random oracle comparisons passed: 100000 seed 1.
+Random oracle seed 2: Oracle comparisons passed: 74; Random oracle comparisons passed: 100000 seed 2.
+Random oracle seed 41: Oracle comparisons passed: 74; Random oracle comparisons passed: 100000 seed 41.
+Per-DoF random seed 1: Oracle comparisons passed: 74; Random per-DoF oracle comparisons passed: 100000 seed 1.
+Release random oracle: 100% tests passed, 0 tests failed out of 1; ruckig_c_oracle_random_release passed in 48.99 seconds.
+Windows performance release ratio: 1.16244; threshold: 1.5.
+Windows manual static consumer: 100% tests passed, 0 tests failed out of 1.
+Windows DLL consumer: 100% tests passed, 0 tests failed out of 1.
+Windows exported-symbol baseline comparison: 66 current symbols, 66 baseline symbols, 0 added, 0 removed.
+```
+
+The new `docs/design/0.3.0_readiness.md` records the post-`v0.2.5` design
+entry criteria and go/no-go decisions: Python `cffi` ABI-mode prototype design
+can proceed after publication, Rust bindings remain deferred, vcpkg feasibility
+is first among package-manager investigations, strict ABI diff failure remains
+design-only, upstream baseline upgrade remains a separate project, and
+waypoints/per-section/cloud remain behind separate public API design gates.

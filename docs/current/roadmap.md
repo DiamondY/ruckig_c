@@ -51,11 +51,16 @@ follow-up work for stability and future feature planning.
   CI, manual release-random workflow, performance, consumer, and ABI evidence.
 - Done for `0.2.4`: published `v0.2.4` with final tag, GitHub Release, push
   CI, manual release-random workflow, performance, consumer, and ABI evidence.
-- In progress for `0.2.5`: roll exported-symbol comparison to the `v0.2.4`
-  baseline, design strict ABI diff gate prerequisites while keeping
-  warning/evidence mode by default, expand Windows standalone consumer matrix
-  notes, keep package-manager work as feasibility only, and add a small set of
-  targeted fixed oracle regressions.
+- In progress for `0.2.5`: final planned `0.2.x` stabilization release before
+  `0.3.0-design`. It rolls exported-symbol comparison to the `v0.2.4`
+  baseline, designs strict ABI diff gate prerequisites while keeping
+  warning/evidence mode by default, expands Windows standalone consumer matrix
+  notes, keeps package-manager work as feasibility only, and adds a small set
+  of targeted fixed oracle regressions.
+- Reserve `0.2.6` only for emergency patch work after `v0.2.5`; it is not the
+  default post-release route.
+- Track `very large duration + exact target first-time-at-position` as a
+  tolerance investigation after `v0.2.5`; it is not a `v0.2.5` release blocker.
 - Before each `0.2.x` patch release, record Windows and Linux release
   benchmarks with average, p99, worst, and C/oracle average ratio.
 - Keep per-DoF override hardening focused on oracle coverage, diagnostics, and
@@ -73,14 +78,17 @@ follow-up work for stability and future feature planning.
 
 ## 0.3.0 Design Candidates
 
-The `0.3.0` line is design-only until a separate proposal is accepted. It must
-not change public API, solver dispatch, or the frozen oracle baseline during
-`0.2.x` patch work.
+After `v0.2.5` is published, the default next mainline stage is
+`0.3.0-design`. The `0.3.0` line is design-only until a separate proposal is
+accepted. It must not change public API, solver dispatch, or the frozen oracle
+baseline during `0.2.x` patch work.
 
 - Current priority decision is recorded in
   `docs/design/0.3.0_priorities.md`: finish `0.2.x` package, consumer, ABI,
   performance, and regression evidence before starting bindings; evaluate
   Python bindings before Rust bindings once prerequisites are met.
+- The pre-`0.3.0` readiness decision is recorded in
+  `docs/design/0.3.0_readiness.md`.
 - Python binding feasibility is scoped in
   `docs/design/python_bindings_feasibility.md`. It is design-only and does not
   add binding code or change the C ABI.

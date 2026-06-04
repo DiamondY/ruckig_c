@@ -30,6 +30,8 @@ Historical rewrite plans and release evidence are retained for traceability.
 - `design/per_dof_overrides.md` - per-DoF control/synchronization override
   design.
 - `design/0.3.0_priorities.md` - design-only `0.3.0` priority ordering.
+- `design/0.3.0_readiness.md` - pre-`0.3.0` readiness decisions after the
+  final planned `0.2.x` stabilization release.
 - `design/python_bindings_feasibility.md` - Python binding feasibility, without
   implementation approval.
 - `design/package_manager_feasibility.md` - package-manager feasibility, without

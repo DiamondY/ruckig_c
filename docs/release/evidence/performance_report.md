@@ -122,6 +122,7 @@ Current same-platform release baselines:
 | `0.2.2` | `1.39707` | Pass, artifact ids `7404574237` and `7404750529` | Final Windows tag-target rerun and manual Linux release workflow evidence; the Linux ratio was not excerpted into tracked docs. |
 | `0.2.3` | `1.08893` | `1.26328` | Final Windows closeout and manual Linux release workflow evidence. |
 | `0.2.4` | `1.4087` | `1.29012` | Final Windows closeout and manual Linux release workflow evidence. |
+| `0.2.5` | `1.16244` | Pending | Final planned pre-`0.3.0` stabilization baseline; Linux final evidence is pending push CI or manual release workflow. |
 
 Store raw local or CI outputs outside version-controlled source unless the
 release process intentionally promotes a short excerpt into this report. Use a
@@ -661,6 +662,35 @@ maintenance preparation run is within the release threshold of average
 calculation time no worse than `1.5x` the C++ oracle on the same benchmark
 corpus.
 
+## 2026-06-05 Windows 0.2.5 Local Release Closeout Run
+
+- Source: Local `0.2.5` release closeout gate after bumping the project version
+  to `0.2.5`.
+- Command:
+  `.\build_release_check_ninja\ruckig_c_performance_benchmark.exe --samples 10000 --seed 1`
+- OS: Windows.
+- CPU identifier: `Intel64 Family 6 Model 165 Stepping 5, GenuineIntel`.
+- C compiler: `clang 21.1.8`.
+- C++ compiler: `clang 21.1.8`.
+- CMake build type: Release-check Ninja build directory.
+- Generator: Ninja.
+- Seed: `1`.
+- Samples: `10000`.
+
+| Metric | C implementation | C++ oracle |
+| --- | ---: | ---: |
+| Average | 752.67 ns | 647.49 ns |
+| p99 | 5500 ns | 5100 ns |
+| Worst | 64300 ns | 20300 ns |
+
+Average C/oracle ratio: `1.16244`.
+
+The same-platform `0.2.4` Windows release baseline ratio was `1.4087`. This
+local release closeout run is within the release threshold of average
+calculation time no worse than `1.5x` the C++ oracle on the same benchmark
+corpus. It is the Windows final pre-`0.3.0` performance baseline for `0.2.x`;
+the Linux final baseline is pending push CI or manual release workflow evidence.
+
 ### Windows clang release
 
 ```text
@@ -681,7 +711,7 @@ Oracle average ns:
 Oracle p99 ns:
 Oracle worst ns:
 Average C/oracle ratio:
-0.2.3 same-platform baseline ratio:
+0.2.4 same-platform baseline ratio:
 Release threshold:
 Result:
 ```
@@ -706,7 +736,7 @@ Oracle average ns:
 Oracle p99 ns:
 Oracle worst ns:
 Average C/oracle ratio:
-0.2.3 same-platform baseline ratio:
+0.2.4 same-platform baseline ratio:
 Release threshold:
 Result:
 ```
