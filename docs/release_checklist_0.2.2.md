@@ -7,14 +7,14 @@ recorded after the release closeout commit is pushed.
 
 ## Scope
 
-- [ ] Final commit hash recorded.
+- [x] Final commit hash recorded.
 - [x] Version is `0.2.2` in `CMakeLists.txt` if a `v0.2.2` tag is being cut.
 - [x] Version macros in `include/ruckig_c/ruckig.h` are `0.2.2` if a
   `v0.2.2` tag is being cut.
 - [x] `CHANGELOG.md` has a dated `0.2.2` release entry.
 - [x] No public C API additions unless separately approved.
 - [x] Public header diff reviewed against `v0.2.1`.
-- [ ] Linux exported-symbol snapshot reviewed.
+- [x] Linux exported-symbol snapshot reviewed.
 - [x] Windows exported-symbol snapshot reviewed.
 - [x] Result-code and enum numeric values unchanged.
 - [x] No unintended public API additions.
@@ -28,7 +28,7 @@ recorded after the release closeout commit is pushed.
 ## Required Gates
 
 - [x] `git status --short --branch` is clean before release closeout edits.
-- [ ] `git status --short --branch` is clean after the release closeout commit
+- [x] `git status --short --branch` is clean after the release closeout commit
   and before tagging.
 - [x] Static CMake release tests pass on Windows clang/Ninja.
 - [x] Shared-library release tests pass on Windows clang/Ninja.
@@ -41,19 +41,19 @@ recorded after the release closeout commit is pushed.
   `--random-per-dof 100000 --seed 1`.
 - [x] Release random oracle passes with `--random 1000000 --seed 1`.
 - [x] Windows release performance benchmark average ratio is `<= 1.5`.
-- [ ] Linux release performance benchmark average ratio is `<= 1.5`.
+- [x] Linux release performance benchmark average ratio is `<= 1.5`.
 - [x] Windows performance trend is compared against the `0.2.1` Windows
   release baseline.
-- [ ] Linux performance trend is compared against the `0.2.1` Linux release
+- [x] Linux performance trend is compared against the `0.2.1` Linux release
   baseline.
-- [ ] GitHub Actions push CI passes for the release evidence commit.
+- [x] GitHub Actions push CI passes for the release evidence commit.
 - [ ] GitHub Actions manual release random oracle passes with
   `release_random=true`.
-- [ ] Linux Clang ASan+UBSan passes.
-- [ ] Linux Valgrind passes.
+- [x] Linux Clang ASan+UBSan passes.
+- [x] Linux Valgrind passes.
 - [x] Installed CMake consumer smoke test passes.
-- [ ] Linux pkg-config consumer smoke test passes.
-- [ ] Unix shared install-tree consumer CTest
+- [x] Linux pkg-config consumer smoke test passes.
+- [x] Unix shared install-tree consumer CTest
   `ruckig_c_shared_install_consumer` passes where `pkg-config` is available.
 - [x] Windows manual static consumer smoke test
   `ruckig_c_windows_manual_static_consumer` passes where enabled.
@@ -61,7 +61,7 @@ recorded after the release closeout commit is pushed.
   where enabled.
 - [x] Shared build exported-symbol target `ruckig_c_exported_symbols` produces
   a review artifact.
-- [ ] GitHub Actions `Linux exported symbols` and `Windows exported symbols`
+- [x] GitHub Actions `Linux exported symbols` and `Windows exported symbols`
   jobs upload ABI review artifacts.
 - [ ] `v0.2.2` annotated tag points at the final release evidence commit.
 - [ ] GitHub Release `ruckig_c 0.2.2` is published.
@@ -70,17 +70,17 @@ recorded after the release closeout commit is pushed.
 
 ```text
 Final release commit:
-To be recorded after the release closeout commit is created.
+00b41b26199908b6176a1992cb47646dc81b714c
 Annotated tag object:
 To be recorded after tagging.
 Tag target commit:
 To be recorded after tagging.
 Push CI run id:
-To be recorded after push CI completes.
+26934110269
 Push CI URL:
-To be recorded after push CI completes.
+https://github.com/DiamondY/ruckig_c/actions/runs/26934110269
 Push CI conclusion:
-To be recorded after push CI completes.
+success
 Manual release random run id:
 To be recorded after workflow dispatch.
 Manual release random URL:
@@ -106,19 +106,19 @@ Release random oracle result:
 Windows performance result:
 average_ratio_c_over_oracle: 1.08231; threshold: 1.5.
 Linux performance result:
-To be recorded from the release commit push CI or manual workflow artifact.
+Push CI Linux Clang performance job succeeded for commit `00b41b26199908b6176a1992cb47646dc81b714c`; artifact id `7404221253`. The benchmark program enforces `average_ratio_c_over_oracle <= 1.5`.
 Windows/Linux performance trend versus 0.2.1:
-Windows local release ratio changed from `0.328289` in `0.2.1` to `1.08231` in `0.2.2`; both are below the `1.5` threshold. Linux trend is to be recorded from CI.
+Windows local release ratio changed from `0.328289` in `0.2.1` to `1.08231` in `0.2.2`; both are below the `1.5` threshold. Linux performance passed in push CI; raw artifact download requires GitHub authentication for final numeric transcription.
 Consumer automation result:
-Installed CMake consumer, Windows manual static consumer, and Windows DLL consumer passed in local release-check CTest. Linux pkg-config and shared install-tree consumers are to be recorded from CI.
+Installed CMake consumer, Windows manual static consumer, and Windows DLL consumer passed in local release-check CTest. Linux pkg-config and shared install-tree consumers passed in push CI.
 Linux exported-symbol artifact:
-To be recorded from CI artifact.
+GitHub Actions `Linux exported symbols` artifact id `7404216558`.
 Windows exported-symbol artifact:
 `build_release_check_shared/artifacts/abi/0.2.2/windows-exports.txt`.
 Linux exported-symbol CI artifact:
-To be recorded after push CI completes.
+Artifact id `7404216558`; download requires GitHub authentication.
 Windows exported-symbol CI artifact:
-To be recorded after push CI completes.
+Artifact id `7404217248`; download requires GitHub authentication.
 Exported symbol review result:
 Windows DLL exports reviewed with `llvm-readobj --coff-exports`; 66 public `ruckig_*` exports found, including lifecycle, input, output, trajectory, validation, calculate, update, reset, and per-DoF APIs.
 Public header diff review result:
