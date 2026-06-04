@@ -50,6 +50,11 @@ it prefers `llvm-readobj --coff-exports` and falls back to `dumpbin /EXPORTS`.
 The helper only generates review artifacts; it does not rewrite tracked
 documentation and it is not yet a strict ABI-diff fail gate.
 
+GitHub Actions also runs the same shared-build helper for Linux and Windows in
+the `Linux exported symbols` and `Windows exported symbols` jobs. Those jobs
+upload the generated snapshots as CI artifacts so patch-release evidence can be
+reviewed without relying only on a local workstation run.
+
 For `0.2.x`, public header diffs are expected to be limited to version macros,
 comments, or documentation-only changes. Any public symbol addition, removal,
 signature change, enum numeric-value change, or result-code numeric-value

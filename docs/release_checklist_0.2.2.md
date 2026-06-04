@@ -60,6 +60,8 @@ they do not indicate current implementation defects.
   where enabled.
 - [ ] Shared build exported-symbol target `ruckig_c_exported_symbols` produces
   a review artifact.
+- [ ] GitHub Actions `Linux exported symbols` and `Windows exported symbols`
+  jobs upload ABI review artifacts.
 - [ ] `v0.2.2` annotated tag points at the final release evidence commit.
 - [ ] GitHub Release `ruckig_c 0.2.2` is published.
 
@@ -89,6 +91,8 @@ Windows/Linux performance trend versus 0.2.1:
 Consumer automation result:
 Linux exported-symbol artifact:
 Windows exported-symbol artifact:
+Linux exported-symbol CI artifact:
+Windows exported-symbol CI artifact:
 Exported symbol review result:
 Public header diff review result:
 Enum/result-code review result:

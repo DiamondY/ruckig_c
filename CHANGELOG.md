@@ -8,6 +8,8 @@ Added:
   automation, performance trend, and per-DoF random oracle evidence fields.
 - Shared-build exported-symbol evidence target `ruckig_c_exported_symbols`,
   using `nm` on Unix-like systems and `llvm-readobj` or `dumpbin` on Windows.
+- GitHub Actions Linux/Windows exported-symbol snapshot job that runs the
+  shared-build helper and uploads review artifacts.
 - Windows consumer smoke CTest scripts for manual static linking and DLL
   import-library consumption where the release-check toolchain supports them.
 - Additional fixed C++ oracle regression cases for 4-6 DoF mixed scenarios,
