@@ -30,8 +30,10 @@ Implemented and covered by fixed C/oracle tests plus deterministic random oracle
 
 Release-readiness evidence is tracked in `docs/release_checklist.md` for
 `0.1.0`, `docs/release_checklist_0.2.0.md` for `0.2.0`, and
-`docs/release_checklist_0.2.1.md` for `0.2.1`. The post-release stability
-queue is tracked in `docs/roadmap.md`. Current release scope
+`docs/release_checklist_0.2.1.md` for `0.2.1`. `v0.2.1` is the latest
+published release, and `main` is currently the `0.2.2 - Unreleased`
+maintenance line. The post-release stability queue is tracked in
+`docs/roadmap.md`. Current release scope
 intentionally excludes:
 
 - Waypoints, per-section constraints, cloud, and Python/Rust bindings remain
@@ -89,6 +91,8 @@ manually linking a static Windows build without CMake, define
 Additional consumer and packaging notes are collected in `docs/packaging.md`,
 including installed CMake consumers, pkg-config consumers, Windows manual
 static linking, DLL consumers, and shared install-tree verification.
+Patch-release API/ABI review notes, including exported-symbol snapshot
+generation, are collected in `docs/api_compatibility.md`.
 
 ## C API Shape
 
@@ -206,7 +210,9 @@ Common error results:
 - `RUCKIG_ERROR_SYNCHRONIZATION_CALCULATION`
 - `RUCKIG_ERROR_UNSUPPORTED`
 
-`RUCKIG_ERROR_UNSUPPORTED` is reserved for public features outside the first-release API scope. Solver calculation failures return execution-time or synchronization calculation errors instead of being silently ignored.
+`RUCKIG_ERROR_UNSUPPORTED` is reserved for public features outside the current
+C API scope. Solver calculation failures return execution-time or
+synchronization calculation errors instead of being silently ignored.
 
 ## Examples
 
@@ -273,7 +279,8 @@ Windows clang ASan/UBSan CMake tests pass when the LLVM sanitizer runtime
 directory is present in `PATH`. Linux Clang ASan/UBSan, Valgrind, pkg-config
 consumer, and performance evidence is recorded in release checklists under
 `docs/`, including `docs/release_checklist.md`,
-`docs/release_checklist_0.2.0.md`, and `docs/release_checklist_0.2.1.md`.
+`docs/release_checklist_0.2.0.md`, `docs/release_checklist_0.2.1.md`, and the
+future `docs/release_checklist_0.2.2.md` template.
 
 ## Verification
 

@@ -4,6 +4,16 @@ This document records the first `0.3.0-design` priority decision after the
 `v0.2.1` patch release. It is design-only and does not approve implementation,
 public API changes, solver changes, or upstream baseline changes.
 
+## Non-Goals
+
+During `0.2.x` maintenance and `0.3.0-design`, this document does not approve:
+
+- Binding implementation work.
+- Public C API additions or removals.
+- Solver dispatch or numerical behavior changes.
+- Upstream baseline upgrades.
+- Waypoints, per-section constraints, or cloud calculation implementation.
+
 ## Decision
 
 The next feature-planning priority is package and ABI maturity before bindings.

@@ -1,0 +1,112 @@
+# Python Bindings Feasibility
+
+This is a `0.3.0-design` document only. It does not approve implementation,
+does not add a public binding API, does not change the C ABI, and does not
+change solver behavior.
+
+## Prerequisites
+
+Python bindings should wait until the `0.2.x` maintenance line has repeatable
+evidence for:
+
+- At least one completed `0.2.x` patch release after `v0.2.1`.
+- Public header diff review in a release checklist.
+- Exported-symbol evidence generated on Windows and Linux.
+- Stable installed CMake, pkg-config, static, DLL, and shared install-tree
+  consumer paths.
+- `docs/api_compatibility.md` used as part of a release closeout.
+- Windows and Linux performance records below the `1.5` average-ratio
+  threshold.
+
+## Candidate Routes
+
+### ctypes
+
+`ctypes` is the lowest-build-friction route. It can load a shared `ruckig_c`
+library and call the C ABI directly, which is useful for an early feasibility
+prototype. Its drawbacks are more manual type declarations, weaker static
+checking, and more runtime error surface around array sizes and ownership.
+
+### cffi
+
+`cffi` gives a cleaner C declaration model and can support ABI-mode prototypes
+without compiling an extension module. It is a strong candidate for the first
+prototype if packaging a shared library is already reliable across platforms.
+
+### CPython Extension
+
+A CPython extension can provide the tightest user experience and fastest array
+conversion, but it creates more packaging work and a larger compiled matrix. It
+should be considered after the ownership, array, and error models are proven.
+
+### pybind11
+
+`pybind11` is not the default route because this project intentionally exposes a
+pure C ABI and avoids introducing a C++ runtime dependency into `ruckig_c`
+consumers. It may still be evaluated separately for a higher-level wrapper, but
+it should not be the first binding path.
+
+## Ownership Model
+
+The Python layer should wrap the same opaque C handles:
+
+- `ruckig_t`
+- `ruckig_input_t`
+- `ruckig_output_t`
+- `ruckig_trajectory_t`
+
+Each wrapper must own exactly one C handle and call the matching destroy
+function. Context-manager support should release handles deterministically.
+`destroy(NULL)` behavior in C is useful for cleanup, but Python wrappers should
+avoid double-destroy through an internal closed flag.
+
+Accessor-returned arrays are borrowed pointers. Python code should not expose
+borrowed raw pointers beyond the lifetime of the owner handle. A safe initial
+design can copy values in and out through Python sequences, then later add a
+buffer or NumPy fast path.
+
+## Array Model
+
+The first prototype should support Python list or tuple copy-in/copy-out for
+all fixed-size DoF vectors. It should validate lengths before calling setters
+or writing accessor arrays.
+
+An optional fast path can use the buffer protocol or NumPy arrays. NumPy should
+not be a hard dependency for the first binding unless the package strategy
+explicitly accepts it.
+
+## Error Model
+
+The binding should preserve the distinction between:
+
+- `RUCKIG_WORKING`
+- `RUCKIG_FINISHED`
+- `RUCKIG_ERROR_INVALID_INPUT`
+- `RUCKIG_ERROR_ZERO_LIMITS`
+- execution-time, synchronization, trajectory-duration, positional-limit, and
+  unsupported errors.
+
+Feasibility work should decide whether normal calculation methods return a
+result enum, raise exceptions for error codes, or use a hybrid model. The
+online update loop must keep `RUCKIG_WORKING` and `RUCKIG_FINISHED` as normal
+control-flow states rather than exceptions.
+
+## Packaging Questions
+
+The design must answer:
+
+- Whether wheels vendor a static `ruckig_c` build or load a shared library.
+- How Windows, macOS, and Linux wheels are built.
+- How source distributions find or build the C library.
+- Whether the package exposes low-level C-like wrappers, higher-level Pythonic
+  classes, or both.
+- How CI covers Python versions, operating systems, and CPU architectures.
+- How MIT license notices and the frozen Ruckig Community baseline source are
+  represented.
+
+## Decision
+
+The next binding-related step is a Python feasibility prototype design, not
+implementation in the `0.2.x` maintenance line. Rust bindings should remain
+deferred until Python feasibility clarifies the ownership, packaging, and error
+model for one high-level FFI layer.

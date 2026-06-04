@@ -1059,3 +1059,137 @@ Successful manual release random workflow jobs:
 The manual workflow Linux performance artifact id is `7390788705`. The push CI
 Linux performance artifact id is `7390652575`. Both workflows ran against
 commit `dc09eb938484b407415e1d6b4f59a2242c18ba8b`.
+
+## 2026-06-04 0.2.2 Preparation Smoke
+
+This pass verifies the initial `0.2.2 - Unreleased` maintenance work on `main`.
+It is preparation evidence only; final `0.2.2` release evidence must be rerun
+from the eventual release candidate commit.
+
+Implemented maintenance coverage:
+
+- Shared-build exported-symbol evidence target `ruckig_c_exported_symbols`.
+- Windows manual static consumer CTest
+  `ruckig_c_windows_manual_static_consumer`.
+- Windows DLL consumer CTest `ruckig_c_windows_dll_consumer`.
+- Fixed oracle suite expansion from 59 to 64 cases.
+- New fixed oracle coverage for 4-6 DoF mixed scenarios, long high-frequency
+  online update loops, very small `delta_time` with per-DoF mixed
+  synchronization, segment-boundary query coverage, and multi-disabled
+  mixed-order inputs.
+
+Local static release-check CTest:
+
+```powershell
+ctest --test-dir build_release_check_ninja --output-on-failure -E ruckig_c_oracle_random_release
+```
+
+Result:
+
+```text
+100% tests passed, 0 tests failed out of 20
+```
+
+Local shared release-check CTest:
+
+```powershell
+ctest --test-dir build_release_check_shared --output-on-failure -E ruckig_c_oracle_random_release
+```
+
+Result:
+
+```text
+100% tests passed, 0 tests failed out of 19
+```
+
+Fixed oracle suite:
+
+```powershell
+.\build_release_check_ninja\ruckig_c_oracle_tests.exe
+```
+
+Result:
+
+```text
+Oracle comparisons passed: 64
+```
+
+Development random oracle:
+
+```powershell
+.\build_release_check_ninja\ruckig_c_oracle_tests.exe --random 100000 --seed 2
+.\build_release_check_ninja\ruckig_c_oracle_tests.exe --random 100000 --seed 41
+```
+
+Result:
+
+```text
+Oracle comparisons passed: 64
+Random oracle comparisons passed: 100000 seed 2
+Oracle comparisons passed: 64
+Random oracle comparisons passed: 100000 seed 41
+```
+
+The seed `1` development random oracle also passed inside the static and shared
+CTest runs through `ruckig_c_oracle_random_development`.
+
+Per-DoF development random oracle:
+
+```powershell
+.\build_release_check_ninja\ruckig_c_oracle_tests.exe --random-per-dof 100000 --seed 1
+```
+
+Result:
+
+```text
+Oracle comparisons passed: 64
+Random per-DoF oracle comparisons passed: 100000 seed 1
+```
+
+Release random oracle:
+
+```powershell
+ctest --test-dir build_release_check_ninja -R ruckig_c_oracle_random_release --output-on-failure
+```
+
+Result:
+
+```text
+100% tests passed, 0 tests failed out of 1
+```
+
+The release random oracle executed `--random 1000000 --seed 1` and completed in
+337.66 seconds. This is still preparation evidence; final `0.2.2` release
+evidence must be rerun from the eventual release candidate commit.
+
+Windows consumer automation:
+
+```powershell
+ctest --test-dir build_release_check_ninja -R "ruckig_c_windows_manual_static_consumer|ruckig_c_oracle_tests" --output-on-failure
+ctest --test-dir build_release_check_shared -R "ruckig_c_windows_dll_consumer|ruckig_c_oracle_tests" --output-on-failure
+```
+
+Result:
+
+```text
+100% tests passed, 0 tests failed out of 2
+100% tests passed, 0 tests failed out of 2
+```
+
+Exported-symbol evidence:
+
+```powershell
+cmake --build build_release_check_shared --target ruckig_c_exported_symbols
+```
+
+Result:
+
+```text
+Wrote exported symbols to E:/Yww/DownLoad/source/ruckig_c/build_release_check_shared/artifacts/abi/0.2.2/windows-exports.txt
+```
+
+The Windows export snapshot contains 66 public `ruckig_*` exports, including
+`ruckig_create`, `ruckig_calculate`, `ruckig_update`,
+`ruckig_input_set_per_dof_control_interface`,
+`ruckig_input_set_per_dof_synchronization`, and
+`ruckig_trajectory_at_time`.

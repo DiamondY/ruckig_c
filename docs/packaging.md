@@ -64,6 +64,17 @@ The second command mirrors the Windows clang/Ninja release-check link mode.
 Toolchains that use a different C runtime may need equivalent system-runtime
 libraries for math functions such as `cbrt`.
 
+Where the Windows clang release-check toolchain supports the same driver and
+link mode, CTest enables a repeatable smoke test:
+
+```powershell
+ctest --test-dir build_release_check_ninja -R ruckig_c_windows_manual_static_consumer --output-on-failure
+```
+
+The automated smoke uses `examples/c/00_minimal_offline.c`, defines
+`RUCKIG_C_STATIC_DEFINE`, links the static `ruckig_c` archive, and runs the
+resulting executable.
+
 ## DLL Consumers
 
 DLL consumers include the same public header and link against the import
@@ -84,6 +95,17 @@ $env:PATH = (Resolve-Path build_release_check_shared).Path + ";" + $env:PATH
 
 The exact import-library filename may vary by generator and toolchain; use the
 import library produced next to `ruckig_c.dll`.
+
+Where the Windows clang shared release-check toolchain supports the same driver
+mode, CTest enables a repeatable DLL smoke test:
+
+```powershell
+ctest --test-dir build_release_check_shared -R ruckig_c_windows_dll_consumer --output-on-failure
+```
+
+The automated smoke compiles `examples/c/00_minimal_offline.c` without
+`RUCKIG_C_STATIC_DEFINE`, links the import library, adds the DLL directory to
+the process `PATH`, and runs the executable.
 
 ## Shared Install-Tree Verification
 

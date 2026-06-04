@@ -1,0 +1,63 @@
+if(NOT WIN32)
+  message(FATAL_ERROR "Windows static consumer smoke is only valid on Windows")
+endif()
+
+set(build_dir "@CMAKE_CURRENT_BINARY_DIR@/consumer-build/windows-static")
+set(obj "${build_dir}/manual_static_consumer.obj")
+set(exe "${build_dir}/manual_static_consumer@CMAKE_EXECUTABLE_SUFFIX@")
+
+if(NOT DEFINED RUCKIG_C_STATIC_LIBRARY)
+  message(FATAL_ERROR "RUCKIG_C_STATIC_LIBRARY is required")
+endif()
+
+file(REMOVE_RECURSE "${build_dir}")
+file(MAKE_DIRECTORY "${build_dir}")
+
+execute_process(
+  COMMAND
+    "@CMAKE_C_COMPILER@"
+    -std=c99
+    -DRUCKIG_C_STATIC_DEFINE
+    -I "@CMAKE_CURRENT_SOURCE_DIR@/include"
+    -c "@CMAKE_CURRENT_SOURCE_DIR@/examples/c/00_minimal_offline.c"
+    -o "${obj}"
+  RESULT_VARIABLE compile_result
+)
+if(NOT compile_result EQUAL 0)
+  message(FATAL_ERROR "Windows manual static consumer compile failed")
+endif()
+
+execute_process(
+  COMMAND
+    "@CMAKE_C_COMPILER@"
+    -nostartfiles
+    -nostdlib
+    -fuse-ld=lld-link
+    "${obj}"
+    "${RUCKIG_C_STATIC_LIBRARY}"
+    -Xlinker /subsystem:console
+    -o "${exe}"
+    -lkernel32
+    -luser32
+    -lgdi32
+    -lwinspool
+    -lshell32
+    -lole32
+    -loleaut32
+    -luuid
+    -lcomdlg32
+    -ladvapi32
+    -loldnames
+  RESULT_VARIABLE link_result
+)
+if(NOT link_result EQUAL 0)
+  message(FATAL_ERROR "Windows manual static consumer link failed")
+endif()
+
+execute_process(
+  COMMAND "${exe}"
+  RESULT_VARIABLE run_result
+)
+if(NOT run_result EQUAL 0)
+  message(FATAL_ERROR "Windows manual static consumer run failed")
+endif()

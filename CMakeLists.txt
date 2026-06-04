@@ -197,6 +197,35 @@ if(BUILD_RUCKIG_C_TESTS)
       )
     endif()
   endif()
+
+  if(WIN32 AND CMAKE_C_COMPILER_ID MATCHES "Clang")
+    if(NOT "${CMAKE_C_COMPILER_FRONTEND_VARIANT}" STREQUAL "MSVC")
+      if(BUILD_SHARED_LIBS)
+        configure_file(
+          test/cmake/test_windows_dll_consumer.cmake.in
+          ${CMAKE_CURRENT_BINARY_DIR}/test_windows_dll_consumer.cmake
+          @ONLY
+        )
+        add_test(NAME ruckig_c_windows_dll_consumer
+          COMMAND ${CMAKE_COMMAND}
+            "-DRUCKIG_C_IMPORT_LIBRARY=$<TARGET_LINKER_FILE:ruckig_c>"
+            "-DRUCKIG_C_DLL_DIR=$<TARGET_FILE_DIR:ruckig_c>"
+            -P ${CMAKE_CURRENT_BINARY_DIR}/test_windows_dll_consumer.cmake
+        )
+      else()
+        configure_file(
+          test/cmake/test_windows_static_consumer.cmake.in
+          ${CMAKE_CURRENT_BINARY_DIR}/test_windows_static_consumer.cmake
+          @ONLY
+        )
+        add_test(NAME ruckig_c_windows_manual_static_consumer
+          COMMAND ${CMAKE_COMMAND}
+            "-DRUCKIG_C_STATIC_LIBRARY=$<TARGET_LINKER_FILE:ruckig_c>"
+            -P ${CMAKE_CURRENT_BINARY_DIR}/test_windows_static_consumer.cmake
+        )
+      endif()
+    endif()
+  endif()
 endif()
 
 if(BUILD_RUCKIG_C_EXAMPLES)
@@ -323,6 +352,27 @@ if(BUILD_RUCKIG_C_PERFORMANCE_TESTS)
   endif()
   ruckig_c_apply_sanitizers(ruckig_c_performance_benchmark)
   add_test(NAME ruckig_c_performance_benchmark COMMAND ruckig_c_performance_benchmark --samples 10000 --seed 1)
+endif()
+
+if(BUILD_RUCKIG_C AND BUILD_SHARED_LIBS)
+  set(RUCKIG_C_ABI_PLATFORM "linux")
+  if(WIN32)
+    set(RUCKIG_C_ABI_PLATFORM "windows")
+  elseif(APPLE)
+    set(RUCKIG_C_ABI_PLATFORM "macos")
+  endif()
+  add_custom_command(
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/artifacts/abi/0.2.2/${RUCKIG_C_ABI_PLATFORM}-exports.txt
+    COMMAND ${CMAKE_COMMAND}
+      "-DRUCKIG_C_SHARED_LIBRARY=$<TARGET_FILE:ruckig_c>"
+      "-DRUCKIG_C_OUTPUT_FILE=${CMAKE_CURRENT_BINARY_DIR}/artifacts/abi/0.2.2/${RUCKIG_C_ABI_PLATFORM}-exports.txt"
+      -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/generate_exported_symbols.cmake
+    DEPENDS ruckig_c
+    VERBATIM
+  )
+  add_custom_target(ruckig_c_exported_symbols
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/artifacts/abi/0.2.2/${RUCKIG_C_ABI_PLATFORM}-exports.txt
+  )
 endif()
 
 if(BUILD_RUCKIG_C)

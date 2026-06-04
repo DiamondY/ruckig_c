@@ -30,12 +30,37 @@ Before each patch release:
 The initial `0.2.x` process records exported symbols as release evidence; it
 does not require a strict automated ABI diff yet.
 
+## 0.2.2 ABI Evidence Procedure
+
+Shared builds expose a non-invasive helper target:
+
+```powershell
+cmake --build build_release_check_shared --target ruckig_c_exported_symbols
+```
+
+The target writes a text snapshot under the build tree, for example:
+
+```text
+build_release_check_shared/artifacts/abi/0.2.2/windows-exports.txt
+build-shared/artifacts/abi/0.2.2/linux-exports.txt
+```
+
+On Linux it uses `nm -D --defined-only`. On macOS it uses `nm -gU`. On Windows
+it prefers `llvm-readobj --coff-exports` and falls back to `dumpbin /EXPORTS`.
+The helper only generates review artifacts; it does not rewrite tracked
+documentation and it is not yet a strict ABI-diff fail gate.
+
+For `0.2.x`, public header diffs are expected to be limited to version macros,
+comments, or documentation-only changes. Any public symbol addition, removal,
+signature change, enum numeric-value change, or result-code numeric-value
+change requires a separate design and version decision before release.
+
 ## Public Header Diff
 
 Review the public header against the previous release tag:
 
 ```powershell
-git -c safe.directory=E:/Yww/DownLoad/source/ruckig_c diff v0.2.0 -- include/ruckig_c/ruckig.h
+git -c safe.directory=E:/Yww/DownLoad/source/ruckig_c diff v0.2.1 -- include/ruckig_c/ruckig.h
 ```
 
 For `0.2.x` patch releases, expected changes are limited to version macros and

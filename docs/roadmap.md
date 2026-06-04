@@ -39,9 +39,13 @@ follow-up work for stability and future feature planning.
 - Done for `0.2.1`: documentation source-of-truth cleanup, routine per-DoF
   random oracle smoke, post-`v0.2.0` hardening in the changelog, consumer
   packaging guidance, and API/ABI compatibility documentation.
-- Planned for `0.2.2`: automated or semi-automated exported-symbol evidence,
-  broader consumer smoke automation, and continued numerical regression corpus
-  expansion when new edge cases are found.
+- In progress for `0.2.2`: automated exported-symbol evidence through the
+  shared-build `ruckig_c_exported_symbols` target, Windows static/DLL consumer
+  smoke scripts where supported by the release-check toolchain, and continued
+  fixed oracle regression corpus expansion.
+- Planned for `0.2.2`: record final ABI/exported-symbol, consumer, random
+  oracle, and performance trend evidence in `docs/release_checklist_0.2.2.md`
+  from the release candidate commit.
 - Before each `0.2.x` patch release, record Windows and Linux release
   benchmarks with average, p99, worst, and C/oracle average ratio.
 - Keep per-DoF override hardening focused on oracle coverage, diagnostics, and
@@ -67,6 +71,9 @@ not change public API, solver dispatch, or the frozen oracle baseline during
   `docs/design_0.3.0_priorities.md`: finish `0.2.x` package, consumer, ABI,
   performance, and regression evidence before starting bindings; evaluate
   Python bindings before Rust bindings once prerequisites are met.
+- Python binding feasibility is scoped in
+  `docs/design_python_bindings_feasibility.md`. It is design-only and does not
+  add binding code or change the C ABI.
 - Evaluate Python or Rust bindings only after the C ABI has passed at least one
   `0.2.x` patch cycle, `docs/api_compatibility.md` is complete, and CMake,
   pkg-config, and shared/static consumer paths are stable.

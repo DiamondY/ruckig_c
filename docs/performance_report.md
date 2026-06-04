@@ -218,6 +218,8 @@ corpus.
 
 ## 2026-06-03 Windows 0.2.1 Preparation Smoke
 
+Superseded by final 0.2.1 release evidence below.
+
 - Source: Local `0.2.1` preparation smoke on `main`; not final release
   evidence.
 - Command:
@@ -299,9 +301,40 @@ This Linux manual release workflow run is within the release threshold of
 average calculation time no worse than `1.5x` the C++ oracle on the same
 benchmark corpus.
 
-## 0.2.1 Benchmark Template
+## 0.2.2 Benchmark Template
 
-Use this template for follow-up patch-release evidence.
+Use this template for the next patch-release evidence. Compare Windows results
+only against the same Windows benchmark context and Linux results only against
+the same Linux benchmark context; do not compare absolute timings across
+different platforms or runner classes.
+
+## 2026-06-04 Windows 0.2.2 Preparation Smoke
+
+- Source: Local `0.2.2` preparation smoke on `main`; not final release
+  evidence.
+- Command:
+  `.\build_release_check_ninja\ruckig_c_performance_benchmark.exe --samples 10000 --seed 1`
+- OS: Windows.
+- CPU identifier: `Intel64 Family 6 Model 165 Stepping 5, GenuineIntel`.
+- C compiler: `clang 21.1.8`.
+- C++ compiler: `clang 21.1.8`.
+- CMake build type: Release-check Ninja build directory.
+- Generator: Ninja.
+- Seed: `1`.
+- Samples: `10000`.
+
+| Metric | C implementation | C++ oracle |
+| --- | ---: | ---: |
+| Average | 1327.32 ns | 4443.77 ns |
+| p99 | 9000 ns | 18900 ns |
+| Worst | 50500 ns | 149100 ns |
+
+Average C/oracle ratio: `0.298692`.
+
+The same-platform `0.2.1` local Windows release baseline ratio was `0.328289`.
+This preparation smoke is within the release threshold of average calculation
+time no worse than `1.5x` the C++ oracle on the same benchmark corpus. Final
+`0.2.2` release evidence must be rerun from the release candidate commit.
 
 ### Windows clang release
 
@@ -323,6 +356,7 @@ Oracle average ns:
 Oracle p99 ns:
 Oracle worst ns:
 Average C/oracle ratio:
+0.2.1 same-platform baseline ratio:
 Release threshold:
 Result:
 ```
@@ -347,6 +381,7 @@ Oracle average ns:
 Oracle p99 ns:
 Oracle worst ns:
 Average C/oracle ratio:
+0.2.1 same-platform baseline ratio:
 Release threshold:
 Result:
 ```

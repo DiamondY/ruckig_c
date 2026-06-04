@@ -51,6 +51,7 @@ struct CaseData {
     std::vector<ruckig_control_interface_t> per_dof_control_interface {};
     std::vector<ruckig_synchronization_t> per_dof_synchronization {};
     std::vector<FirstTimeQuery> first_time_queries {};
+    std::vector<double> extra_sample_times {};
     bool compare_first_time_queries {true};
     bool compare_update_loop {true};
 };
@@ -260,6 +261,11 @@ void compare_samples(
     if (duration > 2e-9) {
         sample_times.push_back(1e-9);
         sample_times.push_back(duration - 1e-9);
+    }
+    for (double sample_time: test_case.extra_sample_times) {
+        if (sample_time >= 0.0 && sample_time <= duration) {
+            sample_times.push_back(sample_time);
+        }
     }
 
     for (double sample_time: sample_times) {
@@ -2099,6 +2105,7 @@ int main(int argc, char** argv) {
         {},
         {},
         {},
+        {},
         false,
         false
     });
@@ -2181,6 +2188,138 @@ int main(int argc, char** argv) {
         {},
         {RUCKIG_CONTROL_POSITION, RUCKIG_CONTROL_VELOCITY, RUCKIG_CONTROL_POSITION},
         {RUCKIG_SYNCHRONIZATION_TIME, RUCKIG_SYNCHRONIZATION_NONE, RUCKIG_SYNCHRONIZATION_TIME}
+    });
+
+    cases.push_back(CaseData{
+        "position-third-order-5d-disabled-mixed-sync",
+        5,
+        0.01,
+        RUCKIG_CONTROL_POSITION,
+        RUCKIG_SYNCHRONIZATION_TIME,
+        RUCKIG_DURATION_CONTINUOUS,
+        false,
+        0.0,
+        {0.0, -0.2, 0.4, 1.0, -0.8},
+        {0.0, 0.1, -0.15, 0.2, -0.1},
+        {0.0, 0.02, -0.03, 0.04, 0.01},
+        {1.2, -0.7, 0.9, 3.0, -1.4},
+        {0.0, -0.05, 0.0, 0.4, 0.0},
+        {0.0, 0.0, 0.0, 0.0, 0.0},
+        {1.3, 1.0, 1.1, 0.0, 1.4},
+        {1.2, 0.8, 0.9, 1.0, 1.1},
+        {1.8, 1.4, 1.5, 1.0, 1.6},
+        {true, true, true, false, true},
+        {},
+        {},
+        {},
+        {RUCKIG_SYNCHRONIZATION_TIME, RUCKIG_SYNCHRONIZATION_NONE, RUCKIG_SYNCHRONIZATION_TIME_IF_NECESSARY, RUCKIG_SYNCHRONIZATION_NONE, RUCKIG_SYNCHRONIZATION_TIME}
+    });
+
+    cases.push_back(CaseData{
+        "position-third-order-4d-long-online-high-frequency",
+        4,
+        0.001,
+        RUCKIG_CONTROL_POSITION,
+        RUCKIG_SYNCHRONIZATION_TIME,
+        RUCKIG_DURATION_CONTINUOUS,
+        false,
+        0.0,
+        {0.0, -0.5, 0.25, 1.0},
+        {0.02, -0.03, 0.04, -0.05},
+        {0.005, -0.004, 0.003, -0.002},
+        {0.8, -1.1, 0.9, 0.2},
+        {0.0, 0.0, 0.0, 0.0},
+        {0.0, 0.0, 0.0, 0.0},
+        {1.2, 1.1, 1.3, 1.0},
+        {0.9, 0.8, 1.0, 0.7},
+        {1.5, 1.4, 1.6, 1.3},
+        {},
+        {},
+        {},
+        {},
+        {RUCKIG_SYNCHRONIZATION_TIME, RUCKIG_SYNCHRONIZATION_TIME_IF_NECESSARY, RUCKIG_SYNCHRONIZATION_NONE, RUCKIG_SYNCHRONIZATION_TIME}
+    });
+
+    cases.push_back(CaseData{
+        "per-dof-small-delta-mixed-sync-discrete",
+        3,
+        0.0005,
+        RUCKIG_CONTROL_POSITION,
+        RUCKIG_SYNCHRONIZATION_TIME,
+        RUCKIG_DURATION_DISCRETE,
+        false,
+        0.0,
+        {0.0, 0.15, -0.25},
+        {0.0, 0.02, -0.015},
+        {0.0, 0.001, -0.002},
+        {0.2, -0.35, 0.45},
+        {0.0, 0.0, 0.0},
+        {0.0, 0.0, 0.0},
+        {0.6, 0.7, 0.65},
+        {0.5, 0.55, 0.45},
+        {0.9, 0.85, 0.8},
+        {},
+        {},
+        {},
+        {RUCKIG_CONTROL_POSITION, RUCKIG_CONTROL_POSITION, RUCKIG_CONTROL_POSITION},
+        {RUCKIG_SYNCHRONIZATION_NONE, RUCKIG_SYNCHRONIZATION_TIME, RUCKIG_SYNCHRONIZATION_TIME_IF_NECESSARY}
+    });
+
+    cases.push_back(CaseData{
+        "first-time-segment-boundary-query-combined",
+        1,
+        0.01,
+        RUCKIG_CONTROL_POSITION,
+        RUCKIG_SYNCHRONIZATION_TIME,
+        RUCKIG_DURATION_CONTINUOUS,
+        false,
+        0.0,
+        {0.0},
+        {0.0},
+        {0.0},
+        {2.0},
+        {0.0},
+        {0.0},
+        {1.0},
+        {1.0},
+        {1.0},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {
+            {0, 0.0, 0.0},
+            {0, 0.125, 0.0},
+            {0, 2.0, 0.0},
+            {0, 2.0, 0.999999}
+        },
+        {0.01, 0.5, 1.0}
+    });
+
+    cases.push_back(CaseData{
+        "position-multi-disabled-mixed-order-per-dof",
+        6,
+        0.02,
+        RUCKIG_CONTROL_POSITION,
+        RUCKIG_SYNCHRONIZATION_TIME,
+        RUCKIG_DURATION_DISCRETE,
+        false,
+        0.0,
+        {0.0, 0.2, -0.4, 1.0, -1.5, 0.75},
+        {0.0, 0.02, -0.03, 0.1, -0.12, 0.04},
+        {0.0, 0.005, -0.004, 0.02, -0.01, 0.003},
+        {1.0, 0.0, -1.0, 4.0, -3.0, 0.0},
+        {0.0, 0.0, 0.0, 0.3, -0.4, 0.6},
+        {0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
+        {1.2, 0.0, 1.1, 0.0, 1.3, 0.0},
+        {inf, 1.0, 0.9, 1.0, 1.1, 0.8},
+        {inf, 1.0, 1.5, 1.0, 1.6, inf},
+        {true, false, true, false, true, true},
+        {},
+        {},
+        {RUCKIG_CONTROL_POSITION, RUCKIG_CONTROL_POSITION, RUCKIG_CONTROL_POSITION, RUCKIG_CONTROL_POSITION, RUCKIG_CONTROL_POSITION, RUCKIG_CONTROL_VELOCITY},
+        {RUCKIG_SYNCHRONIZATION_TIME, RUCKIG_SYNCHRONIZATION_NONE, RUCKIG_SYNCHRONIZATION_TIME_IF_NECESSARY, RUCKIG_SYNCHRONIZATION_NONE, RUCKIG_SYNCHRONIZATION_TIME, RUCKIG_SYNCHRONIZATION_TIME}
     });
 
     for (const auto& test_case: cases) {

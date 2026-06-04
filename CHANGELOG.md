@@ -4,10 +4,32 @@
 
 Added:
 
+- `0.2.2` release checklist template with ABI/exported-symbol, consumer
+  automation, performance trend, and per-DoF random oracle evidence fields.
+- Shared-build exported-symbol evidence target `ruckig_c_exported_symbols`,
+  using `nm` on Unix-like systems and `llvm-readobj` or `dumpbin` on Windows.
+- Windows consumer smoke CTest scripts for manual static linking and DLL
+  import-library consumption where the release-check toolchain supports them.
+- Additional fixed C++ oracle regression cases for 4-6 DoF mixed scenarios,
+  long high-frequency online update loops, very small `delta_time` with
+  per-DoF mixed synchronization, segment-boundary query coverage, and
+  multi-disabled mixed-order inputs.
+- Python bindings feasibility design for `0.3.0-design`; this is design-only
+  and does not add binding code.
 - `0.3.0-design` priority evaluation documenting that `0.2.x` package,
   consumer, ABI, performance, and regression evidence should mature before
   bindings work; Python bindings should be evaluated before Rust bindings once
   prerequisites are met.
+
+Changed:
+
+- Expanded `0.2.x` packaging, ABI, performance, and roadmap documentation for
+  repeatable `0.2.2` maintenance evidence collection.
+
+Still deferred:
+
+- Intermediate waypoints, per-section constraints, cloud calculation, Python
+  bindings, Rust bindings, and upstream baseline upgrades.
 
 ## 0.2.1 - 2026-06-04
 

@@ -1,0 +1,41 @@
+if(NOT WIN32)
+  message(FATAL_ERROR "Windows DLL consumer smoke is only valid on Windows")
+endif()
+
+set(build_dir "@CMAKE_CURRENT_BINARY_DIR@/consumer-build/windows-dll")
+set(exe "${build_dir}/dll_consumer@CMAKE_EXECUTABLE_SUFFIX@")
+
+if(NOT DEFINED RUCKIG_C_IMPORT_LIBRARY)
+  message(FATAL_ERROR "RUCKIG_C_IMPORT_LIBRARY is required")
+endif()
+if(NOT DEFINED RUCKIG_C_DLL_DIR)
+  message(FATAL_ERROR "RUCKIG_C_DLL_DIR is required")
+endif()
+
+file(REMOVE_RECURSE "${build_dir}")
+file(MAKE_DIRECTORY "${build_dir}")
+
+execute_process(
+  COMMAND
+    "@CMAKE_C_COMPILER@"
+    -std=c99
+    -I "@CMAKE_CURRENT_SOURCE_DIR@/include"
+    "@CMAKE_CURRENT_SOURCE_DIR@/examples/c/00_minimal_offline.c"
+    "${RUCKIG_C_IMPORT_LIBRARY}"
+    -o "${exe}"
+  RESULT_VARIABLE compile_result
+)
+if(NOT compile_result EQUAL 0)
+  message(FATAL_ERROR "Windows DLL consumer compile/link failed")
+endif()
+
+execute_process(
+  COMMAND
+    "@CMAKE_COMMAND@" -E env
+    "PATH=${RUCKIG_C_DLL_DIR};$ENV{PATH}"
+    "${exe}"
+  RESULT_VARIABLE run_result
+)
+if(NOT run_result EQUAL 0)
+  message(FATAL_ERROR "Windows DLL consumer run failed")
+endif()
