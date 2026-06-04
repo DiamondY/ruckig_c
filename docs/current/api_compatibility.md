@@ -94,7 +94,7 @@ ABI changes.
 Review the public header against the previous release tag:
 
 ```powershell
-git -c safe.directory=E:/Yww/DownLoad/source/ruckig_c diff v0.2.1 -- include/ruckig_c/ruckig.h
+git -c safe.directory=E:/Yww/DownLoad/source/ruckig_c diff v0.2.2 -- include/ruckig_c/ruckig.h
 ```
 
 For `0.2.x` patch releases, expected changes are limited to version macros and

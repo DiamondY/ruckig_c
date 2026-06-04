@@ -1459,3 +1459,106 @@ Exported symbols match the baseline
 The generated comparison artifact reports 66 current symbols, 66 baseline
 symbols, 0 added symbols, and 0 removed symbols. The comparison remains
 warning/evidence only for `0.2.3`.
+
+## 2026-06-04 0.2.3 Local Release Closeout
+
+This pass verifies the local `0.2.3` release closeout after bumping the project
+version to `0.2.3` and converting the changelog entry to a dated release entry.
+Remote push CI, manual workflow-dispatch, tag, and GitHub Release evidence must
+be recorded after the release closeout commit is pushed.
+
+Version and scope:
+
+- `CMakeLists.txt` project version: `0.2.3`.
+- `include/ruckig_c/ruckig.h` version macros: `0.2.3`.
+- Public header diff from `v0.2.2` contains only version macro changes.
+- No public C API additions, removals, signature changes, enum numeric-value
+  changes, or result-code numeric-value changes.
+- `original/ruckig-main` remains frozen as the Ruckig Community `0.17.3`
+  oracle baseline.
+- Intermediate waypoints, per-section constraints, cloud calculation, Python
+  binding implementation, Rust bindings, and upstream baseline upgrades remain
+  deferred.
+
+Static and shared release-check CTest:
+
+```powershell
+ctest --test-dir build_release_check_ninja --output-on-failure -E ruckig_c_oracle_random_release
+ctest --test-dir build_release_check_shared --output-on-failure -E ruckig_c_oracle_random_release
+```
+
+Result:
+
+```text
+100% tests passed, 0 tests failed out of 20
+100% tests passed, 0 tests failed out of 20
+```
+
+Fixed and development oracle gates:
+
+```powershell
+.\build_release_check_ninja\ruckig_c_oracle_tests.exe
+.\build_release_check_ninja\ruckig_c_oracle_tests.exe --random 100000 --seed 1
+.\build_release_check_ninja\ruckig_c_oracle_tests.exe --random 100000 --seed 2
+.\build_release_check_ninja\ruckig_c_oracle_tests.exe --random 100000 --seed 41
+.\build_release_check_ninja\ruckig_c_oracle_tests.exe --random-per-dof 100000 --seed 1
+```
+
+Result:
+
+```text
+Oracle comparisons passed: 70
+Oracle comparisons passed: 70
+Random oracle comparisons passed: 100000 seed 1
+Oracle comparisons passed: 70
+Random oracle comparisons passed: 100000 seed 2
+Oracle comparisons passed: 70
+Random oracle comparisons passed: 100000 seed 41
+Oracle comparisons passed: 70
+Random per-DoF oracle comparisons passed: 100000 seed 1
+```
+
+Release random oracle:
+
+```powershell
+ctest --test-dir build_release_check_ninja -R ruckig_c_oracle_random_release --output-on-failure
+```
+
+Result:
+
+```text
+100% tests passed, 0 tests failed out of 1
+ruckig_c_oracle_random_release passed in 51.24 seconds.
+```
+
+Local Windows exported-symbol baseline comparison:
+
+```powershell
+cmake --build build_release_check_shared --target ruckig_c_compare_exported_symbols
+```
+
+Result:
+
+```text
+Exported-symbol baseline comparison
+current_symbol_count: 66
+baseline_symbol_count: 66
+added_symbol_count: 0
+removed_symbol_count: 0
+Exported symbols match the baseline
+```
+
+The generated artifacts are:
+
+```text
+build_release_check_shared/artifacts/abi/0.2.3/windows-exports.txt
+build_release_check_shared/artifacts/abi/0.2.3/windows-export-diff.txt
+```
+
+Local consumer evidence:
+
+- Installed CMake consumer passed in local release-check CTest.
+- Windows manual static consumer passed in local release-check CTest.
+- Windows DLL consumer passed in local shared release-check CTest.
+- Linux pkg-config and Unix shared install-tree consumers must be recorded from
+  CI or a Unix release gate.

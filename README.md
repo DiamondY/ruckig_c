@@ -29,9 +29,9 @@ Implemented and covered by fixed C/oracle tests plus deterministic random oracle
   velocity, stop, and minimum duration.
 
 Release-readiness evidence is tracked under `docs/release/`; see
-`docs/index.md` for the organized documentation map. `v0.2.2` is the latest
-published release, and `main` is currently the `0.2.3 - Unreleased`
-maintenance line. The post-release stability queue is tracked in
+`docs/index.md` for the organized documentation map. `v0.2.3` is the latest
+published release, and `main` moves to the `0.2.4 - Unreleased` maintenance
+line after the release closeout. The post-release stability queue is tracked in
 `docs/current/roadmap.md`. Current release scope intentionally excludes:
 
 - Waypoints, per-section constraints, cloud, and Python/Rust bindings remain

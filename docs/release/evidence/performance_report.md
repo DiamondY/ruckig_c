@@ -495,3 +495,32 @@ The same-platform `0.2.2` Windows final-commit baseline ratio was `1.39707`.
 This maintenance preparation run is within the release threshold of average
 calculation time no worse than `1.5x` the C++ oracle on the same benchmark
 corpus.
+
+## 2026-06-04 Windows 0.2.3 Local Release Closeout Run
+
+- Source: Local `0.2.3` release closeout gate after bumping the project version
+  to `0.2.3`.
+- Command:
+  `.\build_release_check_ninja\ruckig_c_performance_benchmark.exe --samples 10000 --seed 1`
+- OS: Windows.
+- CPU identifier: `Intel64 Family 6 Model 165 Stepping 5, GenuineIntel`.
+- C compiler: `clang 21.1.8`.
+- C++ compiler: `clang 21.1.8`.
+- CMake build type: Release-check Ninja build directory.
+- Generator: Ninja.
+- Seed: `1`.
+- Samples: `10000`.
+
+| Metric | C implementation | C++ oracle |
+| --- | ---: | ---: |
+| Average | 720.33 ns | 661.5 ns |
+| p99 | 5300 ns | 5200 ns |
+| Worst | 24200 ns | 34300 ns |
+
+Average C/oracle ratio: `1.08893`.
+
+The same-platform `0.2.2` Windows final-commit baseline ratio was `1.39707`.
+This local release closeout run is within the release threshold of average
+calculation time no worse than `1.5x` the C++ oracle on the same benchmark
+corpus. Linux `0.2.3` release evidence must be recorded from push CI or the
+manual release workflow.
