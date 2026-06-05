@@ -2347,6 +2347,82 @@ local pass. Re-run the GitHub Actions evidence step after refreshing the GitHub
 CLI token, then record the run id, URL, job results, Linux performance artifact,
 and exported-symbol artifacts here.
 
+After pushing the closeout follow-up commit, public GitHub Actions metadata and
+`gh run download` provided the remote evidence below.
+
+Remote GitHub Actions push CI:
+
+```text
+Run id: 27014576431
+Run URL: https://github.com/DiamondY/ruckig_c/actions/runs/27014576431
+Commit: ec9e3b2b566e33bfddf91974a8263b8d0c85e0b1
+Event: push
+Conclusion: success
+Started: 2026-06-05T12:22:30Z
+```
+
+Successful push CI jobs:
+
+```text
+Windows MinGW DLL consumer
+Linux Clang ASan UBSan
+macOS exported symbols
+Windows MinGW static consumer
+Linux Clang performance
+Linux Valgrind
+Linux Clang oracle
+Windows clang-cl C-only
+Windows exported symbols
+Windows clang oracle
+Windows clang-cl shared C-only
+Linux exported symbols
+macOS Clang C-only
+Linux GCC C-only
+```
+
+The `Manual release random oracle` job was skipped as expected for a
+push-triggered workflow.
+
+Uploaded artifacts:
+
+```text
+Windows exported symbols: artifact id 7436395702, size 2983 bytes.
+Linux performance: artifact id 7436387971, size 527 bytes.
+Linux exported symbols: artifact id 7436384845, size 3386 bytes.
+macOS exported symbols: artifact id 7436381416, size 1843 bytes.
+```
+
+Downloaded artifact inspection:
+
+```text
+Windows public exported-symbol comparison: status clean, strict_public_abi ON,
+66 current symbols, 66 baseline symbols, 66 approved public symbols,
+0 missing public symbols, 0 added public symbols, 0 removed public symbols,
+0 unapproved exported symbols.
+
+Windows exported-symbol baseline comparison: 66 current symbols,
+66 baseline symbols, 0 added, 0 removed.
+
+Linux public exported-symbol comparison: status clean, strict_public_abi ON,
+66 current symbols, 127 baseline symbols, 66 approved public symbols,
+0 missing public symbols, 0 added public symbols, 0 removed public symbols,
+0 unapproved exported symbols, 61 historical baseline internal symbols.
+
+Linux exported-symbol baseline comparison: 66 current symbols,
+127 baseline symbols, 0 added, 61 historical internal symbols removed.
+
+macOS public symbol allowlist verification: status clean,
+66 header symbols, 66 expected symbols, 0 missing, 0 extra.
+macOS Mach-O exported-symbol snapshot contains 66 symbols.
+
+Linux performance: samples 10000, seed 1, clang 18.1.3,
+c_average_ns 744.378, oracle_average_ns 586.91,
+average_ratio_c_over_oracle 1.2683, release threshold 1.5.
+
+Downloaded artifacts were inspected under `out/gh-artifacts/` and then removed
+by `.\scripts\clean-local.ps1 -Apply` as ignored local artifacts.
+```
+
 Local Windows default preset validation:
 
 ```powershell
