@@ -809,6 +809,52 @@ Ruckig Community `0.17.3` baseline does not contain a local global waypoint
 optimizer. This run is C-only trend evidence for the local optimizer after the
 deterministic branch-queue search was enabled.
 
+## 2026-06-06 Windows 0.4.0-Design Local Alpha.4 No-Waypoint Run
+
+- Source: Local `0.4.0-design` alpha.4 pre-stable gate.
+- Command:
+  `out\build\windows-clang-ninja-performance\ruckig_c_performance_benchmark.exe --samples 10000 --seed 1 --enforce-threshold`
+- OS: Windows.
+- CPU identifier: `Intel64 Family 6 Model 165 Stepping 5, GenuineIntel`.
+- C compiler: `clang 21.1.8`.
+- CMake build type: Release.
+- Generator: Ninja.
+- Seed: `1`.
+- Samples: `10000`.
+- Release threshold: average C/oracle ratio `<= 1.5`.
+
+| Metric | C | C++ oracle |
+| --- | ---: | ---: |
+| Average | 637.57 ns | 515.74 ns |
+| p99 | 4700 ns | 3800 ns |
+| Worst | 15900 ns | 19600 ns |
+
+Average C/oracle ratio: `1.23622`.
+
+## 2026-06-06 Windows 0.4.0-Design Local Alpha.4 Waypoint Run
+
+- Source: Local `0.4.0-design` alpha.4 waypoint benchmark corpus.
+- Command:
+  `out\build\windows-clang-ninja-performance\ruckig_c_performance_benchmark.exe --samples 10000 --seed 1 --waypoints`
+- OS: Windows.
+- CPU identifier: `Intel64 Family 6 Model 165 Stepping 5, GenuineIntel`.
+- C compiler: `clang 21.1.8`.
+- CMake build type: Release.
+- Generator: Ninja.
+- Seed: `1`.
+- Samples: `10000`.
+- Waypoint case count: `5`.
+
+| Metric | C waypoint optimizer |
+| --- | ---: |
+| Average | 1.05448e+06 ns |
+| p99 | 6.3575e+06 ns |
+| Worst | 7.6835e+06 ns |
+
+There is no C++ oracle ratio for this waypoint alpha corpus because the frozen
+Ruckig Community `0.17.3` baseline does not contain a local global waypoint
+optimizer.
+
 ### Windows clang release
 
 ```text

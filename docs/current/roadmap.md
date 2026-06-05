@@ -165,10 +165,13 @@ client.
 - No-waypoint target-solver behavior remains frozen against the existing C++
   oracle path.
 - Python `cffi` and Rust wrappers now have alpha prototypes over the public C
-  ABI. They remain unpublished and outside stable package scope until optimizer
-  and ABI evidence are stronger.
+  ABI. They remain unpublished and outside stable package scope until the
+  stable `v0.4.0` release scope explicitly includes or defers wrapper release
+  work.
 - CI configuration now includes `0.4.0-design` ABI artifact paths, Linux
   waypoint alpha performance output, Python prototype smoke, and Rust alpha
-  wrapper smoke. Stable `v0.4.0` still requires actual remote CI evidence.
+  wrapper smoke. Multiple alpha push CI runs have passed; stable `v0.4.0`
+  still requires final release-candidate local gates, final push CI evidence,
+  manual release-random evidence, and a release decision.
 - Package-manager recipes, cloud API support, and upstream baseline upgrades
   remain separate projects.

@@ -2383,6 +2383,57 @@ Linux GCC C-only
 The `Manual release random oracle` job was skipped as expected for a
 push-triggered workflow.
 
+## 2026-06-06 0.4.0-Design Local Alpha.4 Pre-Stable Gates
+
+This local pass ran the heavier pre-stable Windows gates that are short of a
+formal stable release closeout. It did not run the manual release-random
+workflow and does not create a stable release claim.
+
+Oracle and random evidence:
+
+```text
+out\build\windows-clang-ninja-oracle\ruckig_c_oracle_tests.exe:
+pass.
+Fixed oracle comparison count: 76.
+Waypoint section oracle comparisons: 4.
+
+out\build\windows-clang-ninja-oracle\ruckig_c_oracle_tests.exe --random 100000 --seed 1:
+pass.
+
+out\build\windows-clang-ninja-oracle\ruckig_c_oracle_tests.exe --random 100000 --seed 2:
+pass.
+
+out\build\windows-clang-ninja-oracle\ruckig_c_oracle_tests.exe --random 100000 --seed 41:
+pass.
+
+out\build\windows-clang-ninja-oracle\ruckig_c_oracle_tests.exe --random-per-dof 100000 --seed 1:
+pass.
+
+ctest --test-dir out\build\windows-clang-ninja-oracle --output-on-failure -E ruckig_c_oracle_random_release:
+pass, 29/29.
+```
+
+Performance evidence:
+
+```text
+out\build\windows-clang-ninja-performance\ruckig_c_performance_benchmark.exe --samples 10000 --seed 1 --enforce-threshold:
+pass.
+average_ratio_c_over_oracle: 1.23622.
+release_threshold_average_ratio: 1.5.
+
+out\build\windows-clang-ninja-performance\ruckig_c_performance_benchmark.exe --samples 10000 --seed 1 --waypoints:
+pass.
+waypoint_case_count: 5.
+waypoint_c_average_ns: 1.05448e+06.
+waypoint_c_p99_ns: 6.3575e+06.
+waypoint_c_worst_ns: 7.6835e+06.
+waypoint_oracle_ratio: unavailable.
+```
+
+Stable `v0.4.0` remains unreleased after this pass. The final release still
+requires a release-candidate commit, final push CI, manual release-random
+workflow evidence, release decision, tag, and GitHub Release.
+
 ## 2026-06-06 0.4.0-Design Local Alpha.3 Wrapper Parity Evidence
 
 The third local alpha pass strengthened Python and Rust prototype coverage for
