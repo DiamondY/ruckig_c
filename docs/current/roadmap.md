@@ -82,13 +82,16 @@ follow-up work for stability and future feature planning.
 
 ## 0.3.0 Hardening Release
 
-The default mainline stage is now the `0.3.0` hardening release preparation.
-The accepted release decision is recorded in
-`docs/design/0.3.0_release_decision.md`. It publishes the completed
+Published as `v0.3.0`. The accepted release decision is recorded in
+`docs/design/0.3.0_release_decision.md`. The release publishes the completed
 `0.3.0-design` engineering hardening work without changing public API, solver
-dispatch, or the frozen oracle baseline.
+dispatch, or the frozen oracle baseline. Final tag, GitHub Release, push CI,
+manual release-random workflow, ABI/export artifacts, macOS bootstrap evidence,
+performance, consumer, and Python prototype evidence are recorded in
+`docs/release/checklists/0.3.0.md` and
+`docs/release/evidence/verification_report.md`.
 
-- Current priority decision is recorded in
+- The priority decision that shaped `0.3.0` is recorded in
   `docs/design/0.3.0_priorities.md` and
   `docs/design/0.3.0_readiness.md`: maintain ABI/export hygiene and existing
   installed-package consumer paths; evaluate Python bindings before Rust
@@ -98,7 +101,7 @@ dispatch, or the frozen oracle baseline.
 - Python binding feasibility is scoped in
   `docs/design/python_bindings_feasibility.md`. Current work is prototype-only;
   it does not approve a formal binding API, release package, or C ABI change.
-- ABI/export hygiene is the first `0.3.0` release queue. Linux historical
+- ABI/export hygiene shipped as the first `0.3.0` release queue. Linux historical
   implementation-internal exports from `v0.2.5` are not public API;
   `docs/abi/public-symbols.txt` is the approved public symbol allowlist.
 - Evaluate Python or Rust bindings only after the C ABI has passed at least one
@@ -116,7 +119,7 @@ dispatch, or the frozen oracle baseline.
   separate design document that defines the Community cloud/pro behavior
   boundary, C API shape, and unsupported/partial behavior before any public API
   is implemented.
-- `0.3.0` release priorities:
+- `0.3.0` shipped priorities and follow-up boundaries:
   1. Maintain ABI/export hygiene and Linux internal symbol cleanup evidence.
      The current build exposes public-symbol allowlist verification and
      public exported-symbol comparison targets for shared builds.

@@ -29,13 +29,13 @@ Implemented and covered by fixed C/oracle tests plus deterministic random oracle
   velocity, stop, and minimum duration.
 
 Release-readiness evidence is tracked under `docs/release/`; see
-`docs/index.md` for the organized documentation map. `v0.2.5` is the latest
-published release and the final planned `0.2.x` stabilization baseline.
-`main` is preparing the `0.3.0` hardening release. The C API remains frozen:
-`0.3.0` publishes ABI/export hygiene, consumer-matrix hardening, macOS
-shared/export bootstrap evidence, and Python feasibility evidence without
-adding public API or solver scope. The post-release stability queue is tracked
-in `docs/current/roadmap.md`. Current release scope intentionally excludes:
+`docs/index.md` for the organized documentation map. `v0.3.0` is the latest
+published release. It is a hardening release that publishes ABI/export hygiene,
+consumer-matrix hardening, macOS shared/export bootstrap evidence, and Python
+feasibility evidence without adding public API or solver scope. `v0.2.5`
+remains the final planned `0.2.x` stabilization baseline. The post-release
+stability queue is tracked in `docs/current/roadmap.md`. Current scope
+intentionally excludes:
 
 - Waypoints, per-section constraints, cloud, and Python/Rust bindings remain
   intentionally outside the public C API.

@@ -123,6 +123,7 @@ Current same-platform release baselines:
 | `0.2.3` | `1.08893` | `1.26328` | Final Windows closeout and manual Linux release workflow evidence. |
 | `0.2.4` | `1.4087` | `1.29012` | Final Windows closeout and manual Linux release workflow evidence. |
 | `0.2.5` | `1.16244` | `1.30314` | Final planned pre-`0.3.0` stabilization baseline from local Windows closeout and manual Linux release workflow evidence. |
+| `0.3.0` | Not a separate 0.3.0 gate | `1.2875` | Hardening release final push CI run `27028896945`, artifact `7442364071`; local Windows release gates covered build/test/ABI rather than a separate benchmark rerun. |
 
 Store raw local or CI outputs outside version-controlled source unless the
 release process intentionally promotes a short excerpt into this report. Use a
@@ -721,6 +722,39 @@ The same-platform `0.2.4` Linux release baseline ratio was `1.29012`. This
 manual release workflow run is within the release threshold of average
 calculation time no worse than `1.5x` the C++ oracle on the same benchmark
 corpus. It is the Linux final pre-`0.3.0` performance baseline for `0.2.x`.
+
+## 2026-06-05 Linux 0.3.0 Final Push CI Run
+
+- Source: GitHub Actions push CI run `27028896945`, job
+  `Linux Clang performance`.
+- Commit: `5c7bf60612e6910073fa64e4837a304d063a9d7d`.
+- Artifact: `linux-performance`, artifact id `7442364071`, digest
+  `sha256:520679364dbd65d0ddbe2b8ac561c898340488fbc0d45f85709595b5da1139f8`.
+- Command: `./build-perf/ruckig_c_performance_benchmark --samples 10000 --seed 1`.
+- OS: Linux, GitHub-hosted Ubuntu runner.
+- Kernel/build:
+  `Linux runnervm3jyl0 6.17.0-1015-azure #15~24.04.1-Ubuntu SMP Wed May 6 22:37:49 UTC 2026 x86_64`.
+- CPU identifier: `AMD EPYC 7763 64-Core Processor`.
+- C compiler: `Ubuntu clang version 18.1.3 (1ubuntu1)`.
+- C++ compiler: `Ubuntu clang version 18.1.3 (1ubuntu1)`.
+- CMake build type: `Release`.
+- Generator: `Ninja`.
+- Seed: `1`.
+- Samples: `10000`.
+
+| Metric | C implementation | C++ oracle |
+| --- | ---: | ---: |
+| Average | 716.329 ns | 556.371 ns |
+| p99 | 5340 ns | 4188 ns |
+| Worst | 36839 ns | 25928 ns |
+
+Average C/oracle ratio: `1.2875`.
+
+This final push CI run is within the release threshold of average calculation
+time no worse than `1.5x` the C++ oracle on the same benchmark corpus. `0.3.0`
+is a hardening release; the Windows release gates for this version covered
+local build/test, shared build/test, and ABI/export validation rather than a
+separate Windows performance rerun.
 
 ### Windows clang release
 

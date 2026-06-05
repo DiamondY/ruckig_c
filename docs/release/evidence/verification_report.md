@@ -2543,11 +2543,18 @@ Commit: 1353ee665d5d1a9b0bd5c2eafd078b8ded214450
 Subject: Prepare 0.3.0 hardening release
 ```
 
-Release evidence commit:
+Intermediate release evidence commit:
 
 ```text
 Commit: 221e3ab09819cd3f0c39e1033386e526ff1e1a8e
 Subject: Record 0.3.0 release preparation evidence
+```
+
+Final release closeout commit and tag target:
+
+```text
+Commit: 5c7bf60612e6910073fa64e4837a304d063a9d7d
+Subject: Complete 0.3.0 release evidence
 ```
 
 Scope changes:
@@ -2663,16 +2670,16 @@ Dry run preview listed bindings/python_prototype/__pycache__/ and out/.
 Apply removed bindings/python_prototype/__pycache__/ and out/.
 ```
 
-Remote GitHub Actions push CI for the release evidence commit:
+Remote GitHub Actions push CI for the final release closeout commit:
 
 ```text
-Run id: 27024338905
-Run URL: https://github.com/DiamondY/ruckig_c/actions/runs/27024338905
-Commit: 221e3ab09819cd3f0c39e1033386e526ff1e1a8e
+Run id: 27028896945
+Run URL: https://github.com/DiamondY/ruckig_c/actions/runs/27028896945
+Commit: 5c7bf60612e6910073fa64e4837a304d063a9d7d
 Event: push
 Conclusion: success
-Started: 2026-06-05T15:35:38Z
-Completed: 2026-06-05T15:37:04Z
+Started: 2026-06-05T17:07:15Z
+Completed: 2026-06-05T17:08:50Z
 ```
 
 Successful push CI jobs:
@@ -2697,16 +2704,17 @@ macOS exported symbols
 The `Manual release random oracle` job was skipped as expected for a
 push-triggered workflow.
 
-Manual release-random workflow dispatch:
+Manual release-random workflow dispatch for the published tag:
 
 ```text
-Run id: 27028374125
-Run URL: https://github.com/DiamondY/ruckig_c/actions/runs/27028374125
-Commit: 221e3ab09819cd3f0c39e1033386e526ff1e1a8e
+Run id: 27029369635
+Run URL: https://github.com/DiamondY/ruckig_c/actions/runs/27029369635
+Ref: v0.3.0
+Commit: 5c7bf60612e6910073fa64e4837a304d063a9d7d
 Event: workflow_dispatch
 Conclusion: success
-Started: 2026-06-05T16:56:48Z
-Completed: 2026-06-05T16:58:37Z
+Started: 2026-06-05T17:17:00Z
+Completed: 2026-06-05T17:18:51Z
 Manual release random oracle job conclusion: success
 ```
 
@@ -2730,27 +2738,27 @@ macOS exported symbols
 Manual release random oracle
 ```
 
-Uploaded artifact metadata for push CI run `27024338905`:
+Uploaded artifact metadata for push CI run `27028896945`:
 
 ```text
-Linux exported symbols: artifact id 7440525476, size 3372 bytes,
-digest sha256:14bc4f06aae944b32743e43132272d8357518e306b94af6e33f889680ba7a199.
+Linux exported symbols: artifact id 7442363754, size 3372 bytes,
+digest sha256:03606042215fa4af3b7a42dcbccccf869b5ad4566ba659c7c3b0152ee727f3ce.
 
-Windows exported symbols: artifact id 7440536055, size 2969 bytes,
-digest sha256:217d578ba6ba4d448068efab298deaf00439d26396ee8df455b5ab946ed4a317.
+Windows exported symbols: artifact id 7442367811, size 2969 bytes,
+digest sha256:381bc6f1f6bc3b90e8c7a38d06b76db6bd68de38eb351f08f5f91611638c79a0.
 
-macOS exported symbols: artifact id 7440521562, size 1838 bytes,
-digest sha256:2937844b6486bc5cf51edcd6c7255238c306884333877f36b56475244830c50e.
+macOS exported symbols: artifact id 7442357942, size 1838 bytes,
+digest sha256:657270d732ae36ae3e09be6b28b4ba9004146f9125042d95297ac9785cbdd229.
 
-linux-performance: artifact id 7440529500, size 526 bytes,
-digest sha256:0960a68c248a5967fb3431ece88c63d42d504136b4be086283458ff74d2be30b.
+linux-performance: artifact id 7442364071, size 527 bytes,
+digest sha256:520679364dbd65d0ddbe2b8ac561c898340488fbc0d45f85709595b5da1139f8.
 ```
 
 Downloaded artifact inspection:
 
 ```text
-The artifacts were downloaded under E:\Yww\DownLoad and inspected from
-out\gh-artifacts\27024338905 before local cleanup.
+The artifacts were downloaded through the GitHub API and inspected from
+out\gh-artifacts\27028896945 before local cleanup.
 
 Linux public symbol allowlist verification: status clean, 66 header public
 symbols, 66 expected public symbols, 0 missing, 0 extra.
@@ -2777,8 +2785,8 @@ historical baseline exists, so 0.3.0 records this as bootstrap evidence rather
 than a historical exported-symbol diff.
 
 Linux performance: samples 10000, seed 1, clang 18.1.3, Linux,
-c_average_ns 714.979, oracle_average_ns 562.446,
-average_ratio_c_over_oracle 1.2712, release threshold 1.5.
+c_average_ns 716.329, oracle_average_ns 556.371,
+average_ratio_c_over_oracle 1.2875, release threshold 1.5.
 ```
 
 The Linux/Windows public exported-symbol comparison artifacts were generated
@@ -2786,8 +2794,16 @@ with `strict_public_abi: ON` so drift evidence is strict and reviewable. The
 project policy for `0.3.0` remains trial/evidence mode, not a routine required
 CI hard gate for all future changes.
 
-GitHub CLI authentication remained invalid during this pass, but the manual
-workflow was triggered through the GitHub Actions web UI and the run, job, and
-artifact metadata were verified through public GitHub API responses. The
-downloaded artifact contents were inspected locally after the user placed the
-archives under `E:\Yww\DownLoad`.
+Release publication:
+
+```text
+Annotated tag: v0.3.0
+Annotated tag object: 42ba7ee0deb79e6ad9bb9416ef4ec9a829359df9
+Tag target commit: 5c7bf60612e6910073fa64e4837a304d063a9d7d
+GitHub Release: https://github.com/DiamondY/ruckig_c/releases/tag/v0.3.0
+Published at: 2026-06-05T17:13:29Z
+```
+
+GitHub CLI authentication remained invalid during this pass, so release
+creation, workflow dispatch, and final artifact download used the existing Git
+Credential Manager token through the GitHub API without printing the token.
