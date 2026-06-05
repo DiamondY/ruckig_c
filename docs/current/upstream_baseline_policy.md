@@ -14,7 +14,7 @@ upgrade project is approved and completed.
 - Release closeout, per-DoF hardening, bindings design, `0.2.x` patch-release
   work, and ordinary bug-fix work must not update the upstream baseline.
 - ABI/exported-symbol comparison, consumer-matrix hardening, package-manager
-  feasibility notes, performance-trend work, and `0.3.0-design` planning must
+  feasibility notes, performance-trend work, and `0.3.0` release planning must
   not update the upstream baseline.
 
 ## Upstream Upgrade Requirements

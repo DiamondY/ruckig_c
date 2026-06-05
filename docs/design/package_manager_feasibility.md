@@ -2,7 +2,7 @@
 
 This is a frozen feasibility note for possible future packaging work. It does
 not implement or promise package-manager recipes for `0.2.x` or the active
-`0.3.0-design` roadmap. Package-manager work is downgraded to a long-term
+`0.3.0` roadmap. Package-manager work is downgraded to a long-term
 optional project and may remain frozen indefinitely.
 
 ## Current Verified Consumption Paths
@@ -88,7 +88,7 @@ directly. Preconditions:
 
 FetchContent is documentation-only and long-term optional. A future note could
 show the recommended `FetchContent_MakeAvailable` or `add_subdirectory`
-pattern, but no recipe or release promise is attached to active `0.3.0-design`
+pattern, but no recipe or release promise is attached to active `0.3.0`
 work.
 
 ### Vendored Subdirectory
@@ -122,6 +122,6 @@ preconditions are true:
 
 No package-manager recipe should be added as part of `0.2.3` release closeout.
 No package-manager recipe should be added as part of `0.2.5` maintenance work
-either. No package-manager recipe or new prototype is part of active
-`0.3.0-design`; this document is retained as frozen feasibility evidence and
+either. No package-manager recipe or new prototype is part of active `0.3.0`;
+this document is retained as frozen feasibility evidence and
 future project scoping only.

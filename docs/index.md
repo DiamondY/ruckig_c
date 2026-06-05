@@ -32,6 +32,8 @@ Historical rewrite plans and release evidence are retained for traceability.
 - `design/0.3.0_priorities.md` - design-only `0.3.0` priority ordering.
 - `design/0.3.0_readiness.md` - pre-`0.3.0` readiness decisions after the
   final planned `0.2.x` stabilization release.
+- `design/0.3.0_release_decision.md` - accepted hardening-release scope for
+  `0.3.0`.
 - `design/0.3.0_closeout_checklist.md` - engineering-hardening closeout
   checklist for `0.3.0-design`.
 - `design/python_bindings_feasibility.md` - Python binding feasibility, without
@@ -65,7 +67,7 @@ Historical rewrite plans and release evidence are retained for traceability.
   comparison helper.
 - `abi/v0.2.4/` - exported-symbol baselines used by the `0.2.5` ABI
   comparison helper.
-- `abi/v0.2.5/` - exported-symbol baselines used by the `0.3.0-design` ABI
-  comparison helper and any future emergency `0.2.6`.
+- `abi/v0.2.5/` - exported-symbol baselines used by the `0.3.0` ABI comparison
+  helper and any future emergency `0.2.6`.
   `abi/v0.2.5/linux-symbol-review.md` classifies the historical Linux internal
-  exports that are cleaned up during `0.3.0-design`.
+  exports that are cleaned up during `0.3.0`.

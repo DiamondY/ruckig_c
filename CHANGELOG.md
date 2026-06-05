@@ -1,16 +1,21 @@
 # Changelog
 
-## 0.3.0-design - Unreleased
+## 0.3.0 - 2026-06-05
+
+`0.3.0` is a hardening release. It promotes the completed `0.3.0-design`
+engineering work into a versioned release boundary without adding public C API,
+changing solver scope, publishing bindings, adding package-manager recipes, or
+updating the frozen upstream oracle baseline.
 
 Changed:
 
-- `main` now tracks the `0.3.0-design` line after publishing `v0.2.5` as the
-  final planned `0.2.x` stabilization release.
+- `main` now prepares the `0.3.0` hardening release after publishing `v0.2.5`
+  as the final planned `0.2.x` stabilization release.
 - ABI comparison baselines now roll forward to `docs/abi/v0.2.5/`; strict
   public ABI diff failure remains opt-in for local builds, while the dedicated
   Linux/Windows exported-symbol CI jobs upload warning/evidence artifacts.
-- `0.3.0-design` priority now starts with ABI/export hygiene and existing
-  installed-package consumer paths before binding prototypes.
+- `0.3.0` release priority starts with ABI/export hygiene and existing
+  installed-package consumer paths before binding release work.
 - Added `docs/abi/public-symbols.txt` as the approved public C ABI symbol
   allowlist derived from `include/ruckig_c/ruckig.h`.
 - Added a public symbol allowlist verification target that extracts
@@ -30,8 +35,9 @@ Changed:
   tolerance exception.
 - Added and smoke-tested a Python `cffi` ABI-mode prototype workspace against a
   local shared `ruckig_c` build.
-- Added an experimental vcpkg overlay prototype and verified local
-  `x64-windows` shared/default and `x64-windows-static` consumer paths.
+- Retained the experimental vcpkg overlay prototype as frozen reference
+  evidence after verifying local `x64-windows` shared/default and
+  `x64-windows-static` consumer paths.
 - Downgraded package-manager recipes and new package-manager prototypes to
   long-term optional work; the existing vcpkg overlay is retained as frozen
   reference evidence outside the active roadmap.
@@ -43,7 +49,7 @@ Changed:
 - Added a Windows-specific `windows-clang-ninja` preset as the default local
   README build path, plus a matching `windows-clang-ninja-shared` preset for
   ABI/export and Python prototype smoke validation.
-- Recorded a `0.3.0-design` local hardening pass covering the Windows preset,
+- Recorded a `0.3.0` hardening pass covering the Windows preset,
   shared DLL/import-library consumer, public symbol allowlist verification,
   public exported-symbol comparison, Python `cffi` prototype smoke, and current
   MinGW/MSVC `cl` toolchain availability.
@@ -55,13 +61,16 @@ Changed:
 - Completed the Python prototype design decisions for low-level ABI shape,
   future high-level wrappers, result/error handling, explicit shared-library
   discovery, copy-in/copy-out arrays, and deferred wheel/package strategy.
+- Added a `0.3.0` release decision document and release checklist to keep the
+  hardening-release scope separate from future feature, packaging, and binding
+  projects.
 
 Still deferred:
 
 - Intermediate waypoints, per-section constraints, cloud calculation, Python
-  binding implementation, Rust bindings, package-manager recipes and new
-  package-manager prototypes, strict ABI fail gates, and upstream baseline
-  upgrades.
+  binding release work, Rust bindings, package-manager recipes and new
+  package-manager prototypes, strict exported-symbol fail gates, and upstream
+  baseline upgrades.
 
 ## 0.2.5 - 2026-06-05
 

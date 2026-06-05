@@ -80,11 +80,13 @@ follow-up work for stability and future feature planning.
 - Keep waypoints, per-section constraints, cloud calculation, Python/Rust
   bindings, and upstream baseline upgrades as separate future projects.
 
-## 0.3.0 Design Candidates
+## 0.3.0 Hardening Release
 
-The default mainline stage is now `0.3.0-design`. The `0.3.0` line is
-design-only until a separate proposal is accepted. It must not change public
-API, solver dispatch, or the frozen oracle baseline during design evaluation.
+The default mainline stage is now the `0.3.0` hardening release preparation.
+The accepted release decision is recorded in
+`docs/design/0.3.0_release_decision.md`. It publishes the completed
+`0.3.0-design` engineering hardening work without changing public API, solver
+dispatch, or the frozen oracle baseline.
 
 - Current priority decision is recorded in
   `docs/design/0.3.0_priorities.md` and
@@ -96,10 +98,9 @@ API, solver dispatch, or the frozen oracle baseline during design evaluation.
 - Python binding feasibility is scoped in
   `docs/design/python_bindings_feasibility.md`. Current work is prototype-only;
   it does not approve a formal binding API, release package, or C ABI change.
-- ABI/export hygiene is the first `0.3.0-design` implementation queue and its
-  first pass is implemented on `main`. Linux historical implementation-internal
-  exports from `v0.2.5` are not public API; `docs/abi/public-symbols.txt` is the
-  approved public symbol allowlist.
+- ABI/export hygiene is the first `0.3.0` release queue. Linux historical
+  implementation-internal exports from `v0.2.5` are not public API;
+  `docs/abi/public-symbols.txt` is the approved public symbol allowlist.
 - Evaluate Python or Rust bindings only after the C ABI has passed at least one
   `0.2.x` patch cycle, `docs/current/api_compatibility.md` is complete, and CMake,
   pkg-config, and shared/static consumer paths are stable.
@@ -115,7 +116,7 @@ API, solver dispatch, or the frozen oracle baseline during design evaluation.
   separate design document that defines the Community cloud/pro behavior
   boundary, C API shape, and unsupported/partial behavior before any public API
   is implemented.
-- First `0.3.0-design` priorities:
+- `0.3.0` release priorities:
   1. Maintain ABI/export hygiene and Linux internal symbol cleanup evidence.
      The current build exposes public-symbol allowlist verification and
      public exported-symbol comparison targets for shared builds.

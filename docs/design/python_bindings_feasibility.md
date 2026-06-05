@@ -1,8 +1,8 @@
 # Python Bindings Feasibility
 
-This is a `0.3.0-design` document only. It does not approve implementation,
-does not add a public binding API, does not change the C ABI, and does not
-change solver behavior.
+This is a `0.3.0` feasibility document only. It does not approve a released
+binding package, does not add a public binding API, does not change the C ABI,
+and does not change solver behavior.
 
 ## Prerequisites
 
@@ -45,9 +45,8 @@ ownership, array, lifecycle, and error behavior are evaluated.
 
 ## Current Prototype Decisions
 
-The `0.3.0-design` prototype remains experimental. It is not published, not
-installed by CMake, not part of routine CI, and must not change the public C
-ABI.
+The `0.3.0` prototype remains experimental. It is not published, not installed
+by CMake, not part of routine CI, and must not change the public C ABI.
 
 - Low-level API shape: keep the prototype close to the C ABI with explicit
   `Ruckig`, `Input`, `Output`, and `Trajectory` wrappers around one opaque C
@@ -67,7 +66,7 @@ ABI.
   protocol, memoryview, and NumPy fast paths are deferred until lifetime rules
   and package strategy are stable.
 - Package strategy: no wheel, source distribution, vendored library, or
-  installer strategy is implemented in `0.3.0-design`. Wheel/package design
+  installer strategy is implemented in `0.3.0`. Wheel/package design
   remains a separate decision after shared-library loading is stable.
 
 ### CPython Extension
@@ -240,7 +239,7 @@ Command: python bindings/python_prototype/test_prototype.py
 Result: Ran 8 tests in 0.009s, OK
 ```
 
-Current `0.3.0-design` prototype coverage includes:
+Current `0.3.0` prototype coverage includes:
 
 - Handle create/destroy and context-manager cleanup.
 - Harmless double `close()` at the Python wrapper level.

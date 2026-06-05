@@ -47,5 +47,5 @@ symbol removals or implementation-internal exports.
 
 The `v0.2.5` Linux exported-symbol baseline includes implementation-internal
 `ruckig_*` symbols because strict symbol visibility was not yet enforced. Those
-symbols were never public API. Cleaning them up in `0.3.0-design` is export
+symbols were never public API. Cleaning them up in `0.3.0` is export
 hygiene, not a public API removal.

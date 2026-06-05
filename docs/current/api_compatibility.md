@@ -1,8 +1,8 @@
 # API and ABI Compatibility
 
 This document defines the `ruckig_c 0.2.x` patch-release compatibility policy.
-For the `0.3.0-design` line, it also defines the pre-implementation public ABI
-guardrails that are built on the final planned `0.2.x` baseline.
+For the `0.3.0` hardening release, it also defines the public ABI guardrails
+that are built on the final planned `0.2.x` baseline.
 
 ## Policy
 
@@ -140,8 +140,8 @@ maintainers can review public header diffs, exported-symbol diffs, enum values,
 and result-code values before deciding whether the process is mature enough to
 fail CI automatically.
 
-`v0.2.5` is the planned final `0.2.x` stabilization release before
-`0.3.0-design`, so its release artifacts should be treated as the pre-`0.3.0`
+`v0.2.5` is the planned final `0.2.x` stabilization release before `0.3.0`,
+so its release artifacts should be treated as the pre-`0.3.0`
 C ABI baseline. After publication, save Linux and Windows exported-symbol
 baselines under:
 
@@ -150,12 +150,13 @@ docs/abi/v0.2.5/linux-symbols.txt
 docs/abi/v0.2.5/windows-symbols.txt
 ```
 
-Strict exported-symbol diff failure is still not enabled in `v0.2.5`. It can
-continue as a `0.3.0-design` topic or future emergency patch design item after
-the exception process and reproducibility requirements below are satisfied.
+Strict exported-symbol diff failure is still not enabled in `v0.2.5`. It
+continues as a `0.3.0` trial/evidence topic or future emergency patch design
+item after the exception process and reproducibility requirements below are
+satisfied.
 
 After publishing `v0.2.5`, `docs/abi/v0.2.5/` is the active comparison
-baseline for `0.3.0-design`:
+baseline for `0.3.0`:
 
 ```text
 docs/abi/v0.2.5/linux-symbols.txt
@@ -169,7 +170,7 @@ enforced. Treat this as ABI evidence for drift review, not as approval to use
 those internal symbols as public API. The public C API remains the declarations
 in `include/ruckig_c/ruckig.h`.
 
-`0.3.0-design` begins by cleaning up that Linux export surface. Non-Windows
+`0.3.0` cleans up that Linux export surface. Non-Windows
 shared builds use hidden symbol visibility so only `RUCKIG_C_API` declarations
 are exported. Linux builds additionally use a linker version script generated
 from `docs/abi/public-symbols.txt` so the dynamic symbol table is constrained
@@ -185,15 +186,15 @@ test/debug allocation helpers that must not be treated as supported consumer
 entry points. The detailed classification is recorded in
 `docs/abi/v0.2.5/linux-symbol-review.md`.
 
-Shared builds on `main` now write next-stage comparison artifacts under:
+Shared builds on `main` now write `0.3.0` comparison artifacts under:
 
 ```text
-build_release_check_shared/artifacts/abi/0.3.0-design/windows-exports.txt
-build_release_check_shared/artifacts/abi/0.3.0-design/windows-export-diff.txt
-build_release_check_shared/artifacts/abi/0.3.0-design/windows-public-export-diff.txt
-build-shared/artifacts/abi/0.3.0-design/linux-exports.txt
-build-shared/artifacts/abi/0.3.0-design/linux-export-diff.txt
-build-shared/artifacts/abi/0.3.0-design/linux-public-export-diff.txt
+build_release_check_shared/artifacts/abi/0.3.0/windows-exports.txt
+build_release_check_shared/artifacts/abi/0.3.0/windows-export-diff.txt
+build_release_check_shared/artifacts/abi/0.3.0/windows-public-export-diff.txt
+build-shared/artifacts/abi/0.3.0/linux-exports.txt
+build-shared/artifacts/abi/0.3.0/linux-export-diff.txt
+build-shared/artifacts/abi/0.3.0/linux-public-export-diff.txt
 ```
 
 Strict exported-symbol diff enforcement can be enabled only after all of these
@@ -217,8 +218,8 @@ It compares the current shared-library exports against
 report such as:
 
 ```text
-build_release_check_shared/artifacts/abi/0.3.0-design/windows-public-export-diff.txt
-build-shared/artifacts/abi/0.3.0-design/linux-public-export-diff.txt
+build_release_check_shared/artifacts/abi/0.3.0/windows-public-export-diff.txt
+build-shared/artifacts/abi/0.3.0/linux-public-export-diff.txt
 ```
 
 The report includes machine-readable summary fields and human-readable symbol
@@ -238,9 +239,9 @@ to diagnose Linux and Windows drift without blocking routine maintenance.
 
 macOS shared builds generate a Mach-O exported-symbol snapshot and verify the
 public symbol allowlist, but they do not run a historical exported-symbol diff
-in `0.3.0-design` because no `docs/abi/v0.2.5/macos-symbols.txt` baseline
-exists. The macOS job is evidence bootstrap only until a separate macOS ABI
-baseline policy is accepted.
+for `v0.2.5` because no `docs/abi/v0.2.5/macos-symbols.txt` baseline exists.
+The `0.3.0` macOS job is the first shared/export evidence bootstrap and should
+be treated as the baseline starting point for future macOS ABI policy.
 
 The tracked public allowlist can be verified against the current public header
 without rewriting tracked documentation:
@@ -251,7 +252,7 @@ cmake --build build_release_check_shared --target ruckig_c_verify_public_symbols
 
 That target extracts declarations marked `RUCKIG_C_API` from
 `include/ruckig_c/ruckig.h`, writes a generated allowlist artifact such as
-`build_release_check_shared/artifacts/abi/0.3.0-design/public-symbols-from-header.txt`,
+`build_release_check_shared/artifacts/abi/0.3.0/public-symbols-from-header.txt`,
 and fails if it differs from `docs/abi/public-symbols.txt`.
 
 ABI exception policy:
@@ -272,8 +273,8 @@ The full policy is tracked in `docs/abi/exceptions.md`.
 
 ## Public Header Diff
 
-Review the public header against the previous release tag. For the
-`0.3.0-design` line, compare against the final planned `0.2.x` stabilization
+Review the public header against the previous release tag. For the `0.3.0`
+hardening release, compare against the final planned `0.2.x` stabilization
 baseline:
 
 ```powershell

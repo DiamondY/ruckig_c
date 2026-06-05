@@ -244,7 +244,7 @@ vcpkg, Conan, Homebrew, CMake FetchContent, and vendored subdirectory recipes
 are downgraded to long-term optional work. The existing feasibility notes and
 experimental vcpkg overlay may remain as frozen reference material, but no new
 package-manager recipe, prototype, or release commitment is part of the active
-`0.3.0-design` roadmap unless a separate packaging project is accepted.
+`0.3.0` roadmap unless a separate packaging project is accepted.
 
 See `docs/design/package_manager_feasibility.md` for the frozen feasibility
 record and the conditions that would need to be revisited before any future
