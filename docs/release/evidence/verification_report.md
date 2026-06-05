@@ -2807,3 +2807,57 @@ Published at: 2026-06-05T17:13:29Z
 GitHub CLI authentication remained invalid during this pass, so release
 creation, workflow dispatch, and final artifact download used the existing Git
 Credential Manager token through the GitHub API without printing the token.
+
+## 2026-06-06 0.4.0-Design Alpha Push CI
+
+Remote GitHub Actions push CI for the `0.4.0-design` alpha commit:
+
+```text
+Run id: 27035876734
+Run URL: https://github.com/DiamondY/ruckig_c/actions/runs/27035876734
+Commit: d3a010ec89af0385fc0497a3d1fe5ff824fcef1d
+Event: push
+Conclusion: success
+```
+
+Successful push CI jobs:
+
+```text
+Windows clang-cl C-only
+Windows clang-cl shared C-only
+Windows clang oracle
+Linux GCC C-only
+Linux Clang oracle
+macOS Clang C-only
+Linux Clang ASan UBSan
+Linux Valgrind
+Linux Clang performance
+Windows MinGW static consumer
+Windows MinGW DLL consumer
+Linux exported symbols
+Windows exported symbols
+macOS exported symbols
+Python prototype smoke (Windows)
+Python prototype smoke (Linux)
+Python prototype smoke (macOS)
+Rust alpha wrapper smoke
+```
+
+The `Manual release random oracle` job was skipped as expected for a
+push-triggered workflow.
+
+Uploaded artifact metadata for push CI run `27035876734`:
+
+```text
+linux-performance: artifact id 7445188452, size 1057 bytes.
+Linux exported symbols: artifact id 7445183264, size 4544 bytes.
+Windows exported symbols: artifact id 7445184317, size 4377 bytes.
+macOS exported symbols: artifact id 7445180547, size 2459 bytes.
+```
+
+This CI run verifies the updated `0.4.0-design` ABI artifact path, Linux
+waypoint alpha performance output, cross-platform Python prototype smoke, and
+Rust alpha wrapper smoke. Stable `v0.4.0` is still not released from this
+evidence; `docs/release/checklists/0.4.0-alpha.md` records the alpha decision
+that another alpha cycle is required before making a stable waypoint optimizer
+readiness claim.
