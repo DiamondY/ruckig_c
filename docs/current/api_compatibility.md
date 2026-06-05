@@ -229,12 +229,18 @@ only for separately approved public API additions. By default the target is
 warning/evidence-only. Setting `RUCKIG_C_STRICT_PUBLIC_ABI=ON` makes public ABI
 drift fail the target.
 The dedicated Linux and Windows exported-symbol GitHub Actions jobs currently
-run the public-only comparison in warning/evidence mode while uploading the
-same exported-symbol artifacts and diff reports for review. Ordinary local
-shared builds also default to warning/evidence mode unless the option is
-explicitly enabled. Promote the CI jobs to a strict fail gate only after the
-artifact review path is stable enough to diagnose Linux and Windows drift
-without blocking routine maintenance.
+run the public-only comparison through the strict comparison script in
+non-blocking trial mode while uploading the same exported-symbol artifacts and
+diff reports for review. Ordinary local shared builds default to
+warning/evidence mode unless the option is explicitly enabled. Promote the CI
+jobs to a strict fail gate only after the artifact review path is stable enough
+to diagnose Linux and Windows drift without blocking routine maintenance.
+
+macOS shared builds generate a Mach-O exported-symbol snapshot and verify the
+public symbol allowlist, but they do not run a historical exported-symbol diff
+in `0.3.0-design` because no `docs/abi/v0.2.5/macos-symbols.txt` baseline
+exists. The macOS job is evidence bootstrap only until a separate macOS ABI
+baseline policy is accepted.
 
 The tracked public allowlist can be verified against the current public header
 without rewriting tracked documentation:

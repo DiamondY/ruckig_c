@@ -291,12 +291,21 @@ jobs:
             c_compiler: clang
             cxx_compiler: clang++
             abi_platform: linux
+            has_baseline: "true"
             artifact_path: build-shared/artifacts/abi/0.3.0-design/*
           - name: Windows exported symbols
             os: windows-latest
             c_compiler: clang
             cxx_compiler: clang++
             abi_platform: windows
+            has_baseline: "true"
+            artifact_path: build-shared/artifacts/abi/0.3.0-design/*
+          - name: macOS exported symbols
+            os: macos-latest
+            c_compiler: clang
+            cxx_compiler: clang++
+            abi_platform: macos
+            has_baseline: "false"
             artifact_path: build-shared/artifacts/abi/0.3.0-design/*
 
     steps:
@@ -309,6 +318,10 @@ jobs:
       - name: Install Linux build tools
         if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y ninja-build
+
+      - name: Install macOS build tools
+        if: runner.os == 'macOS'
+        run: brew install ninja
 
       - name: Configure shared build
         run: >
@@ -328,9 +341,11 @@ jobs:
         run: cmake --build build-shared --target ruckig_c_exported_symbols --config Release
 
       - name: Compare exported-symbol snapshot
+        if: matrix.has_baseline == 'true'
         run: cmake --build build-shared --target ruckig_c_compare_exported_symbols --config Release
 
-      - name: Compare public exported symbols strictly
+      - name: Compare public exported symbols strictly as trial
+        if: matrix.has_baseline == 'true'
         continue-on-error: true
         run: >
           cmake
@@ -343,10 +358,17 @@ jobs:
           -P cmake/compare_public_exported_symbols.cmake
 
       - name: Note public exported-symbol drift result
-        if: always()
+        if: always() && matrix.has_baseline == 'true'
         run: |
-          echo "Public exported-symbol comparison ran in warning/evidence mode for CI review."
+          echo "Public exported-symbol comparison ran with the strict script in non-blocking trial mode for CI review."
           echo "Review the uploaded exported-symbol artifacts before promoting this check to a strict fail gate."
+        shell: bash
+
+      - name: Note macOS exported-symbol bootstrap
+        if: always() && matrix.has_baseline == 'false'
+        run: |
+          echo "macOS exported-symbol evidence is a bootstrap artifact."
+          echo "No docs/abi/v0.2.5/macos-symbols.txt baseline exists, so this job verifies the public allowlist and uploads the Mach-O export snapshot without historical diff comparison."
         shell: bash
 
       - name: Print exported-symbol snapshot

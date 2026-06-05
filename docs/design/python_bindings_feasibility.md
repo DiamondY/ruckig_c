@@ -237,8 +237,23 @@ Python: 3.14.3 in build_python_proto_venv
 cffi: 2.0.0
 Library: build_release_check_shared/ruckig_c.dll
 Command: python bindings/python_prototype/test_prototype.py
-Result: Ran 4 tests in 0.005s, OK
+Result: Ran 8 tests in 0.009s, OK
 ```
+
+Current `0.3.0-design` prototype coverage includes:
+
+- Handle create/destroy and context-manager cleanup.
+- Harmless double `close()` at the Python wrapper level.
+- Python-side lifecycle errors for method calls after close.
+- Offline `calculate`.
+- Online `update` loops with `output_pass_to_input`.
+- List and tuple copy-in plus list copy-out.
+- Length mismatch checks before writing C-owned arrays.
+- Typed Python exceptions for error result codes while preserving the original
+  integer result code and operation name.
+
+This expanded coverage still does not approve a released binding API, wheel,
+source distribution, CMake install target, or routine CI job.
 
 Rust bindings should remain deferred until Python feasibility clarifies the
 ownership, packaging, and error model for one high-level FFI layer.

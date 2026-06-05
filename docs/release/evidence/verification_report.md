@@ -2313,3 +2313,134 @@ Dry run preview listed bindings/python_prototype/__pycache__/, build_vcpkg_tool/
 Apply removed bindings/python_prototype/__pycache__/, build_vcpkg_tool/, and out/.
 No ignored local artifacts remained in git status after cleanup.
 ```
+
+## 2026-06-05 0.3.0-design Closeout Follow-up
+
+This pass implements the next closeout checklist items after commit
+`15d85c7 Harden 0.3.0 design build and ABI workflow`. It keeps the public C API
+frozen, keeps strict public ABI failure in trial/evidence mode, adds macOS
+shared/export artifact bootstrap coverage, and expands the Python `cffi`
+prototype tests without installing or publishing a binding package.
+
+Repository state before edits:
+
+```text
+HEAD: 15d85c7 Harden 0.3.0 design build and ABI workflow
+git status --short --ignored: clean
+```
+
+GitHub Actions evidence collection:
+
+```powershell
+gh auth status
+```
+
+Result:
+
+```text
+Failed to log in to github.com account DiamondY.
+The token in default is invalid.
+```
+
+Remote CI run inspection and artifact download were therefore blocked in this
+local pass. Re-run the GitHub Actions evidence step after refreshing the GitHub
+CLI token, then record the run id, URL, job results, Linux performance artifact,
+and exported-symbol artifacts here.
+
+Local Windows default preset validation:
+
+```powershell
+cmake --list-presets
+cmake --preset windows-clang-ninja
+cmake --build --preset windows-clang-ninja
+ctest --preset windows-clang-ninja
+```
+
+Result:
+
+```text
+Available configure presets include windows-clang-ninja and windows-clang-ninja-shared.
+100% tests passed, 0 tests failed out of 15.
+```
+
+Local Windows shared preset and ABI validation:
+
+```powershell
+cmake --preset windows-clang-ninja-shared
+cmake --build --preset windows-clang-ninja-shared
+ctest --preset windows-clang-ninja-shared
+cmake --build out\build\windows-clang-ninja-shared --target ruckig_c_verify_public_symbols
+cmake --build out\build\windows-clang-ninja-shared --target ruckig_c_compare_public_exported_symbols
+cmake --build out\build\windows-clang-ninja-shared --target ruckig_c_compare_exported_symbols
+```
+
+Result:
+
+```text
+Shared CTest: 100% tests passed, 0 tests failed out of 15.
+Public symbol allowlist verification: matches include/ruckig_c/ruckig.h.
+Public exported-symbol comparison: clean, strict_public_abi OFF.
+Windows exported-symbol baseline comparison: exported symbols match the baseline.
+```
+
+Python `cffi` prototype smoke:
+
+```powershell
+python -m venv out\python-prototype-venv
+out\python-prototype-venv\Scripts\python.exe -m pip install cffi
+$env:RUCKIG_C_SHARED_LIBRARY = (Resolve-Path out\build\windows-clang-ninja-shared\ruckig_c.dll).Path
+out\python-prototype-venv\Scripts\python.exe bindings\python_prototype\test_prototype.py
+```
+
+Result:
+
+```text
+Ran 8 tests in 0.009s
+OK
+```
+
+The expanded prototype coverage now includes create/destroy, double close,
+method-after-close lifecycle errors, offline calculation, online update with
+`output_pass_to_input`, list/tuple copy-in and list copy-out, length mismatch
+checks before C array writes, and typed Python exceptions that retain the
+original result code and operation name.
+
+CI and documentation changes made in this pass:
+
+```text
+Added a macOS exported-symbol CI matrix entry for shared-build Mach-O export
+artifact bootstrap. The job verifies the public symbol allowlist and uploads
+build-shared/artifacts/abi/0.3.0-design/* without running a historical
+exported-symbol diff because docs/abi/v0.2.5/macos-symbols.txt does not exist.
+
+Renamed the Linux/Windows public exported-symbol comparison CI step to make the
+strict-script, non-blocking trial semantics explicit.
+
+Added docs/design/0.3.0_closeout_checklist.md and linked it from docs/index.md.
+```
+
+Scope-freeze audit:
+
+```text
+No public C header change.
+No docs/abi/public-symbols.txt change.
+docs/abi/public-symbol-exceptions.txt remains empty.
+No package-manager recipe or new package-manager prototype was added.
+No waypoint, per-section constraint, or cloud public API entry point was added.
+Python prototype remains experimental, not installed, not published, and outside routine CI.
+Rust bindings and upstream baseline upgrades remain deferred independent projects.
+```
+
+Local cleanup control:
+
+```powershell
+.\scripts\clean-local.ps1
+.\scripts\clean-local.ps1 -Apply
+```
+
+Result:
+
+```text
+Dry run preview listed bindings/python_prototype/__pycache__/ and out/.
+Apply removed bindings/python_prototype/__pycache__/ and out/.
+```

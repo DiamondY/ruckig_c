@@ -90,8 +90,47 @@ class RuckigError(RuntimeError):
         super().__init__(f"{operation} failed with ruckig result {result}")
 
 
+class RuckigInvalidInputError(RuckigError):
+    pass
+
+
+class RuckigTrajectoryDurationError(RuckigError):
+    pass
+
+
+class RuckigPositionalLimitsError(RuckigError):
+    pass
+
+
+class RuckigZeroLimitsError(RuckigError):
+    pass
+
+
+class RuckigExecutionTimeCalculationError(RuckigError):
+    pass
+
+
+class RuckigSynchronizationCalculationError(RuckigError):
+    pass
+
+
+class RuckigUnsupportedError(RuckigError):
+    pass
+
+
 class RuckigLifecycleError(RuntimeError):
     pass
+
+
+_ERROR_TYPES = {
+    Result.ERROR_INVALID_INPUT: RuckigInvalidInputError,
+    Result.ERROR_TRAJECTORY_DURATION: RuckigTrajectoryDurationError,
+    Result.ERROR_POSITIONAL_LIMITS: RuckigPositionalLimitsError,
+    Result.ERROR_ZERO_LIMITS: RuckigZeroLimitsError,
+    Result.ERROR_EXECUTION_TIME_CALCULATION: RuckigExecutionTimeCalculationError,
+    Result.ERROR_SYNCHRONIZATION_CALCULATION: RuckigSynchronizationCalculationError,
+    Result.ERROR_UNSUPPORTED: RuckigUnsupportedError,
+}
 
 
 def _default_library_names() -> List[str]:
@@ -140,7 +179,8 @@ def _result(value: int, operation: str) -> Result:
     result = Result(int(value))
     if result in (Result.WORKING, Result.FINISHED):
         return result
-    raise RuckigError(result, operation)
+    error_type = _ERROR_TYPES.get(result, RuckigError)
+    raise error_type(result, operation)
 
 
 def _copy_in(ptr, values: Iterable[float], dofs: int) -> None:
