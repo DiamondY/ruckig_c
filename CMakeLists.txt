@@ -22,6 +22,7 @@ set(RUCKIG_C_INSTALL_CMAKEDIR
   "${CMAKE_INSTALL_LIBDIR}/cmake/ruckig_c"
   CACHE STRING "Install directory for ruckig_c CMake package files"
 )
+set(RUCKIG_C_ABI_PUBLIC_SYMBOLS_FILE "${CMAKE_CURRENT_SOURCE_DIR}/docs/abi/public-symbols.txt")
 
 set(RUCKIG_C_PC_PRIVATE_LIBS "")
 if(NOT WIN32)
@@ -100,6 +101,21 @@ if(BUILD_RUCKIG_C)
     set_target_properties(ruckig_c PROPERTIES
       C_VISIBILITY_PRESET hidden
     )
+    target_compile_options(ruckig_c PRIVATE -fvisibility=hidden)
+    if(NOT APPLE AND EXISTS "${RUCKIG_C_ABI_PUBLIC_SYMBOLS_FILE}")
+      file(STRINGS "${RUCKIG_C_ABI_PUBLIC_SYMBOLS_FILE}" ruckig_c_public_symbol_lines)
+      set(ruckig_c_version_script "{\n  global:\n")
+      foreach(symbol IN LISTS ruckig_c_public_symbol_lines)
+        string(STRIP "${symbol}" symbol)
+        if(symbol MATCHES "^ruckig_[A-Za-z0-9_]+$")
+          string(APPEND ruckig_c_version_script "    ${symbol};\n")
+        endif()
+      endforeach()
+      string(APPEND ruckig_c_version_script "  local:\n    *;\n};\n")
+      set(RUCKIG_C_PUBLIC_VERSION_SCRIPT "${CMAKE_CURRENT_BINARY_DIR}/ruckig_c_public_symbols.map")
+      file(WRITE "${RUCKIG_C_PUBLIC_VERSION_SCRIPT}" "${ruckig_c_version_script}")
+      target_link_options(ruckig_c PRIVATE "LINKER:--version-script,${RUCKIG_C_PUBLIC_VERSION_SCRIPT}")
+    endif()
   endif()
 
   target_include_directories(ruckig_c PUBLIC
@@ -387,7 +403,6 @@ if(BUILD_RUCKIG_C_PERFORMANCE_TESTS)
 endif()
 
 set(RUCKIG_C_ABI_OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/artifacts/abi/0.3.0-design")
-set(RUCKIG_C_ABI_PUBLIC_SYMBOLS_FILE "${CMAKE_CURRENT_SOURCE_DIR}/docs/abi/public-symbols.txt")
 set(RUCKIG_C_ABI_PUBLIC_GENERATED_FILE "${RUCKIG_C_ABI_OUTPUT_DIR}/public-symbols-from-header.txt")
 set(RUCKIG_C_ABI_PUBLIC_VERIFY_FILE "${RUCKIG_C_ABI_OUTPUT_DIR}/public-symbols-verify.txt")
 add_custom_command(

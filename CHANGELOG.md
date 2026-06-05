@@ -18,6 +18,8 @@ Changed:
   allowlist.
 - Non-Windows shared builds now hide implementation-internal symbols by
   default and export only declarations marked with `RUCKIG_C_API`.
+- Linux shared builds additionally link with a public-symbol version script
+  generated from `docs/abi/public-symbols.txt`.
 - Added a public exported-symbol comparison target for warning/evidence-only
   strict ABI gate trial artifacts, with the dedicated ABI CI jobs opting into
   strict public drift failure.

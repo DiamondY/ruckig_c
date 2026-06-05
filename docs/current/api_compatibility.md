@@ -171,9 +171,12 @@ in `include/ruckig_c/ruckig.h`.
 
 `0.3.0-design` begins by cleaning up that Linux export surface. Non-Windows
 shared builds use hidden symbol visibility so only `RUCKIG_C_API` declarations
-are exported. Removing the historical Linux implementation-internal exports is
-not a public API removal because those symbols were never declared in the
-public header or listed in `docs/abi/public-symbols.txt`.
+are exported. Linux builds additionally use a linker version script generated
+from `docs/abi/public-symbols.txt` so the dynamic symbol table is constrained
+to the approved public allowlist. Removing the historical Linux
+implementation-internal exports is not a public API removal because those
+symbols were never declared in the public header or listed in
+`docs/abi/public-symbols.txt`.
 
 The `v0.2.5` Linux baseline contains `127` normalized `ruckig_*` symbols. The
 approved public allowlist contains `66` symbols from the public header. The
