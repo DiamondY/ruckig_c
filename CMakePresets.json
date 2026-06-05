@@ -9,9 +9,46 @@
     {
       "name": "dev",
       "displayName": "Developer default",
-      "description": "Default local build under out/build/dev.",
+      "description": "Generic local build under out/build/dev. Requires the current shell to provide a C/C++ compiler.",
       "binaryDir": "${sourceDir}/out/build/${presetName}",
       "cacheVariables": {
+        "BUILD_RUCKIG_C": "ON",
+        "BUILD_RUCKIG_C_TESTS": "ON",
+        "BUILD_RUCKIG_C_EXAMPLES": "ON",
+        "BUILD_RUCKIG_C_ORACLE_TESTS": "OFF",
+        "BUILD_RUCKIG_C_PERFORMANCE_TESTS": "OFF"
+      }
+    },
+    {
+      "name": "windows-clang-ninja",
+      "displayName": "Windows LLVM clang + Ninja",
+      "description": "Windows local build under out/build/windows-clang-ninja using the verified LLVM clang toolchain and Visual Studio bundled Ninja.",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/out/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_MAKE_PROGRAM": "C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe",
+        "CMAKE_C_COMPILER": "D:/Program Files/LLVM/bin/clang.exe",
+        "CMAKE_CXX_COMPILER": "D:/Program Files/LLVM/bin/clang++.exe",
+        "BUILD_RUCKIG_C": "ON",
+        "BUILD_RUCKIG_C_TESTS": "ON",
+        "BUILD_RUCKIG_C_EXAMPLES": "ON",
+        "BUILD_RUCKIG_C_ORACLE_TESTS": "OFF",
+        "BUILD_RUCKIG_C_PERFORMANCE_TESTS": "OFF"
+      }
+    },
+    {
+      "name": "windows-clang-ninja-shared",
+      "displayName": "Windows LLVM clang + Ninja shared library",
+      "description": "Windows shared-library build under out/build/windows-clang-ninja-shared using the verified LLVM clang toolchain and Visual Studio bundled Ninja.",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/out/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_MAKE_PROGRAM": "C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe",
+        "CMAKE_C_COMPILER": "D:/Program Files/LLVM/bin/clang.exe",
+        "CMAKE_CXX_COMPILER": "D:/Program Files/LLVM/bin/clang++.exe",
+        "BUILD_SHARED_LIBS": "ON",
         "BUILD_RUCKIG_C": "ON",
         "BUILD_RUCKIG_C_TESTS": "ON",
         "BUILD_RUCKIG_C_EXAMPLES": "ON",
@@ -69,6 +106,16 @@
       "configurePreset": "dev"
     },
     {
+      "name": "windows-clang-ninja",
+      "configurePreset": "windows-clang-ninja",
+      "configuration": "Release"
+    },
+    {
+      "name": "windows-clang-ninja-shared",
+      "configurePreset": "windows-clang-ninja-shared",
+      "configuration": "Release"
+    },
+    {
       "name": "release",
       "configurePreset": "release",
       "configuration": "Release"
@@ -88,6 +135,22 @@
     {
       "name": "dev",
       "configurePreset": "dev",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "windows-clang-ninja",
+      "configurePreset": "windows-clang-ninja",
+      "configuration": "Release",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "windows-clang-ninja-shared",
+      "configurePreset": "windows-clang-ninja-shared",
+      "configuration": "Release",
       "output": {
         "outputOnFailure": true
       }

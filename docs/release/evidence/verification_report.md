@@ -1935,3 +1935,381 @@ Windows ABI comparison against docs/abi/v0.2.5: exported symbols match the basel
 docs/abi/v0.2.5/linux-symbols.txt: 127 symbols.
 docs/abi/v0.2.5/windows-symbols.txt: 66 symbols.
 ```
+
+## 2026-06-05 0.3.0-design Local Hardening Pass
+
+This pass verifies the next-stage local build entry, public ABI/export hygiene,
+consumer smoke status, and Python `cffi` prototype smoke. It does not change
+the public C API, does not add package-manager recipes, does not add
+waypoints/per-section/cloud entry points, and does not promote strict ABI
+comparison to a default CI failure gate.
+
+Environment:
+
+- OS: Windows.
+- Compiler: clang 21.1.8, target `x86_64-pc-windows-msvc`.
+- CMake: 4.1.0.
+- Ninja: Visual Studio bundled Ninja 1.11.0 at
+  `C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe`.
+- Python: 3.14.3 in `out/python-prototype-venv`.
+- `cffi`: 2.0.0.
+
+Configured presets:
+
+```powershell
+cmake --list-presets
+```
+
+Result:
+
+```text
+Available configure presets include:
+dev
+windows-clang-ninja
+windows-clang-ninja-shared
+release
+shared
+oracle
+```
+
+Windows default local build entry:
+
+```powershell
+cmake --preset windows-clang-ninja
+cmake --build --preset windows-clang-ninja
+ctest --preset windows-clang-ninja
+```
+
+Result:
+
+```text
+100% tests passed, 0 tests failed out of 15.
+```
+
+The default Windows preset run covers the C unit tests, allocation audit,
+C/C++ public header consumers, installed CMake consumer, Windows manual static
+consumer, and all C examples.
+
+Windows shared build and DLL/import-library consumer:
+
+```powershell
+cmake --preset windows-clang-ninja-shared
+cmake --build --preset windows-clang-ninja-shared
+ctest --preset windows-clang-ninja-shared
+```
+
+Result:
+
+```text
+100% tests passed, 0 tests failed out of 15.
+```
+
+The shared preset run covers the same routine tests plus the Windows
+DLL/import-library consumer smoke.
+
+Public symbol allowlist verification:
+
+```powershell
+cmake --build out\build\windows-clang-ninja-shared --target ruckig_c_verify_public_symbols
+```
+
+Result:
+
+```text
+Public symbol allowlist matches include/ruckig_c/ruckig.h.
+header_public_symbol_count: 66
+expected_public_symbol_count: 66
+missing_from_expected_count: 0
+extra_in_expected_count: 0
+```
+
+Public exported-symbol comparison:
+
+```powershell
+cmake --build out\build\windows-clang-ninja-shared --target ruckig_c_compare_public_exported_symbols
+```
+
+Result:
+
+```text
+Public exported symbols match the approved allowlist.
+strict_public_abi: OFF
+current_symbol_count: 66
+baseline_symbol_count: 66
+approved_public_symbol_count: 66
+current_public_symbol_count: 66
+baseline_public_symbol_count: 66
+missing_public_symbol_count: 0
+added_public_since_baseline_count: 0
+removed_public_since_baseline_count: 0
+unapproved_exported_symbol_count: 0
+```
+
+The generated artifacts are under
+`out/build/windows-clang-ninja-shared/artifacts/abi/0.3.0-design/`. The public
+comparison remains evidence/trial mode; strict local failure is still opt-in.
+`docs/abi/public-symbol-exceptions.txt` remains empty.
+
+Python `cffi` prototype smoke:
+
+```powershell
+$env:RUCKIG_C_SHARED_LIBRARY = (Resolve-Path out\build\windows-clang-ninja-shared\ruckig_c.dll).Path
+.\out\python-prototype-venv\Scripts\python.exe bindings\python_prototype\test_prototype.py
+```
+
+Result:
+
+```text
+Ran 4 tests in 0.004s
+OK
+```
+
+The prototype remains experimental, not installed, not published, and outside
+routine CI until shared-library discovery and packaging strategy are stable.
+
+Windows consumer matrix discovery before installing the local MinGW toolchain:
+
+```powershell
+Get-Command clang.exe,clang++.exe,clang-cl.exe,cl,gcc,mingw32-make,x86_64-w64-mingw32-gcc -ErrorAction SilentlyContinue
+```
+
+Result:
+
+```text
+Found:
+clang.exe
+clang++.exe
+clang-cl.exe
+
+Not found in the current shell:
+cl
+gcc
+mingw32-make
+x86_64-w64-mingw32-gcc
+```
+
+MSVC `cl` standalone static/DLL smokes therefore remain opt-in local gates and
+were not promoted to routine CI in this pass.
+
+MSVC `cl` opt-in standalone static consumer:
+
+```powershell
+cmd.exe /c "call ""C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"" >nul && cmake -S . -B out\build\msvc-cl-static-smoke-ninja -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl -DRUCKIG_C_ENABLE_MSVC_CL_CONSUMER_SMOKE=ON -DBUILD_RUCKIG_C_ORACLE_TESTS=OFF -DBUILD_RUCKIG_C_PERFORMANCE_TESTS=OFF"
+cmd.exe /c "call ""C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"" >nul && cmake --build out\build\msvc-cl-static-smoke-ninja --config Release"
+cmd.exe /c "call ""C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"" >nul && ctest --test-dir out\build\msvc-cl-static-smoke-ninja --build-config Release -R ruckig_c_msvc_cl_static_consumer --output-on-failure"
+```
+
+Result:
+
+```text
+100% tests passed, 0 tests failed out of 1.
+```
+
+MSVC `cl` opt-in standalone DLL/import-library consumer:
+
+```powershell
+cmd.exe /c "call ""C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"" >nul && cmake -S . -B out\build\msvc-cl-dll-smoke-ninja -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl -DBUILD_SHARED_LIBS=ON -DRUCKIG_C_ENABLE_MSVC_CL_CONSUMER_SMOKE=ON -DBUILD_RUCKIG_C_ORACLE_TESTS=OFF -DBUILD_RUCKIG_C_PERFORMANCE_TESTS=OFF"
+cmd.exe /c "call ""C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"" >nul && cmake --build out\build\msvc-cl-dll-smoke-ninja --config Release"
+cmd.exe /c "call ""C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"" >nul && ctest --test-dir out\build\msvc-cl-dll-smoke-ninja --build-config Release -R ruckig_c_msvc_cl_dll_consumer --output-on-failure"
+```
+
+Result:
+
+```text
+100% tests passed, 0 tests failed out of 1.
+```
+
+MSVC `cl` remains an opt-in local gate rather than routine CI because the
+routine Windows matrix already covers `clang-cl` static and shared consumers.
+
+MinGW local toolchain:
+
+```text
+gcc.exe (x86_64-posix-seh-rev0, Built by MinGW-Builds project) 15.2.0
+```
+
+MinGW static consumer:
+
+```powershell
+$env:PATH = "C:\ProgramData\mingw64\mingw64\bin;" + $env:PATH
+cmake -S . -B out\build\mingw-static-consumer -G Ninja -DCMAKE_MAKE_PROGRAM="C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe" -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER="C:/ProgramData/mingw64/mingw64/bin/gcc.exe" -DCMAKE_CXX_COMPILER="C:/ProgramData/mingw64/mingw64/bin/g++.exe" -DBUILD_RUCKIG_C_ORACLE_TESTS=OFF -DBUILD_RUCKIG_C_PERFORMANCE_TESTS=OFF
+cmake --build out\build\mingw-static-consumer
+ctest --test-dir out\build\mingw-static-consumer --output-on-failure -R ruckig_c_windows_manual_static_consumer
+```
+
+Result:
+
+```text
+100% tests passed, 0 tests failed out of 1.
+```
+
+MinGW DLL/import-library consumer:
+
+```powershell
+$env:PATH = "C:\ProgramData\mingw64\mingw64\bin;" + $env:PATH
+cmake -S . -B out\build\mingw-dll-consumer -G Ninja -DCMAKE_MAKE_PROGRAM="C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe" -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER="C:/ProgramData/mingw64/mingw64/bin/gcc.exe" -DCMAKE_CXX_COMPILER="C:/ProgramData/mingw64/mingw64/bin/g++.exe" -DBUILD_SHARED_LIBS=ON -DBUILD_RUCKIG_C_ORACLE_TESTS=OFF -DBUILD_RUCKIG_C_PERFORMANCE_TESTS=OFF
+cmake --build out\build\mingw-dll-consumer
+ctest --test-dir out\build\mingw-dll-consumer --output-on-failure -R ruckig_c_windows_dll_consumer
+```
+
+Result:
+
+```text
+100% tests passed, 0 tests failed out of 1.
+```
+
+This pass also adds a dedicated MSYS2 MinGW64 routine CI gate for the MinGW
+static and DLL/import-library consumer smokes.
+
+## 2026-06-05 0.3.0-design Final Checklist Audit
+
+This audit verifies the implemented next-stage checklist after adding MinGW
+consumer support and the Windows-specific local presets. It does not add public
+C API symbols and does not change `docs/abi/public-symbols.txt` or
+`docs/abi/public-symbol-exceptions.txt`.
+
+Local preset and routine Windows clang validation:
+
+```powershell
+cmake --list-presets
+cmake --preset windows-clang-ninja
+cmake --build --preset windows-clang-ninja
+ctest --preset windows-clang-ninja
+```
+
+Result:
+
+```text
+Available configure presets include windows-clang-ninja and
+windows-clang-ninja-shared.
+100% tests passed, 0 tests failed out of 15.
+```
+
+Shared build, DLL consumer, and ABI/export hygiene:
+
+```powershell
+cmake --preset windows-clang-ninja-shared
+cmake --build --preset windows-clang-ninja-shared
+ctest --preset windows-clang-ninja-shared
+cmake --build out\build\windows-clang-ninja-shared --target ruckig_c_verify_public_symbols
+cmake --build out\build\windows-clang-ninja-shared --target ruckig_c_compare_exported_symbols
+cmake --build out\build\windows-clang-ninja-shared --target ruckig_c_compare_public_exported_symbols
+```
+
+Result:
+
+```text
+Shared CTest: 100% tests passed, 0 tests failed out of 15.
+Public symbol allowlist verification: status clean, 66 header symbols, 66 expected symbols.
+Windows exported-symbol baseline comparison: 66 current symbols, 66 baseline symbols, 0 added, 0 removed.
+Public exported-symbol comparison: status clean, strict_public_abi OFF, 66 approved public symbols, 0 missing, 0 added, 0 removed, 0 unapproved exported symbols.
+```
+
+Python prototype smoke:
+
+```powershell
+$env:RUCKIG_C_SHARED_LIBRARY = (Resolve-Path out\build\windows-clang-ninja-shared\ruckig_c.dll).Path
+.\out\python-prototype-venv\Scripts\python.exe bindings\python_prototype\test_prototype.py
+```
+
+Result:
+
+```text
+Ran 4 tests in 0.007s
+OK
+```
+
+Windows clang-cl consumer smokes:
+
+```powershell
+cmake -S . -B out\build\clangcl-static-consumer -G Ninja -DCMAKE_MAKE_PROGRAM="C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe" -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER="D:/Program Files/LLVM/bin/clang-cl.exe" -DCMAKE_CXX_COMPILER="D:/Program Files/LLVM/bin/clang-cl.exe" -DBUILD_RUCKIG_C_ORACLE_TESTS=OFF -DBUILD_RUCKIG_C_PERFORMANCE_TESTS=OFF
+cmake --build out\build\clangcl-static-consumer
+ctest --test-dir out\build\clangcl-static-consumer --output-on-failure -R ruckig_c_windows_manual_static_consumer
+
+cmake -S . -B out\build\clangcl-dll-consumer -G Ninja -DCMAKE_MAKE_PROGRAM="C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe" -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER="D:/Program Files/LLVM/bin/clang-cl.exe" -DCMAKE_CXX_COMPILER="D:/Program Files/LLVM/bin/clang-cl.exe" -DBUILD_SHARED_LIBS=ON -DBUILD_RUCKIG_C_ORACLE_TESTS=OFF -DBUILD_RUCKIG_C_PERFORMANCE_TESTS=OFF
+cmake --build out\build\clangcl-dll-consumer
+ctest --test-dir out\build\clangcl-dll-consumer --output-on-failure -R ruckig_c_windows_dll_consumer
+```
+
+Result:
+
+```text
+clang-cl static consumer: 100% tests passed, 0 tests failed out of 1.
+clang-cl DLL/import-library consumer: 100% tests passed, 0 tests failed out of 1.
+```
+
+MSVC `cl` opt-in consumer smokes:
+
+```text
+MSVC cl static consumer: 100% tests passed, 0 tests failed out of 1.
+MSVC cl DLL/import-library consumer: 100% tests passed, 0 tests failed out of 1.
+```
+
+MSVC `cl` remains opt-in and local, not routine CI.
+
+MinGW consumer smokes:
+
+```text
+MinGW GCC: 15.2.0.
+MinGW static consumer: 100% tests passed, 0 tests failed out of 1.
+MinGW DLL/import-library consumer: 100% tests passed, 0 tests failed out of 1.
+MinGW static full CTest: 100% tests passed, 0 tests failed out of 15.
+MinGW DLL full CTest: 100% tests passed, 0 tests failed out of 15.
+```
+
+The Windows MinGW static and DLL consumer checks are also wired into a
+dedicated MSYS2 MinGW64 routine CI job.
+
+Scope-freeze audit:
+
+```text
+No public header diff.
+No docs/abi/public-symbols.txt diff.
+docs/abi/public-symbol-exceptions.txt remains empty.
+No package-manager recipe or new package-manager prototype was added.
+No waypoint, per-section constraint, or cloud public API entry point was added.
+Python prototype remains experimental, not installed, not published, and outside routine CI.
+Strict public ABI failure remains opt-in/warning-evidence mode.
+```
+
+Linux ELF public-only export hygiene:
+
+```powershell
+$env:ZIG_GLOBAL_CACHE_DIR = 'E:\Yww\DownLoad\source\ruckig_c\out\zig-global-cache'
+$env:ZIG_LOCAL_CACHE_DIR = 'E:\Yww\DownLoad\source\ruckig_c\out\zig-local-cache'
+cmake -S . -B out\build\linux-elf-symbol-probe -G Ninja -DCMAKE_MAKE_PROGRAM="C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe" -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER="C:/ProgramData/chocolatey/bin/zig.exe" -DCMAKE_C_COMPILER_ARG1=cc -DCMAKE_C_FLAGS="-target x86_64-linux-gnu" -DCMAKE_SYSTEM_NAME=Linux -DCMAKE_BUILD_WITH_INSTALL_RPATH=ON -DBUILD_SHARED_LIBS=ON -DBUILD_RUCKIG_C_TESTS=OFF -DBUILD_RUCKIG_C_EXAMPLES=OFF -DBUILD_RUCKIG_C_ORACLE_TESTS=OFF -DBUILD_RUCKIG_C_PERFORMANCE_TESTS=OFF
+cmake --build out\build\linux-elf-symbol-probe --target ruckig_c_verify_public_symbols ruckig_c_exported_symbols ruckig_c_compare_public_exported_symbols
+```
+
+Result:
+
+```text
+Linux ELF shared artifact: out/build/linux-elf-symbol-probe/libruckig_c.so.
+Export inspector: llvm-nm -D --defined-only through the CMake exported-symbol target.
+Public symbol allowlist verification: status clean, 66 header symbols, 66 expected symbols.
+Public exported-symbol comparison: status clean, strict_public_abi OFF, 66 approved public symbols, 0 missing, 0 added, 0 removed, 0 unapproved exported symbols.
+Current Linux ELF exported-symbol count: 66.
+Historical v0.2.5 Linux baseline count: 127, including 61 implementation-internal symbols that are now hidden by the public-symbol version script.
+```
+
+This is export-hygiene evidence for a Linux ELF shared library generated from
+the current worktree on a Windows host with Zig `cc -target x86_64-linux-gnu`.
+It is not a Linux host CTest run. The dedicated Linux exported-symbol GitHub
+Actions job remains the routine native Linux evidence path, but the local
+GitHub CLI token was invalid during this audit and no WSL distribution was
+available for a native local Linux run.
+
+Local cleanup control:
+
+```powershell
+.\scripts\clean-local.ps1
+.\scripts\clean-local.ps1 -Apply
+```
+
+Result:
+
+```text
+Dry run preview listed bindings/python_prototype/__pycache__/, build_vcpkg_tool/, and out/.
+Apply removed bindings/python_prototype/__pycache__/, build_vcpkg_tool/, and out/.
+No ignored local artifacts remained in git status after cleanup.
+```

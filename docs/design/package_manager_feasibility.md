@@ -112,6 +112,14 @@ with `add_subdirectory` and link `ruckig_c::ruckig_c`. Preconditions:
    dependency checks, package metadata shape, and CI maintenance budget before
    adding any supported recipe.
 
+A future package-manager project must not start until all of these
+preconditions are true:
+
+- Strict/public ABI comparison has stabilized through repeated clean evidence.
+- Windows, Linux, and macOS static/shared consumer states are explicit.
+- MinGW and MSVC `cl` static/DLL consumer states are explicit.
+- The project accepts the CI and release-maintenance budget for any new recipe.
+
 No package-manager recipe should be added as part of `0.2.3` release closeout.
 No package-manager recipe should be added as part of `0.2.5` maintenance work
 either. No package-manager recipe or new prototype is part of active

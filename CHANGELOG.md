@@ -40,6 +40,21 @@ Changed:
 - Added CMake presets that keep routine local builds under `out/build/`, plus
   a dry-run-first local cleanup script for ignored build trees, caches, and
   temporary files.
+- Added a Windows-specific `windows-clang-ninja` preset as the default local
+  README build path, plus a matching `windows-clang-ninja-shared` preset for
+  ABI/export and Python prototype smoke validation.
+- Recorded a `0.3.0-design` local hardening pass covering the Windows preset,
+  shared DLL/import-library consumer, public symbol allowlist verification,
+  public exported-symbol comparison, Python `cffi` prototype smoke, and current
+  MinGW/MSVC `cl` toolchain availability.
+- Clarified that MSVC `cl` standalone consumer smokes remain opt-in local gates
+  rather than routine CI.
+- Added MinGW static and DLL/import-library consumer smoke support, verified
+  both locally with GCC 15.2.0, and added a dedicated MSYS2 MinGW64 routine CI
+  consumer gate.
+- Completed the Python prototype design decisions for low-level ABI shape,
+  future high-level wrappers, result/error handling, explicit shared-library
+  discovery, copy-in/copy-out arrays, and deferred wheel/package strategy.
 
 Still deferred:
 

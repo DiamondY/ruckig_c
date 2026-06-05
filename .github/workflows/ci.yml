@@ -230,6 +230,55 @@ jobs:
           name: linux-performance
           path: linux-performance.txt
 
+  windows-mingw-consumers:
+    name: ${{ matrix.name }}
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows MinGW static consumer
+            build_dir: build-mingw-static
+            shared: "OFF"
+            consumer_regex: ruckig_c_windows_manual_static_consumer
+          - name: Windows MinGW DLL consumer
+            build_dir: build-mingw-dll
+            shared: "ON"
+            consumer_regex: ruckig_c_windows_dll_consumer
+
+    defaults:
+      run:
+        shell: msys2 {0}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up MSYS2 MinGW64
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+          install: >-
+            mingw-w64-x86_64-cmake
+            mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-ninja
+
+      - name: Configure
+        run: >
+          cmake -S . -B ${{ matrix.build_dir }} -G Ninja
+          -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_C_COMPILER=gcc
+          -DCMAKE_CXX_COMPILER=g++
+          -DBUILD_SHARED_LIBS=${{ matrix.shared }}
+          -DBUILD_RUCKIG_C_ORACLE_TESTS=OFF
+          -DBUILD_RUCKIG_C_PERFORMANCE_TESTS=OFF
+
+      - name: Build
+        run: cmake --build ${{ matrix.build_dir }}
+
+      - name: Run MinGW consumer smoke
+        run: ctest --test-dir ${{ matrix.build_dir }} --output-on-failure -R ${{ matrix.consumer_regex }}
+
   abi-exported-symbols:
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}

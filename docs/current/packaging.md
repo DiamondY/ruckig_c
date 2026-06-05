@@ -1,6 +1,6 @@
 # Packaging and Consumer Notes
 
-This document records supported consumer paths for `ruckig_c 0.2.x`. It is a
+This document records supported consumer paths for `ruckig_c`. It is a
 maintenance checklist, not a commitment to package-manager recipes.
 
 ## Installed CMake Package
@@ -47,10 +47,10 @@ pkg-config path on Unix systems that provide `pkg-config`.
 | clang DLL | verified |
 | clang-cl static | verified in CI |
 | clang-cl DLL | verified in CI |
-| MSVC cl static | optional CTest gate, locally verified; not yet CI-verified |
-| MSVC cl DLL | optional CTest gate, locally verified; not yet CI-verified |
-| MinGW static | not yet verified |
-| MinGW DLL | not yet verified |
+| MSVC cl static | optional CTest gate, locally verified; not routine CI |
+| MSVC cl DLL | optional CTest gate, locally verified; not routine CI |
+| MinGW static | locally verified; routine CI gate added |
+| MinGW DLL | locally verified; routine CI gate added |
 | CMake installed package | verified |
 | pkg-config | verified on Unix CI |
 | shared install-tree | verified on Unix CI |
@@ -98,9 +98,11 @@ Current Windows toolchain status:
 - `clang-cl`: verified for C-only CMake target consumption and standalone
   manual static-link smoke in CI.
 - MSVC `cl`: locally verified with the opt-in standalone static-link CTest;
-  not yet part of routine CI. The repeatable gate is available when configured
+  not part of routine CI. The repeatable gate is available when configured
   with `-DRUCKIG_C_ENABLE_MSVC_CL_CONSUMER_SMOKE=ON`.
-- MinGW: not yet verified.
+- MinGW: locally verified with GCC 15.2.0 through the Windows manual static
+  consumer CTest. A dedicated MSYS2 MinGW64 routine CI gate now covers this
+  path.
 
 MSVC `cl` standalone static smoke:
 
@@ -162,9 +164,11 @@ Current Windows DLL consumer status:
 - `clang-cl`: verified through a shared C-only CI job that builds the DLL,
   links the import library, updates the process `PATH`, and runs the consumer.
 - MSVC `cl`: locally verified with the opt-in standalone DLL/import-library
-  CTest; not yet part of routine CI. The repeatable gate is available when
+  CTest; not part of routine CI. The repeatable gate is available when
   configured with `-DRUCKIG_C_ENABLE_MSVC_CL_CONSUMER_SMOKE=ON`.
-- MinGW: not yet verified.
+- MinGW: locally verified with GCC 15.2.0 through the Windows
+  DLL/import-library consumer CTest. A dedicated MSYS2 MinGW64 routine CI gate
+  now covers this path.
 
 MSVC `cl` standalone DLL smoke:
 
@@ -185,9 +189,32 @@ cmake --build build_msvc_dll_smoke --config Release
 ctest --test-dir build_msvc_dll_smoke -C Release -R ruckig_c_msvc_cl_dll_consumer --output-on-failure
 ```
 
-MinGW feasibility remains separate from MSVC-style consumers. It should be
-validated as two independent smokes, one static and one DLL/import-library,
-before documentation or CI implies support.
+MinGW feasibility remains separate from MSVC-style consumers. The current
+repeatable checks are:
+
+```powershell
+$env:PATH = "C:\ProgramData\mingw64\mingw64\bin;" + $env:PATH
+cmake -S . -B out\build\mingw-static-consumer -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER="C:/ProgramData/mingw64/mingw64/bin/gcc.exe" -DCMAKE_CXX_COMPILER="C:/ProgramData/mingw64/mingw64/bin/g++.exe"
+cmake --build out\build\mingw-static-consumer
+ctest --test-dir out\build\mingw-static-consumer --output-on-failure -R ruckig_c_windows_manual_static_consumer
+```
+
+```powershell
+$env:PATH = "C:\ProgramData\mingw64\mingw64\bin;" + $env:PATH
+cmake -S . -B out\build\mingw-dll-consumer -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER="C:/ProgramData/mingw64/mingw64/bin/gcc.exe" -DCMAKE_CXX_COMPILER="C:/ProgramData/mingw64/mingw64/bin/g++.exe" -DBUILD_SHARED_LIBS=ON
+cmake --build out\build\mingw-dll-consumer
+ctest --test-dir out\build\mingw-dll-consumer --output-on-failure -R ruckig_c_windows_dll_consumer
+```
+
+The routine CI gate uses MSYS2 MinGW64 and runs the same CTest consumer names
+for static and DLL/import-library builds.
+
+MSVC `cl` standalone static and DLL/import-library smokes remain opt-in local
+gates. They are not routine CI jobs because the current routine Windows matrix
+already covers `clang-cl` static and shared consumers, and `cl` availability is
+environment-dependent. Reconsider routine CI only after repeated opt-in `cl`
+evidence shows stable Visual Studio C++ tool availability and acceptable
+maintenance cost.
 
 ## Shared Install-Tree Verification
 

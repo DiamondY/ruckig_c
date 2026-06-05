@@ -138,7 +138,7 @@ if(BUILD_RUCKIG_C)
     target_compile_definitions(ruckig_c PRIVATE _USE_MATH_DEFINES)
   else()
     target_compile_options(ruckig_c PRIVATE -Wall -Wextra -Wpedantic)
-    if(NOT WIN32)
+    if(NOT WIN32 OR MINGW)
       target_link_libraries(ruckig_c PRIVATE m)
     endif()
   endif()
@@ -170,7 +170,7 @@ if(BUILD_RUCKIG_C_TESTS)
     target_compile_options(ruckig_c_tests PRIVATE /W4)
   else()
     target_compile_options(ruckig_c_tests PRIVATE -Wall -Wextra -Wpedantic)
-    if(NOT WIN32)
+    if(NOT WIN32 OR MINGW)
       target_link_libraries(ruckig_c_tests PRIVATE m)
     endif()
   endif()
@@ -222,7 +222,7 @@ if(BUILD_RUCKIG_C_TESTS)
     endif()
   endif()
 
-  if(WIN32 AND CMAKE_C_COMPILER_ID MATCHES "Clang")
+  if(WIN32 AND CMAKE_C_COMPILER_ID MATCHES "Clang|GNU")
     if(BUILD_SHARED_LIBS)
       configure_file(
         test/cmake/test_windows_dll_consumer.cmake.in
@@ -428,10 +428,13 @@ add_custom_target(ruckig_c_verify_public_symbols
 
 if(BUILD_RUCKIG_C AND BUILD_SHARED_LIBS)
   set(RUCKIG_C_ABI_PLATFORM "linux")
+  set(RUCKIG_C_ABI_EXPORT_FORMAT "elf")
   if(WIN32)
     set(RUCKIG_C_ABI_PLATFORM "windows")
+    set(RUCKIG_C_ABI_EXPORT_FORMAT "coff")
   elseif(APPLE)
     set(RUCKIG_C_ABI_PLATFORM "macos")
+    set(RUCKIG_C_ABI_EXPORT_FORMAT "macho")
   endif()
   set(RUCKIG_C_ABI_EXPORTS_FILE "${RUCKIG_C_ABI_OUTPUT_DIR}/${RUCKIG_C_ABI_PLATFORM}-exports.txt")
   set(RUCKIG_C_ABI_DIFF_FILE "${RUCKIG_C_ABI_OUTPUT_DIR}/${RUCKIG_C_ABI_PLATFORM}-export-diff.txt")
@@ -442,6 +445,7 @@ if(BUILD_RUCKIG_C AND BUILD_SHARED_LIBS)
     COMMAND ${CMAKE_COMMAND}
       "-DRUCKIG_C_SHARED_LIBRARY=$<TARGET_FILE:ruckig_c>"
       "-DRUCKIG_C_OUTPUT_FILE=${RUCKIG_C_ABI_EXPORTS_FILE}"
+      "-DRUCKIG_C_EXPORT_FORMAT=${RUCKIG_C_ABI_EXPORT_FORMAT}"
       -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/generate_exported_symbols.cmake
     DEPENDS ruckig_c
     VERBATIM

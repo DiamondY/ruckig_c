@@ -43,6 +43,33 @@ released binding package and is not installed by CMake. It must load an
 already-built shared `ruckig_c` library and stay close to the C ABI while
 ownership, array, lifecycle, and error behavior are evaluated.
 
+## Current Prototype Decisions
+
+The `0.3.0-design` prototype remains experimental. It is not published, not
+installed by CMake, not part of routine CI, and must not change the public C
+ABI.
+
+- Low-level API shape: keep the prototype close to the C ABI with explicit
+  `Ruckig`, `Input`, `Output`, and `Trajectory` wrappers around one opaque C
+  handle each.
+- Higher-level API shape: defer Pythonic convenience wrappers until the
+  low-level ownership, lifecycle, array, error, and shared-library discovery
+  rules have been proven.
+- Result handling: treat `RUCKIG_WORKING` and `RUCKIG_FINISHED` as normal
+  control flow. Map error result codes to typed Python exceptions while
+  preserving the original integer result code for debugging and compatibility
+  tests.
+- Shared-library discovery: continue to require
+  `RUCKIG_C_SHARED_LIBRARY` for routine prototype smoke tests. Opportunistic
+  default library-name loading may stay in the prototype, but documented
+  verification must use an explicit shared-library path.
+- Array model: keep list/tuple copy-in/copy-out as the default. Buffer
+  protocol, memoryview, and NumPy fast paths are deferred until lifetime rules
+  and package strategy are stable.
+- Package strategy: no wheel, source distribution, vendored library, or
+  installer strategy is implemented in `0.3.0-design`. Wheel/package design
+  remains a separate decision after shared-library loading is stable.
+
 ### CPython Extension
 
 A CPython extension can provide the tightest user experience and fastest array

@@ -44,6 +44,23 @@ queue is tracked in
 
 ## Build
 
+On Windows, the default local path uses the checked-in LLVM clang/Ninja preset:
+
+```powershell
+cmake --preset windows-clang-ninja
+cmake --build --preset windows-clang-ninja
+ctest --preset windows-clang-ninja
+```
+
+The Windows preset points at the currently verified local toolchain:
+
+- C compiler: `D:/Program Files/LLVM/bin/clang.exe`
+- C++ compiler: `D:/Program Files/LLVM/bin/clang++.exe`
+- Ninja: `C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe`
+
+On other platforms, or on Windows shells where the compiler is already
+discoverable through the environment, the generic developer preset remains:
+
 ```sh
 cmake --preset dev
 cmake --build --preset dev
@@ -56,7 +73,15 @@ repository root.
 
 Useful presets:
 
+- `windows-clang-ninja` is the verified Windows default. It builds the C
+  library, C tests, and examples under `out/build/windows-clang-ninja` using
+  LLVM clang and the Visual Studio bundled Ninja.
+- `windows-clang-ninja-shared` builds the same Windows LLVM/Ninja target set as
+  a shared library under `out/build/windows-clang-ninja-shared`; it is intended
+  for ABI/export hygiene checks and Python prototype smoke tests.
 - `dev` builds the C library, C tests, and examples under `out/build/dev`.
+  It is intentionally generic and requires the current shell or CMake generator
+  selection to find a working C/C++ compiler.
 - `release` builds the same routine targets under `out/build/release`.
 - `shared` builds a shared library under `out/build/shared`.
 - `oracle` enables the frozen C++ differential oracle tests under
@@ -87,7 +112,12 @@ Useful CMake options:
 - `RUCKIG_C_ENABLE_CALCULATION_DURATION=ON` records `ruckig_update` calculation duration in microseconds in `ruckig_output_get_calculation_duration`.
 - `BUILD_SHARED_LIBS=ON` builds a shared library instead of a static library.
 
-On Windows, the current verified CMake path uses LLVM clang/clang++ with the Visual Studio bundled Ninja. The oracle harness must compile `.c` sources with a C compiler and the original Ruckig sources with a C++ compiler. Current verification includes static-library and DLL/import-library builds; see `docs/release/evidence/verification_report.md`.
+On Windows, the current verified CMake path uses LLVM clang/clang++ with the
+Visual Studio bundled Ninja. The `windows-clang-ninja` preset is the default
+local entry point for that path. The oracle harness must compile `.c` sources
+with a C compiler and the original Ruckig sources with a C++ compiler. Current
+verification includes static-library and DLL/import-library builds; see
+`docs/release/evidence/verification_report.md`.
 
 ## Install and Consume
 

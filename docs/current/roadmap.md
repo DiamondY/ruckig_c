@@ -117,10 +117,19 @@ API, solver dispatch, or the frozen oracle baseline during design evaluation.
   is implemented.
 - First `0.3.0-design` priorities:
   1. Maintain ABI/export hygiene and Linux internal symbol cleanup evidence.
+     The current build exposes public-symbol allowlist verification and
+     public exported-symbol comparison targets for shared builds.
   2. Strict public ABI diff gate trial, opt-in locally and warning/evidence-only
-     in the dedicated exported-symbol CI jobs.
+     in the dedicated exported-symbol CI jobs. Do not promote it to routine
+     strict failure until repeated artifact review is clean.
   3. Windows consumer matrix hardening for MSVC `cl` and MinGW feasibility.
-  4. Python `cffi` ABI-mode prototype design and prototype plan.
+     `clang` and `clang-cl` static/DLL paths remain the routine verified
+     Windows paths. MSVC `cl` standalone static/DLL gates remain opt-in and
+     local, not routine CI. MinGW static and DLL/import-library consumers now
+     have local GCC evidence and a dedicated MSYS2 MinGW64 routine CI gate.
+  4. Python `cffi` ABI-mode prototype design and prototype smoke, still
+     experimental and outside routine CI until shared-library discovery is
+     stable.
   5. Upstream baseline upgrade evaluation as a separate project.
   6. Rust binding feasibility after Python feasibility results.
 
@@ -129,3 +138,7 @@ Long-term optional, outside the active roadmap:
 - Package-manager recipes for vcpkg, Conan, Homebrew, FetchContent, and
   vendored subdirectory use.
 - New package-manager prototype work beyond the existing experimental notes.
+- Waypoints, per-section constraints, and cloud calculation remain separate
+  design projects. Do not add public setters or public ABI symbols for those
+  features in the current hardening queue; `RUCKIG_ERROR_UNSUPPORTED` remains a
+  future-compatible error code only.

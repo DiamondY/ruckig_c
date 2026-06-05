@@ -30,6 +30,22 @@ if("@CMAKE_C_COMPILER_FRONTEND_VARIANT@" STREQUAL "MSVC")
   if(NOT build_result EQUAL 0)
     message(FATAL_ERROR "Windows clang-cl manual static consumer build failed")
   endif()
+elseif("@CMAKE_C_COMPILER_ID@" STREQUAL "GNU")
+  execute_process(
+    COMMAND
+      "@CMAKE_C_COMPILER@"
+      -std=c99
+      -DRUCKIG_C_STATIC_DEFINE
+      -I "@CMAKE_CURRENT_SOURCE_DIR@/include"
+      "@CMAKE_CURRENT_SOURCE_DIR@/examples/c/00_minimal_offline.c"
+      "${RUCKIG_C_STATIC_LIBRARY}"
+      -lm
+      -o "${exe}"
+    RESULT_VARIABLE build_result
+  )
+  if(NOT build_result EQUAL 0)
+    message(FATAL_ERROR "Windows MinGW manual static consumer build failed")
+  endif()
 else()
   execute_process(
     COMMAND
