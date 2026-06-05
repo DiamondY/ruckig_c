@@ -222,8 +222,12 @@ build-shared/artifacts/abi/0.3.0-design/linux-public-export-diff.txt
 ```
 
 The report includes machine-readable summary fields and human-readable symbol
-sections. By default it is warning/evidence-only. Setting
-`RUCKIG_C_STRICT_PUBLIC_ABI=ON` makes public ABI drift fail the target.
+sections. Public symbol additions fail strict mode unless the symbol has an
+explicit `allow-add ruckig_symbol_name` entry in
+`docs/abi/public-symbol-exceptions.txt`; that file is empty by default and is
+only for separately approved public API additions. By default the target is
+warning/evidence-only. Setting `RUCKIG_C_STRICT_PUBLIC_ABI=ON` makes public ABI
+drift fail the target.
 The dedicated Linux and Windows exported-symbol GitHub Actions jobs currently
 run the public-only comparison in warning/evidence mode while uploading the
 same exported-symbol artifacts and diff reports for review. Ordinary local
@@ -252,7 +256,9 @@ ABI exception policy:
   signature changes, enum numeric-value changes, result-code numeric-value
   changes, and unreviewed exported-symbol removal.
 - New public API in `0.2.x` requires a separate design and version decision,
-  plus `CHANGELOG.md` and API compatibility documentation updates.
+  plus `CHANGELOG.md`, API compatibility documentation updates, public
+  allowlist updates, and an explicit entry in
+  `docs/abi/public-symbol-exceptions.txt`.
 - Solver behavior changes require an oracle-proven bug fix and a retained
   regression case.
 

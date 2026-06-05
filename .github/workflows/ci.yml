@@ -288,6 +288,7 @@ jobs:
           "-DRUCKIG_C_CURRENT_EXPORTS=build-shared/artifacts/abi/0.3.0-design/${{ matrix.abi_platform }}-exports.txt"
           "-DRUCKIG_C_BASELINE_SYMBOLS=docs/abi/v0.2.5/${{ matrix.abi_platform }}-symbols.txt"
           "-DRUCKIG_C_PUBLIC_SYMBOLS=docs/abi/public-symbols.txt"
+          "-DRUCKIG_C_PUBLIC_ABI_EXCEPTIONS=docs/abi/public-symbol-exceptions.txt"
           "-DRUCKIG_C_PUBLIC_DIFF_OUTPUT=build-shared/artifacts/abi/0.3.0-design/${{ matrix.abi_platform }}-public-export-diff.txt"
           -DRUCKIG_C_STRICT_PUBLIC_ABI=ON
           -P cmake/compare_public_exported_symbols.cmake

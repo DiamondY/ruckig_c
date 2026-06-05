@@ -7,8 +7,8 @@ Changed:
 - `main` now tracks the `0.3.0-design` line after publishing `v0.2.5` as the
   final planned `0.2.x` stabilization release.
 - ABI comparison baselines now roll forward to `docs/abi/v0.2.5/`; strict
-  public ABI diff failure remains opt-in for local builds and is enabled in
-  the dedicated Linux/Windows exported-symbol CI jobs.
+  public ABI diff failure remains opt-in for local builds, while the dedicated
+  Linux/Windows exported-symbol CI jobs upload warning/evidence artifacts.
 - `0.3.0-design` priority now starts with ABI/export hygiene before binding or
   package-manager prototypes.
 - Added `docs/abi/public-symbols.txt` as the approved public C ABI symbol
@@ -23,6 +23,8 @@ Changed:
 - Added a public exported-symbol comparison target for warning/evidence-only
   strict ABI gate trial artifacts, with the dedicated ABI CI jobs currently
   uploading public diff evidence without yet failing the workflow on drift.
+- Added `docs/abi/public-symbol-exceptions.txt` as the explicit approval file
+  for intentional future public symbol additions; it is empty by default.
 - Added a fixed oracle case for a 50s exact-target first-time boundary while
   keeping larger-duration variants as a documented tolerance investigation.
 - Added and smoke-tested a Python `cffi` ABI-mode prototype workspace against a

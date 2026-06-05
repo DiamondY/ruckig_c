@@ -1,0 +1,8 @@
+# Public C ABI exception approvals.
+#
+# Syntax:
+# allow-add ruckig_symbol_name
+#
+# Keep this file empty unless a dedicated public API design, version decision,
+# CHANGELOG entry, and API compatibility update explicitly approve the new
+# public symbol.

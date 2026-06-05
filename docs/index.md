@@ -54,6 +54,8 @@ Historical rewrite plans and release evidence are retained for traceability.
 
 - `abi/public-symbols.txt` - approved public C ABI symbol allowlist generated
   from the public header.
+- `abi/public-symbol-exceptions.txt` - empty-by-default approval file for
+  intentional future public symbol additions.
 - `abi/exceptions.md` - public ABI exception policy.
 - `abi/v0.2.2/` - exported-symbol baselines used by the `0.2.3` ABI
   comparison helper.

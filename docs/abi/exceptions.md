@@ -35,7 +35,13 @@ Any public API addition requires:
 - `CHANGELOG.md` coverage.
 - `docs/current/api_compatibility.md` coverage.
 - An update to `docs/abi/public-symbols.txt`.
+- An explicit `allow-add ruckig_symbol_name` entry in
+  `docs/abi/public-symbol-exceptions.txt` before strict public ABI comparison
+  can pass.
 - Oracle-backed tests for any behavior change.
+
+`docs/abi/public-symbol-exceptions.txt` is empty by default. Do not use it for
+symbol removals or implementation-internal exports.
 
 ## Historical Linux Internal Exports
 
