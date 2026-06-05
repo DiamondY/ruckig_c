@@ -2543,6 +2543,13 @@ Commit: 1353ee665d5d1a9b0bd5c2eafd078b8ded214450
 Subject: Prepare 0.3.0 hardening release
 ```
 
+Release evidence commit:
+
+```text
+Commit: 221e3ab09819cd3f0c39e1033386e526ff1e1a8e
+Subject: Record 0.3.0 release preparation evidence
+```
+
 Scope changes:
 
 ```text
@@ -2656,15 +2663,16 @@ Dry run preview listed bindings/python_prototype/__pycache__/ and out/.
 Apply removed bindings/python_prototype/__pycache__/ and out/.
 ```
 
-Remote GitHub Actions push CI:
+Remote GitHub Actions push CI for the release evidence commit:
 
 ```text
-Run id: 27023713278
-Run URL: https://github.com/DiamondY/ruckig_c/actions/runs/27023713278
-Commit: 1353ee665d5d1a9b0bd5c2eafd078b8ded214450
+Run id: 27024338905
+Run URL: https://github.com/DiamondY/ruckig_c/actions/runs/27024338905
+Commit: 221e3ab09819cd3f0c39e1033386e526ff1e1a8e
 Event: push
 Conclusion: success
-Started: 2026-06-05T15:23:27Z
+Started: 2026-06-05T15:35:38Z
+Completed: 2026-06-05T15:37:04Z
 ```
 
 Successful push CI jobs:
@@ -2689,35 +2697,97 @@ macOS exported symbols
 The `Manual release random oracle` job was skipped as expected for a
 push-triggered workflow.
 
-Uploaded artifact metadata available from the public GitHub Actions page and
-artifact API:
+Manual release-random workflow dispatch:
 
 ```text
-linux-performance: artifact id 7440260459, size 526 bytes,
-digest sha256:a0ce224771935197c9d02317cb385a81d9accf631735793947d5228883649993.
-
-Linux exported symbols: artifact id 7440256570, size 3372 bytes,
-digest sha256:3366cbf00d71641d1177ce71fb964cf39ed92da06f2c0898e63ae66471f9da86.
-
-Windows exported symbols: artifact id 7440259690, size 2969 bytes,
-digest sha256:64cdc30e82e74ef18536b7e2a9e9f9831042bd5e7f2789e03538c50ea2a2dea8.
-
-macOS exported symbols: artifact id 7440252482, size 1838 bytes,
-digest sha256:28e0b8dad01133c2c36a2716c0a6f79f9c0f0d43eb9fbcb07d7b66add0d6bdd1.
+Run id: 27028374125
+Run URL: https://github.com/DiamondY/ruckig_c/actions/runs/27028374125
+Commit: 221e3ab09819cd3f0c39e1033386e526ff1e1a8e
+Event: workflow_dispatch
+Conclusion: success
+Started: 2026-06-05T16:56:48Z
+Completed: 2026-06-05T16:58:37Z
+Manual release random oracle job conclusion: success
 ```
 
-Blocked release evidence:
+Successful workflow-dispatch jobs:
 
 ```text
-gh auth status reports that the default DiamondY token is invalid.
-gh workflow run ci.yml --ref main -f release_random=true fails with HTTP 401.
-gh run download 27023713278 fails with HTTP 401 when downloading artifacts.
-gh run view --job <job-id> --log and the GitHub job logs API fail with HTTP 403.
-
-Therefore the following 0.3.0 release gates remain incomplete:
-- Manual release random workflow run.
-- Downloaded artifact inspection for Linux performance.
-- Downloaded artifact inspection for Linux exported symbols.
-- Downloaded artifact inspection for Windows exported symbols.
-- Downloaded artifact inspection for macOS exported-symbol bootstrap.
+Windows clang-cl C-only
+Windows clang-cl shared C-only
+Windows clang oracle
+Linux GCC C-only
+Linux Clang oracle
+macOS Clang C-only
+Linux Clang ASan UBSan
+Linux Valgrind
+Linux Clang performance
+Windows MinGW static consumer
+Windows MinGW DLL consumer
+Linux exported symbols
+Windows exported symbols
+macOS exported symbols
+Manual release random oracle
 ```
+
+Uploaded artifact metadata for push CI run `27024338905`:
+
+```text
+Linux exported symbols: artifact id 7440525476, size 3372 bytes,
+digest sha256:14bc4f06aae944b32743e43132272d8357518e306b94af6e33f889680ba7a199.
+
+Windows exported symbols: artifact id 7440536055, size 2969 bytes,
+digest sha256:217d578ba6ba4d448068efab298deaf00439d26396ee8df455b5ab946ed4a317.
+
+macOS exported symbols: artifact id 7440521562, size 1838 bytes,
+digest sha256:2937844b6486bc5cf51edcd6c7255238c306884333877f36b56475244830c50e.
+
+linux-performance: artifact id 7440529500, size 526 bytes,
+digest sha256:0960a68c248a5967fb3431ece88c63d42d504136b4be086283458ff74d2be30b.
+```
+
+Downloaded artifact inspection:
+
+```text
+The artifacts were downloaded under E:\Yww\DownLoad and inspected from
+out\gh-artifacts\27024338905 before local cleanup.
+
+Linux public symbol allowlist verification: status clean, 66 header public
+symbols, 66 expected public symbols, 0 missing, 0 extra.
+
+Linux public exported-symbol comparison: status clean, strict_public_abi ON,
+66 current symbols, 127 historical baseline symbols, 66 approved public
+symbols, 0 missing public symbols, 0 added public symbols, 0 removed public
+symbols, 0 unapproved exported symbols, 61 historical baseline internal
+symbols intentionally hidden from the current public-only shared library.
+
+Windows public symbol allowlist verification: status clean, 66 header public
+symbols, 66 expected public symbols, 0 missing, 0 extra.
+
+Windows public exported-symbol comparison: status clean, strict_public_abi ON,
+66 current symbols, 66 historical baseline symbols, 66 approved public
+symbols, 0 missing public symbols, 0 added public symbols, 0 removed public
+symbols, 0 unapproved exported symbols.
+
+macOS public symbol allowlist verification: status clean, 66 header public
+symbols, 66 expected public symbols, 0 missing, 0 extra.
+
+macOS Mach-O exported-symbol snapshot contains 66 symbols. No v0.2.5 macOS
+historical baseline exists, so 0.3.0 records this as bootstrap evidence rather
+than a historical exported-symbol diff.
+
+Linux performance: samples 10000, seed 1, clang 18.1.3, Linux,
+c_average_ns 714.979, oracle_average_ns 562.446,
+average_ratio_c_over_oracle 1.2712, release threshold 1.5.
+```
+
+The Linux/Windows public exported-symbol comparison artifacts were generated
+with `strict_public_abi: ON` so drift evidence is strict and reviewable. The
+project policy for `0.3.0` remains trial/evidence mode, not a routine required
+CI hard gate for all future changes.
+
+GitHub CLI authentication remained invalid during this pass, but the manual
+workflow was triggered through the GitHub Actions web UI and the run, job, and
+artifact metadata were verified through public GitHub API responses. The
+downloaded artifact contents were inspected locally after the user placed the
+archives under `E:\Yww\DownLoad`.
