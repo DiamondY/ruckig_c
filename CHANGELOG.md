@@ -25,8 +25,9 @@ Changed:
   uploading public diff evidence without yet failing the workflow on drift.
 - Added `docs/abi/public-symbol-exceptions.txt` as the explicit approval file
   for intentional future public symbol additions; it is empty by default.
-- Added a fixed oracle case for a 50s exact-target first-time boundary while
-  keeping larger-duration variants as a documented tolerance investigation.
+- Added fixed oracle cases for 50s and 100s exact-target first-time boundaries;
+  the 100s case is retained with a documented case-specific first-time
+  tolerance exception.
 - Added and smoke-tested a Python `cffi` ABI-mode prototype workspace against a
   local shared `ruckig_c` build.
 - Added an experimental vcpkg overlay prototype and verified local

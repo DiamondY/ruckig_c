@@ -59,11 +59,12 @@ follow-up work for stability and future feature planning.
 - Reserve `0.2.6` only for emergency patch work after `v0.2.5`; it is not the
   default post-release route.
 - Track `very large duration + exact target first-time-at-position` as a
-  tolerance investigation after `v0.2.5`; it is not a `v0.2.5` release blocker.
-  `0.3.0-design` now has a fixed 50s oracle case for the same boundary shape;
-  100s and larger exact-target first-time cases remain a separate tolerance or
-  solver-stretching investigation because they exceed the current first-time
-  tolerance or the frozen oracle's trajectory-duration limits.
+  documented tolerance investigation after `v0.2.5`; it is not a `v0.2.5`
+  release blocker. `0.3.0-design` now has fixed 50s and 100s oracle cases for
+  the boundary shape. The 100s case is retained with a case-specific
+  `2e-4` first-time tolerance because the long near-flat final segment differs
+  from the frozen C++ oracle by about `1.64e-4s` while still matching trajectory
+  sampling and found/not-found semantics.
 - Before each `0.2.x` patch release, record Windows and Linux release
   benchmarks with average, p99, worst, and C/oracle average ratio.
 - Keep per-DoF override hardening focused on oracle coverage, diagnostics, and

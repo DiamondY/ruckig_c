@@ -54,6 +54,7 @@ struct CaseData {
     std::vector<double> extra_sample_times {};
     bool compare_first_time_queries {true};
     bool compare_update_loop {true};
+    double first_time_tolerance {kFirstTimeTolerance};
 };
 
 int failures = 0;
@@ -418,7 +419,7 @@ void compare_trajectory_queries(
             fail(test_case.name, message.str());
             return;
         }
-        if (c_found && !near(c_time, *oracle_time, kFirstTimeTolerance)) {
+        if (c_found && !near(c_time, *oracle_time, test_case.first_time_tolerance)) {
             fail(test_case.name, "first-time-at-position mismatch dof=" + std::to_string(dof) + values(c_time, *oracle_time));
         }
     };
@@ -2562,6 +2563,41 @@ int main(int argc, char** argv) {
         {0.1, 25.0, 49.0, 50.0},
         true,
         false
+    });
+
+    // Long near-flat final segment: the frozen oracle and C implementation agree
+    // within a documented first-time boundary tolerance exception.
+    cases.push_back(CaseData{
+        "position-very-large-duration-exact-target-first-time-100s",
+        1,
+        0.1,
+        RUCKIG_CONTROL_POSITION,
+        RUCKIG_SYNCHRONIZATION_TIME,
+        RUCKIG_DURATION_CONTINUOUS,
+        true,
+        100.0,
+        {0.0},
+        {0.0},
+        {0.0},
+        {1.0},
+        {0.0},
+        {0.0},
+        {10.0},
+        {10.0},
+        {10.0},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {
+            {0, 1.0, 0.0},
+            {0, 1.0, 99.0}
+        },
+        {0.1, 50.0, 99.0, 100.0},
+        true,
+        false,
+        2.0e-4
     });
 
     cases.push_back(CaseData{
