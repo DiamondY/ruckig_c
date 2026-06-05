@@ -1,3 +1,7 @@
+if(POLICY CMP0057)
+  cmake_policy(SET CMP0057 NEW)
+endif()
+
 if(NOT DEFINED RUCKIG_C_CURRENT_EXPORTS)
   message(FATAL_ERROR "RUCKIG_C_CURRENT_EXPORTS is required")
 endif()
