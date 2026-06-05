@@ -280,17 +280,25 @@ jobs:
         run: cmake --build build-shared --target ruckig_c_compare_exported_symbols --config Release
 
       - name: Compare public exported symbols strictly
+        id: public_abi
+        continue-on-error: true
         run: cmake --build build-shared --target ruckig_c_compare_public_exported_symbols --config Release
 
       - name: Print exported-symbol snapshot
+        if: always()
         run: cat build-shared/artifacts/abi/0.3.0-design/*
         shell: bash
 
       - name: Upload exported-symbol snapshot
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.name }}
           path: ${{ matrix.artifact_path }}
+
+      - name: Fail on public exported-symbol drift
+        if: steps.public_abi.outcome == 'failure'
+        run: exit 1
 
   release-random-oracle:
     name: Manual release random oracle
