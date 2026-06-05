@@ -47,8 +47,8 @@ pkg-config path on Unix systems that provide `pkg-config`.
 | clang DLL | verified |
 | clang-cl static | verified in CI |
 | clang-cl DLL | verified in CI |
-| MSVC cl static | documented, not yet CI-verified |
-| MSVC cl DLL | documented, not yet CI-verified |
+| MSVC cl static | optional CTest gate, locally verified; not yet CI-verified |
+| MSVC cl DLL | optional CTest gate, locally verified; not yet CI-verified |
 | MinGW static | not yet verified |
 | MinGW DLL | not yet verified |
 | CMake installed package | verified |
@@ -97,21 +97,31 @@ Current Windows toolchain status:
   CTest.
 - `clang-cl`: verified for C-only CMake target consumption and standalone
   manual static-link smoke in CI.
-- MSVC `cl`: planned as a standalone manual static-link smoke; not yet part of
-  routine CI.
+- MSVC `cl`: locally verified with the opt-in standalone static-link CTest;
+  not yet part of routine CI. The repeatable gate is available when configured
+  with `-DRUCKIG_C_ENABLE_MSVC_CL_CONSUMER_SMOKE=ON`.
 - MinGW: not yet verified.
 
-Planned MSVC `cl` standalone static smoke:
+MSVC `cl` standalone static smoke:
 
 ```powershell
-cl /nologo /std:c11 /DRUCKIG_C_STATIC_DEFINE /I include examples\c\00_minimal_offline.c build_release_check_ninja\ruckig_c.lib /Fe:build_release_check_ninja\msvc_static_consumer.exe
+cl /nologo /std:c11 /DRUCKIG_C_STATIC_DEFINE /I include /c examples\c\00_minimal_offline.c /Fo:build_release_check_ninja\msvc_static_consumer.obj
+link /nologo build_release_check_ninja\msvc_static_consumer.obj build_release_check_ninja\ruckig_c.lib /OUT:build_release_check_ninja\msvc_static_consumer.exe
 .\build_release_check_ninja\msvc_static_consumer.exe
 ```
 
 This smoke must run from a Developer Command Prompt or an equivalent
 environment where `cl`, the Windows SDK, and the C runtime libraries are
-available. It is a manual or CMake-scripted gate until CI evidence proves the
-toolchain is stable enough for routine execution.
+available. The CMake-scripted gate is:
+
+```powershell
+cmake -S . -B build_msvc_static_smoke -G "Visual Studio 17 2022" -A x64 -DRUCKIG_C_ENABLE_MSVC_CL_CONSUMER_SMOKE=ON
+cmake --build build_msvc_static_smoke --config Release
+ctest --test-dir build_msvc_static_smoke -C Release -R ruckig_c_msvc_cl_static_consumer --output-on-failure
+```
+
+It remains opt-in until CI evidence proves the toolchain is stable enough for
+routine execution.
 
 ## DLL Consumers
 
@@ -151,19 +161,29 @@ Current Windows DLL consumer status:
   release-check CTest.
 - `clang-cl`: verified through a shared C-only CI job that builds the DLL,
   links the import library, updates the process `PATH`, and runs the consumer.
-- MSVC `cl`: planned as a standalone DLL/import-library smoke; not yet part of
-  routine CI.
+- MSVC `cl`: locally verified with the opt-in standalone DLL/import-library
+  CTest; not yet part of routine CI. The repeatable gate is available when
+  configured with `-DRUCKIG_C_ENABLE_MSVC_CL_CONSUMER_SMOKE=ON`.
 - MinGW: not yet verified.
 
-Planned MSVC `cl` standalone DLL smoke:
+MSVC `cl` standalone DLL smoke:
 
 ```powershell
-cl /nologo /std:c11 /I include examples\c\00_minimal_offline.c build_release_check_shared\ruckig_c.lib /Fe:build_release_check_shared\msvc_dll_consumer.exe
+cl /nologo /std:c11 /I include /c examples\c\00_minimal_offline.c /Fo:build_release_check_shared\msvc_dll_consumer.obj
+link /nologo build_release_check_shared\msvc_dll_consumer.obj build_release_check_shared\ruckig_c.lib /OUT:build_release_check_shared\msvc_dll_consumer.exe
 $env:PATH = (Resolve-Path build_release_check_shared).Path + ";" + $env:PATH
 .\build_release_check_shared\msvc_dll_consumer.exe
 ```
 
 Do not define `RUCKIG_C_STATIC_DEFINE` for this DLL consumer path.
+
+The CMake-scripted gate is:
+
+```powershell
+cmake -S . -B build_msvc_dll_smoke -G "Visual Studio 17 2022" -A x64 -DBUILD_SHARED_LIBS=ON -DRUCKIG_C_ENABLE_MSVC_CL_CONSUMER_SMOKE=ON
+cmake --build build_msvc_dll_smoke --config Release
+ctest --test-dir build_msvc_dll_smoke -C Release -R ruckig_c_msvc_cl_dll_consumer --output-on-failure
+```
 
 MinGW feasibility remains separate from MSVC-style consumers. It should be
 validated as two independent smokes, one static and one DLL/import-library,

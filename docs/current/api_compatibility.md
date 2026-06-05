@@ -1,6 +1,8 @@
 # API and ABI Compatibility
 
 This document defines the `ruckig_c 0.2.x` patch-release compatibility policy.
+For the `0.3.0-design` line, it also defines the pre-implementation public ABI
+guardrails that are built on the final planned `0.2.x` baseline.
 
 ## Policy
 
@@ -13,6 +15,10 @@ This document defines the `ruckig_c 0.2.x` patch-release compatibility policy.
 - Opaque handle internals may change, but the public C ABI surface must be
   reviewed before every patch release.
 - Public header changes must be recorded in `CHANGELOG.md`.
+- The approved public symbol allowlist is `docs/abi/public-symbols.txt`. It is
+  generated from the `RUCKIG_C_API` declarations in
+  `include/ruckig_c/ruckig.h` at the `v0.2.5` baseline and must not be expanded
+  without a separate public API design and version decision.
 
 ## Release Review
 
@@ -163,13 +169,28 @@ enforced. Treat this as ABI evidence for drift review, not as approval to use
 those internal symbols as public API. The public C API remains the declarations
 in `include/ruckig_c/ruckig.h`.
 
+`0.3.0-design` begins by cleaning up that Linux export surface. Non-Windows
+shared builds use hidden symbol visibility so only `RUCKIG_C_API` declarations
+are exported. Removing the historical Linux implementation-internal exports is
+not a public API removal because those symbols were never declared in the
+public header or listed in `docs/abi/public-symbols.txt`.
+
+The `v0.2.5` Linux baseline contains `127` normalized `ruckig_*` symbols. The
+approved public allowlist contains `66` symbols from the public header. The
+remaining `61` Linux baseline symbols are implementation-internal or
+test/debug allocation helpers that must not be treated as supported consumer
+entry points. The detailed classification is recorded in
+`docs/abi/v0.2.5/linux-symbol-review.md`.
+
 Shared builds on `main` now write next-stage comparison artifacts under:
 
 ```text
 build_release_check_shared/artifacts/abi/0.3.0-design/windows-exports.txt
 build_release_check_shared/artifacts/abi/0.3.0-design/windows-export-diff.txt
+build_release_check_shared/artifacts/abi/0.3.0-design/windows-public-export-diff.txt
 build-shared/artifacts/abi/0.3.0-design/linux-exports.txt
 build-shared/artifacts/abi/0.3.0-design/linux-export-diff.txt
+build-shared/artifacts/abi/0.3.0-design/linux-public-export-diff.txt
 ```
 
 Strict exported-symbol diff enforcement can be enabled only after all of these
@@ -182,7 +203,41 @@ conditions are true:
 - An exception process exists for intentional ABI changes.
 - CI output exposes a machine-readable diff summary that is easy to audit.
 
-Draft ABI exception policy:
+The public-only comparison target is:
+
+```powershell
+cmake --build build_release_check_shared --target ruckig_c_compare_public_exported_symbols
+```
+
+It compares the current shared-library exports against
+`docs/abi/public-symbols.txt` and the `v0.2.5` platform baseline, then writes a
+report such as:
+
+```text
+build_release_check_shared/artifacts/abi/0.3.0-design/windows-public-export-diff.txt
+build-shared/artifacts/abi/0.3.0-design/linux-public-export-diff.txt
+```
+
+The report includes machine-readable summary fields and human-readable symbol
+sections. By default it is warning/evidence-only. Setting
+`RUCKIG_C_STRICT_PUBLIC_ABI=ON` makes public ABI drift fail the target.
+The dedicated Linux and Windows exported-symbol GitHub Actions jobs opt into
+that strict mode; ordinary local shared builds still default to warning/evidence
+mode unless the option is explicitly enabled.
+
+The tracked public allowlist can be verified against the current public header
+without rewriting tracked documentation:
+
+```powershell
+cmake --build build_release_check_shared --target ruckig_c_verify_public_symbols
+```
+
+That target extracts declarations marked `RUCKIG_C_API` from
+`include/ruckig_c/ruckig.h`, writes a generated allowlist artifact such as
+`build_release_check_shared/artifacts/abi/0.3.0-design/public-symbols-from-header.txt`,
+and fails if it differs from `docs/abi/public-symbols.txt`.
+
+ABI exception policy:
 
 - Allowed without separate version decision: version macro changes, comments,
   documentation-only edits, and release-evidence text.
@@ -193,6 +248,8 @@ Draft ABI exception policy:
   plus `CHANGELOG.md` and API compatibility documentation updates.
 - Solver behavior changes require an oracle-proven bug fix and a retained
   regression case.
+
+The full policy is tracked in `docs/abi/exceptions.md`.
 
 ## Public Header Diff
 

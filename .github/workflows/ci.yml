@@ -268,12 +268,19 @@ jobs:
           -DBUILD_SHARED_LIBS=ON
           -DBUILD_RUCKIG_C_ORACLE_TESTS=OFF
           -DBUILD_RUCKIG_C_PERFORMANCE_TESTS=OFF
+          -DRUCKIG_C_STRICT_PUBLIC_ABI=ON
+
+      - name: Verify public symbol allowlist
+        run: cmake --build build-shared --target ruckig_c_verify_public_symbols --config Release
 
       - name: Generate exported-symbol snapshot
         run: cmake --build build-shared --target ruckig_c_exported_symbols --config Release
 
       - name: Compare exported-symbol snapshot
         run: cmake --build build-shared --target ruckig_c_compare_exported_symbols --config Release
+
+      - name: Compare public exported symbols strictly
+        run: cmake --build build-shared --target ruckig_c_compare_public_exported_symbols --config Release
 
       - name: Print exported-symbol snapshot
         run: cat build-shared/artifacts/abi/0.3.0-design/*

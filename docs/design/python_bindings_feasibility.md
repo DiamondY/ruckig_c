@@ -38,6 +38,11 @@ the existing pure C ABI, avoids compiling a CPython extension during feasibility
 work, and lets the project validate ownership, array, error, and packaging
 questions before committing to a wheel build strategy.
 
+The current prototype workspace is `bindings/python_prototype/`. It is not a
+released binding package and is not installed by CMake. It must load an
+already-built shared `ruckig_c` library and stay close to the C ABI while
+ownership, array, lifecycle, and error behavior are evaluated.
+
 ### CPython Extension
 
 A CPython extension can provide the tightest user experience and fastest array
@@ -192,6 +197,21 @@ Prototype acceptance criteria for a later implementation project:
 - Propagate `RUCKIG_WORKING` and `RUCKIG_FINISHED` as normal control flow.
 - Map error result codes to a documented Python enum or exception strategy.
 - Demonstrate wrapper lifecycle tests with no leaked handles.
+
+The prototype test entry point is `bindings/python_prototype/test_prototype.py`.
+It requires `RUCKIG_C_SHARED_LIBRARY` to point at a shared `ruckig_c` build and
+is intentionally not part of routine CI until shared-library loading strategy
+and public export hygiene are stable.
+
+Local prototype smoke evidence:
+
+```text
+Python: 3.14.3 in build_python_proto_venv
+cffi: 2.0.0
+Library: build_release_check_shared/ruckig_c.dll
+Command: python bindings/python_prototype/test_prototype.py
+Result: Ran 4 tests in 0.005s, OK
+```
 
 Rust bindings should remain deferred until Python feasibility clarifies the
 ownership, packaging, and error model for one high-level FFI layer.

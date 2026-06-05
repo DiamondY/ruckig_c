@@ -2533,6 +2533,38 @@ int main(int argc, char** argv) {
     });
 
     cases.push_back(CaseData{
+        "position-very-large-duration-exact-target-first-time",
+        1,
+        0.1,
+        RUCKIG_CONTROL_POSITION,
+        RUCKIG_SYNCHRONIZATION_TIME,
+        RUCKIG_DURATION_CONTINUOUS,
+        true,
+        50.0,
+        {0.0},
+        {0.0},
+        {0.0},
+        {1.0},
+        {0.0},
+        {0.0},
+        {10.0},
+        {10.0},
+        {10.0},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {
+            {0, 1.0, 0.0},
+            {0, 1.0, 49.0}
+        },
+        {0.1, 25.0, 49.0, 50.0},
+        true,
+        false
+    });
+
+    cases.push_back(CaseData{
         "per-dof-mixed-order-none-phase-edge",
         4,
         0.02,

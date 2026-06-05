@@ -6,8 +6,29 @@ Changed:
 
 - `main` now tracks the `0.3.0-design` line after publishing `v0.2.5` as the
   final planned `0.2.x` stabilization release.
-- ABI comparison baselines now roll forward to `docs/abi/v0.2.5/`; strict ABI
-  diff failure remains design-only and is not enabled by default.
+- ABI comparison baselines now roll forward to `docs/abi/v0.2.5/`; strict
+  public ABI diff failure remains opt-in for local builds and is enabled in
+  the dedicated Linux/Windows exported-symbol CI jobs.
+- `0.3.0-design` priority now starts with ABI/export hygiene before binding or
+  package-manager prototypes.
+- Added `docs/abi/public-symbols.txt` as the approved public C ABI symbol
+  allowlist derived from `include/ruckig_c/ruckig.h`.
+- Added a public symbol allowlist verification target that extracts
+  `RUCKIG_C_API` declarations from the public header and checks the tracked
+  allowlist.
+- Non-Windows shared builds now hide implementation-internal symbols by
+  default and export only declarations marked with `RUCKIG_C_API`.
+- Added a public exported-symbol comparison target for warning/evidence-only
+  strict ABI gate trial artifacts, with the dedicated ABI CI jobs opting into
+  strict public drift failure.
+- Added a fixed oracle case for a 50s exact-target first-time boundary while
+  keeping larger-duration variants as a documented tolerance investigation.
+- Added and smoke-tested a Python `cffi` ABI-mode prototype workspace against a
+  local shared `ruckig_c` build.
+- Added an experimental vcpkg overlay prototype and verified local
+  `x64-windows` shared/default and `x64-windows-static` consumer paths.
+- Added opt-in MSVC `cl` standalone static and DLL consumer CTest gates and
+  verified both locally; they remain outside routine CI.
 
 Still deferred:
 

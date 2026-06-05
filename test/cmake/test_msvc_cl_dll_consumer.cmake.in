@@ -1,0 +1,128 @@
+if(NOT WIN32)
+  message(FATAL_ERROR "MSVC cl DLL consumer smoke is only valid on Windows")
+endif()
+
+if(NOT DEFINED RUCKIG_C_IMPORT_LIBRARY)
+  message(FATAL_ERROR "RUCKIG_C_IMPORT_LIBRARY is required")
+endif()
+if(NOT DEFINED RUCKIG_C_DLL_DIR)
+  message(FATAL_ERROR "RUCKIG_C_DLL_DIR is required")
+endif()
+
+set(MSVC_CL_EXECUTABLE "@CMAKE_C_COMPILER@")
+set(_use_configured_cl FALSE)
+if(MSVC_CL_EXECUTABLE AND EXISTS "${MSVC_CL_EXECUTABLE}")
+  get_filename_component(_msvc_cl_name "${MSVC_CL_EXECUTABLE}" NAME_WE)
+  if(_msvc_cl_name STREQUAL "cl")
+    set(_use_configured_cl TRUE)
+  endif()
+endif()
+if(NOT _use_configured_cl)
+  unset(MSVC_CL_EXECUTABLE)
+  find_program(MSVC_CL_EXECUTABLE NAMES cl cl.exe)
+endif()
+
+set(MSVC_VCVARS64 "")
+if(DEFINED ENV{VSINSTALLDIR} AND EXISTS "$ENV{VSINSTALLDIR}/VC/Auxiliary/Build/vcvars64.bat")
+  set(MSVC_VCVARS64 "$ENV{VSINSTALLDIR}/VC/Auxiliary/Build/vcvars64.bat")
+endif()
+
+if(NOT MSVC_VCVARS64 AND MSVC_CL_EXECUTABLE)
+  get_filename_component(_cl_dir "${MSVC_CL_EXECUTABLE}" DIRECTORY)
+  set(_vc_root "${_cl_dir}")
+  foreach(_unused RANGE 1 6)
+    get_filename_component(_vc_root "${_vc_root}" DIRECTORY)
+  endforeach()
+  if(EXISTS "${_vc_root}/Auxiliary/Build/vcvars64.bat")
+    set(MSVC_VCVARS64 "${_vc_root}/Auxiliary/Build/vcvars64.bat")
+  endif()
+endif()
+
+if(NOT MSVC_VCVARS64)
+  set(_vswhere "C:/Program Files (x86)/Microsoft Visual Studio/Installer/vswhere.exe")
+  if(EXISTS "${_vswhere}")
+    execute_process(
+      COMMAND "${_vswhere}" -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+      OUTPUT_VARIABLE _vs_install
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+      RESULT_VARIABLE _vswhere_result
+    )
+    if(_vswhere_result EQUAL 0 AND _vs_install)
+      file(TO_CMAKE_PATH "${_vs_install}" _vs_install)
+      if(EXISTS "${_vs_install}/VC/Auxiliary/Build/vcvars64.bat")
+        set(MSVC_VCVARS64 "${_vs_install}/VC/Auxiliary/Build/vcvars64.bat")
+      endif()
+      if(NOT MSVC_CL_EXECUTABLE)
+        file(GLOB _cl_candidates "${_vs_install}/VC/Tools/MSVC/*/bin/Hostx64/x64/cl.exe")
+        if(_cl_candidates)
+          list(SORT _cl_candidates)
+          list(REVERSE _cl_candidates)
+          list(GET _cl_candidates 0 MSVC_CL_EXECUTABLE)
+        endif()
+      endif()
+    endif()
+  endif()
+endif()
+
+if(NOT MSVC_VCVARS64)
+  message(FATAL_ERROR "vcvars64.bat was not found; install Visual Studio C++ tools or run from a configured MSVC environment")
+endif()
+
+set(build_dir "@CMAKE_CURRENT_BINARY_DIR@/consumer-build/msvc-cl-dll")
+set(obj "${build_dir}/00_minimal_offline.obj")
+set(exe "${build_dir}/msvc_cl_dll_consumer@CMAKE_EXECUTABLE_SUFFIX@")
+set(build_bat "${build_dir}/build_dll_consumer.bat")
+set(run_bat "${build_dir}/run_dll_consumer.bat")
+
+file(REMOVE_RECURSE "${build_dir}")
+file(MAKE_DIRECTORY "${build_dir}")
+
+set(_source "@CMAKE_CURRENT_SOURCE_DIR@/examples/c/00_minimal_offline.c")
+set(_include_dir "@CMAKE_CURRENT_SOURCE_DIR@/include")
+file(TO_NATIVE_PATH "${MSVC_VCVARS64}" _vcvars_native)
+file(TO_NATIVE_PATH "${_source}" _source_native)
+file(TO_NATIVE_PATH "${_include_dir}" _include_native)
+file(TO_NATIVE_PATH "${obj}" _obj_native)
+file(TO_NATIVE_PATH "${exe}" _exe_native)
+file(TO_NATIVE_PATH "${RUCKIG_C_IMPORT_LIBRARY}" _import_library_native)
+file(TO_NATIVE_PATH "${RUCKIG_C_DLL_DIR}" _dll_dir_native)
+if(MSVC_CL_EXECUTABLE)
+  file(TO_NATIVE_PATH "${MSVC_CL_EXECUTABLE}" _cl_native)
+  set(_cl_command "\"${_cl_native}\"")
+else()
+  set(_cl_command "cl")
+endif()
+
+file(WRITE "${build_bat}" "@echo off\r\n")
+file(APPEND "${build_bat}" "call \"${_vcvars_native}\" >nul\r\n")
+file(APPEND "${build_bat}" "if errorlevel 1 exit /b %errorlevel%\r\n")
+file(APPEND "${build_bat}" "${_cl_command} /nologo /std:c11 /MD /TC /I\"${_include_native}\" /Fo\"${_obj_native}\" /c \"${_source_native}\"\r\n")
+file(APPEND "${build_bat}" "if errorlevel 1 exit /b %errorlevel%\r\n")
+file(APPEND "${build_bat}" "link /nologo \"${_obj_native}\" \"${_import_library_native}\" /OUT:\"${_exe_native}\"\r\n")
+file(APPEND "${build_bat}" "if errorlevel 1 exit /b %errorlevel%\r\n")
+
+execute_process(
+  COMMAND "${build_bat}"
+  WORKING_DIRECTORY "${build_dir}"
+  RESULT_VARIABLE build_result
+  OUTPUT_VARIABLE build_stdout
+  ERROR_VARIABLE build_stderr
+)
+if(NOT build_result EQUAL 0)
+  message(FATAL_ERROR "MSVC cl standalone DLL consumer build failed\nstdout:\n${build_stdout}\nstderr:\n${build_stderr}")
+endif()
+
+file(WRITE "${run_bat}" "@echo off\r\n")
+file(APPEND "${run_bat}" "set \"PATH=${_dll_dir_native};%PATH%\"\r\n")
+file(APPEND "${run_bat}" "\"${_exe_native}\"\r\n")
+
+execute_process(
+  COMMAND "${run_bat}"
+  WORKING_DIRECTORY "${build_dir}"
+  RESULT_VARIABLE run_result
+  OUTPUT_VARIABLE run_stdout
+  ERROR_VARIABLE run_stderr
+)
+if(NOT run_result EQUAL 0)
+  message(FATAL_ERROR "MSVC cl standalone DLL consumer run failed\nstdout:\n${run_stdout}\nstderr:\n${run_stderr}")
+endif()

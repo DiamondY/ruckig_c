@@ -14,6 +14,8 @@ option(BUILD_RUCKIG_C_PERFORMANCE_TESTS "Build C/C++ oracle performance benchmar
 option(RUCKIG_C_ENABLE_ASAN "Enable AddressSanitizer for supported compilers" OFF)
 option(RUCKIG_C_ENABLE_UBSAN "Enable UndefinedBehaviorSanitizer for supported compilers" OFF)
 option(RUCKIG_C_ENABLE_CALCULATION_DURATION "Measure ruckig_update calculation duration in microseconds" OFF)
+option(RUCKIG_C_STRICT_PUBLIC_ABI "Fail shared-build ABI comparison on public exported-symbol drift" OFF)
+option(RUCKIG_C_ENABLE_MSVC_CL_CONSUMER_SMOKE "Enable optional standalone MSVC cl consumer smoke tests on Windows" OFF)
 option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
 
 set(RUCKIG_C_INSTALL_CMAKEDIR
@@ -94,6 +96,11 @@ if(BUILD_RUCKIG_C)
     C_STANDARD_REQUIRED ON
     C_EXTENSIONS OFF
   )
+  if(BUILD_SHARED_LIBS AND NOT WIN32 AND CMAKE_C_COMPILER_ID MATCHES "Clang|GNU|AppleClang")
+    set_target_properties(ruckig_c PROPERTIES
+      C_VISIBILITY_PRESET hidden
+    )
+  endif()
 
   target_include_directories(ruckig_c PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -221,6 +228,33 @@ if(BUILD_RUCKIG_C_TESTS)
         COMMAND ${CMAKE_COMMAND}
           "-DRUCKIG_C_STATIC_LIBRARY=$<TARGET_LINKER_FILE:ruckig_c>"
           -P ${CMAKE_CURRENT_BINARY_DIR}/test_windows_static_consumer.cmake
+      )
+    endif()
+  endif()
+
+  if(WIN32 AND RUCKIG_C_ENABLE_MSVC_CL_CONSUMER_SMOKE)
+    if(BUILD_SHARED_LIBS)
+      configure_file(
+        test/cmake/test_msvc_cl_dll_consumer.cmake.in
+        ${CMAKE_CURRENT_BINARY_DIR}/test_msvc_cl_dll_consumer.cmake
+        @ONLY
+      )
+      add_test(NAME ruckig_c_msvc_cl_dll_consumer
+        COMMAND ${CMAKE_COMMAND}
+          "-DRUCKIG_C_IMPORT_LIBRARY=$<TARGET_LINKER_FILE:ruckig_c>"
+          "-DRUCKIG_C_DLL_DIR=$<TARGET_FILE_DIR:ruckig_c>"
+          -P ${CMAKE_CURRENT_BINARY_DIR}/test_msvc_cl_dll_consumer.cmake
+      )
+    else()
+      configure_file(
+        test/cmake/test_msvc_cl_static_consumer.cmake.in
+        ${CMAKE_CURRENT_BINARY_DIR}/test_msvc_cl_static_consumer.cmake
+        @ONLY
+      )
+      add_test(NAME ruckig_c_msvc_cl_static_consumer
+        COMMAND ${CMAKE_COMMAND}
+          "-DRUCKIG_C_STATIC_LIBRARY=$<TARGET_LINKER_FILE:ruckig_c>"
+          -P ${CMAKE_CURRENT_BINARY_DIR}/test_msvc_cl_static_consumer.cmake
       )
     endif()
   endif()
@@ -352,6 +386,30 @@ if(BUILD_RUCKIG_C_PERFORMANCE_TESTS)
   add_test(NAME ruckig_c_performance_benchmark COMMAND ruckig_c_performance_benchmark --samples 10000 --seed 1)
 endif()
 
+set(RUCKIG_C_ABI_OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/artifacts/abi/0.3.0-design")
+set(RUCKIG_C_ABI_PUBLIC_SYMBOLS_FILE "${CMAKE_CURRENT_SOURCE_DIR}/docs/abi/public-symbols.txt")
+set(RUCKIG_C_ABI_PUBLIC_GENERATED_FILE "${RUCKIG_C_ABI_OUTPUT_DIR}/public-symbols-from-header.txt")
+set(RUCKIG_C_ABI_PUBLIC_VERIFY_FILE "${RUCKIG_C_ABI_OUTPUT_DIR}/public-symbols-verify.txt")
+add_custom_command(
+  OUTPUT ${RUCKIG_C_ABI_PUBLIC_VERIFY_FILE}
+  BYPRODUCTS ${RUCKIG_C_ABI_PUBLIC_GENERATED_FILE}
+  COMMAND ${CMAKE_COMMAND}
+    "-DRUCKIG_C_PUBLIC_HEADER=${CMAKE_CURRENT_SOURCE_DIR}/include/ruckig_c/ruckig.h"
+    "-DRUCKIG_C_OUTPUT_FILE=${RUCKIG_C_ABI_PUBLIC_GENERATED_FILE}"
+    "-DRUCKIG_C_EXPECTED_PUBLIC_SYMBOLS=${RUCKIG_C_ABI_PUBLIC_SYMBOLS_FILE}"
+    "-DRUCKIG_C_VERIFY_OUTPUT=${RUCKIG_C_ABI_PUBLIC_VERIFY_FILE}"
+    -DRUCKIG_C_FAIL_ON_MISMATCH=ON
+    -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/generate_public_symbols.cmake
+  DEPENDS
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/ruckig_c/ruckig.h
+    ${RUCKIG_C_ABI_PUBLIC_SYMBOLS_FILE}
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/generate_public_symbols.cmake
+  VERBATIM
+)
+add_custom_target(ruckig_c_verify_public_symbols
+  DEPENDS ${RUCKIG_C_ABI_PUBLIC_VERIFY_FILE}
+)
+
 if(BUILD_RUCKIG_C AND BUILD_SHARED_LIBS)
   set(RUCKIG_C_ABI_PLATFORM "linux")
   if(WIN32)
@@ -359,9 +417,9 @@ if(BUILD_RUCKIG_C AND BUILD_SHARED_LIBS)
   elseif(APPLE)
     set(RUCKIG_C_ABI_PLATFORM "macos")
   endif()
-  set(RUCKIG_C_ABI_OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/artifacts/abi/0.3.0-design")
   set(RUCKIG_C_ABI_EXPORTS_FILE "${RUCKIG_C_ABI_OUTPUT_DIR}/${RUCKIG_C_ABI_PLATFORM}-exports.txt")
   set(RUCKIG_C_ABI_DIFF_FILE "${RUCKIG_C_ABI_OUTPUT_DIR}/${RUCKIG_C_ABI_PLATFORM}-export-diff.txt")
+  set(RUCKIG_C_ABI_PUBLIC_DIFF_FILE "${RUCKIG_C_ABI_OUTPUT_DIR}/${RUCKIG_C_ABI_PLATFORM}-public-export-diff.txt")
   set(RUCKIG_C_ABI_BASELINE_FILE "${CMAKE_CURRENT_SOURCE_DIR}/docs/abi/v0.2.5/${RUCKIG_C_ABI_PLATFORM}-symbols.txt")
   add_custom_command(
     OUTPUT ${RUCKIG_C_ABI_EXPORTS_FILE}
@@ -389,6 +447,23 @@ if(BUILD_RUCKIG_C AND BUILD_SHARED_LIBS)
     add_custom_target(ruckig_c_compare_exported_symbols
       DEPENDS ${RUCKIG_C_ABI_DIFF_FILE}
     )
+    if(EXISTS "${RUCKIG_C_ABI_PUBLIC_SYMBOLS_FILE}")
+      add_custom_command(
+        OUTPUT ${RUCKIG_C_ABI_PUBLIC_DIFF_FILE}
+        COMMAND ${CMAKE_COMMAND}
+          "-DRUCKIG_C_CURRENT_EXPORTS=${RUCKIG_C_ABI_EXPORTS_FILE}"
+          "-DRUCKIG_C_BASELINE_SYMBOLS=${RUCKIG_C_ABI_BASELINE_FILE}"
+          "-DRUCKIG_C_PUBLIC_SYMBOLS=${RUCKIG_C_ABI_PUBLIC_SYMBOLS_FILE}"
+          "-DRUCKIG_C_PUBLIC_DIFF_OUTPUT=${RUCKIG_C_ABI_PUBLIC_DIFF_FILE}"
+          "-DRUCKIG_C_STRICT_PUBLIC_ABI=${RUCKIG_C_STRICT_PUBLIC_ABI}"
+          -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/compare_public_exported_symbols.cmake
+        DEPENDS ${RUCKIG_C_ABI_EXPORTS_FILE} ${RUCKIG_C_ABI_BASELINE_FILE} ${RUCKIG_C_ABI_PUBLIC_SYMBOLS_FILE}
+        VERBATIM
+      )
+      add_custom_target(ruckig_c_compare_public_exported_symbols
+        DEPENDS ${RUCKIG_C_ABI_PUBLIC_DIFF_FILE}
+      )
+    endif()
   endif()
 endif()
 

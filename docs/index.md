@@ -36,6 +36,8 @@ Historical rewrite plans and release evidence are retained for traceability.
   implementation approval.
 - `design/package_manager_feasibility.md` - package-manager feasibility, without
   recipes.
+- `design/vcpkg_feasibility_prototype.md` - executable vcpkg prototype plan,
+  without adding a supported recipe.
 
 ## Technical References
 
@@ -50,6 +52,9 @@ Historical rewrite plans and release evidence are retained for traceability.
 
 ## ABI Baselines
 
+- `abi/public-symbols.txt` - approved public C ABI symbol allowlist generated
+  from the public header.
+- `abi/exceptions.md` - public ABI exception policy.
 - `abi/v0.2.2/` - exported-symbol baselines used by the `0.2.3` ABI
   comparison helper.
 - `abi/v0.2.3/` - exported-symbol baselines used by the `0.2.4` ABI
@@ -58,3 +63,5 @@ Historical rewrite plans and release evidence are retained for traceability.
   comparison helper.
 - `abi/v0.2.5/` - exported-symbol baselines used by the `0.3.0-design` ABI
   comparison helper and any future emergency `0.2.6`.
+  `abi/v0.2.5/linux-symbol-review.md` classifies the historical Linux internal
+  exports that are cleaned up during `0.3.0-design`.
