@@ -241,11 +241,13 @@ jobs:
             os: ubuntu-latest
             c_compiler: clang
             cxx_compiler: clang++
+            abi_platform: linux
             artifact_path: build-shared/artifacts/abi/0.3.0-design/*
           - name: Windows exported symbols
             os: windows-latest
             c_compiler: clang
             cxx_compiler: clang++
+            abi_platform: windows
             artifact_path: build-shared/artifacts/abi/0.3.0-design/*
 
     steps:
@@ -282,7 +284,14 @@ jobs:
       - name: Compare public exported symbols strictly
         id: public_abi
         continue-on-error: true
-        run: cmake --build build-shared --target ruckig_c_compare_public_exported_symbols --config Release
+        run: >
+          cmake
+          "-DRUCKIG_C_CURRENT_EXPORTS=build-shared/artifacts/abi/0.3.0-design/${{ matrix.abi_platform }}-exports.txt"
+          "-DRUCKIG_C_BASELINE_SYMBOLS=docs/abi/v0.2.5/${{ matrix.abi_platform }}-symbols.txt"
+          "-DRUCKIG_C_PUBLIC_SYMBOLS=docs/abi/public-symbols.txt"
+          "-DRUCKIG_C_PUBLIC_DIFF_OUTPUT=build-shared/artifacts/abi/0.3.0-design/${{ matrix.abi_platform }}-public-export-diff.txt"
+          -DRUCKIG_C_STRICT_PUBLIC_ABI=ON
+          -P cmake/compare_public_exported_symbols.cmake
 
       - name: Print exported-symbol snapshot
         if: always()
