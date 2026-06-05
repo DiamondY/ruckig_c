@@ -50,9 +50,9 @@ The `v0.2.5` Linux exported-symbol baseline includes implementation-internal
 symbols were never public API. Cleaning them up in `0.3.0` is export
 hygiene, not a public API removal.
 
-## 0.4.0-Design Public API Expansion
+## 0.4.0 Public API Expansion
 
-`0.4.0-design` is the first planned public C ABI expansion after the `0.3.0`
+`0.4.0` is the first planned public C ABI expansion after the `0.3.0`
 hardening release. The approved additions expose original-surface parity for
 waypoint-aware construction, global position bounds, intermediate waypoints,
 per-section constraints, intermediate duration queries, multi-section

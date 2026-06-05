@@ -3,7 +3,7 @@
 # Syntax:
 # allow-add ruckig_symbol_name
 #
-# 0.4.0-design original-surface parity public API additions.
+# 0.4.0 original-surface parity public API additions.
 allow-add ruckig_create_with_waypoints
 allow-add ruckig_filter_intermediate_positions
 allow-add ruckig_get_max_number_of_waypoints

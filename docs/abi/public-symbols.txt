@@ -1,7 +1,7 @@
 # Approved public C ABI symbols.
 #
 # Source of truth: declarations marked RUCKIG_C_API in
-# include/ruckig_c/ruckig.h. The 0.4.0-design line intentionally expands the
+# include/ruckig_c/ruckig.h. The 0.4.0 line intentionally expands the
 # public C ABI for original-surface waypoint/per-section parity.
 ruckig_calculate
 ruckig_create

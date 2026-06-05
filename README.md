@@ -25,29 +25,25 @@ Implemented and covered by fixed C/oracle tests plus deterministic random oracle
 - Disabled DoF behavior.
 - Offline `ruckig_calculate`, online `ruckig_update`, `ruckig_output_pass_to_input`.
 - Trajectory duration, independent minimum durations, sampling, position extrema, and first-time-at-position helpers.
-- `0.4.0-design` experimental waypoint-aware C ABI, global position bounds,
-  per-section constraints, intermediate duration queries, and local coupled
-  waypoint optimizer alpha.
+- `0.4.0` waypoint-aware C ABI, global position bounds, per-section
+  constraints, intermediate duration queries, and local coupled waypoint
+  optimizer.
 - C examples for position, offline position, online update, per-DoF overrides,
   velocity, stop, minimum duration, waypoints, and per-section minimum duration.
 
 Release-readiness evidence is tracked under `docs/release/`; see
-`docs/index.md` for the organized documentation map. `v0.3.0` is the latest
-published release. It is a hardening release that publishes ABI/export hygiene,
-consumer-matrix hardening, macOS shared/export bootstrap evidence, and Python
-feasibility evidence without adding public API or solver scope. `v0.2.5`
-remains the final planned `0.2.x` stabilization baseline. The post-release
-stability queue is tracked in `docs/current/roadmap.md`. `main` is now the
-`0.4.0-design - Unreleased` line for original-surface parity; the waypoint
-optimizer is alpha evidence and is not yet a stable release claim. Current
-stable release scope intentionally excludes:
+`docs/index.md` for the organized documentation map. `v0.4.0` is the current
+release line for original-surface parity. It adds waypoint-aware C ABI entry
+points, per-section constraints, global position bounds, and a local coupled
+waypoint optimizer. `v0.3.0` remains the last no-new-C-API hardening release,
+and `v0.2.5` remains the final planned `0.2.x` stabilization baseline.
+Current stable release scope intentionally excludes:
 
-- Waypoints, per-section constraints, and the expanded C ABI are not part of
-  the latest published `v0.3.0` release.
-- Cloud and remote calculation remain intentionally unsupported; `0.4.0-design`
-  implements local optimizer work only.
-- Python/Rust binding release work remains outside the stable public package
-  surface until the C ABI and optimizer alpha stabilize.
+- Cloud and remote calculation; `0.4.0` implements local optimizer work only.
+- Formal Ruckig Pro/cloud global numerical equivalence claims.
+- Hard real-time guarantees for waypoint optimization.
+- Python/Rust binding publication. The Python `cffi` prototype and Rust alpha
+  wrapper remain prototype-only and are not installed or published packages.
 - Package-manager recipes and new package-manager prototypes are outside the
   active roadmap. Existing CMake install, pkg-config, static/DLL, and shared
   install-tree consumption paths remain the supported integration surface.

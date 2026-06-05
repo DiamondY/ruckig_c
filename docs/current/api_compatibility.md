@@ -18,8 +18,8 @@ that are built on the final planned `0.2.x` baseline.
 - The approved public symbol allowlist is `docs/abi/public-symbols.txt`. It is
   generated from the `RUCKIG_C_API` declarations in
   `include/ruckig_c/ruckig.h`. It was established from the `v0.2.5` baseline
-  for `0.3.0` hardening and is expanded in `0.4.0-design` only through the
-  separate original-parity design and
+  for `0.3.0` hardening and is expanded in `0.4.0` only through the separate
+  original-parity design and
   `docs/abi/public-symbol-exceptions.txt`.
 
 ## Release Review
@@ -307,9 +307,9 @@ Record the command output summary in the release checklist. At minimum confirm
 that lifecycle, input, output, trajectory, calculate, update, and reset APIs are
 exported and that no unintended public symbols were added.
 
-## 0.4.0-Design Public API Expansion
+## 0.4.0 Public API Expansion
 
-`0.4.0-design` intentionally expands the public C ABI after the `v0.3.0`
+`0.4.0` intentionally expands the public C ABI after the `v0.3.0`
 hardening release. This is not a `0.2.x` patch-release exception and not an
 accidental exported-symbol drift. The approved design is
 `docs/design/0.4.0_original_parity.md`.
@@ -325,12 +325,12 @@ The expansion adds public entry points for:
 - multi-section trajectory section and intermediate-duration queries;
 - deterministic local intermediate-position filtering.
 
-The approved public allowlist is now the `0.4.0-design` public header surface
+The approved public allowlist is now the `0.4.0` public header surface
 and contains `117` symbols. The `51` new symbols are listed as `allow-add`
 entries in `docs/abi/public-symbol-exceptions.txt` so strict public ABI trials
 can distinguish approved minor-version additions from unintended drift.
 
-Compatibility rules for `0.4.0-design`:
+Compatibility rules for `0.4.0`:
 
 - Existing `v0.3.0` public functions must not be removed or have their
   signatures changed.
@@ -344,13 +344,14 @@ Compatibility rules for `0.4.0-design`:
   section-level target-solver oracle checks, and optional non-blocking
   cloud/Pro black-box comparison evidence when available.
 
-Current local build artifacts are written under:
+Current local build artifacts continue to use the historical design-line
+artifact directory:
 
 ```text
 out/build/<preset>/artifacts/abi/0.4.0-design/
 ```
 
-Use these checks during the alpha line:
+Use these checks during release closeout and follow-up ABI review:
 
 ```powershell
 cmake --build out\build\windows-clang-ninja --target ruckig_c_verify_public_symbols

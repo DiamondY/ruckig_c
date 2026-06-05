@@ -1,11 +1,12 @@
 # Changelog
 
-## 0.4.0-design - Unreleased
+## 0.4.0 - 2026-06-06
 
-`0.4.0-design` starts the full original-surface parity line after `v0.3.0`.
-This line intentionally expands the public C ABI for intermediate waypoints,
+`0.4.0` starts the full original-surface parity line after `v0.3.0`. This
+release intentionally expands the public C ABI for intermediate waypoints,
 per-section constraints, global position bounds, and multi-section trajectory
-queries. It is an alpha/design queue, not a stable `v0.4.0` release.
+queries. The waypoint optimizer is local-only; no cloud or remote calculation
+client is implemented.
 
 Added:
 
@@ -34,11 +35,11 @@ Added:
 - Added a waypoint alpha performance benchmark mode for the local C optimizer
   corpus. It is C-only evidence because Ruckig Community `0.17.3` has no local
   global waypoint optimizer oracle.
-- Added CI coverage for `0.4.0-design` ABI/export artifact paths, Linux
+- Added CI coverage for `0.4.0` ABI/export artifact paths, Linux
   waypoint alpha performance output, Python prototype smoke, and Rust alpha
   wrapper smoke.
 - Extended the experimental Python `cffi` ABI-mode prototype to cover the
-  `0.4.0-design` waypoint-aware C ABI surface.
+  `0.4.0` waypoint-aware C ABI surface.
 - Added an experimental Rust alpha wrapper over `ruckig_c` with smoke tests and
   examples for position, offline calculation, velocity, waypoints, and
   per-section minimum duration.
@@ -49,8 +50,7 @@ Added:
 
 Changed:
 
-- `CMakeLists.txt` and public version macros now point at the `0.4.0` design
-  line.
+- `CMakeLists.txt` and public version macros now point at `0.4.0`.
 - ABI artifact output paths now use `artifacts/abi/0.4.0-design`.
 - `docs/abi/public-symbols.txt` and
   `docs/abi/public-symbol-exceptions.txt` now record the approved `0.4.0`
@@ -64,10 +64,9 @@ Changed:
 
 Still deferred:
 
-- Stable `v0.4.0` release closeout, formal cloud/Pro numerical equivalence
-  claims, hard real-time guarantees for waypoint optimization, released Python
-  wheels, published Rust crate, package-manager recipes, cloud API support, and
-  upstream baseline upgrades.
+- Formal cloud/Pro numerical equivalence claims, hard real-time guarantees for
+  waypoint optimization, released Python wheels, published Rust crate,
+  package-manager recipes, cloud API support, and upstream baseline upgrades.
 
 ## 0.3.0 - 2026-06-05
 
