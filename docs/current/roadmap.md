@@ -87,17 +87,18 @@ API, solver dispatch, or the frozen oracle baseline during design evaluation.
 
 - Current priority decision is recorded in
   `docs/design/0.3.0_priorities.md` and
-  `docs/design/0.3.0_readiness.md`: finish ABI/export hygiene before binding or
-  package-manager prototypes depend on the shared-library surface; evaluate
+  `docs/design/0.3.0_readiness.md`: maintain ABI/export hygiene before binding
+  or package-manager prototypes depend on the shared-library surface; evaluate
   Python bindings before Rust bindings once prerequisites are met.
 - The pre-`0.3.0` readiness decision is recorded in
   `docs/design/0.3.0_readiness.md`.
 - Python binding feasibility is scoped in
-  `docs/design/python_bindings_feasibility.md`. It is design-only and does not
-  add binding code or change the C ABI.
-- ABI/export hygiene is the first `0.3.0-design` implementation queue. Linux
-  historical implementation-internal exports from `v0.2.5` are not public API;
-  `docs/abi/public-symbols.txt` is the approved public symbol allowlist.
+  `docs/design/python_bindings_feasibility.md`. Current work is prototype-only;
+  it does not approve a formal binding API, release package, or C ABI change.
+- ABI/export hygiene is the first `0.3.0-design` implementation queue and its
+  first pass is implemented on `main`. Linux historical implementation-internal
+  exports from `v0.2.5` are not public API; `docs/abi/public-symbols.txt` is the
+  approved public symbol allowlist.
 - Evaluate Python or Rust bindings only after the C ABI has passed at least one
   `0.2.x` patch cycle, `docs/current/api_compatibility.md` is complete, and CMake,
   pkg-config, and shared/static consumer paths are stable.
@@ -109,7 +110,7 @@ API, solver dispatch, or the frozen oracle baseline during design evaluation.
   boundary, C API shape, and unsupported/partial behavior before any public API
   is implemented.
 - First `0.3.0-design` priorities:
-  1. ABI/export hygiene and Linux internal symbol cleanup.
+  1. Maintain ABI/export hygiene and Linux internal symbol cleanup evidence.
   2. Strict public ABI diff gate trial, opt-in locally and warning/evidence-only
      in the dedicated exported-symbol CI jobs.
   3. Windows consumer matrix hardening for MSVC `cl` and MinGW feasibility.
