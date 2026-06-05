@@ -2520,3 +2520,204 @@ Result:
 Dry run preview listed bindings/python_prototype/__pycache__/ and out/.
 Apply removed bindings/python_prototype/__pycache__/ and out/.
 ```
+
+## 2026-06-05 0.3.0 Hardening Release Preparation
+
+This pass starts the accepted `0.3.0` hardening release after the completed
+`0.3.0-design` closeout evidence. It promotes the version metadata and release
+documentation to `0.3.0` without adding public C API, changing solver scope,
+publishing bindings, adding package-manager recipes, or updating the frozen
+upstream oracle baseline.
+
+Repository state before edits:
+
+```text
+HEAD: cf956eb Record 0.3.0 design closeout CI evidence
+git status --short --ignored: clean
+```
+
+Release-preparation commit:
+
+```text
+Commit: 1353ee665d5d1a9b0bd5c2eafd078b8ded214450
+Subject: Prepare 0.3.0 hardening release
+```
+
+Scope changes:
+
+```text
+CMakeLists.txt project version: 0.3.0.
+include/ruckig_c/ruckig.h version macros: 0.3.0.
+CHANGELOG.md entry: 0.3.0 - 2026-06-05.
+Added docs/design/0.3.0_release_decision.md.
+Added docs/release/checklists/0.3.0.md.
+Moved next-stage ABI artifacts from artifacts/abi/0.3.0-design/ to artifacts/abi/0.3.0/.
+```
+
+Public API and scope-freeze audit:
+
+```text
+Public header diff against v0.2.5 contains only version macro changes.
+No public C function additions, removals, or signature changes.
+No enum numeric-value changes.
+No result-code numeric-value changes.
+docs/abi/public-symbols.txt unchanged.
+docs/abi/public-symbol-exceptions.txt remains empty.
+No package-manager recipe or new package-manager prototype was added.
+No waypoint, per-section constraint, or cloud public API entry point was added.
+Python prototype remains feasibility evidence only: not installed, not published, not packaged, and outside routine CI.
+Rust bindings and upstream baseline upgrades remain deferred independent projects.
+MSVC cl standalone consumer smokes remain optional local gates, not routine CI.
+```
+
+Local Windows default preset validation:
+
+```powershell
+cmake --preset windows-clang-ninja
+cmake --build --preset windows-clang-ninja
+ctest --preset windows-clang-ninja
+```
+
+Result:
+
+```text
+100% tests passed, 0 tests failed out of 15.
+```
+
+Local Windows shared preset and ABI validation:
+
+```powershell
+cmake --preset windows-clang-ninja-shared
+cmake --build --preset windows-clang-ninja-shared
+ctest --preset windows-clang-ninja-shared
+cmake --build out\build\windows-clang-ninja-shared --target ruckig_c_verify_public_symbols
+cmake --build out\build\windows-clang-ninja-shared --target ruckig_c_compare_public_exported_symbols
+cmake --build out\build\windows-clang-ninja-shared --target ruckig_c_compare_exported_symbols
+```
+
+Result:
+
+```text
+Shared CTest: 100% tests passed, 0 tests failed out of 15.
+Public symbol allowlist verification: clean, 66 header symbols, 66 expected symbols.
+Windows public exported-symbol comparison: clean, strict_public_abi OFF,
+66 current symbols, 66 baseline symbols, 66 approved public symbols,
+0 missing public symbols, 0 added public symbols, 0 removed public symbols,
+0 unapproved exported symbols.
+Windows exported-symbol baseline comparison: 66 current symbols,
+66 baseline symbols, 0 added, 0 removed.
+```
+
+Oracle validation:
+
+```powershell
+cmake -S . -B out\build\windows-clang-ninja-oracle -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_MAKE_PROGRAM="C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe" -DCMAKE_C_COMPILER="D:/Program Files/LLVM/bin/clang.exe" -DCMAKE_CXX_COMPILER="D:/Program Files/LLVM/bin/clang++.exe" -DBUILD_RUCKIG_C=ON -DBUILD_RUCKIG_C_TESTS=ON -DBUILD_RUCKIG_C_EXAMPLES=ON -DBUILD_RUCKIG_C_ORACLE_TESTS=ON -DBUILD_RUCKIG_C_PERFORMANCE_TESTS=OFF
+cmake --build out\build\windows-clang-ninja-oracle
+ctest --test-dir out\build\windows-clang-ninja-oracle --output-on-failure -E ruckig_c_oracle_random_release
+out\build\windows-clang-ninja-oracle\ruckig_c_oracle_tests.exe
+out\build\windows-clang-ninja-oracle\ruckig_c_oracle_tests.exe --random 100000 --seed 1
+```
+
+Result:
+
+```text
+Oracle CTest excluding release random: 100% tests passed, 0 tests failed out of 19.
+Fixed oracle suite: Oracle comparisons passed: 76.
+Development random oracle seed 1: Oracle comparisons passed: 76; Random oracle comparisons passed: 100000 seed 1.
+```
+
+Python `cffi` prototype smoke:
+
+```powershell
+python -m venv out\python-prototype-venv
+out\python-prototype-venv\Scripts\python.exe -m pip install cffi
+$env:RUCKIG_C_SHARED_LIBRARY = (Resolve-Path out\build\windows-clang-ninja-shared\ruckig_c.dll).Path
+out\python-prototype-venv\Scripts\python.exe bindings\python_prototype\test_prototype.py
+```
+
+Result:
+
+```text
+Ran 8 tests in 0.005s
+OK
+```
+
+Local cleanup control:
+
+```powershell
+.\scripts\clean-local.ps1
+.\scripts\clean-local.ps1 -Apply
+```
+
+Result:
+
+```text
+Dry run preview listed bindings/python_prototype/__pycache__/ and out/.
+Apply removed bindings/python_prototype/__pycache__/ and out/.
+```
+
+Remote GitHub Actions push CI:
+
+```text
+Run id: 27023713278
+Run URL: https://github.com/DiamondY/ruckig_c/actions/runs/27023713278
+Commit: 1353ee665d5d1a9b0bd5c2eafd078b8ded214450
+Event: push
+Conclusion: success
+Started: 2026-06-05T15:23:27Z
+```
+
+Successful push CI jobs:
+
+```text
+Windows clang-cl C-only
+Windows clang-cl shared C-only
+Windows clang oracle
+Linux GCC C-only
+Linux Clang oracle
+macOS Clang C-only
+Linux Clang ASan UBSan
+Linux Valgrind
+Linux Clang performance
+Windows MinGW static consumer
+Windows MinGW DLL consumer
+Linux exported symbols
+Windows exported symbols
+macOS exported symbols
+```
+
+The `Manual release random oracle` job was skipped as expected for a
+push-triggered workflow.
+
+Uploaded artifact metadata available from the public GitHub Actions page and
+artifact API:
+
+```text
+linux-performance: artifact id 7440260459, size 526 bytes,
+digest sha256:a0ce224771935197c9d02317cb385a81d9accf631735793947d5228883649993.
+
+Linux exported symbols: artifact id 7440256570, size 3372 bytes,
+digest sha256:3366cbf00d71641d1177ce71fb964cf39ed92da06f2c0898e63ae66471f9da86.
+
+Windows exported symbols: artifact id 7440259690, size 2969 bytes,
+digest sha256:64cdc30e82e74ef18536b7e2a9e9f9831042bd5e7f2789e03538c50ea2a2dea8.
+
+macOS exported symbols: artifact id 7440252482, size 1838 bytes,
+digest sha256:28e0b8dad01133c2c36a2716c0a6f79f9c0f0d43eb9fbcb07d7b66add0d6bdd1.
+```
+
+Blocked release evidence:
+
+```text
+gh auth status reports that the default DiamondY token is invalid.
+gh workflow run ci.yml --ref main -f release_random=true fails with HTTP 401.
+gh run download 27023713278 fails with HTTP 401 when downloading artifacts.
+gh run view --job <job-id> --log and the GitHub job logs API fail with HTTP 403.
+
+Therefore the following 0.3.0 release gates remain incomplete:
+- Manual release random workflow run.
+- Downloaded artifact inspection for Linux performance.
+- Downloaded artifact inspection for Linux exported symbols.
+- Downloaded artifact inspection for Windows exported symbols.
+- Downloaded artifact inspection for macOS exported-symbol bootstrap.
+```
