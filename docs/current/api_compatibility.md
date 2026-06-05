@@ -224,9 +224,13 @@ build-shared/artifacts/abi/0.3.0-design/linux-public-export-diff.txt
 The report includes machine-readable summary fields and human-readable symbol
 sections. By default it is warning/evidence-only. Setting
 `RUCKIG_C_STRICT_PUBLIC_ABI=ON` makes public ABI drift fail the target.
-The dedicated Linux and Windows exported-symbol GitHub Actions jobs opt into
-that strict mode; ordinary local shared builds still default to warning/evidence
-mode unless the option is explicitly enabled.
+The dedicated Linux and Windows exported-symbol GitHub Actions jobs currently
+run the public-only comparison in warning/evidence mode while uploading the
+same exported-symbol artifacts and diff reports for review. Ordinary local
+shared builds also default to warning/evidence mode unless the option is
+explicitly enabled. Promote the CI jobs to a strict fail gate only after the
+artifact review path is stable enough to diagnose Linux and Windows drift
+without blocking routine maintenance.
 
 The tracked public allowlist can be verified against the current public header
 without rewriting tracked documentation:

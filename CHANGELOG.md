@@ -21,8 +21,8 @@ Changed:
 - Linux shared builds additionally link with a public-symbol version script
   generated from `docs/abi/public-symbols.txt`.
 - Added a public exported-symbol comparison target for warning/evidence-only
-  strict ABI gate trial artifacts, with the dedicated ABI CI jobs opting into
-  strict public drift failure.
+  strict ABI gate trial artifacts, with the dedicated ABI CI jobs currently
+  uploading public diff evidence without yet failing the workflow on drift.
 - Added a fixed oracle case for a 50s exact-target first-time boundary while
   keeping larger-duration variants as a documented tolerance investigation.
 - Added and smoke-tested a Python `cffi` ABI-mode prototype workspace against a
