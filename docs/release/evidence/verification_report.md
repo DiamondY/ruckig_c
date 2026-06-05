@@ -2383,6 +2383,60 @@ Linux GCC C-only
 The `Manual release random oracle` job was skipped as expected for a
 push-triggered workflow.
 
+## 2026-06-06 0.4.0-Design Local Alpha.3 Wrapper Parity Evidence
+
+The third local alpha pass strengthened Python and Rust prototype coverage for
+the `0.4.0-design` waypoint-aware C ABI. This pass did not change the public C
+header, solver ABI, or frozen `original/ruckig-main` baseline.
+
+Coverage added in this pass:
+
+```text
+Rust alpha wrapper:
+- Per-section max/min position constraint setters.
+- Clear methods for optional min, per-section, and interrupt-duration fields.
+- Intermediate-position count/readback.
+- Deterministic intermediate-position filtering.
+- Trajectory first-time-at-position.
+- Output acceleration, jerk, new-calculation, interrupted, and
+  calculation-duration accessors.
+
+Python cffi prototype smoke:
+- Multi-DoF waypoint calculation with per-section position bounds.
+- Per-section getter and clear paths.
+- Control-interface, synchronization, and duration-discretization enum setters.
+- Interrupt-calculation-duration set/clear.
+```
+
+Local verification:
+
+```text
+cargo test --manifest-path bindings\rust\Cargo.toml:
+pass, 6 tests.
+
+cargo test --manifest-path bindings\rust\Cargo.toml --examples:
+pass.
+
+RUCKIG_C_SHARED_LIBRARY=out\build\windows-clang-ninja-shared\ruckig_c.dll
+out\python-prototype-venv\Scripts\python.exe bindings\python_prototype\test_prototype.py:
+pass, 13 tests.
+
+ctest --test-dir out\build\windows-clang-ninja --output-on-failure:
+pass, 24/24.
+
+ctest --test-dir out\build\windows-clang-ninja-shared --output-on-failure:
+pass, 24/24.
+
+ctest --test-dir out\build\windows-clang-ninja-oracle -R ruckig_c_waypoint_section_oracle --output-on-failure:
+pass.
+
+cmake --build out\build\windows-clang-ninja-shared --target ruckig_c_verify_public_symbols ruckig_c_compare_public_exported_symbols:
+pass.
+```
+
+Python and Rust remain prototype-only. This evidence does not publish Python
+wheels, a Rust crate, package-manager recipes, or stable wrapper APIs.
+
 Uploaded artifacts:
 
 ```text

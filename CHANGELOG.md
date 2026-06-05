@@ -42,6 +42,10 @@ Added:
 - Added an experimental Rust alpha wrapper over `ruckig_c` with smoke tests and
   examples for position, offline calculation, velocity, waypoints, and
   per-section minimum duration.
+- Strengthened Python and Rust prototype smoke coverage for per-section
+  position constraints, interrupt-calculation-duration storage,
+  first-time-at-position, intermediate-position readback/filtering, and output
+  calculation-state accessors.
 
 Changed:
 

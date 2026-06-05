@@ -279,8 +279,9 @@ New prototype coverage:
 - `RUCKIG_WORKING` and `RUCKIG_FINISHED` remain normal control flow; error
   result codes still raise typed exceptions with the raw integer code attached.
 - Local runtime smoke passed against the current Windows shared `ruckig_c.dll`
-  with 11 tests, including waypoint offline, waypoint online, and
-  intermediate-position filtering.
+  with 13 tests, including waypoint offline, waypoint online, multi-DoF
+  per-section position bounds, enum setters, optional clear paths, interrupt
+  storage, and intermediate-position filtering.
 
 This expansion does not approve publishing wheels, vendoring a shared library,
 or adding a higher-level Pythonic API. Stable Python release scope should wait

@@ -1,4 +1,4 @@
-use ruckig_c_alpha::{InputParameter, OutputParameter, Ruckig, RuckigResult, Result};
+use ruckig_c_alpha::{InputParameter, OutputParameter, Result, Ruckig, RuckigResult};
 
 fn main() -> Result<()> {
     let mut otg = Ruckig::new(1, 0.1)?;

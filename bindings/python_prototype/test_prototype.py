@@ -5,12 +5,15 @@ import unittest
 
 from ruckig_cffi import (
     Bound,
+    ControlInterface,
+    DurationDiscretization,
     Input,
     Output,
     Result,
     Ruckig,
     RuckigInvalidInputError,
     RuckigLifecycleError,
+    Synchronization,
     Trajectory,
     configure_library,
 )
@@ -95,6 +98,7 @@ class PrototypeTests(unittest.TestCase):
             self.assertEqual(otg.max_number_of_waypoints, 2)
             self.assertEqual(input_.intermediate_position_count, 1)
             self.assertEqual(input_.intermediate_positions(), [[1.0]])
+            self.assertEqual(input_.per_section_max_velocity(), [[1.2], [1.0]])
             self.assertEqual(input_.per_section_minimum_duration(), [0.0, 0.0])
 
             result = otg.calculate(input_, trajectory)
@@ -118,6 +122,72 @@ class PrototypeTests(unittest.TestCase):
                 intermediate_durations[0],
                 places=7,
             )
+
+    def test_waypoint_multi_dof_per_section_position_bounds(self) -> None:
+        with (
+            Ruckig(2, 0.02, max_number_of_waypoints=2) as otg,
+            Input(2, max_number_of_waypoints=2) as input_,
+            Trajectory(2, max_number_of_waypoints=2) as trajectory,
+        ):
+            input_.set_target_position([1.5, -0.6])
+            input_.set_max_velocity([1.5, 1.4])
+            input_.set_max_acceleration([2.0, 1.8])
+            input_.set_max_jerk([4.0, 3.5])
+            input_.set_intermediate_positions([[0.5, -0.2], [1.0, -0.4]])
+            input_.set_per_section_minimum_duration([0.20, 0.30, 0.20])
+            input_.set_per_section_max_position([
+                [0.6, 0.0],
+                [1.1, -0.1],
+                [1.6, -0.3],
+            ])
+            input_.set_per_section_min_position([
+                [-0.1, -0.3],
+                [0.4, -0.5],
+                [0.9, -0.8],
+            ])
+
+            self.assertEqual(input_.intermediate_positions(), [[0.5, -0.2], [1.0, -0.4]])
+            self.assertEqual(otg.calculate(input_, trajectory), Result.WORKING)
+            self.assertEqual(trajectory.section_count, 3)
+            durations = trajectory.intermediate_durations()
+            self.assertEqual(len(durations), 2)
+            self.assertLess(durations[0], durations[1])
+            second_waypoint = trajectory.at_time(durations[1])
+            self.assertAlmostEqual(second_waypoint["position"][0], 1.0, places=7)
+            self.assertAlmostEqual(second_waypoint["position"][1], -0.4, places=7)
+
+            extrema = trajectory.position_extrema()
+            self.assertLessEqual(extrema[0].max, 1.5 + 1e-7)
+            self.assertGreaterEqual(extrema[1].min, -0.6 - 1e-7)
+
+    def test_waypoint_clear_and_interrupt_surface(self) -> None:
+        with (
+            Ruckig(1, 0.05, max_number_of_waypoints=1) as otg,
+            Input(1, max_number_of_waypoints=1) as input_,
+            Output(1, max_number_of_waypoints=1) as output,
+        ):
+            configure_waypoint_input(input_)
+            input_.set_control_interface(ControlInterface.POSITION)
+            input_.set_synchronization(Synchronization.TIME)
+            input_.set_duration_discretization(DurationDiscretization.CONTINUOUS)
+            input_.clear_min_velocity()
+            input_.clear_min_acceleration()
+            input_.clear_minimum_duration()
+            input_.clear_per_section_max_velocity()
+            input_.clear_per_section_min_velocity()
+            input_.clear_per_section_max_acceleration()
+            input_.clear_per_section_min_acceleration()
+            input_.clear_per_section_max_jerk()
+            input_.clear_per_section_max_position()
+            input_.clear_per_section_min_position()
+            input_.clear_per_section_minimum_duration()
+            input_.set_interrupt_calculation_duration(0.001)
+            input_.clear_interrupt_calculation_duration()
+
+            self.assertEqual(otg.update(input_, output), Result.WORKING)
+            self.assertTrue(output.new_calculation)
+            self.assertFalse(output.was_calculation_interrupted)
+            self.assertEqual(len(output.new_acceleration()), 1)
 
     def test_waypoint_online_update_loop(self) -> None:
         with (

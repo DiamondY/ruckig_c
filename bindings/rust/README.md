@@ -15,10 +15,14 @@ Current alpha coverage:
 - offline position calculation;
 - online update loop;
 - waypoint-aware constructors;
-- intermediate waypoint input;
-- per-section minimum duration and per-section limit setters used by tests;
+- intermediate waypoint input, readback, clearing, and filtering;
+- per-section minimum duration, velocity, acceleration, jerk, and position
+  constraint setters used by tests;
+- interrupt-calculation-duration storage APIs;
 - trajectory duration, section count, intermediate durations, sampling, and
-  position extrema;
+  position extrema and first-time-at-position;
+- output position, velocity, acceleration, jerk, section, calculation-state,
+  and calculation-duration accessors;
 - Rust examples for position, offline, velocity, waypoints, and per-section
   minimum duration.
 
