@@ -8,7 +8,7 @@ static double* allocate_double_vector(size_t count) {
     return (double*)ruckig_calloc(count, sizeof(double));
 }
 
-ruckig_result_t ruckig_trajectory_create(ruckig_trajectory_t** trajectory, size_t dofs) {
+RUCKIG_C_API ruckig_result_t ruckig_trajectory_create(ruckig_trajectory_t** trajectory, size_t dofs) {
     ruckig_trajectory_t* value;
     if (!trajectory || dofs == 0) {
         return RUCKIG_ERROR_INVALID_INPUT;
@@ -34,7 +34,7 @@ ruckig_result_t ruckig_trajectory_create(ruckig_trajectory_t** trajectory, size_
     return RUCKIG_WORKING;
 }
 
-void ruckig_trajectory_destroy(ruckig_trajectory_t* trajectory) {
+RUCKIG_C_API void ruckig_trajectory_destroy(ruckig_trajectory_t* trajectory) {
     if (!trajectory) {
         return;
     }
@@ -45,15 +45,15 @@ void ruckig_trajectory_destroy(ruckig_trajectory_t* trajectory) {
     ruckig_free(trajectory);
 }
 
-size_t ruckig_trajectory_get_dof_count(const ruckig_trajectory_t* trajectory) {
+RUCKIG_C_API size_t ruckig_trajectory_get_dof_count(const ruckig_trajectory_t* trajectory) {
     return trajectory ? trajectory->dofs : 0;
 }
 
-double ruckig_trajectory_get_duration(const ruckig_trajectory_t* trajectory) {
+RUCKIG_C_API double ruckig_trajectory_get_duration(const ruckig_trajectory_t* trajectory) {
     return trajectory ? trajectory->duration : 0.0;
 }
 
-ruckig_result_t ruckig_trajectory_get_independent_min_durations(
+RUCKIG_C_API ruckig_result_t ruckig_trajectory_get_independent_min_durations(
     const ruckig_trajectory_t* trajectory,
     double* durations,
     size_t duration_count
@@ -115,7 +115,7 @@ static void profile_state_at_time(
     }
 }
 
-ruckig_result_t ruckig_trajectory_at_time(
+RUCKIG_C_API ruckig_result_t ruckig_trajectory_at_time(
     const ruckig_trajectory_t* trajectory,
     double time,
     double* position,
@@ -147,7 +147,7 @@ ruckig_result_t ruckig_trajectory_at_time(
     return RUCKIG_WORKING;
 }
 
-ruckig_result_t ruckig_trajectory_get_position_extrema(
+RUCKIG_C_API ruckig_result_t ruckig_trajectory_get_position_extrema(
     const ruckig_trajectory_t* trajectory,
     ruckig_position_extrema_t* extrema,
     size_t extrema_count
@@ -166,7 +166,7 @@ ruckig_result_t ruckig_trajectory_get_position_extrema(
     return RUCKIG_WORKING;
 }
 
-ruckig_result_t ruckig_trajectory_get_first_time_at_position(
+RUCKIG_C_API ruckig_result_t ruckig_trajectory_get_first_time_at_position(
     const ruckig_trajectory_t* trajectory,
     size_t dof,
     double position,

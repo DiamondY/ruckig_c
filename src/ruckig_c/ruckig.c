@@ -1219,7 +1219,7 @@ static ruckig_result_t calculate_position(
     return RUCKIG_WORKING;
 }
 
-ruckig_result_t ruckig_create(ruckig_t** otg, size_t dofs, double delta_time) {
+RUCKIG_C_API ruckig_result_t ruckig_create(ruckig_t** otg, size_t dofs, double delta_time) {
     ruckig_t* value;
     if (!otg || dofs == 0) {
         return RUCKIG_ERROR_INVALID_INPUT;
@@ -1242,7 +1242,7 @@ ruckig_result_t ruckig_create(ruckig_t** otg, size_t dofs, double delta_time) {
     return RUCKIG_WORKING;
 }
 
-void ruckig_destroy(ruckig_t* otg) {
+RUCKIG_C_API void ruckig_destroy(ruckig_t* otg) {
     if (!otg) {
         return;
     }
@@ -1250,7 +1250,7 @@ void ruckig_destroy(ruckig_t* otg) {
     ruckig_free(otg);
 }
 
-ruckig_result_t ruckig_calculate(
+RUCKIG_C_API ruckig_result_t ruckig_calculate(
     ruckig_t* otg,
     const ruckig_input_t* input,
     ruckig_trajectory_t* trajectory
@@ -1283,7 +1283,7 @@ ruckig_result_t ruckig_calculate(
     return RUCKIG_ERROR_INVALID_INPUT;
 }
 
-ruckig_result_t ruckig_update(
+RUCKIG_C_API ruckig_result_t ruckig_update(
     ruckig_t* otg,
     const ruckig_input_t* input,
     ruckig_output_t* output
@@ -1330,7 +1330,7 @@ ruckig_result_t ruckig_update(
     return output->time > output->trajectory->duration ? RUCKIG_FINISHED : RUCKIG_WORKING;
 }
 
-void ruckig_reset(ruckig_t* otg) {
+RUCKIG_C_API void ruckig_reset(ruckig_t* otg) {
     if (otg) {
         otg->current_input_initialized = false;
     }

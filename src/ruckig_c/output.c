@@ -6,7 +6,7 @@ static double* allocate_double_vector(size_t count) {
     return (double*)ruckig_calloc(count, sizeof(double));
 }
 
-ruckig_result_t ruckig_output_create(ruckig_output_t** output, size_t dofs) {
+RUCKIG_C_API ruckig_result_t ruckig_output_create(ruckig_output_t** output, size_t dofs) {
     ruckig_output_t* value;
     if (!output || dofs == 0) {
         return RUCKIG_ERROR_INVALID_INPUT;
@@ -36,7 +36,7 @@ ruckig_result_t ruckig_output_create(ruckig_output_t** output, size_t dofs) {
     return RUCKIG_WORKING;
 }
 
-void ruckig_output_destroy(ruckig_output_t* output) {
+RUCKIG_C_API void ruckig_output_destroy(ruckig_output_t* output) {
     if (!output) {
         return;
     }
@@ -48,7 +48,7 @@ void ruckig_output_destroy(ruckig_output_t* output) {
     ruckig_free(output);
 }
 
-void ruckig_output_pass_to_input(
+RUCKIG_C_API void ruckig_output_pass_to_input(
     const ruckig_output_t* output,
     ruckig_input_t* input
 ) {
@@ -60,50 +60,50 @@ void ruckig_output_pass_to_input(
     memcpy(input->current_acceleration, output->new_acceleration, sizeof(double) * input->dofs);
 }
 
-size_t ruckig_output_get_dof_count(const ruckig_output_t* output) {
+RUCKIG_C_API size_t ruckig_output_get_dof_count(const ruckig_output_t* output) {
     return output ? output->dofs : 0;
 }
 
-const double* ruckig_output_new_position_data(const ruckig_output_t* output) {
+RUCKIG_C_API const double* ruckig_output_new_position_data(const ruckig_output_t* output) {
     return output ? output->new_position : NULL;
 }
 
-const double* ruckig_output_new_velocity_data(const ruckig_output_t* output) {
+RUCKIG_C_API const double* ruckig_output_new_velocity_data(const ruckig_output_t* output) {
     return output ? output->new_velocity : NULL;
 }
 
-const double* ruckig_output_new_acceleration_data(const ruckig_output_t* output) {
+RUCKIG_C_API const double* ruckig_output_new_acceleration_data(const ruckig_output_t* output) {
     return output ? output->new_acceleration : NULL;
 }
 
-const double* ruckig_output_new_jerk_data(const ruckig_output_t* output) {
+RUCKIG_C_API const double* ruckig_output_new_jerk_data(const ruckig_output_t* output) {
     return output ? output->new_jerk : NULL;
 }
 
-double ruckig_output_get_time(const ruckig_output_t* output) {
+RUCKIG_C_API double ruckig_output_get_time(const ruckig_output_t* output) {
     return output ? output->time : 0.0;
 }
 
-size_t ruckig_output_get_new_section(const ruckig_output_t* output) {
+RUCKIG_C_API size_t ruckig_output_get_new_section(const ruckig_output_t* output) {
     return output ? output->new_section : 0;
 }
 
-bool ruckig_output_did_section_change(const ruckig_output_t* output) {
+RUCKIG_C_API bool ruckig_output_did_section_change(const ruckig_output_t* output) {
     return output ? output->did_section_change : false;
 }
 
-bool ruckig_output_new_calculation(const ruckig_output_t* output) {
+RUCKIG_C_API bool ruckig_output_new_calculation(const ruckig_output_t* output) {
     return output ? output->new_calculation : false;
 }
 
-bool ruckig_output_was_calculation_interrupted(const ruckig_output_t* output) {
+RUCKIG_C_API bool ruckig_output_was_calculation_interrupted(const ruckig_output_t* output) {
     return output ? output->was_calculation_interrupted : false;
 }
 
-double ruckig_output_get_calculation_duration(const ruckig_output_t* output) {
+RUCKIG_C_API double ruckig_output_get_calculation_duration(const ruckig_output_t* output) {
     return output ? output->calculation_duration : 0.0;
 }
 
-const ruckig_trajectory_t* ruckig_output_get_trajectory(const ruckig_output_t* output) {
+RUCKIG_C_API const ruckig_trajectory_t* ruckig_output_get_trajectory(const ruckig_output_t* output) {
     return output ? output->trajectory : NULL;
 }

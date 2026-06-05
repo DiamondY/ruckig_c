@@ -65,7 +65,7 @@ static void initialize_input_defaults(ruckig_input_t* input) {
     }
 }
 
-ruckig_result_t ruckig_input_create(ruckig_input_t** input, size_t dofs) {
+RUCKIG_C_API ruckig_result_t ruckig_input_create(ruckig_input_t** input, size_t dofs) {
     ruckig_input_t* value;
     if (!input || dofs == 0) {
         return RUCKIG_ERROR_INVALID_INPUT;
@@ -88,7 +88,7 @@ ruckig_result_t ruckig_input_create(ruckig_input_t** input, size_t dofs) {
     return RUCKIG_WORKING;
 }
 
-void ruckig_input_destroy(ruckig_input_t* input) {
+RUCKIG_C_API void ruckig_input_destroy(ruckig_input_t* input) {
     if (!input) {
         return;
     }
@@ -110,15 +110,15 @@ void ruckig_input_destroy(ruckig_input_t* input) {
     ruckig_free(input);
 }
 
-size_t ruckig_input_get_dof_count(const ruckig_input_t* input) {
+RUCKIG_C_API size_t ruckig_input_get_dof_count(const ruckig_input_t* input) {
     return input ? input->dofs : 0;
 }
 
 #define MUTABLE_DATA_ACCESSOR(name, field) \
-double* name(ruckig_input_t* input) { return input ? input->field : NULL; }
+RUCKIG_C_API double* name(ruckig_input_t* input) { return input ? input->field : NULL; }
 
 #define CONST_DATA_ACCESSOR(name, field) \
-const double* name(const ruckig_input_t* input) { return input ? input->field : NULL; }
+RUCKIG_C_API const double* name(const ruckig_input_t* input) { return input ? input->field : NULL; }
 
 MUTABLE_DATA_ACCESSOR(ruckig_input_current_position_data, current_position)
 MUTABLE_DATA_ACCESSOR(ruckig_input_current_velocity_data, current_velocity)
@@ -130,7 +130,7 @@ MUTABLE_DATA_ACCESSOR(ruckig_input_max_velocity_data, max_velocity)
 MUTABLE_DATA_ACCESSOR(ruckig_input_max_acceleration_data, max_acceleration)
 MUTABLE_DATA_ACCESSOR(ruckig_input_max_jerk_data, max_jerk)
 
-bool* ruckig_input_enabled_data(ruckig_input_t* input) {
+RUCKIG_C_API bool* ruckig_input_enabled_data(ruckig_input_t* input) {
     return input ? input->enabled : NULL;
 }
 
@@ -144,11 +144,11 @@ CONST_DATA_ACCESSOR(ruckig_input_max_velocity_const_data, max_velocity)
 CONST_DATA_ACCESSOR(ruckig_input_max_acceleration_const_data, max_acceleration)
 CONST_DATA_ACCESSOR(ruckig_input_max_jerk_const_data, max_jerk)
 
-const bool* ruckig_input_enabled_const_data(const ruckig_input_t* input) {
+RUCKIG_C_API const bool* ruckig_input_enabled_const_data(const ruckig_input_t* input) {
     return input ? input->enabled : NULL;
 }
 
-ruckig_result_t ruckig_input_set_control_interface(
+RUCKIG_C_API ruckig_result_t ruckig_input_set_control_interface(
     ruckig_input_t* input,
     ruckig_control_interface_t control_interface
 ) {
@@ -159,7 +159,7 @@ ruckig_result_t ruckig_input_set_control_interface(
     return RUCKIG_WORKING;
 }
 
-ruckig_result_t ruckig_input_set_synchronization(
+RUCKIG_C_API ruckig_result_t ruckig_input_set_synchronization(
     ruckig_input_t* input,
     ruckig_synchronization_t synchronization
 ) {
@@ -170,7 +170,7 @@ ruckig_result_t ruckig_input_set_synchronization(
     return RUCKIG_WORKING;
 }
 
-ruckig_result_t ruckig_input_set_per_dof_control_interface(
+RUCKIG_C_API ruckig_result_t ruckig_input_set_per_dof_control_interface(
     ruckig_input_t* input,
     const ruckig_control_interface_t* values,
     size_t count
@@ -189,13 +189,13 @@ ruckig_result_t ruckig_input_set_per_dof_control_interface(
     return RUCKIG_WORKING;
 }
 
-void ruckig_input_clear_per_dof_control_interface(ruckig_input_t* input) {
+RUCKIG_C_API void ruckig_input_clear_per_dof_control_interface(ruckig_input_t* input) {
     if (input) {
         input->has_per_dof_control_interface = false;
     }
 }
 
-ruckig_result_t ruckig_input_set_per_dof_synchronization(
+RUCKIG_C_API ruckig_result_t ruckig_input_set_per_dof_synchronization(
     ruckig_input_t* input,
     const ruckig_synchronization_t* values,
     size_t count
@@ -214,13 +214,13 @@ ruckig_result_t ruckig_input_set_per_dof_synchronization(
     return RUCKIG_WORKING;
 }
 
-void ruckig_input_clear_per_dof_synchronization(ruckig_input_t* input) {
+RUCKIG_C_API void ruckig_input_clear_per_dof_synchronization(ruckig_input_t* input) {
     if (input) {
         input->has_per_dof_synchronization = false;
     }
 }
 
-ruckig_result_t ruckig_input_set_duration_discretization(
+RUCKIG_C_API ruckig_result_t ruckig_input_set_duration_discretization(
     ruckig_input_t* input,
     ruckig_duration_discretization_t duration_discretization
 ) {
@@ -231,7 +231,7 @@ ruckig_result_t ruckig_input_set_duration_discretization(
     return RUCKIG_WORKING;
 }
 
-ruckig_result_t ruckig_input_set_dof_enabled(
+RUCKIG_C_API ruckig_result_t ruckig_input_set_dof_enabled(
     ruckig_input_t* input,
     size_t dof,
     bool enabled
@@ -243,7 +243,7 @@ ruckig_result_t ruckig_input_set_dof_enabled(
     return RUCKIG_WORKING;
 }
 
-ruckig_result_t ruckig_input_set_min_velocity(
+RUCKIG_C_API ruckig_result_t ruckig_input_set_min_velocity(
     ruckig_input_t* input,
     const double* min_velocity,
     size_t count
@@ -256,13 +256,13 @@ ruckig_result_t ruckig_input_set_min_velocity(
     return RUCKIG_WORKING;
 }
 
-void ruckig_input_clear_min_velocity(ruckig_input_t* input) {
+RUCKIG_C_API void ruckig_input_clear_min_velocity(ruckig_input_t* input) {
     if (input) {
         input->has_min_velocity = false;
     }
 }
 
-ruckig_result_t ruckig_input_set_min_acceleration(
+RUCKIG_C_API ruckig_result_t ruckig_input_set_min_acceleration(
     ruckig_input_t* input,
     const double* min_acceleration,
     size_t count
@@ -275,13 +275,13 @@ ruckig_result_t ruckig_input_set_min_acceleration(
     return RUCKIG_WORKING;
 }
 
-void ruckig_input_clear_min_acceleration(ruckig_input_t* input) {
+RUCKIG_C_API void ruckig_input_clear_min_acceleration(ruckig_input_t* input) {
     if (input) {
         input->has_min_acceleration = false;
     }
 }
 
-ruckig_result_t ruckig_input_set_minimum_duration(
+RUCKIG_C_API ruckig_result_t ruckig_input_set_minimum_duration(
     ruckig_input_t* input,
     double minimum_duration
 ) {
@@ -293,7 +293,7 @@ ruckig_result_t ruckig_input_set_minimum_duration(
     return RUCKIG_WORKING;
 }
 
-void ruckig_input_clear_minimum_duration(ruckig_input_t* input) {
+RUCKIG_C_API void ruckig_input_clear_minimum_duration(ruckig_input_t* input) {
     if (input) {
         input->has_minimum_duration = false;
     }
@@ -307,7 +307,7 @@ static double v_at_a_zero(double v0, double a0, double j) {
     return v0 + (a0 * a0) / (2.0 * j);
 }
 
-ruckig_result_t ruckig_validate_input(
+RUCKIG_C_API ruckig_result_t ruckig_validate_input(
     const ruckig_t* otg,
     const ruckig_input_t* input,
     bool check_current_state_within_limits,
