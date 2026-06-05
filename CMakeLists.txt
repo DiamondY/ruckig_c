@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(ruckig_c_rewrite VERSION 0.3.0 LANGUAGES C)
+project(ruckig_c_rewrite VERSION 0.4.0 LANGUAGES C)
 
 include(CTest)
 include(GNUInstallDirs)
@@ -65,6 +65,7 @@ set(RUCKIG_C_SOURCES
   src/ruckig_c/velocity_second_step2.c
   src/ruckig_c/velocity_third_step1.c
   src/ruckig_c/velocity_third_step2.c
+  src/ruckig_c/waypoint.c
 )
 
 function(ruckig_c_apply_sanitizers target)
@@ -176,6 +177,9 @@ if(BUILD_RUCKIG_C_TESTS)
   endif()
   ruckig_c_apply_sanitizers(ruckig_c_tests)
   add_test(NAME ruckig_c_tests COMMAND ruckig_c_tests)
+  add_test(NAME ruckig_c_waypoint_optimizer COMMAND ruckig_c_tests --waypoint)
+  add_test(NAME ruckig_c_per_section_constraints COMMAND ruckig_c_tests --per-section)
+  add_test(NAME ruckig_c_waypoint_quality COMMAND ruckig_c_tests --waypoint-quality)
   add_test(NAME ruckig_c_allocation_audit
     COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/test/c/audit_allocations.cmake
   )
@@ -318,6 +322,30 @@ if(BUILD_RUCKIG_C_EXAMPLES)
   target_link_libraries(example-ruckig-c-08-per-dof-online PRIVATE ruckig_c)
   add_test(NAME example_ruckig_c_08_per_dof_online COMMAND example-ruckig-c-08-per-dof-online)
 
+  add_executable(example-ruckig-c-09-waypoints-offline examples/c/09_waypoints_offline.c)
+  target_link_libraries(example-ruckig-c-09-waypoints-offline PRIVATE ruckig_c)
+  add_test(NAME example_ruckig_c_09_waypoints_offline COMMAND example-ruckig-c-09-waypoints-offline)
+
+  add_executable(example-ruckig-c-10-per-section-minimum-duration examples/c/10_per_section_minimum_duration.c)
+  target_link_libraries(example-ruckig-c-10-per-section-minimum-duration PRIVATE ruckig_c)
+  add_test(NAME example_ruckig_c_10_per_section_minimum_duration COMMAND example-ruckig-c-10-per-section-minimum-duration)
+
+  add_executable(example-ruckig-c-11-waypoints-online examples/c/11_waypoints_online.c)
+  target_link_libraries(example-ruckig-c-11-waypoints-online PRIVATE ruckig_c)
+  add_test(NAME example_ruckig_c_11_waypoints_online COMMAND example-ruckig-c-11-waypoints-online)
+
+  add_executable(example-ruckig-c-12-per-section-limits examples/c/12_per_section_limits.c)
+  target_link_libraries(example-ruckig-c-12-per-section-limits PRIVATE ruckig_c)
+  add_test(NAME example_ruckig_c_12_per_section_limits COMMAND example-ruckig-c-12-per-section-limits)
+
+  add_executable(example-ruckig-c-13-filter-intermediate-positions examples/c/13_filter_intermediate_positions.c)
+  target_link_libraries(example-ruckig-c-13-filter-intermediate-positions PRIVATE ruckig_c)
+  add_test(NAME example_ruckig_c_13_filter_intermediate_positions COMMAND example-ruckig-c-13-filter-intermediate-positions)
+
+  add_executable(example-ruckig-c-14-dynamic-dofs-waypoints examples/c/14_dynamic_dofs_waypoints.c)
+  target_link_libraries(example-ruckig-c-14-dynamic-dofs-waypoints PRIVATE ruckig_c)
+  add_test(NAME example_ruckig_c_14_dynamic_dofs_waypoints COMMAND example-ruckig-c-14-dynamic-dofs-waypoints)
+
   add_custom_target(ruckig_c_examples
     DEPENDS
       example-ruckig-c-00-minimal-offline
@@ -329,6 +357,12 @@ if(BUILD_RUCKIG_C_EXAMPLES)
       example-ruckig-c-06-stop
       example-ruckig-c-07-minimum-duration
       example-ruckig-c-08-per-dof-online
+      example-ruckig-c-09-waypoints-offline
+      example-ruckig-c-10-per-section-minimum-duration
+      example-ruckig-c-11-waypoints-online
+      example-ruckig-c-12-per-section-limits
+      example-ruckig-c-13-filter-intermediate-positions
+      example-ruckig-c-14-dynamic-dofs-waypoints
   )
 endif()
 
@@ -362,6 +396,7 @@ if(BUILD_RUCKIG_C_ORACLE_TESTS)
   endif()
   ruckig_c_apply_sanitizers(ruckig_c_oracle_tests)
   add_test(NAME ruckig_c_oracle_tests COMMAND ruckig_c_oracle_tests)
+  add_test(NAME ruckig_c_waypoint_section_oracle COMMAND ruckig_c_oracle_tests --waypoint-section-oracle)
   add_test(NAME ruckig_c_oracle_random_smoke COMMAND ruckig_c_oracle_tests --random 100 --seed 1)
   add_test(NAME ruckig_c_oracle_random_per_dof_smoke COMMAND ruckig_c_oracle_tests --random-per-dof 100 --seed 1)
   add_test(NAME ruckig_c_oracle_random_development COMMAND ruckig_c_oracle_tests --random 100000 --seed 1)
@@ -401,9 +436,10 @@ if(BUILD_RUCKIG_C_PERFORMANCE_TESTS)
   endif()
   ruckig_c_apply_sanitizers(ruckig_c_performance_benchmark)
   add_test(NAME ruckig_c_performance_benchmark COMMAND ruckig_c_performance_benchmark --samples 10000 --seed 1)
+  add_test(NAME ruckig_c_waypoint_performance_benchmark COMMAND ruckig_c_performance_benchmark --samples 1000 --seed 1 --waypoints)
 endif()
 
-set(RUCKIG_C_ABI_OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/artifacts/abi/0.3.0")
+set(RUCKIG_C_ABI_OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/artifacts/abi/0.4.0-design")
 set(RUCKIG_C_ABI_PUBLIC_GENERATED_FILE "${RUCKIG_C_ABI_OUTPUT_DIR}/public-symbols-from-header.txt")
 set(RUCKIG_C_ABI_PUBLIC_VERIFY_FILE "${RUCKIG_C_ABI_OUTPUT_DIR}/public-symbols-verify.txt")
 add_custom_command(

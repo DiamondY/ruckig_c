@@ -585,6 +585,289 @@ void run_case(const CaseData& test_case, bool compare_first_time_queries = true)
     ruckig_destroy(c_otg);
 }
 
+struct WaypointSectionOracleCase {
+    std::string name;
+    size_t dofs {1};
+    double delta_time {0.01};
+    std::vector<double> current_position;
+    std::vector<double> current_velocity;
+    std::vector<double> current_acceleration;
+    std::vector<double> target_position;
+    std::vector<double> target_velocity;
+    std::vector<double> target_acceleration;
+    std::vector<double> max_velocity;
+    std::vector<double> max_acceleration;
+    std::vector<double> max_jerk;
+    std::vector<double> intermediate_positions;
+    std::vector<double> per_section_max_velocity {};
+    std::vector<double> per_section_min_velocity {};
+    std::vector<double> per_section_max_acceleration {};
+    std::vector<double> per_section_min_acceleration {};
+    std::vector<double> per_section_max_jerk {};
+    std::vector<double> per_section_minimum_duration {};
+};
+
+void fill_waypoint_c_input(const WaypointSectionOracleCase& test_case, ruckig_input_t* input) {
+    copy_vector(ruckig_input_current_position_data(input), test_case.current_position);
+    copy_vector(ruckig_input_current_velocity_data(input), test_case.current_velocity);
+    copy_vector(ruckig_input_current_acceleration_data(input), test_case.current_acceleration);
+    copy_vector(ruckig_input_target_position_data(input), test_case.target_position);
+    copy_vector(ruckig_input_target_velocity_data(input), test_case.target_velocity);
+    copy_vector(ruckig_input_target_acceleration_data(input), test_case.target_acceleration);
+    copy_vector(ruckig_input_max_velocity_data(input), test_case.max_velocity);
+    copy_vector(ruckig_input_max_acceleration_data(input), test_case.max_acceleration);
+    copy_vector(ruckig_input_max_jerk_data(input), test_case.max_jerk);
+
+    const size_t waypoint_count = test_case.intermediate_positions.size() / test_case.dofs;
+    ruckig_input_set_intermediate_positions(input, test_case.intermediate_positions.data(), waypoint_count, test_case.dofs);
+    if (!test_case.per_section_max_velocity.empty()) {
+        ruckig_input_set_per_section_max_velocity(input, test_case.per_section_max_velocity.data(), waypoint_count + 1, test_case.dofs);
+    }
+    if (!test_case.per_section_min_velocity.empty()) {
+        ruckig_input_set_per_section_min_velocity(input, test_case.per_section_min_velocity.data(), waypoint_count + 1, test_case.dofs);
+    }
+    if (!test_case.per_section_max_acceleration.empty()) {
+        ruckig_input_set_per_section_max_acceleration(input, test_case.per_section_max_acceleration.data(), waypoint_count + 1, test_case.dofs);
+    }
+    if (!test_case.per_section_min_acceleration.empty()) {
+        ruckig_input_set_per_section_min_acceleration(input, test_case.per_section_min_acceleration.data(), waypoint_count + 1, test_case.dofs);
+    }
+    if (!test_case.per_section_max_jerk.empty()) {
+        ruckig_input_set_per_section_max_jerk(input, test_case.per_section_max_jerk.data(), waypoint_count + 1, test_case.dofs);
+    }
+    if (!test_case.per_section_minimum_duration.empty()) {
+        ruckig_input_set_per_section_minimum_duration(input, test_case.per_section_minimum_duration.data(), waypoint_count + 1);
+    }
+}
+
+double section_value_or_global(
+    const std::vector<double>& per_section_values,
+    const std::vector<double>& global_values,
+    size_t section,
+    size_t dof,
+    size_t dofs
+) {
+    if (!per_section_values.empty()) {
+        return per_section_values[section * dofs + dof];
+    }
+    return global_values[dof];
+}
+
+void compare_waypoint_section_to_oracle(
+    const WaypointSectionOracleCase& test_case,
+    const ruckig_trajectory_t* c_trajectory,
+    const std::vector<double>& cumulative_times,
+    size_t section,
+    const std::vector<double>& start_position,
+    const std::vector<double>& start_velocity,
+    const std::vector<double>& start_acceleration,
+    const std::vector<double>& end_position,
+    const std::vector<double>& end_velocity,
+    const std::vector<double>& end_acceleration
+) {
+    const double offset = section == 0 ? 0.0 : cumulative_times[section - 1];
+    const double section_duration = cumulative_times[section] - offset;
+    ruckig::Ruckig<ruckig::DynamicDOFs> oracle_otg(test_case.dofs, test_case.delta_time);
+    ruckig::InputParameter<ruckig::DynamicDOFs> oracle_input(test_case.dofs);
+    ruckig::Trajectory<ruckig::DynamicDOFs> oracle_trajectory(test_case.dofs);
+
+    oracle_input.current_position = start_position;
+    oracle_input.current_velocity = start_velocity;
+    oracle_input.current_acceleration = start_acceleration;
+    oracle_input.target_position = end_position;
+    oracle_input.target_velocity = end_velocity;
+    oracle_input.target_acceleration = end_acceleration;
+    oracle_input.max_velocity.assign(test_case.dofs, 0.0);
+    oracle_input.min_velocity = std::vector<double>(test_case.dofs, 0.0);
+    oracle_input.max_acceleration.assign(test_case.dofs, 0.0);
+    oracle_input.min_acceleration = std::vector<double>(test_case.dofs, 0.0);
+    oracle_input.max_jerk.assign(test_case.dofs, 0.0);
+    for (size_t dof = 0; dof < test_case.dofs; ++dof) {
+        oracle_input.max_velocity[dof] = section_value_or_global(test_case.per_section_max_velocity, test_case.max_velocity, section, dof, test_case.dofs);
+        oracle_input.min_velocity.value()[dof] = test_case.per_section_min_velocity.empty()
+            ? -oracle_input.max_velocity[dof]
+            : test_case.per_section_min_velocity[section * test_case.dofs + dof];
+        oracle_input.max_acceleration[dof] = section_value_or_global(test_case.per_section_max_acceleration, test_case.max_acceleration, section, dof, test_case.dofs);
+        oracle_input.min_acceleration.value()[dof] = test_case.per_section_min_acceleration.empty()
+            ? -oracle_input.max_acceleration[dof]
+            : test_case.per_section_min_acceleration[section * test_case.dofs + dof];
+        oracle_input.max_jerk[dof] = section_value_or_global(test_case.per_section_max_jerk, test_case.max_jerk, section, dof, test_case.dofs);
+    }
+    if (!test_case.per_section_minimum_duration.empty()) {
+        oracle_input.minimum_duration = test_case.per_section_minimum_duration[section];
+    }
+
+    const auto oracle_result = oracle_otg.calculate(oracle_input, oracle_trajectory);
+    if (oracle_result != ruckig::Result::Working) {
+        fail(test_case.name, "section oracle solve failed section=" + std::to_string(section));
+        return;
+    }
+    if (!near(section_duration, oracle_trajectory.get_duration(), kDurationTolerance)) {
+        fail(test_case.name, "section duration mismatch section=" + std::to_string(section) + values(section_duration, oracle_trajectory.get_duration()));
+    }
+
+    const std::vector<double> sample_times {0.0, section_duration / 2.0, section_duration};
+    for (double local_time: sample_times) {
+        std::vector<double> oracle_position(test_case.dofs);
+        std::vector<double> oracle_velocity(test_case.dofs);
+        std::vector<double> oracle_acceleration(test_case.dofs);
+        std::vector<double> c_position(test_case.dofs);
+        std::vector<double> c_velocity(test_case.dofs);
+        std::vector<double> c_acceleration(test_case.dofs);
+        oracle_trajectory.at_time(local_time, oracle_position, oracle_velocity, oracle_acceleration);
+        const auto c_result = ruckig_trajectory_at_time(
+            c_trajectory,
+            offset + local_time,
+            c_position.data(),
+            c_velocity.data(),
+            c_acceleration.data(),
+            nullptr,
+            nullptr
+        );
+        if (c_result != RUCKIG_WORKING) {
+            fail(test_case.name, "section C trajectory sample failed section=" + std::to_string(section));
+            continue;
+        }
+        for (size_t dof = 0; dof < test_case.dofs; ++dof) {
+            if (!near(c_position[dof], oracle_position[dof], kPositionTolerance)) {
+                fail(test_case.name, "section position mismatch section=" + std::to_string(section) + " dof=" + std::to_string(dof) + values(c_position[dof], oracle_position[dof]));
+            }
+            if (!near(c_velocity[dof], oracle_velocity[dof], kVelocityTolerance)) {
+                fail(test_case.name, "section velocity mismatch section=" + std::to_string(section) + " dof=" + std::to_string(dof) + values(c_velocity[dof], oracle_velocity[dof]));
+            }
+            if (!near(c_acceleration[dof], oracle_acceleration[dof], kAccelerationTolerance)) {
+                fail(test_case.name, "section acceleration mismatch section=" + std::to_string(section) + " dof=" + std::to_string(dof) + values(c_acceleration[dof], oracle_acceleration[dof]));
+            }
+        }
+    }
+}
+
+void run_waypoint_section_oracle_case(const WaypointSectionOracleCase& test_case) {
+    const size_t waypoint_count = test_case.intermediate_positions.size() / test_case.dofs;
+    const size_t section_count = waypoint_count + 1;
+    ruckig_t* c_otg = nullptr;
+    ruckig_input_t* c_input = nullptr;
+    ruckig_trajectory_t* c_trajectory = nullptr;
+    if (ruckig_create_with_waypoints(&c_otg, test_case.dofs, test_case.delta_time, waypoint_count) != RUCKIG_WORKING
+        || ruckig_input_create_with_waypoints(&c_input, test_case.dofs, waypoint_count) != RUCKIG_WORKING
+        || ruckig_trajectory_create_with_waypoints(&c_trajectory, test_case.dofs, waypoint_count) != RUCKIG_WORKING) {
+        fail(test_case.name, "failed to create waypoint section oracle C handles");
+        ruckig_trajectory_destroy(c_trajectory);
+        ruckig_input_destroy(c_input);
+        ruckig_destroy(c_otg);
+        return;
+    }
+
+    fill_waypoint_c_input(test_case, c_input);
+    const auto c_result = ruckig_calculate(c_otg, c_input, c_trajectory);
+    if (c_result != RUCKIG_WORKING) {
+        fail(test_case.name, "waypoint calculate failed before section oracle comparison");
+        ruckig_trajectory_destroy(c_trajectory);
+        ruckig_input_destroy(c_input);
+        ruckig_destroy(c_otg);
+        return;
+    }
+
+    std::vector<double> intermediate_times(waypoint_count);
+    if (waypoint_count > 0) {
+        const auto durations_result = ruckig_trajectory_get_intermediate_durations(c_trajectory, intermediate_times.data(), intermediate_times.size());
+        if (durations_result != RUCKIG_WORKING) {
+            fail(test_case.name, "failed to get intermediate durations");
+        }
+    }
+    std::vector<double> cumulative_times(section_count);
+    for (size_t i = 0; i < waypoint_count; ++i) {
+        cumulative_times[i] = intermediate_times[i];
+    }
+    cumulative_times[section_count - 1] = ruckig_trajectory_get_duration(c_trajectory);
+
+    std::vector<std::vector<double>> positions(section_count + 1, std::vector<double>(test_case.dofs));
+    std::vector<std::vector<double>> velocities(section_count + 1, std::vector<double>(test_case.dofs));
+    std::vector<std::vector<double>> accelerations(section_count + 1, std::vector<double>(test_case.dofs));
+    for (size_t boundary = 0; boundary < section_count + 1; ++boundary) {
+        const double time = boundary == 0 ? 0.0 : cumulative_times[boundary - 1];
+        const auto sample_result = ruckig_trajectory_at_time(
+            c_trajectory,
+            time,
+            positions[boundary].data(),
+            velocities[boundary].data(),
+            accelerations[boundary].data(),
+            nullptr,
+            nullptr
+        );
+        if (sample_result != RUCKIG_WORKING) {
+            fail(test_case.name, "failed to sample waypoint section boundary=" + std::to_string(boundary));
+        }
+    }
+
+    for (size_t section = 0; section < section_count; ++section) {
+        compare_waypoint_section_to_oracle(
+            test_case,
+            c_trajectory,
+            cumulative_times,
+            section,
+            positions[section],
+            velocities[section],
+            accelerations[section],
+            positions[section + 1],
+            velocities[section + 1],
+            accelerations[section + 1]
+        );
+    }
+
+    ruckig_trajectory_destroy(c_trajectory);
+    ruckig_input_destroy(c_input);
+    ruckig_destroy(c_otg);
+}
+
+void run_waypoint_section_oracle_cases() {
+    const int failures_before = failures;
+    std::vector<WaypointSectionOracleCase> cases;
+    cases.push_back(WaypointSectionOracleCase{
+        "waypoint-section-oracle-1d-per-section-min-duration",
+        1,
+        0.01,
+        {0.0},
+        {0.0},
+        {0.0},
+        {2.0},
+        {0.0},
+        {0.0},
+        {1.5},
+        {2.0},
+        {4.0},
+        {1.0},
+        {1.2, 1.0},
+        {-1.2, -1.0},
+        {2.0, 1.8},
+        {-2.0, -1.8},
+        {4.0, 4.0},
+        {0.5, 0.25}
+    });
+    cases.push_back(WaypointSectionOracleCase{
+        "waypoint-section-oracle-2d-two-waypoints",
+        2,
+        0.02,
+        {0.0, 0.0},
+        {0.0, 0.0},
+        {0.0, 0.0},
+        {1.5, -0.8},
+        {0.0, 0.0},
+        {0.0, 0.0},
+        {1.2, 1.1},
+        {2.0, 1.8},
+        {4.0, 3.5},
+        {0.5, -0.2, 1.0, -0.5}
+    });
+
+    for (const auto& test_case: cases) {
+        run_waypoint_section_oracle_case(test_case);
+    }
+    if (failures == failures_before) {
+        std::cout << "Waypoint section oracle comparisons passed: " << cases.size() << '\n';
+    }
+}
+
 void print_case_repro(const CaseData& test_case) {
     std::cerr.precision(17);
     std::cerr << "repro name=" << test_case.name
@@ -864,6 +1147,7 @@ int main(int argc, char** argv) {
     size_t random_count = 0;
     size_t random_per_dof_count = 0;
     std::uint64_t random_seed = 1;
+    bool waypoint_section_oracle_only = false;
 
     for (int i = 1; i < argc; ++i) {
         const std::string arg = argv[i];
@@ -873,10 +1157,21 @@ int main(int argc, char** argv) {
             random_per_dof_count = static_cast<size_t>(std::stoull(argv[++i]));
         } else if (arg == "--seed" && i + 1 < argc) {
             random_seed = static_cast<std::uint64_t>(std::stoull(argv[++i]));
+        } else if (arg == "--waypoint-section-oracle") {
+            waypoint_section_oracle_only = true;
         } else {
-            std::cerr << "usage: " << argv[0] << " [--random N] [--random-per-dof N] [--seed S]\n";
+            std::cerr << "usage: " << argv[0] << " [--random N] [--random-per-dof N] [--seed S] [--waypoint-section-oracle]\n";
             return 2;
         }
+    }
+
+    if (waypoint_section_oracle_only) {
+        run_waypoint_section_oracle_cases();
+        if (failures != 0) {
+            std::cerr << failures << " waypoint section oracle comparison failures\n";
+            return 1;
+        }
+        return 0;
     }
 
     cases.push_back(CaseData{
@@ -2659,6 +2954,7 @@ int main(int argc, char** argv) {
     for (const auto& test_case: cases) {
         run_case(test_case, test_case.compare_first_time_queries);
     }
+    run_waypoint_section_oracle_cases();
 
     if (failures != 0) {
         std::cerr << failures << " oracle comparison failures\n";

@@ -142,7 +142,33 @@ Long-term optional, outside the active roadmap:
 - Package-manager recipes for vcpkg, Conan, Homebrew, FetchContent, and
   vendored subdirectory use.
 - New package-manager prototype work beyond the existing experimental notes.
-- Waypoints, per-section constraints, and cloud calculation remain separate
-  design projects. Do not add public setters or public ABI symbols for those
-  features in the current hardening queue; `RUCKIG_ERROR_UNSUPPORTED` remains a
-  future-compatible error code only.
+
+## 0.4.0-Design Original-Surface Parity
+
+`main` now starts the `0.4.0-design - Unreleased` line. This is the first
+planned public C ABI expansion after the `v0.3.0` hardening release. The goal
+is full original-surface parity with a local waypoint optimizer, not a cloud
+client.
+
+- Added waypoint-aware C constructors and input/trajectory APIs for
+  intermediate waypoints, global position bounds, per-section constraints,
+  interrupt-duration storage, intermediate duration queries, and local
+  waypoint filtering.
+- Added an experimental coupled waypoint optimizer. It searches shared internal
+  waypoint velocity/acceleration candidates, evaluates every complete candidate
+  through the existing target solver section evaluator, rejects constraint
+  violations, explores a deterministic internal branch queue around promising
+  candidates, and selects the lowest-duration feasible result.
+- The alpha optimizer is local-only. It does not call Ruckig cloud, does not
+  provide remote fallback, and does not yet claim Ruckig Pro/cloud global
+  numerical equivalence.
+- No-waypoint target-solver behavior remains frozen against the existing C++
+  oracle path.
+- Python `cffi` and Rust wrappers now have alpha prototypes over the public C
+  ABI. They remain unpublished and outside stable package scope until optimizer
+  and ABI evidence are stronger.
+- CI configuration now includes `0.4.0-design` ABI artifact paths, Linux
+  waypoint alpha performance output, Python prototype smoke, and Rust alpha
+  wrapper smoke. Stable `v0.4.0` still requires actual remote CI evidence.
+- Package-manager recipes, cloud API support, and upstream baseline upgrades
+  remain separate projects.

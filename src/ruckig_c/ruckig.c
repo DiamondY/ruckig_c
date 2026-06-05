@@ -4,6 +4,7 @@
 #include "ruckig_c/velocity_second.h"
 
 #include <math.h>
+#include <string.h>
 #ifdef RUCKIG_C_ENABLE_CALCULATION_DURATION
 #include <time.h>
 #endif
@@ -1219,8 +1220,14 @@ static ruckig_result_t calculate_position(
     return RUCKIG_WORKING;
 }
 
-RUCKIG_C_API ruckig_result_t ruckig_create(ruckig_t** otg, size_t dofs, double delta_time) {
+static ruckig_result_t ruckig_create_impl(
+    ruckig_t** otg,
+    size_t dofs,
+    double delta_time,
+    size_t max_number_of_waypoints
+) {
     ruckig_t* value;
+    const size_t waypoint_values = max_number_of_waypoints * dofs;
     if (!otg || dofs == 0) {
         return RUCKIG_ERROR_INVALID_INPUT;
     }
@@ -1232,14 +1239,50 @@ RUCKIG_C_API ruckig_result_t ruckig_create(ruckig_t** otg, size_t dofs, double d
     }
 
     value->dofs = dofs;
+    value->max_number_of_waypoints = max_number_of_waypoints;
     value->delta_time = delta_time;
-    if (ruckig_input_create(&value->current_input, dofs) != RUCKIG_WORKING) {
+    if (ruckig_input_create_with_waypoints(&value->current_input, dofs, max_number_of_waypoints) != RUCKIG_WORKING) {
         ruckig_destroy(value);
         return RUCKIG_ERROR;
+    }
+    if (ruckig_input_create(&value->waypoint_section_input, dofs) != RUCKIG_WORKING) {
+        ruckig_destroy(value);
+        return RUCKIG_ERROR;
+    }
+    if (ruckig_trajectory_create(&value->waypoint_section_trajectory, dofs) != RUCKIG_WORKING) {
+        ruckig_destroy(value);
+        return RUCKIG_ERROR;
+    }
+    if (waypoint_values > 0) {
+        value->waypoint_candidate_velocity = (double*)ruckig_calloc(waypoint_values, sizeof(double));
+        value->waypoint_candidate_acceleration = (double*)ruckig_calloc(waypoint_values, sizeof(double));
+        value->waypoint_best_velocity = (double*)ruckig_calloc(waypoint_values, sizeof(double));
+        value->waypoint_best_acceleration = (double*)ruckig_calloc(waypoint_values, sizeof(double));
+        value->waypoint_baseline_velocity = (double*)ruckig_calloc(waypoint_values, sizeof(double));
+        value->waypoint_baseline_acceleration = (double*)ruckig_calloc(waypoint_values, sizeof(double));
+        if (!value->waypoint_candidate_velocity || !value->waypoint_candidate_acceleration
+            || !value->waypoint_best_velocity || !value->waypoint_best_acceleration
+            || !value->waypoint_baseline_velocity || !value->waypoint_baseline_acceleration) {
+            ruckig_destroy(value);
+            return RUCKIG_ERROR;
+        }
     }
 
     *otg = value;
     return RUCKIG_WORKING;
+}
+
+RUCKIG_C_API ruckig_result_t ruckig_create(ruckig_t** otg, size_t dofs, double delta_time) {
+    return ruckig_create_impl(otg, dofs, delta_time, 0);
+}
+
+RUCKIG_C_API ruckig_result_t ruckig_create_with_waypoints(
+    ruckig_t** otg,
+    size_t dofs,
+    double delta_time,
+    size_t max_number_of_waypoints
+) {
+    return ruckig_create_impl(otg, dofs, delta_time, max_number_of_waypoints);
 }
 
 RUCKIG_C_API void ruckig_destroy(ruckig_t* otg) {
@@ -1247,10 +1290,22 @@ RUCKIG_C_API void ruckig_destroy(ruckig_t* otg) {
         return;
     }
     ruckig_input_destroy(otg->current_input);
+    ruckig_input_destroy(otg->waypoint_section_input);
+    ruckig_trajectory_destroy(otg->waypoint_section_trajectory);
+    ruckig_free(otg->waypoint_candidate_velocity);
+    ruckig_free(otg->waypoint_candidate_acceleration);
+    ruckig_free(otg->waypoint_best_velocity);
+    ruckig_free(otg->waypoint_best_acceleration);
+    ruckig_free(otg->waypoint_baseline_velocity);
+    ruckig_free(otg->waypoint_baseline_acceleration);
     ruckig_free(otg);
 }
 
-RUCKIG_C_API ruckig_result_t ruckig_calculate(
+RUCKIG_C_API size_t ruckig_get_max_number_of_waypoints(const ruckig_t* otg) {
+    return otg ? otg->max_number_of_waypoints : 0;
+}
+
+ruckig_result_t ruckig_calculate_target(
     ruckig_t* otg,
     const ruckig_input_t* input,
     ruckig_trajectory_t* trajectory
@@ -1259,6 +1314,7 @@ RUCKIG_C_API ruckig_result_t ruckig_calculate(
         return RUCKIG_ERROR_INVALID_INPUT;
     }
     trajectory->valid = false;
+    trajectory->section_count = 1;
     if (ruckig_validate_input(otg, input, false, true) != RUCKIG_WORKING) {
         return RUCKIG_ERROR_INVALID_INPUT;
     }
@@ -1283,6 +1339,24 @@ RUCKIG_C_API ruckig_result_t ruckig_calculate(
     return RUCKIG_ERROR_INVALID_INPUT;
 }
 
+RUCKIG_C_API ruckig_result_t ruckig_calculate(
+    ruckig_t* otg,
+    const ruckig_input_t* input,
+    ruckig_trajectory_t* trajectory
+) {
+    if (!otg || !input || !trajectory || otg->dofs != input->dofs || trajectory->dofs != otg->dofs) {
+        return RUCKIG_ERROR_INVALID_INPUT;
+    }
+    if (input->waypoint_count > 0) {
+        if (input->waypoint_count > otg->max_number_of_waypoints
+            || input->waypoint_count > trajectory->max_number_of_waypoints) {
+            return RUCKIG_ERROR_INVALID_INPUT;
+        }
+        return ruckig_calculate_waypoints(otg, input, trajectory);
+    }
+    return ruckig_calculate_target(otg, input, trajectory);
+}
+
 RUCKIG_C_API ruckig_result_t ruckig_update(
     ruckig_t* otg,
     const ruckig_input_t* input,
@@ -1303,6 +1377,8 @@ RUCKIG_C_API ruckig_result_t ruckig_update(
         ruckig_input_copy_state(input, otg->current_input);
         otg->current_input_initialized = true;
         output->time = 0.0;
+        output->new_section = 0;
+        output->did_section_change = false;
         output->new_calculation = true;
     }
 

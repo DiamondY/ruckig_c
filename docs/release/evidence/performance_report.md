@@ -756,6 +756,59 @@ is a hardening release; the Windows release gates for this version covered
 local build/test, shared build/test, and ABI/export validation rather than a
 separate Windows performance rerun.
 
+## 2026-06-06 Windows 0.4.0-Design Local Alpha No-Waypoint Run
+
+- Source: Local `0.4.0-design` alpha after adding waypoint-aware C ABI,
+  local waypoint optimizer tests, Python prototype expansion, Rust alpha
+  wrapper, and waypoint alpha benchmark mode.
+- Command:
+  `out\build\windows-clang-ninja-performance\ruckig_c_performance_benchmark.exe --samples 10000 --seed 1`
+- OS: Windows.
+- CPU identifier: `Intel64 Family 6 Model 165 Stepping 5, GenuineIntel`.
+- C compiler: `clang 21.1.8`.
+- C++ compiler: `clang 21.1.8`.
+- CMake build type: Release.
+- Generator: Ninja.
+- Seed: `1`.
+- Samples: `10000`.
+
+| Metric | C implementation | C++ oracle |
+| --- | ---: | ---: |
+| Average | 710.08 ns | 738.7 ns |
+| p99 | 5000 ns | 5300 ns |
+| Worst | 23400 ns | 54500 ns |
+
+Average C/oracle ratio: `0.961256`.
+
+Optional development reruns on the same binary also stayed below the `1.5`
+threshold: seed `2` ratio `1.02636`; seed `41` ratio `1.20996`. No-waypoint
+behavior remains on the frozen C++ oracle comparison path.
+
+## 2026-06-06 Windows 0.4.0-Design Local Waypoint Alpha Run
+
+- Source: Local `0.4.0-design` waypoint alpha benchmark corpus.
+- Command:
+  `out\build\windows-clang-ninja-performance\ruckig_c_performance_benchmark.exe --samples 10000 --seed 1 --waypoints`
+- OS: Windows.
+- CPU identifier: `Intel64 Family 6 Model 165 Stepping 5, GenuineIntel`.
+- C compiler: `clang 21.1.8`.
+- CMake build type: Release.
+- Generator: Ninja.
+- Seed: `1`.
+- Samples: `10000`.
+- Waypoint case count: `5`.
+
+| Metric | C waypoint optimizer |
+| --- | ---: |
+| Average | 1.02414e+06 ns |
+| p99 | 5.176e+06 ns |
+| Worst | 7.4146e+06 ns |
+
+There is no C++ oracle ratio for this waypoint alpha corpus because the frozen
+Ruckig Community `0.17.3` baseline does not contain a local global waypoint
+optimizer. This run is C-only trend evidence for the local optimizer after the
+deterministic branch-queue search was enabled.
+
 ### Windows clang release
 
 ```text

@@ -9,9 +9,9 @@ extern "C" {
 #endif
 
 #define RUCKIG_C_VERSION_MAJOR 0
-#define RUCKIG_C_VERSION_MINOR 3
+#define RUCKIG_C_VERSION_MINOR 4
 #define RUCKIG_C_VERSION_PATCH 0
-#define RUCKIG_C_VERSION_STRING "0.3.0"
+#define RUCKIG_C_VERSION_STRING "0.4.0"
 
 #ifndef RUCKIG_C_API
 #  if defined(RUCKIG_C_STATIC_DEFINE)
@@ -81,27 +81,45 @@ typedef struct ruckig ruckig_t;
 #endif
 
 /*
- * Current unsupported scope:
- * - No intermediate waypoints.
- * - No per-section constraints.
- * - No cloud API.
- * - No Python or Rust bindings in this C ABI.
- *
- * These unsupported features are intentionally not exposed as public setters.
- * If compatibility entry points are added later, they must fail explicitly with
- * RUCKIG_ERROR_UNSUPPORTED instead of silently ignoring caller input.
+ * 0.4.0-design scope:
+ * - Intermediate waypoints and per-section constraints are exposed through the
+ *   C ABI and solved locally by the experimental waypoint optimizer.
+ * - No cloud API or remote fallback is provided.
+ * - Python and Rust bindings remain separate layers over this C ABI.
  */
 
 RUCKIG_C_API ruckig_result_t ruckig_create(ruckig_t** otg, size_t dofs, double delta_time);
+RUCKIG_C_API ruckig_result_t ruckig_create_with_waypoints(
+    ruckig_t** otg,
+    size_t dofs,
+    double delta_time,
+    size_t max_number_of_waypoints
+);
 RUCKIG_C_API void ruckig_destroy(ruckig_t* otg);
+RUCKIG_C_API size_t ruckig_get_max_number_of_waypoints(const ruckig_t* otg);
 
 RUCKIG_C_API ruckig_result_t ruckig_input_create(ruckig_input_t** input, size_t dofs);
+RUCKIG_C_API ruckig_result_t ruckig_input_create_with_waypoints(
+    ruckig_input_t** input,
+    size_t dofs,
+    size_t max_number_of_waypoints
+);
 RUCKIG_C_API void ruckig_input_destroy(ruckig_input_t* input);
 
 RUCKIG_C_API ruckig_result_t ruckig_output_create(ruckig_output_t** output, size_t dofs);
+RUCKIG_C_API ruckig_result_t ruckig_output_create_with_waypoints(
+    ruckig_output_t** output,
+    size_t dofs,
+    size_t max_number_of_waypoints
+);
 RUCKIG_C_API void ruckig_output_destroy(ruckig_output_t* output);
 
 RUCKIG_C_API ruckig_result_t ruckig_trajectory_create(ruckig_trajectory_t** trajectory, size_t dofs);
+RUCKIG_C_API ruckig_result_t ruckig_trajectory_create_with_waypoints(
+    ruckig_trajectory_t** trajectory,
+    size_t dofs,
+    size_t max_number_of_waypoints
+);
 RUCKIG_C_API void ruckig_trajectory_destroy(ruckig_trajectory_t* trajectory);
 
 RUCKIG_C_API ruckig_result_t ruckig_validate_input(
@@ -157,6 +175,8 @@ RUCKIG_C_API double* ruckig_input_target_acceleration_data(ruckig_input_t* input
 RUCKIG_C_API double* ruckig_input_max_velocity_data(ruckig_input_t* input);
 RUCKIG_C_API double* ruckig_input_max_acceleration_data(ruckig_input_t* input);
 RUCKIG_C_API double* ruckig_input_max_jerk_data(ruckig_input_t* input);
+RUCKIG_C_API double* ruckig_input_max_position_data(ruckig_input_t* input);
+RUCKIG_C_API double* ruckig_input_min_position_data(ruckig_input_t* input);
 RUCKIG_C_API bool* ruckig_input_enabled_data(ruckig_input_t* input);
 
 RUCKIG_C_API const double* ruckig_input_current_position_const_data(const ruckig_input_t* input);
@@ -168,6 +188,8 @@ RUCKIG_C_API const double* ruckig_input_target_acceleration_const_data(const ruc
 RUCKIG_C_API const double* ruckig_input_max_velocity_const_data(const ruckig_input_t* input);
 RUCKIG_C_API const double* ruckig_input_max_acceleration_const_data(const ruckig_input_t* input);
 RUCKIG_C_API const double* ruckig_input_max_jerk_const_data(const ruckig_input_t* input);
+RUCKIG_C_API const double* ruckig_input_max_position_const_data(const ruckig_input_t* input);
+RUCKIG_C_API const double* ruckig_input_min_position_const_data(const ruckig_input_t* input);
 RUCKIG_C_API const bool* ruckig_input_enabled_const_data(const ruckig_input_t* input);
 
 RUCKIG_C_API ruckig_result_t ruckig_input_set_control_interface(
@@ -230,9 +252,147 @@ RUCKIG_C_API ruckig_result_t ruckig_input_set_minimum_duration(
 
 RUCKIG_C_API void ruckig_input_clear_minimum_duration(ruckig_input_t* input);
 
+RUCKIG_C_API ruckig_result_t ruckig_input_set_intermediate_positions(
+    ruckig_input_t* input,
+    const double* flat_positions,
+    size_t waypoint_count,
+    size_t dofs
+);
+RUCKIG_C_API void ruckig_input_clear_intermediate_positions(ruckig_input_t* input);
+RUCKIG_C_API size_t ruckig_input_get_intermediate_position_count(const ruckig_input_t* input);
+RUCKIG_C_API ruckig_result_t ruckig_input_get_intermediate_positions(
+    const ruckig_input_t* input,
+    double* flat_positions,
+    size_t capacity
+);
+
+RUCKIG_C_API ruckig_result_t ruckig_input_set_per_section_max_velocity(
+    ruckig_input_t* input,
+    const double* values,
+    size_t section_count,
+    size_t dofs
+);
+RUCKIG_C_API void ruckig_input_clear_per_section_max_velocity(ruckig_input_t* input);
+RUCKIG_C_API bool ruckig_input_has_per_section_max_velocity(const ruckig_input_t* input);
+RUCKIG_C_API ruckig_result_t ruckig_input_get_per_section_max_velocity(
+    const ruckig_input_t* input,
+    double* values,
+    size_t capacity
+);
+
+RUCKIG_C_API ruckig_result_t ruckig_input_set_per_section_min_velocity(
+    ruckig_input_t* input,
+    const double* values,
+    size_t section_count,
+    size_t dofs
+);
+RUCKIG_C_API void ruckig_input_clear_per_section_min_velocity(ruckig_input_t* input);
+RUCKIG_C_API bool ruckig_input_has_per_section_min_velocity(const ruckig_input_t* input);
+RUCKIG_C_API ruckig_result_t ruckig_input_get_per_section_min_velocity(
+    const ruckig_input_t* input,
+    double* values,
+    size_t capacity
+);
+
+RUCKIG_C_API ruckig_result_t ruckig_input_set_per_section_max_acceleration(
+    ruckig_input_t* input,
+    const double* values,
+    size_t section_count,
+    size_t dofs
+);
+RUCKIG_C_API void ruckig_input_clear_per_section_max_acceleration(ruckig_input_t* input);
+RUCKIG_C_API bool ruckig_input_has_per_section_max_acceleration(const ruckig_input_t* input);
+RUCKIG_C_API ruckig_result_t ruckig_input_get_per_section_max_acceleration(
+    const ruckig_input_t* input,
+    double* values,
+    size_t capacity
+);
+
+RUCKIG_C_API ruckig_result_t ruckig_input_set_per_section_min_acceleration(
+    ruckig_input_t* input,
+    const double* values,
+    size_t section_count,
+    size_t dofs
+);
+RUCKIG_C_API void ruckig_input_clear_per_section_min_acceleration(ruckig_input_t* input);
+RUCKIG_C_API bool ruckig_input_has_per_section_min_acceleration(const ruckig_input_t* input);
+RUCKIG_C_API ruckig_result_t ruckig_input_get_per_section_min_acceleration(
+    const ruckig_input_t* input,
+    double* values,
+    size_t capacity
+);
+
+RUCKIG_C_API ruckig_result_t ruckig_input_set_per_section_max_jerk(
+    ruckig_input_t* input,
+    const double* values,
+    size_t section_count,
+    size_t dofs
+);
+RUCKIG_C_API void ruckig_input_clear_per_section_max_jerk(ruckig_input_t* input);
+RUCKIG_C_API bool ruckig_input_has_per_section_max_jerk(const ruckig_input_t* input);
+RUCKIG_C_API ruckig_result_t ruckig_input_get_per_section_max_jerk(
+    const ruckig_input_t* input,
+    double* values,
+    size_t capacity
+);
+
+RUCKIG_C_API ruckig_result_t ruckig_input_set_per_section_max_position(
+    ruckig_input_t* input,
+    const double* values,
+    size_t section_count,
+    size_t dofs
+);
+RUCKIG_C_API void ruckig_input_clear_per_section_max_position(ruckig_input_t* input);
+RUCKIG_C_API bool ruckig_input_has_per_section_max_position(const ruckig_input_t* input);
+RUCKIG_C_API ruckig_result_t ruckig_input_get_per_section_max_position(
+    const ruckig_input_t* input,
+    double* values,
+    size_t capacity
+);
+
+RUCKIG_C_API ruckig_result_t ruckig_input_set_per_section_min_position(
+    ruckig_input_t* input,
+    const double* values,
+    size_t section_count,
+    size_t dofs
+);
+RUCKIG_C_API void ruckig_input_clear_per_section_min_position(ruckig_input_t* input);
+RUCKIG_C_API bool ruckig_input_has_per_section_min_position(const ruckig_input_t* input);
+RUCKIG_C_API ruckig_result_t ruckig_input_get_per_section_min_position(
+    const ruckig_input_t* input,
+    double* values,
+    size_t capacity
+);
+
+RUCKIG_C_API ruckig_result_t ruckig_input_set_per_section_minimum_duration(
+    ruckig_input_t* input,
+    const double* values,
+    size_t section_count
+);
+RUCKIG_C_API void ruckig_input_clear_per_section_minimum_duration(ruckig_input_t* input);
+RUCKIG_C_API bool ruckig_input_has_per_section_minimum_duration(const ruckig_input_t* input);
+RUCKIG_C_API ruckig_result_t ruckig_input_get_per_section_minimum_duration(
+    const ruckig_input_t* input,
+    double* values,
+    size_t capacity
+);
+
+RUCKIG_C_API ruckig_result_t ruckig_input_set_interrupt_calculation_duration(
+    ruckig_input_t* input,
+    double interrupt_calculation_duration
+);
+RUCKIG_C_API void ruckig_input_clear_interrupt_calculation_duration(ruckig_input_t* input);
+
 RUCKIG_C_API size_t ruckig_trajectory_get_dof_count(const ruckig_trajectory_t* trajectory);
 
 RUCKIG_C_API double ruckig_trajectory_get_duration(const ruckig_trajectory_t* trajectory);
+RUCKIG_C_API size_t ruckig_trajectory_get_section_count(const ruckig_trajectory_t* trajectory);
+RUCKIG_C_API size_t ruckig_trajectory_get_intermediate_duration_count(const ruckig_trajectory_t* trajectory);
+RUCKIG_C_API ruckig_result_t ruckig_trajectory_get_intermediate_durations(
+    const ruckig_trajectory_t* trajectory,
+    double* durations,
+    size_t duration_count
+);
 
 RUCKIG_C_API ruckig_result_t ruckig_trajectory_get_independent_min_durations(
     const ruckig_trajectory_t* trajectory,
@@ -263,6 +423,16 @@ RUCKIG_C_API ruckig_result_t ruckig_trajectory_get_first_time_at_position(
     double time_after,
     double* time,
     bool* found
+);
+
+RUCKIG_C_API ruckig_result_t ruckig_filter_intermediate_positions(
+    const ruckig_t* otg,
+    const ruckig_input_t* input,
+    const double* threshold_distance,
+    size_t threshold_count,
+    double* filtered_positions,
+    size_t capacity,
+    size_t* written_waypoints
 );
 
 #ifdef __cplusplus

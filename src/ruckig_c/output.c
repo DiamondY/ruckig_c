@@ -6,7 +6,11 @@ static double* allocate_double_vector(size_t count) {
     return (double*)ruckig_calloc(count, sizeof(double));
 }
 
-RUCKIG_C_API ruckig_result_t ruckig_output_create(ruckig_output_t** output, size_t dofs) {
+static ruckig_result_t ruckig_output_create_impl(
+    ruckig_output_t** output,
+    size_t dofs,
+    size_t max_number_of_waypoints
+) {
     ruckig_output_t* value;
     if (!output || dofs == 0) {
         return RUCKIG_ERROR_INVALID_INPUT;
@@ -27,13 +31,25 @@ RUCKIG_C_API ruckig_result_t ruckig_output_create(ruckig_output_t** output, size
         ruckig_output_destroy(value);
         return RUCKIG_ERROR;
     }
-    if (ruckig_trajectory_create(&value->trajectory, dofs) != RUCKIG_WORKING) {
+    if (ruckig_trajectory_create_with_waypoints(&value->trajectory, dofs, max_number_of_waypoints) != RUCKIG_WORKING) {
         ruckig_output_destroy(value);
         return RUCKIG_ERROR;
     }
 
     *output = value;
     return RUCKIG_WORKING;
+}
+
+RUCKIG_C_API ruckig_result_t ruckig_output_create(ruckig_output_t** output, size_t dofs) {
+    return ruckig_output_create_impl(output, dofs, 0);
+}
+
+RUCKIG_C_API ruckig_result_t ruckig_output_create_with_waypoints(
+    ruckig_output_t** output,
+    size_t dofs,
+    size_t max_number_of_waypoints
+) {
+    return ruckig_output_create_impl(output, dofs, max_number_of_waypoints);
 }
 
 RUCKIG_C_API void ruckig_output_destroy(ruckig_output_t* output) {

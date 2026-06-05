@@ -1,0 +1,823 @@
+use std::fmt;
+use std::marker::PhantomData;
+use std::ptr::NonNull;
+use std::slice;
+
+#[repr(C)]
+struct RuckigRaw {
+    _private: [u8; 0],
+}
+
+#[repr(C)]
+struct InputRaw {
+    _private: [u8; 0],
+}
+
+#[repr(C)]
+struct OutputRaw {
+    _private: [u8; 0],
+}
+
+#[repr(C)]
+struct TrajectoryRaw {
+    _private: [u8; 0],
+}
+
+#[repr(C)]
+#[derive(Clone, Copy)]
+struct CBound {
+    min_position: f64,
+    max_position: f64,
+    time_min: f64,
+    time_max: f64,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[repr(i32)]
+pub enum RuckigResult {
+    Working = 0,
+    Finished = 1,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[repr(i32)]
+pub enum ControlInterface {
+    Position = 0,
+    Velocity = 1,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[repr(i32)]
+pub enum Synchronization {
+    Time = 0,
+    TimeIfNecessary = 1,
+    Phase = 2,
+    None = 3,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[repr(i32)]
+pub enum DurationDiscretization {
+    Continuous = 0,
+    Discrete = 1,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct Bound {
+    pub min: f64,
+    pub max: f64,
+    pub t_min: f64,
+    pub t_max: f64,
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct State {
+    pub position: Vec<f64>,
+    pub velocity: Vec<f64>,
+    pub acceleration: Vec<f64>,
+    pub jerk: Vec<f64>,
+    pub section: usize,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct Error {
+    pub code: i32,
+    pub operation: &'static str,
+}
+
+impl fmt::Display for Error {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{} failed with ruckig result {}", self.operation, self.code)
+    }
+}
+
+impl std::error::Error for Error {}
+
+pub type Result<T> = std::result::Result<T, Error>;
+
+unsafe extern "C" {
+    fn ruckig_create(otg: *mut *mut RuckigRaw, dofs: usize, delta_time: f64) -> i32;
+    fn ruckig_create_with_waypoints(
+        otg: *mut *mut RuckigRaw,
+        dofs: usize,
+        delta_time: f64,
+        max_number_of_waypoints: usize,
+    ) -> i32;
+    fn ruckig_destroy(otg: *mut RuckigRaw);
+    fn ruckig_get_max_number_of_waypoints(otg: *const RuckigRaw) -> usize;
+    fn ruckig_calculate(
+        otg: *mut RuckigRaw,
+        input: *const InputRaw,
+        trajectory: *mut TrajectoryRaw,
+    ) -> i32;
+    fn ruckig_update(otg: *mut RuckigRaw, input: *const InputRaw, output: *mut OutputRaw) -> i32;
+
+    fn ruckig_input_create(input: *mut *mut InputRaw, dofs: usize) -> i32;
+    fn ruckig_input_create_with_waypoints(
+        input: *mut *mut InputRaw,
+        dofs: usize,
+        max_number_of_waypoints: usize,
+    ) -> i32;
+    fn ruckig_input_destroy(input: *mut InputRaw);
+    fn ruckig_input_current_position_data(input: *mut InputRaw) -> *mut f64;
+    fn ruckig_input_current_velocity_data(input: *mut InputRaw) -> *mut f64;
+    fn ruckig_input_current_acceleration_data(input: *mut InputRaw) -> *mut f64;
+    fn ruckig_input_target_position_data(input: *mut InputRaw) -> *mut f64;
+    fn ruckig_input_target_velocity_data(input: *mut InputRaw) -> *mut f64;
+    fn ruckig_input_target_acceleration_data(input: *mut InputRaw) -> *mut f64;
+    fn ruckig_input_max_velocity_data(input: *mut InputRaw) -> *mut f64;
+    fn ruckig_input_max_acceleration_data(input: *mut InputRaw) -> *mut f64;
+    fn ruckig_input_max_jerk_data(input: *mut InputRaw) -> *mut f64;
+    fn ruckig_input_max_position_data(input: *mut InputRaw) -> *mut f64;
+    fn ruckig_input_min_position_data(input: *mut InputRaw) -> *mut f64;
+    fn ruckig_input_set_control_interface(input: *mut InputRaw, control_interface: i32) -> i32;
+    fn ruckig_input_set_synchronization(input: *mut InputRaw, synchronization: i32) -> i32;
+    fn ruckig_input_set_duration_discretization(input: *mut InputRaw, discretization: i32) -> i32;
+    fn ruckig_input_set_min_velocity(input: *mut InputRaw, values: *const f64, count: usize) -> i32;
+    fn ruckig_input_set_min_acceleration(input: *mut InputRaw, values: *const f64, count: usize) -> i32;
+    fn ruckig_input_set_minimum_duration(input: *mut InputRaw, duration: f64) -> i32;
+    fn ruckig_input_set_intermediate_positions(
+        input: *mut InputRaw,
+        flat_positions: *const f64,
+        waypoint_count: usize,
+        dofs: usize,
+    ) -> i32;
+    fn ruckig_input_clear_intermediate_positions(input: *mut InputRaw);
+    fn ruckig_input_set_per_section_max_velocity(
+        input: *mut InputRaw,
+        values: *const f64,
+        section_count: usize,
+        dofs: usize,
+    ) -> i32;
+    fn ruckig_input_set_per_section_min_velocity(
+        input: *mut InputRaw,
+        values: *const f64,
+        section_count: usize,
+        dofs: usize,
+    ) -> i32;
+    fn ruckig_input_set_per_section_max_acceleration(
+        input: *mut InputRaw,
+        values: *const f64,
+        section_count: usize,
+        dofs: usize,
+    ) -> i32;
+    fn ruckig_input_set_per_section_min_acceleration(
+        input: *mut InputRaw,
+        values: *const f64,
+        section_count: usize,
+        dofs: usize,
+    ) -> i32;
+    fn ruckig_input_set_per_section_max_jerk(
+        input: *mut InputRaw,
+        values: *const f64,
+        section_count: usize,
+        dofs: usize,
+    ) -> i32;
+    fn ruckig_input_set_per_section_minimum_duration(
+        input: *mut InputRaw,
+        values: *const f64,
+        section_count: usize,
+    ) -> i32;
+
+    fn ruckig_output_create(output: *mut *mut OutputRaw, dofs: usize) -> i32;
+    fn ruckig_output_create_with_waypoints(
+        output: *mut *mut OutputRaw,
+        dofs: usize,
+        max_number_of_waypoints: usize,
+    ) -> i32;
+    fn ruckig_output_destroy(output: *mut OutputRaw);
+    fn ruckig_output_pass_to_input(output: *const OutputRaw, input: *mut InputRaw);
+    fn ruckig_output_new_position_data(output: *const OutputRaw) -> *const f64;
+    fn ruckig_output_new_velocity_data(output: *const OutputRaw) -> *const f64;
+    fn ruckig_output_get_time(output: *const OutputRaw) -> f64;
+    fn ruckig_output_get_new_section(output: *const OutputRaw) -> usize;
+    fn ruckig_output_did_section_change(output: *const OutputRaw) -> bool;
+
+    fn ruckig_trajectory_create(trajectory: *mut *mut TrajectoryRaw, dofs: usize) -> i32;
+    fn ruckig_trajectory_create_with_waypoints(
+        trajectory: *mut *mut TrajectoryRaw,
+        dofs: usize,
+        max_number_of_waypoints: usize,
+    ) -> i32;
+    fn ruckig_trajectory_destroy(trajectory: *mut TrajectoryRaw);
+    fn ruckig_trajectory_get_duration(trajectory: *const TrajectoryRaw) -> f64;
+    fn ruckig_trajectory_get_section_count(trajectory: *const TrajectoryRaw) -> usize;
+    fn ruckig_trajectory_get_intermediate_duration_count(trajectory: *const TrajectoryRaw) -> usize;
+    fn ruckig_trajectory_get_intermediate_durations(
+        trajectory: *const TrajectoryRaw,
+        durations: *mut f64,
+        duration_count: usize,
+    ) -> i32;
+    fn ruckig_trajectory_at_time(
+        trajectory: *const TrajectoryRaw,
+        time: f64,
+        position: *mut f64,
+        velocity: *mut f64,
+        acceleration: *mut f64,
+        jerk: *mut f64,
+        section: *mut usize,
+    ) -> i32;
+    fn ruckig_trajectory_get_position_extrema(
+        trajectory: *const TrajectoryRaw,
+        extrema: *mut CBound,
+        extrema_count: usize,
+    ) -> i32;
+}
+
+fn check_code(code: i32, operation: &'static str) -> Result<RuckigResult> {
+    match code {
+        0 => Ok(RuckigResult::Working),
+        1 => Ok(RuckigResult::Finished),
+        _ => Err(Error { code, operation }),
+    }
+}
+
+fn require_len(values: &[f64], expected: usize, operation: &'static str) -> Result<()> {
+    if values.len() != expected {
+        return Err(Error {
+            code: -100,
+            operation,
+        });
+    }
+    Ok(())
+}
+
+unsafe fn write_data(ptr: *mut f64, values: &[f64], operation: &'static str) -> Result<()> {
+    if ptr.is_null() {
+        return Err(Error {
+            code: -100,
+            operation,
+        });
+    }
+    ptr.copy_from_nonoverlapping(values.as_ptr(), values.len());
+    Ok(())
+}
+
+pub struct Ruckig {
+    raw: NonNull<RuckigRaw>,
+    dofs: usize,
+}
+
+impl Ruckig {
+    pub fn new(dofs: usize, delta_time: f64) -> Result<Self> {
+        let mut raw = std::ptr::null_mut();
+        check_code(unsafe { ruckig_create(&mut raw, dofs, delta_time) }, "ruckig_create")?;
+        Ok(Self {
+            raw: NonNull::new(raw).ok_or(Error {
+                code: -1,
+                operation: "ruckig_create",
+            })?,
+            dofs,
+        })
+    }
+
+    pub fn with_waypoints(dofs: usize, delta_time: f64, max_number_of_waypoints: usize) -> Result<Self> {
+        let mut raw = std::ptr::null_mut();
+        check_code(
+            unsafe { ruckig_create_with_waypoints(&mut raw, dofs, delta_time, max_number_of_waypoints) },
+            "ruckig_create_with_waypoints",
+        )?;
+        Ok(Self {
+            raw: NonNull::new(raw).ok_or(Error {
+                code: -1,
+                operation: "ruckig_create_with_waypoints",
+            })?,
+            dofs,
+        })
+    }
+
+    pub fn max_number_of_waypoints(&self) -> usize {
+        unsafe { ruckig_get_max_number_of_waypoints(self.raw.as_ptr()) }
+    }
+
+    pub fn dofs(&self) -> usize {
+        self.dofs
+    }
+
+    pub fn calculate(&mut self, input: &InputParameter, trajectory: &mut Trajectory) -> Result<RuckigResult> {
+        check_code(
+            unsafe { ruckig_calculate(self.raw.as_ptr(), input.raw.as_ptr(), trajectory.raw.as_ptr()) },
+            "ruckig_calculate",
+        )
+    }
+
+    pub fn update(&mut self, input: &InputParameter, output: &mut OutputParameter) -> Result<RuckigResult> {
+        check_code(
+            unsafe { ruckig_update(self.raw.as_ptr(), input.raw.as_ptr(), output.raw.as_ptr()) },
+            "ruckig_update",
+        )
+    }
+}
+
+impl Drop for Ruckig {
+    fn drop(&mut self) {
+        unsafe { ruckig_destroy(self.raw.as_ptr()) };
+    }
+}
+
+pub struct InputParameter {
+    raw: NonNull<InputRaw>,
+    dofs: usize,
+    waypoint_count: usize,
+}
+
+impl InputParameter {
+    pub fn new(dofs: usize) -> Result<Self> {
+        let mut raw = std::ptr::null_mut();
+        check_code(unsafe { ruckig_input_create(&mut raw, dofs) }, "ruckig_input_create")?;
+        Ok(Self {
+            raw: NonNull::new(raw).ok_or(Error {
+                code: -1,
+                operation: "ruckig_input_create",
+            })?,
+            dofs,
+            waypoint_count: 0,
+        })
+    }
+
+    pub fn with_waypoints(dofs: usize, max_number_of_waypoints: usize) -> Result<Self> {
+        let mut raw = std::ptr::null_mut();
+        check_code(
+            unsafe { ruckig_input_create_with_waypoints(&mut raw, dofs, max_number_of_waypoints) },
+            "ruckig_input_create_with_waypoints",
+        )?;
+        Ok(Self {
+            raw: NonNull::new(raw).ok_or(Error {
+                code: -1,
+                operation: "ruckig_input_create_with_waypoints",
+            })?,
+            dofs,
+            waypoint_count: 0,
+        })
+    }
+
+    fn set_vector(&mut self, values: &[f64], accessor: unsafe extern "C" fn(*mut InputRaw) -> *mut f64, operation: &'static str) -> Result<()> {
+        require_len(values, self.dofs, operation)?;
+        unsafe { write_data(accessor(self.raw.as_ptr()), values, operation) }
+    }
+
+    pub fn set_current_position(&mut self, values: &[f64]) -> Result<()> {
+        self.set_vector(values, ruckig_input_current_position_data, "set_current_position")
+    }
+
+    pub fn set_current_velocity(&mut self, values: &[f64]) -> Result<()> {
+        self.set_vector(values, ruckig_input_current_velocity_data, "set_current_velocity")
+    }
+
+    pub fn set_current_acceleration(&mut self, values: &[f64]) -> Result<()> {
+        self.set_vector(values, ruckig_input_current_acceleration_data, "set_current_acceleration")
+    }
+
+    pub fn set_target_position(&mut self, values: &[f64]) -> Result<()> {
+        self.set_vector(values, ruckig_input_target_position_data, "set_target_position")
+    }
+
+    pub fn set_target_velocity(&mut self, values: &[f64]) -> Result<()> {
+        self.set_vector(values, ruckig_input_target_velocity_data, "set_target_velocity")
+    }
+
+    pub fn set_target_acceleration(&mut self, values: &[f64]) -> Result<()> {
+        self.set_vector(values, ruckig_input_target_acceleration_data, "set_target_acceleration")
+    }
+
+    pub fn set_max_velocity(&mut self, values: &[f64]) -> Result<()> {
+        self.set_vector(values, ruckig_input_max_velocity_data, "set_max_velocity")
+    }
+
+    pub fn set_max_acceleration(&mut self, values: &[f64]) -> Result<()> {
+        self.set_vector(values, ruckig_input_max_acceleration_data, "set_max_acceleration")
+    }
+
+    pub fn set_max_jerk(&mut self, values: &[f64]) -> Result<()> {
+        self.set_vector(values, ruckig_input_max_jerk_data, "set_max_jerk")
+    }
+
+    pub fn set_max_position(&mut self, values: &[f64]) -> Result<()> {
+        self.set_vector(values, ruckig_input_max_position_data, "set_max_position")
+    }
+
+    pub fn set_min_position(&mut self, values: &[f64]) -> Result<()> {
+        self.set_vector(values, ruckig_input_min_position_data, "set_min_position")
+    }
+
+    pub fn set_control_interface(&mut self, value: ControlInterface) -> Result<()> {
+        check_code(
+            unsafe { ruckig_input_set_control_interface(self.raw.as_ptr(), value as i32) },
+            "ruckig_input_set_control_interface",
+        )?;
+        Ok(())
+    }
+
+    pub fn set_synchronization(&mut self, value: Synchronization) -> Result<()> {
+        check_code(
+            unsafe { ruckig_input_set_synchronization(self.raw.as_ptr(), value as i32) },
+            "ruckig_input_set_synchronization",
+        )?;
+        Ok(())
+    }
+
+    pub fn set_duration_discretization(&mut self, value: DurationDiscretization) -> Result<()> {
+        check_code(
+            unsafe { ruckig_input_set_duration_discretization(self.raw.as_ptr(), value as i32) },
+            "ruckig_input_set_duration_discretization",
+        )?;
+        Ok(())
+    }
+
+    pub fn set_min_velocity(&mut self, values: &[f64]) -> Result<()> {
+        require_len(values, self.dofs, "ruckig_input_set_min_velocity")?;
+        check_code(
+            unsafe { ruckig_input_set_min_velocity(self.raw.as_ptr(), values.as_ptr(), values.len()) },
+            "ruckig_input_set_min_velocity",
+        )?;
+        Ok(())
+    }
+
+    pub fn set_min_acceleration(&mut self, values: &[f64]) -> Result<()> {
+        require_len(values, self.dofs, "ruckig_input_set_min_acceleration")?;
+        check_code(
+            unsafe { ruckig_input_set_min_acceleration(self.raw.as_ptr(), values.as_ptr(), values.len()) },
+            "ruckig_input_set_min_acceleration",
+        )?;
+        Ok(())
+    }
+
+    pub fn set_minimum_duration(&mut self, duration: f64) -> Result<()> {
+        check_code(
+            unsafe { ruckig_input_set_minimum_duration(self.raw.as_ptr(), duration) },
+            "ruckig_input_set_minimum_duration",
+        )?;
+        Ok(())
+    }
+
+    pub fn set_intermediate_positions_flat(&mut self, values: &[f64], waypoint_count: usize) -> Result<()> {
+        require_len(values, waypoint_count * self.dofs, "ruckig_input_set_intermediate_positions")?;
+        check_code(
+            unsafe {
+                ruckig_input_set_intermediate_positions(
+                    self.raw.as_ptr(),
+                    values.as_ptr(),
+                    waypoint_count,
+                    self.dofs,
+                )
+            },
+            "ruckig_input_set_intermediate_positions",
+        )?;
+        self.waypoint_count = waypoint_count;
+        Ok(())
+    }
+
+    pub fn clear_intermediate_positions(&mut self) {
+        unsafe { ruckig_input_clear_intermediate_positions(self.raw.as_ptr()) };
+        self.waypoint_count = 0;
+    }
+
+    fn set_per_section_vector(
+        &mut self,
+        values: &[f64],
+        operation: &'static str,
+        setter: unsafe extern "C" fn(*mut InputRaw, *const f64, usize, usize) -> i32,
+    ) -> Result<()> {
+        let section_count = self.waypoint_count + 1;
+        require_len(values, section_count * self.dofs, operation)?;
+        check_code(
+            unsafe { setter(self.raw.as_ptr(), values.as_ptr(), section_count, self.dofs) },
+            operation,
+        )?;
+        Ok(())
+    }
+
+    pub fn set_per_section_max_velocity(&mut self, values: &[f64]) -> Result<()> {
+        self.set_per_section_vector(values, "ruckig_input_set_per_section_max_velocity", ruckig_input_set_per_section_max_velocity)
+    }
+
+    pub fn set_per_section_min_velocity(&mut self, values: &[f64]) -> Result<()> {
+        self.set_per_section_vector(values, "ruckig_input_set_per_section_min_velocity", ruckig_input_set_per_section_min_velocity)
+    }
+
+    pub fn set_per_section_max_acceleration(&mut self, values: &[f64]) -> Result<()> {
+        self.set_per_section_vector(values, "ruckig_input_set_per_section_max_acceleration", ruckig_input_set_per_section_max_acceleration)
+    }
+
+    pub fn set_per_section_min_acceleration(&mut self, values: &[f64]) -> Result<()> {
+        self.set_per_section_vector(values, "ruckig_input_set_per_section_min_acceleration", ruckig_input_set_per_section_min_acceleration)
+    }
+
+    pub fn set_per_section_max_jerk(&mut self, values: &[f64]) -> Result<()> {
+        self.set_per_section_vector(values, "ruckig_input_set_per_section_max_jerk", ruckig_input_set_per_section_max_jerk)
+    }
+
+    pub fn set_per_section_minimum_duration(&mut self, values: &[f64]) -> Result<()> {
+        let section_count = self.waypoint_count + 1;
+        require_len(values, section_count, "ruckig_input_set_per_section_minimum_duration")?;
+        check_code(
+            unsafe {
+                ruckig_input_set_per_section_minimum_duration(
+                    self.raw.as_ptr(),
+                    values.as_ptr(),
+                    values.len(),
+                )
+            },
+            "ruckig_input_set_per_section_minimum_duration",
+        )?;
+        Ok(())
+    }
+}
+
+impl Drop for InputParameter {
+    fn drop(&mut self) {
+        unsafe { ruckig_input_destroy(self.raw.as_ptr()) };
+    }
+}
+
+pub struct OutputParameter {
+    raw: NonNull<OutputRaw>,
+    dofs: usize,
+}
+
+impl OutputParameter {
+    pub fn new(dofs: usize) -> Result<Self> {
+        let mut raw = std::ptr::null_mut();
+        check_code(unsafe { ruckig_output_create(&mut raw, dofs) }, "ruckig_output_create")?;
+        Ok(Self {
+            raw: NonNull::new(raw).ok_or(Error {
+                code: -1,
+                operation: "ruckig_output_create",
+            })?,
+            dofs,
+        })
+    }
+
+    pub fn with_waypoints(dofs: usize, max_number_of_waypoints: usize) -> Result<Self> {
+        let mut raw = std::ptr::null_mut();
+        check_code(
+            unsafe { ruckig_output_create_with_waypoints(&mut raw, dofs, max_number_of_waypoints) },
+            "ruckig_output_create_with_waypoints",
+        )?;
+        Ok(Self {
+            raw: NonNull::new(raw).ok_or(Error {
+                code: -1,
+                operation: "ruckig_output_create_with_waypoints",
+            })?,
+            dofs,
+        })
+    }
+
+    pub fn pass_to_input(&self, input: &mut InputParameter) {
+        unsafe { ruckig_output_pass_to_input(self.raw.as_ptr(), input.raw.as_ptr()) };
+    }
+
+    pub fn new_position(&self) -> Vec<f64> {
+        unsafe { slice::from_raw_parts(ruckig_output_new_position_data(self.raw.as_ptr()), self.dofs) }.to_vec()
+    }
+
+    pub fn new_velocity(&self) -> Vec<f64> {
+        unsafe { slice::from_raw_parts(ruckig_output_new_velocity_data(self.raw.as_ptr()), self.dofs) }.to_vec()
+    }
+
+    pub fn time(&self) -> f64 {
+        unsafe { ruckig_output_get_time(self.raw.as_ptr()) }
+    }
+
+    pub fn new_section(&self) -> usize {
+        unsafe { ruckig_output_get_new_section(self.raw.as_ptr()) }
+    }
+
+    pub fn did_section_change(&self) -> bool {
+        unsafe { ruckig_output_did_section_change(self.raw.as_ptr()) }
+    }
+}
+
+impl Drop for OutputParameter {
+    fn drop(&mut self) {
+        unsafe { ruckig_output_destroy(self.raw.as_ptr()) };
+    }
+}
+
+pub struct Trajectory {
+    raw: NonNull<TrajectoryRaw>,
+    dofs: usize,
+    _not_send_sync: PhantomData<*mut ()>,
+}
+
+impl Trajectory {
+    pub fn new(dofs: usize) -> Result<Self> {
+        let mut raw = std::ptr::null_mut();
+        check_code(unsafe { ruckig_trajectory_create(&mut raw, dofs) }, "ruckig_trajectory_create")?;
+        Ok(Self {
+            raw: NonNull::new(raw).ok_or(Error {
+                code: -1,
+                operation: "ruckig_trajectory_create",
+            })?,
+            dofs,
+            _not_send_sync: PhantomData,
+        })
+    }
+
+    pub fn with_waypoints(dofs: usize, max_number_of_waypoints: usize) -> Result<Self> {
+        let mut raw = std::ptr::null_mut();
+        check_code(
+            unsafe { ruckig_trajectory_create_with_waypoints(&mut raw, dofs, max_number_of_waypoints) },
+            "ruckig_trajectory_create_with_waypoints",
+        )?;
+        Ok(Self {
+            raw: NonNull::new(raw).ok_or(Error {
+                code: -1,
+                operation: "ruckig_trajectory_create_with_waypoints",
+            })?,
+            dofs,
+            _not_send_sync: PhantomData,
+        })
+    }
+
+    pub fn duration(&self) -> f64 {
+        unsafe { ruckig_trajectory_get_duration(self.raw.as_ptr()) }
+    }
+
+    pub fn section_count(&self) -> usize {
+        unsafe { ruckig_trajectory_get_section_count(self.raw.as_ptr()) }
+    }
+
+    pub fn intermediate_durations(&self) -> Result<Vec<f64>> {
+        let count = unsafe { ruckig_trajectory_get_intermediate_duration_count(self.raw.as_ptr()) };
+        let mut values = vec![0.0; count];
+        check_code(
+            unsafe { ruckig_trajectory_get_intermediate_durations(self.raw.as_ptr(), values.as_mut_ptr(), values.len()) },
+            "ruckig_trajectory_get_intermediate_durations",
+        )?;
+        Ok(values)
+    }
+
+    pub fn at_time(&self, time: f64) -> Result<State> {
+        let mut position = vec![0.0; self.dofs];
+        let mut velocity = vec![0.0; self.dofs];
+        let mut acceleration = vec![0.0; self.dofs];
+        let mut jerk = vec![0.0; self.dofs];
+        let mut section = 0usize;
+        check_code(
+            unsafe {
+                ruckig_trajectory_at_time(
+                    self.raw.as_ptr(),
+                    time,
+                    position.as_mut_ptr(),
+                    velocity.as_mut_ptr(),
+                    acceleration.as_mut_ptr(),
+                    jerk.as_mut_ptr(),
+                    &mut section,
+                )
+            },
+            "ruckig_trajectory_at_time",
+        )?;
+        Ok(State {
+            position,
+            velocity,
+            acceleration,
+            jerk,
+            section,
+        })
+    }
+
+    pub fn position_extrema(&self) -> Result<Vec<Bound>> {
+        let mut extrema = vec![
+            CBound {
+                min_position: 0.0,
+                max_position: 0.0,
+                time_min: 0.0,
+                time_max: 0.0,
+            };
+            self.dofs
+        ];
+        check_code(
+            unsafe {
+                ruckig_trajectory_get_position_extrema(
+                    self.raw.as_ptr(),
+                    extrema.as_mut_ptr(),
+                    extrema.len(),
+                )
+            },
+            "ruckig_trajectory_get_position_extrema",
+        )?;
+        Ok(extrema
+            .into_iter()
+            .map(|value| Bound {
+                min: value.min_position,
+                max: value.max_position,
+                t_min: value.time_min,
+                t_max: value.time_max,
+            })
+            .collect())
+    }
+}
+
+impl Drop for Trajectory {
+    fn drop(&mut self) {
+        unsafe { ruckig_trajectory_destroy(self.raw.as_ptr()) };
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn configure_position(input: &mut InputParameter) -> Result<()> {
+        input.set_target_position(&[1.0])?;
+        input.set_max_velocity(&[1.0])?;
+        input.set_max_acceleration(&[1.0])?;
+        input.set_max_jerk(&[1.0])?;
+        Ok(())
+    }
+
+    fn configure_waypoint(input: &mut InputParameter) -> Result<()> {
+        input.set_target_position(&[2.0])?;
+        input.set_max_velocity(&[1.2])?;
+        input.set_max_acceleration(&[2.0])?;
+        input.set_max_jerk(&[4.0])?;
+        input.set_intermediate_positions_flat(&[1.0], 1)?;
+        Ok(())
+    }
+
+    #[test]
+    fn offline_position_calculate() -> Result<()> {
+        let mut otg = Ruckig::new(1, 0.1)?;
+        let mut input = InputParameter::new(1)?;
+        let mut trajectory = Trajectory::new(1)?;
+        configure_position(&mut input)?;
+        assert_eq!(otg.calculate(&input, &mut trajectory)?, RuckigResult::Working);
+        let final_state = trajectory.at_time(trajectory.duration())?;
+        assert!((final_state.position[0] - 1.0).abs() < 1e-8);
+        assert!(final_state.velocity[0].abs() < 1e-8);
+        Ok(())
+    }
+
+    #[test]
+    fn online_update_loop() -> Result<()> {
+        let mut otg = Ruckig::new(1, 0.1)?;
+        let mut input = InputParameter::new(1)?;
+        let mut output = OutputParameter::new(1)?;
+        configure_position(&mut input)?;
+        let mut result = RuckigResult::Working;
+        for _ in 0..200 {
+            result = otg.update(&input, &mut output)?;
+            if result == RuckigResult::Finished {
+                break;
+            }
+            output.pass_to_input(&mut input);
+        }
+        assert_eq!(result, RuckigResult::Finished);
+        assert!((output.new_position()[0] - 1.0).abs() < 1e-8);
+        Ok(())
+    }
+
+    #[test]
+    fn waypoint_offline_calculate() -> Result<()> {
+        let mut otg = Ruckig::with_waypoints(1, 0.05, 1)?;
+        let mut input = InputParameter::with_waypoints(1, 1)?;
+        let mut trajectory = Trajectory::with_waypoints(1, 1)?;
+        configure_waypoint(&mut input)?;
+        assert_eq!(otg.max_number_of_waypoints(), 1);
+        assert_eq!(otg.calculate(&input, &mut trajectory)?, RuckigResult::Working);
+        assert_eq!(trajectory.section_count(), 2);
+        let durations = trajectory.intermediate_durations()?;
+        assert_eq!(durations.len(), 1);
+        let waypoint = trajectory.at_time(durations[0])?;
+        assert!((waypoint.position[0] - 1.0).abs() < 1e-7);
+        assert_eq!(waypoint.section, 1);
+        Ok(())
+    }
+
+    #[test]
+    fn per_section_minimum_duration() -> Result<()> {
+        let mut otg = Ruckig::with_waypoints(1, 0.05, 1)?;
+        let mut input = InputParameter::with_waypoints(1, 1)?;
+        let mut trajectory = Trajectory::with_waypoints(1, 1)?;
+        configure_waypoint(&mut input)?;
+        input.set_per_section_minimum_duration(&[2.0, 1.0])?;
+        assert_eq!(otg.calculate(&input, &mut trajectory)?, RuckigResult::Working);
+        let durations = trajectory.intermediate_durations()?;
+        assert!(durations[0] >= 2.0);
+        assert!(trajectory.duration() >= 3.0);
+        Ok(())
+    }
+
+    #[test]
+    fn per_section_limits_and_extrema() -> Result<()> {
+        let mut otg = Ruckig::with_waypoints(1, 0.01, 1)?;
+        let mut input = InputParameter::with_waypoints(1, 1)?;
+        let mut trajectory = Trajectory::with_waypoints(1, 1)?;
+        input.set_target_position(&[2.0])?;
+        input.set_max_velocity(&[1.5])?;
+        input.set_max_acceleration(&[2.0])?;
+        input.set_max_jerk(&[5.0])?;
+        input.set_intermediate_positions_flat(&[1.0], 1)?;
+        input.set_per_section_max_velocity(&[0.8, 1.4])?;
+        input.set_per_section_min_velocity(&[-0.8, -1.4])?;
+        input.set_per_section_max_acceleration(&[1.2, 2.0])?;
+        input.set_per_section_min_acceleration(&[-1.2, -2.0])?;
+        input.set_per_section_max_jerk(&[3.0, 5.0])?;
+        assert_eq!(otg.calculate(&input, &mut trajectory)?, RuckigResult::Working);
+        let extrema = trajectory.position_extrema()?;
+        assert!(extrema[0].min >= -1e-9);
+        assert!(extrema[0].max <= 2.0 + 1e-9);
+        Ok(())
+    }
+}

@@ -17,8 +17,10 @@ that are built on the final planned `0.2.x` baseline.
 - Public header changes must be recorded in `CHANGELOG.md`.
 - The approved public symbol allowlist is `docs/abi/public-symbols.txt`. It is
   generated from the `RUCKIG_C_API` declarations in
-  `include/ruckig_c/ruckig.h` at the `v0.2.5` baseline and must not be expanded
-  without a separate public API design and version decision.
+  `include/ruckig_c/ruckig.h`. It was established from the `v0.2.5` baseline
+  for `0.3.0` hardening and is expanded in `0.4.0-design` only through the
+  separate original-parity design and
+  `docs/abi/public-symbol-exceptions.txt`.
 
 ## Release Review
 
@@ -304,3 +306,53 @@ llvm-readobj --coff-exports build_release_check_shared\ruckig_c.dll
 Record the command output summary in the release checklist. At minimum confirm
 that lifecycle, input, output, trajectory, calculate, update, and reset APIs are
 exported and that no unintended public symbols were added.
+
+## 0.4.0-Design Public API Expansion
+
+`0.4.0-design` intentionally expands the public C ABI after the `v0.3.0`
+hardening release. This is not a `0.2.x` patch-release exception and not an
+accidental exported-symbol drift. The approved design is
+`docs/design/0.4.0_original_parity.md`.
+
+The expansion adds public entry points for:
+
+- waypoint-aware lifecycle constructors;
+- `max_number_of_waypoints` inspection;
+- global max/min position accessors;
+- intermediate waypoint set/get/clear APIs;
+- per-section constraint set/get/clear/has APIs;
+- interrupt-calculation-duration storage APIs;
+- multi-section trajectory section and intermediate-duration queries;
+- deterministic local intermediate-position filtering.
+
+The approved public allowlist is now the `0.4.0-design` public header surface
+and contains `117` symbols. The `51` new symbols are listed as `allow-add`
+entries in `docs/abi/public-symbol-exceptions.txt` so strict public ABI trials
+can distinguish approved minor-version additions from unintended drift.
+
+Compatibility rules for `0.4.0-design`:
+
+- Existing `v0.3.0` public functions must not be removed or have their
+  signatures changed.
+- Existing enum numeric values and result-code numeric values must not change.
+- New optimizer internals must not be exported.
+- `original/ruckig-main` remains frozen as the Ruckig Community `0.17.3`
+  reference baseline.
+- No-waypoint target-solver behavior must remain covered by the frozen C++
+  oracle tests.
+- Waypoint optimizer evidence uses local invariants, fixed regression cases,
+  section-level target-solver oracle checks, and optional non-blocking
+  cloud/Pro black-box comparison evidence when available.
+
+Current local build artifacts are written under:
+
+```text
+out/build/<preset>/artifacts/abi/0.4.0-design/
+```
+
+Use these checks during the alpha line:
+
+```powershell
+cmake --build out\build\windows-clang-ninja --target ruckig_c_verify_public_symbols
+cmake --build out\build\windows-clang-ninja-shared --target ruckig_c_compare_public_exported_symbols
+```

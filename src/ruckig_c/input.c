@@ -8,6 +8,10 @@ static double* allocate_double_vector(size_t count) {
     return (double*)ruckig_calloc(count, sizeof(double));
 }
 
+static double* allocate_optional_double_vector(size_t count) {
+    return count == 0 ? NULL : (double*)ruckig_calloc(count, sizeof(double));
+}
+
 static bool* allocate_bool_vector(size_t count) {
     return (bool*)ruckig_calloc(count, sizeof(bool));
 }
@@ -22,6 +26,9 @@ static ruckig_synchronization_t* allocate_synchronization_vector(size_t count) {
 
 static bool allocate_input_vectors(ruckig_input_t* input) {
     const size_t n = input->dofs;
+    const size_t sections = input->max_number_of_waypoints + 1;
+    const size_t section_values = sections * n;
+    const size_t waypoint_values = input->max_number_of_waypoints * n;
     input->current_position = allocate_double_vector(n);
     input->current_velocity = allocate_double_vector(n);
     input->current_acceleration = allocate_double_vector(n);
@@ -31,17 +38,35 @@ static bool allocate_input_vectors(ruckig_input_t* input) {
     input->max_velocity = allocate_double_vector(n);
     input->max_acceleration = allocate_double_vector(n);
     input->max_jerk = allocate_double_vector(n);
+    input->max_position = allocate_double_vector(n);
+    input->min_position = allocate_double_vector(n);
     input->enabled = allocate_bool_vector(n);
     input->min_velocity = allocate_double_vector(n);
     input->min_acceleration = allocate_double_vector(n);
     input->per_dof_control_interface = allocate_control_interface_vector(n);
     input->per_dof_synchronization = allocate_synchronization_vector(n);
+    input->intermediate_positions = allocate_optional_double_vector(waypoint_values);
+    input->per_section_max_velocity = allocate_double_vector(section_values);
+    input->per_section_min_velocity = allocate_double_vector(section_values);
+    input->per_section_max_acceleration = allocate_double_vector(section_values);
+    input->per_section_min_acceleration = allocate_double_vector(section_values);
+    input->per_section_max_jerk = allocate_double_vector(section_values);
+    input->per_section_max_position = allocate_double_vector(section_values);
+    input->per_section_min_position = allocate_double_vector(section_values);
+    input->per_section_minimum_duration = allocate_double_vector(sections);
 
     return input->current_position && input->current_velocity && input->current_acceleration
         && input->target_position && input->target_velocity && input->target_acceleration
         && input->max_velocity && input->max_acceleration && input->max_jerk
+        && input->max_position && input->min_position
         && input->enabled && input->min_velocity && input->min_acceleration
-        && input->per_dof_control_interface && input->per_dof_synchronization;
+        && input->per_dof_control_interface && input->per_dof_synchronization
+        && (waypoint_values == 0 || input->intermediate_positions)
+        && input->per_section_max_velocity && input->per_section_min_velocity
+        && input->per_section_max_acceleration && input->per_section_min_acceleration
+        && input->per_section_max_jerk
+        && input->per_section_max_position && input->per_section_min_position
+        && input->per_section_minimum_duration;
 }
 
 static void initialize_input_defaults(ruckig_input_t* input) {
@@ -55,17 +80,34 @@ static void initialize_input_defaults(ruckig_input_t* input) {
     input->has_min_acceleration = false;
     input->has_minimum_duration = false;
     input->minimum_duration = 0.0;
+    input->waypoint_count = 0;
+    input->has_per_section_max_velocity = false;
+    input->has_per_section_min_velocity = false;
+    input->has_per_section_max_acceleration = false;
+    input->has_per_section_min_acceleration = false;
+    input->has_per_section_max_jerk = false;
+    input->has_per_section_max_position = false;
+    input->has_per_section_min_position = false;
+    input->has_per_section_minimum_duration = false;
+    input->has_interrupt_calculation_duration = false;
+    input->interrupt_calculation_duration = 0.0;
 
     for (i = 0; i < input->dofs; ++i) {
         input->max_acceleration[i] = INFINITY;
         input->max_jerk[i] = INFINITY;
+        input->max_position[i] = INFINITY;
+        input->min_position[i] = -INFINITY;
         input->enabled[i] = true;
         input->per_dof_control_interface[i] = RUCKIG_CONTROL_POSITION;
         input->per_dof_synchronization[i] = RUCKIG_SYNCHRONIZATION_TIME;
     }
 }
 
-RUCKIG_C_API ruckig_result_t ruckig_input_create(ruckig_input_t** input, size_t dofs) {
+static ruckig_result_t ruckig_input_create_impl(
+    ruckig_input_t** input,
+    size_t dofs,
+    size_t max_number_of_waypoints
+) {
     ruckig_input_t* value;
     if (!input || dofs == 0) {
         return RUCKIG_ERROR_INVALID_INPUT;
@@ -78,6 +120,7 @@ RUCKIG_C_API ruckig_result_t ruckig_input_create(ruckig_input_t** input, size_t 
     }
 
     value->dofs = dofs;
+    value->max_number_of_waypoints = max_number_of_waypoints;
     if (!allocate_input_vectors(value)) {
         ruckig_input_destroy(value);
         return RUCKIG_ERROR;
@@ -86,6 +129,18 @@ RUCKIG_C_API ruckig_result_t ruckig_input_create(ruckig_input_t** input, size_t 
 
     *input = value;
     return RUCKIG_WORKING;
+}
+
+RUCKIG_C_API ruckig_result_t ruckig_input_create(ruckig_input_t** input, size_t dofs) {
+    return ruckig_input_create_impl(input, dofs, 0);
+}
+
+RUCKIG_C_API ruckig_result_t ruckig_input_create_with_waypoints(
+    ruckig_input_t** input,
+    size_t dofs,
+    size_t max_number_of_waypoints
+) {
+    return ruckig_input_create_impl(input, dofs, max_number_of_waypoints);
 }
 
 RUCKIG_C_API void ruckig_input_destroy(ruckig_input_t* input) {
@@ -102,11 +157,22 @@ RUCKIG_C_API void ruckig_input_destroy(ruckig_input_t* input) {
     ruckig_free(input->max_velocity);
     ruckig_free(input->max_acceleration);
     ruckig_free(input->max_jerk);
+    ruckig_free(input->max_position);
+    ruckig_free(input->min_position);
     ruckig_free(input->enabled);
     ruckig_free(input->min_velocity);
     ruckig_free(input->min_acceleration);
     ruckig_free(input->per_dof_control_interface);
     ruckig_free(input->per_dof_synchronization);
+    ruckig_free(input->intermediate_positions);
+    ruckig_free(input->per_section_max_velocity);
+    ruckig_free(input->per_section_min_velocity);
+    ruckig_free(input->per_section_max_acceleration);
+    ruckig_free(input->per_section_min_acceleration);
+    ruckig_free(input->per_section_max_jerk);
+    ruckig_free(input->per_section_max_position);
+    ruckig_free(input->per_section_min_position);
+    ruckig_free(input->per_section_minimum_duration);
     ruckig_free(input);
 }
 
@@ -129,6 +195,8 @@ MUTABLE_DATA_ACCESSOR(ruckig_input_target_acceleration_data, target_acceleration
 MUTABLE_DATA_ACCESSOR(ruckig_input_max_velocity_data, max_velocity)
 MUTABLE_DATA_ACCESSOR(ruckig_input_max_acceleration_data, max_acceleration)
 MUTABLE_DATA_ACCESSOR(ruckig_input_max_jerk_data, max_jerk)
+MUTABLE_DATA_ACCESSOR(ruckig_input_max_position_data, max_position)
+MUTABLE_DATA_ACCESSOR(ruckig_input_min_position_data, min_position)
 
 RUCKIG_C_API bool* ruckig_input_enabled_data(ruckig_input_t* input) {
     return input ? input->enabled : NULL;
@@ -143,6 +211,8 @@ CONST_DATA_ACCESSOR(ruckig_input_target_acceleration_const_data, target_accelera
 CONST_DATA_ACCESSOR(ruckig_input_max_velocity_const_data, max_velocity)
 CONST_DATA_ACCESSOR(ruckig_input_max_acceleration_const_data, max_acceleration)
 CONST_DATA_ACCESSOR(ruckig_input_max_jerk_const_data, max_jerk)
+CONST_DATA_ACCESSOR(ruckig_input_max_position_const_data, max_position)
+CONST_DATA_ACCESSOR(ruckig_input_min_position_const_data, min_position)
 
 RUCKIG_C_API const bool* ruckig_input_enabled_const_data(const ruckig_input_t* input) {
     return input ? input->enabled : NULL;
@@ -299,6 +369,190 @@ RUCKIG_C_API void ruckig_input_clear_minimum_duration(ruckig_input_t* input) {
     }
 }
 
+static void clear_per_section_constraints(ruckig_input_t* input) {
+    input->has_per_section_max_velocity = false;
+    input->has_per_section_min_velocity = false;
+    input->has_per_section_max_acceleration = false;
+    input->has_per_section_min_acceleration = false;
+    input->has_per_section_max_jerk = false;
+    input->has_per_section_max_position = false;
+    input->has_per_section_min_position = false;
+    input->has_per_section_minimum_duration = false;
+}
+
+RUCKIG_C_API ruckig_result_t ruckig_input_set_intermediate_positions(
+    ruckig_input_t* input,
+    const double* flat_positions,
+    size_t waypoint_count,
+    size_t dofs
+) {
+    const size_t count = waypoint_count * dofs;
+    if (!input || (!flat_positions && count > 0) || dofs != input->dofs || waypoint_count > input->max_number_of_waypoints) {
+        return RUCKIG_ERROR_INVALID_INPUT;
+    }
+    if (input->waypoint_count != waypoint_count) {
+        clear_per_section_constraints(input);
+    }
+    if (count > 0) {
+        memcpy(input->intermediate_positions, flat_positions, sizeof(double) * count);
+    }
+    input->waypoint_count = waypoint_count;
+    return RUCKIG_WORKING;
+}
+
+RUCKIG_C_API void ruckig_input_clear_intermediate_positions(ruckig_input_t* input) {
+    if (input) {
+        input->waypoint_count = 0;
+        clear_per_section_constraints(input);
+    }
+}
+
+RUCKIG_C_API size_t ruckig_input_get_intermediate_position_count(const ruckig_input_t* input) {
+    return input ? input->waypoint_count : 0;
+}
+
+RUCKIG_C_API ruckig_result_t ruckig_input_get_intermediate_positions(
+    const ruckig_input_t* input,
+    double* flat_positions,
+    size_t capacity
+) {
+    const size_t count = input ? input->waypoint_count * input->dofs : 0;
+    if (!input || (!flat_positions && count > 0) || capacity < count) {
+        return RUCKIG_ERROR_INVALID_INPUT;
+    }
+    if (count > 0) {
+        memcpy(flat_positions, input->intermediate_positions, sizeof(double) * count);
+    }
+    return RUCKIG_WORKING;
+}
+
+static ruckig_result_t set_per_section_vector(
+    ruckig_input_t* input,
+    double* dst,
+    bool* flag,
+    const double* values,
+    size_t section_count,
+    size_t dofs
+) {
+    const size_t expected_sections = input ? input->waypoint_count + 1 : 0;
+    const size_t count = section_count * dofs;
+    if (!input || !dst || !flag || !values || dofs != input->dofs || section_count != expected_sections) {
+        return RUCKIG_ERROR_INVALID_INPUT;
+    }
+    memcpy(dst, values, sizeof(double) * count);
+    *flag = true;
+    return RUCKIG_WORKING;
+}
+
+static ruckig_result_t get_per_section_vector(
+    const ruckig_input_t* input,
+    const double* src,
+    bool flag,
+    double* values,
+    size_t capacity
+) {
+    const size_t count = input ? (input->waypoint_count + 1) * input->dofs : 0;
+    if (!input || !src || !flag || (!values && count > 0) || capacity < count) {
+        return RUCKIG_ERROR_INVALID_INPUT;
+    }
+    memcpy(values, src, sizeof(double) * count);
+    return RUCKIG_WORKING;
+}
+
+#define DEFINE_PER_SECTION_VECTOR_API(suffix, field, flag) \
+RUCKIG_C_API ruckig_result_t ruckig_input_set_per_section_##suffix( \
+    ruckig_input_t* input, \
+    const double* values, \
+    size_t section_count, \
+    size_t dofs \
+) { \
+    return set_per_section_vector(input, input ? input->field : NULL, input ? &input->flag : NULL, values, section_count, dofs); \
+} \
+RUCKIG_C_API void ruckig_input_clear_per_section_##suffix(ruckig_input_t* input) { \
+    if (input) { \
+        input->flag = false; \
+    } \
+} \
+RUCKIG_C_API bool ruckig_input_has_per_section_##suffix(const ruckig_input_t* input) { \
+    return input ? input->flag : false; \
+} \
+RUCKIG_C_API ruckig_result_t ruckig_input_get_per_section_##suffix( \
+    const ruckig_input_t* input, \
+    double* values, \
+    size_t capacity \
+) { \
+    return get_per_section_vector(input, input ? input->field : NULL, input ? input->flag : false, values, capacity); \
+}
+
+DEFINE_PER_SECTION_VECTOR_API(max_velocity, per_section_max_velocity, has_per_section_max_velocity)
+DEFINE_PER_SECTION_VECTOR_API(min_velocity, per_section_min_velocity, has_per_section_min_velocity)
+DEFINE_PER_SECTION_VECTOR_API(max_acceleration, per_section_max_acceleration, has_per_section_max_acceleration)
+DEFINE_PER_SECTION_VECTOR_API(min_acceleration, per_section_min_acceleration, has_per_section_min_acceleration)
+DEFINE_PER_SECTION_VECTOR_API(max_jerk, per_section_max_jerk, has_per_section_max_jerk)
+DEFINE_PER_SECTION_VECTOR_API(max_position, per_section_max_position, has_per_section_max_position)
+DEFINE_PER_SECTION_VECTOR_API(min_position, per_section_min_position, has_per_section_min_position)
+
+RUCKIG_C_API ruckig_result_t ruckig_input_set_per_section_minimum_duration(
+    ruckig_input_t* input,
+    const double* values,
+    size_t section_count
+) {
+    size_t i;
+    const size_t expected_sections = input ? input->waypoint_count + 1 : 0;
+    if (!input || !values || section_count != expected_sections) {
+        return RUCKIG_ERROR_INVALID_INPUT;
+    }
+    for (i = 0; i < section_count; ++i) {
+        if (isnan(values[i]) || values[i] < 0.0) {
+            return RUCKIG_ERROR_INVALID_INPUT;
+        }
+    }
+    memcpy(input->per_section_minimum_duration, values, sizeof(double) * section_count);
+    input->has_per_section_minimum_duration = true;
+    return RUCKIG_WORKING;
+}
+
+RUCKIG_C_API void ruckig_input_clear_per_section_minimum_duration(ruckig_input_t* input) {
+    if (input) {
+        input->has_per_section_minimum_duration = false;
+    }
+}
+
+RUCKIG_C_API bool ruckig_input_has_per_section_minimum_duration(const ruckig_input_t* input) {
+    return input ? input->has_per_section_minimum_duration : false;
+}
+
+RUCKIG_C_API ruckig_result_t ruckig_input_get_per_section_minimum_duration(
+    const ruckig_input_t* input,
+    double* values,
+    size_t capacity
+) {
+    const size_t count = input ? input->waypoint_count + 1 : 0;
+    if (!input || !input->has_per_section_minimum_duration || !values || capacity < count) {
+        return RUCKIG_ERROR_INVALID_INPUT;
+    }
+    memcpy(values, input->per_section_minimum_duration, sizeof(double) * count);
+    return RUCKIG_WORKING;
+}
+
+RUCKIG_C_API ruckig_result_t ruckig_input_set_interrupt_calculation_duration(
+    ruckig_input_t* input,
+    double interrupt_calculation_duration
+) {
+    if (!input || isnan(interrupt_calculation_duration) || interrupt_calculation_duration < 0.0) {
+        return RUCKIG_ERROR_INVALID_INPUT;
+    }
+    input->interrupt_calculation_duration = interrupt_calculation_duration;
+    input->has_interrupt_calculation_duration = true;
+    return RUCKIG_WORKING;
+}
+
+RUCKIG_C_API void ruckig_input_clear_interrupt_calculation_duration(ruckig_input_t* input) {
+    if (input) {
+        input->has_interrupt_calculation_duration = false;
+    }
+}
+
 static ruckig_control_interface_t effective_control_interface(const ruckig_input_t* input, size_t dof) {
     return input->has_per_dof_control_interface ? input->per_dof_control_interface[dof] : input->control_interface;
 }
@@ -322,6 +576,19 @@ RUCKIG_C_API ruckig_result_t ruckig_validate_input(
         return RUCKIG_ERROR_INVALID_INPUT;
     }
 
+    if (input->waypoint_count > 0) {
+        if (input->waypoint_count > input->max_number_of_waypoints || input->waypoint_count > otg->max_number_of_waypoints) {
+            return RUCKIG_ERROR_INVALID_INPUT;
+        }
+        if (input->control_interface != RUCKIG_CONTROL_POSITION
+            || input->duration_discretization != RUCKIG_DURATION_CONTINUOUS
+            || input->has_minimum_duration
+            || input->has_per_dof_control_interface
+            || input->has_per_dof_synchronization) {
+            return RUCKIG_ERROR_INVALID_INPUT;
+        }
+    }
+
     for (dof = 0; dof < input->dofs; ++dof) {
         const double j_max = input->max_jerk[dof];
         const double a_max = input->max_acceleration[dof];
@@ -335,6 +602,9 @@ RUCKIG_C_API ruckig_result_t ruckig_validate_input(
         if (isnan(j_max) || j_max < 0.0 || isnan(a_max) || a_max < 0.0 || isnan(a_min) || a_min > 0.0) {
             return RUCKIG_ERROR_INVALID_INPUT;
         }
+        if (input->waypoint_count > 0 && isinf(j_max)) {
+            return RUCKIG_ERROR_INVALID_INPUT;
+        }
         if (isnan(a0) || isnan(af) || isnan(v0) || isnan(vf)) {
             return RUCKIG_ERROR_INVALID_INPUT;
         }
@@ -344,14 +614,28 @@ RUCKIG_C_API ruckig_result_t ruckig_validate_input(
         if (check_target_state_within_limits && (af > a_max || af < a_min)) {
             return RUCKIG_ERROR_INVALID_INPUT;
         }
+        if (input->waypoint_count > 0 && !input->enabled[dof]) {
+            size_t waypoint;
+            if (input->target_position[dof] != input->current_position[dof]) {
+                return RUCKIG_ERROR_INVALID_INPUT;
+            }
+            for (waypoint = 0; waypoint < input->waypoint_count; ++waypoint) {
+                if (input->intermediate_positions[waypoint * input->dofs + dof] != input->current_position[dof]) {
+                    return RUCKIG_ERROR_INVALID_INPUT;
+                }
+            }
+        }
 
         if (control_interface == RUCKIG_CONTROL_POSITION) {
             const double p0 = input->current_position[dof];
             const double pf = input->target_position[dof];
             const double v_max = input->max_velocity[dof];
             const double v_min = input->has_min_velocity ? input->min_velocity[dof] : -input->max_velocity[dof];
+            const double p_max = input->max_position[dof];
+            const double p_min = input->min_position[dof];
 
-            if (isnan(p0) || isnan(pf) || isnan(v_max) || v_max < 0.0 || isnan(v_min) || v_min > 0.0) {
+            if (isnan(p0) || isnan(pf) || isnan(v_max) || v_max < 0.0 || isnan(v_min) || v_min > 0.0
+                || isnan(p_max) || isnan(p_min) || p_min > p_max) {
                 return RUCKIG_ERROR_INVALID_INPUT;
             }
             if (check_current_state_within_limits && (v0 > v_max || v0 < v_min)) {
@@ -379,12 +663,49 @@ RUCKIG_C_API ruckig_result_t ruckig_validate_input(
         }
     }
 
+    if (input->waypoint_count > 0) {
+        const size_t section_count = input->waypoint_count + 1;
+        size_t section;
+        for (section = 0; section < section_count; ++section) {
+            for (dof = 0; dof < input->dofs; ++dof) {
+                const size_t index = section * input->dofs + dof;
+                const double max_velocity = input->has_per_section_max_velocity ? input->per_section_max_velocity[index] : input->max_velocity[dof];
+                const double min_velocity = input->has_per_section_min_velocity ? input->per_section_min_velocity[index] : (input->has_min_velocity ? input->min_velocity[dof] : -max_velocity);
+                const double max_acceleration = input->has_per_section_max_acceleration ? input->per_section_max_acceleration[index] : input->max_acceleration[dof];
+                const double min_acceleration = input->has_per_section_min_acceleration ? input->per_section_min_acceleration[index] : (input->has_min_acceleration ? input->min_acceleration[dof] : -max_acceleration);
+                const double max_jerk = input->has_per_section_max_jerk ? input->per_section_max_jerk[index] : input->max_jerk[dof];
+                const double max_position = input->has_per_section_max_position ? input->per_section_max_position[index] : input->max_position[dof];
+                const double min_position = input->has_per_section_min_position ? input->per_section_min_position[index] : input->min_position[dof];
+                if (isnan(max_velocity) || max_velocity < 0.0
+                    || isnan(min_velocity) || min_velocity > 0.0
+                    || isnan(max_acceleration) || max_acceleration < 0.0
+                    || isnan(min_acceleration) || min_acceleration > 0.0
+                    || isnan(max_jerk) || max_jerk <= 0.0 || isinf(max_jerk)
+                    || isnan(max_position) || isnan(min_position) || min_position > max_position) {
+                    return RUCKIG_ERROR_INVALID_INPUT;
+                }
+            }
+            if (input->has_per_section_minimum_duration) {
+                const double minimum_duration = input->per_section_minimum_duration[section];
+                if (isnan(minimum_duration) || minimum_duration < 0.0) {
+                    return RUCKIG_ERROR_INVALID_INPUT;
+                }
+            }
+        }
+    }
+
     return RUCKIG_WORKING;
 }
 
 ruckig_result_t ruckig_input_copy_state(const ruckig_input_t* src, ruckig_input_t* dst) {
     const size_t n = src && dst ? src->dofs : 0;
+    const size_t waypoint_values = src ? src->waypoint_count * src->dofs : 0;
+    const size_t section_values = src ? (src->waypoint_count + 1) * src->dofs : 0;
+    const size_t section_count = src ? src->waypoint_count + 1 : 0;
     if (!src || !dst || src->dofs != dst->dofs) {
+        return RUCKIG_ERROR_INVALID_INPUT;
+    }
+    if (src->waypoint_count > dst->max_number_of_waypoints) {
         return RUCKIG_ERROR_INVALID_INPUT;
     }
     memcpy(dst->current_position, src->current_position, sizeof(double) * n);
@@ -396,6 +717,8 @@ ruckig_result_t ruckig_input_copy_state(const ruckig_input_t* src, ruckig_input_
     memcpy(dst->max_velocity, src->max_velocity, sizeof(double) * n);
     memcpy(dst->max_acceleration, src->max_acceleration, sizeof(double) * n);
     memcpy(dst->max_jerk, src->max_jerk, sizeof(double) * n);
+    memcpy(dst->max_position, src->max_position, sizeof(double) * n);
+    memcpy(dst->min_position, src->min_position, sizeof(double) * n);
     memcpy(dst->enabled, src->enabled, sizeof(bool) * n);
     memcpy(dst->min_velocity, src->min_velocity, sizeof(double) * n);
     memcpy(dst->min_acceleration, src->min_acceleration, sizeof(double) * n);
@@ -406,6 +729,28 @@ ruckig_result_t ruckig_input_copy_state(const ruckig_input_t* src, ruckig_input_
     dst->has_minimum_duration = src->has_minimum_duration;
     dst->has_per_dof_control_interface = src->has_per_dof_control_interface;
     dst->has_per_dof_synchronization = src->has_per_dof_synchronization;
+    dst->waypoint_count = src->waypoint_count;
+    if (waypoint_values > 0) {
+        memcpy(dst->intermediate_positions, src->intermediate_positions, sizeof(double) * waypoint_values);
+    }
+    memcpy(dst->per_section_max_velocity, src->per_section_max_velocity, sizeof(double) * section_values);
+    memcpy(dst->per_section_min_velocity, src->per_section_min_velocity, sizeof(double) * section_values);
+    memcpy(dst->per_section_max_acceleration, src->per_section_max_acceleration, sizeof(double) * section_values);
+    memcpy(dst->per_section_min_acceleration, src->per_section_min_acceleration, sizeof(double) * section_values);
+    memcpy(dst->per_section_max_jerk, src->per_section_max_jerk, sizeof(double) * section_values);
+    memcpy(dst->per_section_max_position, src->per_section_max_position, sizeof(double) * section_values);
+    memcpy(dst->per_section_min_position, src->per_section_min_position, sizeof(double) * section_values);
+    memcpy(dst->per_section_minimum_duration, src->per_section_minimum_duration, sizeof(double) * section_count);
+    dst->has_per_section_max_velocity = src->has_per_section_max_velocity;
+    dst->has_per_section_min_velocity = src->has_per_section_min_velocity;
+    dst->has_per_section_max_acceleration = src->has_per_section_max_acceleration;
+    dst->has_per_section_min_acceleration = src->has_per_section_min_acceleration;
+    dst->has_per_section_max_jerk = src->has_per_section_max_jerk;
+    dst->has_per_section_max_position = src->has_per_section_max_position;
+    dst->has_per_section_min_position = src->has_per_section_min_position;
+    dst->has_per_section_minimum_duration = src->has_per_section_minimum_duration;
+    dst->has_interrupt_calculation_duration = src->has_interrupt_calculation_duration;
+    dst->interrupt_calculation_duration = src->interrupt_calculation_duration;
     dst->minimum_duration = src->minimum_duration;
     dst->control_interface = src->control_interface;
     dst->synchronization = src->synchronization;
@@ -459,11 +804,15 @@ static bool synchronization_arrays_equal(const ruckig_synchronization_t* lhs, co
 
 bool ruckig_input_equals(const ruckig_input_t* lhs, const ruckig_input_t* rhs) {
     const size_t n = lhs && rhs ? lhs->dofs : 0;
+    const size_t waypoint_values = lhs && rhs ? lhs->waypoint_count * lhs->dofs : 0;
+    const size_t section_values = lhs && rhs ? (lhs->waypoint_count + 1) * lhs->dofs : 0;
+    const size_t section_count = lhs && rhs ? lhs->waypoint_count + 1 : 0;
     if (!lhs || !rhs || lhs->dofs != rhs->dofs) {
         return false;
     }
 
     return lhs->control_interface == rhs->control_interface
+        && lhs->waypoint_count == rhs->waypoint_count
         && lhs->synchronization == rhs->synchronization
         && lhs->duration_discretization == rhs->duration_discretization
         && lhs->has_min_velocity == rhs->has_min_velocity
@@ -471,7 +820,17 @@ bool ruckig_input_equals(const ruckig_input_t* lhs, const ruckig_input_t* rhs) {
         && lhs->has_minimum_duration == rhs->has_minimum_duration
         && lhs->has_per_dof_control_interface == rhs->has_per_dof_control_interface
         && lhs->has_per_dof_synchronization == rhs->has_per_dof_synchronization
+        && lhs->has_per_section_max_velocity == rhs->has_per_section_max_velocity
+        && lhs->has_per_section_min_velocity == rhs->has_per_section_min_velocity
+        && lhs->has_per_section_max_acceleration == rhs->has_per_section_max_acceleration
+        && lhs->has_per_section_min_acceleration == rhs->has_per_section_min_acceleration
+        && lhs->has_per_section_max_jerk == rhs->has_per_section_max_jerk
+        && lhs->has_per_section_max_position == rhs->has_per_section_max_position
+        && lhs->has_per_section_min_position == rhs->has_per_section_min_position
+        && lhs->has_per_section_minimum_duration == rhs->has_per_section_minimum_duration
+        && lhs->has_interrupt_calculation_duration == rhs->has_interrupt_calculation_duration
         && (!lhs->has_minimum_duration || lhs->minimum_duration == rhs->minimum_duration)
+        && (!lhs->has_interrupt_calculation_duration || lhs->interrupt_calculation_duration == rhs->interrupt_calculation_duration)
         && double_arrays_equal(lhs->current_position, rhs->current_position, n)
         && double_arrays_equal(lhs->current_velocity, rhs->current_velocity, n)
         && double_arrays_equal(lhs->current_acceleration, rhs->current_acceleration, n)
@@ -481,9 +840,20 @@ bool ruckig_input_equals(const ruckig_input_t* lhs, const ruckig_input_t* rhs) {
         && double_arrays_equal(lhs->max_velocity, rhs->max_velocity, n)
         && double_arrays_equal(lhs->max_acceleration, rhs->max_acceleration, n)
         && double_arrays_equal(lhs->max_jerk, rhs->max_jerk, n)
+        && double_arrays_equal(lhs->max_position, rhs->max_position, n)
+        && double_arrays_equal(lhs->min_position, rhs->min_position, n)
+        && (waypoint_values == 0 || double_arrays_equal(lhs->intermediate_positions, rhs->intermediate_positions, waypoint_values))
         && (!lhs->has_min_velocity || double_arrays_equal(lhs->min_velocity, rhs->min_velocity, n))
         && (!lhs->has_min_acceleration || double_arrays_equal(lhs->min_acceleration, rhs->min_acceleration, n))
         && (!lhs->has_per_dof_control_interface || control_interface_arrays_equal(lhs->per_dof_control_interface, rhs->per_dof_control_interface, n))
         && (!lhs->has_per_dof_synchronization || synchronization_arrays_equal(lhs->per_dof_synchronization, rhs->per_dof_synchronization, n))
+        && (!lhs->has_per_section_max_velocity || double_arrays_equal(lhs->per_section_max_velocity, rhs->per_section_max_velocity, section_values))
+        && (!lhs->has_per_section_min_velocity || double_arrays_equal(lhs->per_section_min_velocity, rhs->per_section_min_velocity, section_values))
+        && (!lhs->has_per_section_max_acceleration || double_arrays_equal(lhs->per_section_max_acceleration, rhs->per_section_max_acceleration, section_values))
+        && (!lhs->has_per_section_min_acceleration || double_arrays_equal(lhs->per_section_min_acceleration, rhs->per_section_min_acceleration, section_values))
+        && (!lhs->has_per_section_max_jerk || double_arrays_equal(lhs->per_section_max_jerk, rhs->per_section_max_jerk, section_values))
+        && (!lhs->has_per_section_max_position || double_arrays_equal(lhs->per_section_max_position, rhs->per_section_max_position, section_values))
+        && (!lhs->has_per_section_min_position || double_arrays_equal(lhs->per_section_min_position, rhs->per_section_min_position, section_values))
+        && (!lhs->has_per_section_minimum_duration || double_arrays_equal(lhs->per_section_minimum_duration, rhs->per_section_minimum_duration, section_count))
         && bool_arrays_equal(lhs->enabled, rhs->enabled, n);
 }

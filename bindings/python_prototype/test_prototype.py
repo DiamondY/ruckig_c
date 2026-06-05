@@ -4,6 +4,7 @@ import os
 import unittest
 
 from ruckig_cffi import (
+    Bound,
     Input,
     Output,
     Result,
@@ -25,6 +26,29 @@ def configure_input(input_: Input) -> None:
     input_.set_max_velocity([1.0])
     input_.set_max_acceleration([1.0])
     input_.set_max_jerk([1.0])
+
+
+def configure_waypoint_input(input_: Input) -> None:
+    input_.set_current_position([0.0])
+    input_.set_current_velocity([0.0])
+    input_.set_current_acceleration([0.0])
+    input_.set_target_position([2.0])
+    input_.set_target_velocity([0.0])
+    input_.set_target_acceleration([0.0])
+    input_.set_max_velocity([1.2])
+    input_.set_max_acceleration([2.0])
+    input_.set_max_jerk([4.0])
+    input_.set_max_position([3.0])
+    input_.set_min_position([-1.0])
+    input_.set_intermediate_positions([1.0])
+    input_.set_per_section_max_velocity([1.2, 1.0])
+    input_.set_per_section_min_velocity([-1.2, -1.0])
+    input_.set_per_section_max_acceleration([2.0, 2.0])
+    input_.set_per_section_min_acceleration([-2.0, -2.0])
+    input_.set_per_section_max_jerk([4.0, 4.0])
+    input_.set_per_section_max_position([1.5, 2.5])
+    input_.set_per_section_min_position([-0.5, 0.5])
+    input_.set_per_section_minimum_duration([0.0, 0.0])
 
 
 @unittest.skipUnless(
@@ -60,6 +84,68 @@ class PrototypeTests(unittest.TestCase):
             self.assertEqual(result, Result.FINISHED)
             self.assertAlmostEqual(output.new_position()[0], 1.0, places=8)
             self.assertAlmostEqual(output.new_velocity()[0], 0.0, places=8)
+
+    def test_waypoint_offline_calculate(self) -> None:
+        with (
+            Ruckig(1, 0.05, max_number_of_waypoints=2) as otg,
+            Input(1, max_number_of_waypoints=2) as input_,
+            Trajectory(1, max_number_of_waypoints=2) as trajectory,
+        ):
+            configure_waypoint_input(input_)
+            self.assertEqual(otg.max_number_of_waypoints, 2)
+            self.assertEqual(input_.intermediate_position_count, 1)
+            self.assertEqual(input_.intermediate_positions(), [[1.0]])
+            self.assertEqual(input_.per_section_minimum_duration(), [0.0, 0.0])
+
+            result = otg.calculate(input_, trajectory)
+            self.assertEqual(result, Result.WORKING)
+            self.assertEqual(trajectory.section_count, 2)
+            intermediate_durations = trajectory.intermediate_durations()
+            self.assertEqual(len(intermediate_durations), 1)
+            self.assertGreater(intermediate_durations[0], 0.0)
+            self.assertLess(intermediate_durations[0], trajectory.duration)
+
+            waypoint_state = trajectory.at_time(intermediate_durations[0])
+            self.assertAlmostEqual(waypoint_state["position"][0], 1.0, places=7)
+            self.assertEqual(waypoint_state["section"], 1)
+
+            extrema = trajectory.position_extrema()
+            self.assertIsInstance(extrema[0], Bound)
+            self.assertLessEqual(extrema[0].max, 2.0 + 1e-7)
+            self.assertGreaterEqual(extrema[0].min, -1e-7)
+            self.assertAlmostEqual(
+                trajectory.first_time_at_position(0, 1.0),
+                intermediate_durations[0],
+                places=7,
+            )
+
+    def test_waypoint_online_update_loop(self) -> None:
+        with (
+            Ruckig(1, 0.05, max_number_of_waypoints=2) as otg,
+            Input(1, max_number_of_waypoints=2) as input_,
+            Output(1, max_number_of_waypoints=2) as output,
+        ):
+            configure_waypoint_input(input_)
+            result = Result.WORKING
+            for _ in range(300):
+                result = otg.update(input_, output)
+                if result == Result.FINISHED:
+                    break
+                output.pass_to_input(input_)
+
+            self.assertEqual(result, Result.FINISHED)
+            self.assertAlmostEqual(output.new_position()[0], 2.0, places=7)
+            self.assertGreaterEqual(output.new_section, 1)
+
+    def test_filter_intermediate_positions(self) -> None:
+        with (
+            Ruckig(1, 0.05, max_number_of_waypoints=3) as otg,
+            Input(1, max_number_of_waypoints=3) as input_,
+        ):
+            configure_input(input_)
+            input_.set_target_position([4.0])
+            input_.set_intermediate_positions([1.0, 2.0, 3.0])
+            self.assertEqual(otg.filter_intermediate_positions(input_, [0.25]), [])
 
     def test_tuple_copy_in_and_list_copy_out(self) -> None:
         with Ruckig(1, 0.1) as otg, Input(1) as input_, Trajectory(1) as trajectory:

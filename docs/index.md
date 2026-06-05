@@ -19,6 +19,8 @@ Historical rewrite plans and release evidence are retained for traceability.
 ## Release Evidence
 
 - `release/checklists/` - release checklists by version.
+  `release/checklists/0.4.0-alpha.md` tracks the current alpha evidence, and
+  `release/checklists/0.4.0.md` tracks the future stable release gates.
 - `release/evidence/verification_report.md` - local and CI verification
   history.
 - `release/evidence/performance_report.md` - performance procedure and release
@@ -36,6 +38,10 @@ Historical rewrite plans and release evidence are retained for traceability.
   `0.3.0`.
 - `design/0.3.0_closeout_checklist.md` - engineering-hardening closeout
   checklist for `0.3.0-design`.
+- `design/0.4.0_original_parity.md` - original-surface parity design for the
+  local waypoint optimizer and public C ABI expansion.
+- `../bindings/rust/README.md` - experimental Rust alpha wrapper over the
+  public C ABI.
 - `design/python_bindings_feasibility.md` - Python binding feasibility, without
   implementation approval.
 - `design/package_manager_feasibility.md` - frozen package-manager feasibility

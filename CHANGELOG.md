@@ -1,5 +1,70 @@
 # Changelog
 
+## 0.4.0-design - Unreleased
+
+`0.4.0-design` starts the full original-surface parity line after `v0.3.0`.
+This line intentionally expands the public C ABI for intermediate waypoints,
+per-section constraints, global position bounds, and multi-section trajectory
+queries. It is an alpha/design queue, not a stable `v0.4.0` release.
+
+Added:
+
+- Added waypoint-aware constructors for `ruckig_t`, `ruckig_input_t`,
+  `ruckig_output_t`, and `ruckig_trajectory_t`.
+- Added public C ABI access to global max/min position bounds.
+- Added intermediate waypoint set/get/clear APIs.
+- Added per-section max/min velocity, max/min acceleration, max jerk,
+  max/min position, and per-section minimum-duration APIs.
+- Added interrupt-calculation-duration storage APIs for original API surface
+  parity; alpha behavior records the value but does not yet guarantee soft
+  interruption.
+- Added multi-section trajectory metadata APIs for section count and
+  intermediate durations.
+- Added deterministic local `ruckig_filter_intermediate_positions`.
+- Added an experimental local coupled waypoint optimizer. It searches shared
+  internal waypoint velocity/acceleration candidates, evaluates each candidate
+  through the existing target solver section evaluator, rejects constraint
+  violations, explores a deterministic internal branch queue around the best
+  candidates, and selects the lowest-duration feasible candidate.
+- Added C examples for waypoint offline calculation, waypoint online updates,
+  per-section minimum duration, per-section limits, intermediate-position
+  filtering, and dynamic DoFs with waypoints.
+- Added focused CTest entries for waypoint optimizer, per-section constraints,
+  and waypoint quality alpha checks.
+- Added a waypoint alpha performance benchmark mode for the local C optimizer
+  corpus. It is C-only evidence because Ruckig Community `0.17.3` has no local
+  global waypoint optimizer oracle.
+- Added CI coverage for `0.4.0-design` ABI/export artifact paths, Linux
+  waypoint alpha performance output, Python prototype smoke, and Rust alpha
+  wrapper smoke.
+- Extended the experimental Python `cffi` ABI-mode prototype to cover the
+  `0.4.0-design` waypoint-aware C ABI surface.
+- Added an experimental Rust alpha wrapper over `ruckig_c` with smoke tests and
+  examples for position, offline calculation, velocity, waypoints, and
+  per-section minimum duration.
+
+Changed:
+
+- `CMakeLists.txt` and public version macros now point at the `0.4.0` design
+  line.
+- ABI artifact output paths now use `artifacts/abi/0.4.0-design`.
+- `docs/abi/public-symbols.txt` and
+  `docs/abi/public-symbol-exceptions.txt` now record the approved `0.4.0`
+  public API expansion.
+- `bindings/python_prototype/` remains prototype-only; it is not installed,
+  packaged, or treated as a stable Python binding API.
+- `bindings/rust/` is prototype-only; it is not published as a crate and does
+  not wrap original C++ Ruckig.
+- No-waypoint target-solver behavior remains on the existing frozen C++ oracle
+  path and must not regress.
+
+Still deferred:
+
+- Stable `v0.4.0` release closeout, formal cloud/Pro numerical equivalence
+  claims, hard real-time guarantees for waypoint optimization, released Python
+  wheels, published Rust crate, package-manager recipes, cloud API support, and
+  upstream baseline upgrades.
+
 ## 0.3.0 - 2026-06-05
 
 `0.3.0` is a hardening release. It promotes the completed `0.3.0-design`

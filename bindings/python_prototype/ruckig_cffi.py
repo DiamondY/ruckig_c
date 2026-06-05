@@ -3,8 +3,9 @@ from __future__ import annotations
 import enum
 import os
 import sys
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable, List, Optional
+from typing import Iterable, List, Optional, Sequence
 
 from cffi import FFI
 
@@ -17,14 +18,47 @@ ffi.cdef(
     typedef struct ruckig_output ruckig_output_t;
     typedef struct ruckig_trajectory ruckig_trajectory_t;
     typedef int ruckig_result_t;
+    typedef _Bool bool;
+
+    typedef struct ruckig_position_extrema {
+        double min_position;
+        double max_position;
+        double time_min;
+        double time_max;
+    } ruckig_position_extrema_t;
 
     ruckig_result_t ruckig_create(ruckig_t** otg, size_t dofs, double delta_time);
+    ruckig_result_t ruckig_create_with_waypoints(
+        ruckig_t** otg,
+        size_t dofs,
+        double delta_time,
+        size_t max_number_of_waypoints
+    );
     void ruckig_destroy(ruckig_t* otg);
+    size_t ruckig_get_max_number_of_waypoints(const ruckig_t* otg);
+
     ruckig_result_t ruckig_input_create(ruckig_input_t** input, size_t dofs);
+    ruckig_result_t ruckig_input_create_with_waypoints(
+        ruckig_input_t** input,
+        size_t dofs,
+        size_t max_number_of_waypoints
+    );
     void ruckig_input_destroy(ruckig_input_t* input);
+
     ruckig_result_t ruckig_output_create(ruckig_output_t** output, size_t dofs);
+    ruckig_result_t ruckig_output_create_with_waypoints(
+        ruckig_output_t** output,
+        size_t dofs,
+        size_t max_number_of_waypoints
+    );
     void ruckig_output_destroy(ruckig_output_t* output);
+
     ruckig_result_t ruckig_trajectory_create(ruckig_trajectory_t** trajectory, size_t dofs);
+    ruckig_result_t ruckig_trajectory_create_with_waypoints(
+        ruckig_trajectory_t** trajectory,
+        size_t dofs,
+        size_t max_number_of_waypoints
+    );
     void ruckig_trajectory_destroy(ruckig_trajectory_t* trajectory);
 
     ruckig_result_t ruckig_calculate(
@@ -50,13 +84,85 @@ ffi.cdef(
     double* ruckig_input_max_velocity_data(ruckig_input_t* input);
     double* ruckig_input_max_acceleration_data(ruckig_input_t* input);
     double* ruckig_input_max_jerk_data(ruckig_input_t* input);
+    double* ruckig_input_max_position_data(ruckig_input_t* input);
+    double* ruckig_input_min_position_data(ruckig_input_t* input);
+
+    ruckig_result_t ruckig_input_set_control_interface(ruckig_input_t* input, int control_interface);
+    ruckig_result_t ruckig_input_set_synchronization(ruckig_input_t* input, int synchronization);
+    ruckig_result_t ruckig_input_set_duration_discretization(ruckig_input_t* input, int duration_discretization);
+    ruckig_result_t ruckig_input_set_min_velocity(ruckig_input_t* input, const double* min_velocity, size_t count);
+    void ruckig_input_clear_min_velocity(ruckig_input_t* input);
+    ruckig_result_t ruckig_input_set_min_acceleration(ruckig_input_t* input, const double* min_acceleration, size_t count);
+    void ruckig_input_clear_min_acceleration(ruckig_input_t* input);
+    ruckig_result_t ruckig_input_set_minimum_duration(ruckig_input_t* input, double minimum_duration);
+    void ruckig_input_clear_minimum_duration(ruckig_input_t* input);
+
+    ruckig_result_t ruckig_input_set_intermediate_positions(
+        ruckig_input_t* input,
+        const double* flat_positions,
+        size_t waypoint_count,
+        size_t dofs
+    );
+    void ruckig_input_clear_intermediate_positions(ruckig_input_t* input);
+    size_t ruckig_input_get_intermediate_position_count(const ruckig_input_t* input);
+    ruckig_result_t ruckig_input_get_intermediate_positions(
+        const ruckig_input_t* input,
+        double* flat_positions,
+        size_t capacity
+    );
+
+    ruckig_result_t ruckig_input_set_per_section_max_velocity(ruckig_input_t* input, const double* values, size_t section_count, size_t dofs);
+    void ruckig_input_clear_per_section_max_velocity(ruckig_input_t* input);
+    bool ruckig_input_has_per_section_max_velocity(const ruckig_input_t* input);
+    ruckig_result_t ruckig_input_get_per_section_max_velocity(const ruckig_input_t* input, double* values, size_t capacity);
+    ruckig_result_t ruckig_input_set_per_section_min_velocity(ruckig_input_t* input, const double* values, size_t section_count, size_t dofs);
+    void ruckig_input_clear_per_section_min_velocity(ruckig_input_t* input);
+    bool ruckig_input_has_per_section_min_velocity(const ruckig_input_t* input);
+    ruckig_result_t ruckig_input_get_per_section_min_velocity(const ruckig_input_t* input, double* values, size_t capacity);
+    ruckig_result_t ruckig_input_set_per_section_max_acceleration(ruckig_input_t* input, const double* values, size_t section_count, size_t dofs);
+    void ruckig_input_clear_per_section_max_acceleration(ruckig_input_t* input);
+    bool ruckig_input_has_per_section_max_acceleration(const ruckig_input_t* input);
+    ruckig_result_t ruckig_input_get_per_section_max_acceleration(const ruckig_input_t* input, double* values, size_t capacity);
+    ruckig_result_t ruckig_input_set_per_section_min_acceleration(ruckig_input_t* input, const double* values, size_t section_count, size_t dofs);
+    void ruckig_input_clear_per_section_min_acceleration(ruckig_input_t* input);
+    bool ruckig_input_has_per_section_min_acceleration(const ruckig_input_t* input);
+    ruckig_result_t ruckig_input_get_per_section_min_acceleration(const ruckig_input_t* input, double* values, size_t capacity);
+    ruckig_result_t ruckig_input_set_per_section_max_jerk(ruckig_input_t* input, const double* values, size_t section_count, size_t dofs);
+    void ruckig_input_clear_per_section_max_jerk(ruckig_input_t* input);
+    bool ruckig_input_has_per_section_max_jerk(const ruckig_input_t* input);
+    ruckig_result_t ruckig_input_get_per_section_max_jerk(const ruckig_input_t* input, double* values, size_t capacity);
+    ruckig_result_t ruckig_input_set_per_section_max_position(ruckig_input_t* input, const double* values, size_t section_count, size_t dofs);
+    void ruckig_input_clear_per_section_max_position(ruckig_input_t* input);
+    bool ruckig_input_has_per_section_max_position(const ruckig_input_t* input);
+    ruckig_result_t ruckig_input_get_per_section_max_position(const ruckig_input_t* input, double* values, size_t capacity);
+    ruckig_result_t ruckig_input_set_per_section_min_position(ruckig_input_t* input, const double* values, size_t section_count, size_t dofs);
+    void ruckig_input_clear_per_section_min_position(ruckig_input_t* input);
+    bool ruckig_input_has_per_section_min_position(const ruckig_input_t* input);
+    ruckig_result_t ruckig_input_get_per_section_min_position(const ruckig_input_t* input, double* values, size_t capacity);
+    ruckig_result_t ruckig_input_set_per_section_minimum_duration(ruckig_input_t* input, const double* values, size_t section_count);
+    void ruckig_input_clear_per_section_minimum_duration(ruckig_input_t* input);
+    bool ruckig_input_has_per_section_minimum_duration(const ruckig_input_t* input);
+    ruckig_result_t ruckig_input_get_per_section_minimum_duration(const ruckig_input_t* input, double* values, size_t capacity);
+    ruckig_result_t ruckig_input_set_interrupt_calculation_duration(ruckig_input_t* input, double interrupt_calculation_duration);
+    void ruckig_input_clear_interrupt_calculation_duration(ruckig_input_t* input);
 
     const double* ruckig_output_new_position_data(const ruckig_output_t* output);
     const double* ruckig_output_new_velocity_data(const ruckig_output_t* output);
     const double* ruckig_output_new_acceleration_data(const ruckig_output_t* output);
     double ruckig_output_get_time(const ruckig_output_t* output);
+    size_t ruckig_output_get_new_section(const ruckig_output_t* output);
+    bool ruckig_output_did_section_change(const ruckig_output_t* output);
+    bool ruckig_output_new_calculation(const ruckig_output_t* output);
+    bool ruckig_output_was_calculation_interrupted(const ruckig_output_t* output);
 
     double ruckig_trajectory_get_duration(const ruckig_trajectory_t* trajectory);
+    size_t ruckig_trajectory_get_section_count(const ruckig_trajectory_t* trajectory);
+    size_t ruckig_trajectory_get_intermediate_duration_count(const ruckig_trajectory_t* trajectory);
+    ruckig_result_t ruckig_trajectory_get_intermediate_durations(
+        const ruckig_trajectory_t* trajectory,
+        double* durations,
+        size_t duration_count
+    );
     ruckig_result_t ruckig_trajectory_at_time(
         const ruckig_trajectory_t* trajectory,
         double time,
@@ -65,6 +171,28 @@ ffi.cdef(
         double* acceleration,
         double* jerk,
         size_t* section
+    );
+    ruckig_result_t ruckig_trajectory_get_position_extrema(
+        const ruckig_trajectory_t* trajectory,
+        ruckig_position_extrema_t* extrema,
+        size_t extrema_count
+    );
+    ruckig_result_t ruckig_trajectory_get_first_time_at_position(
+        const ruckig_trajectory_t* trajectory,
+        size_t dof,
+        double position,
+        double time_after,
+        double* time,
+        bool* found
+    );
+    ruckig_result_t ruckig_filter_intermediate_positions(
+        const ruckig_t* otg,
+        const ruckig_input_t* input,
+        const double* threshold_distance,
+        size_t threshold_count,
+        double* filtered_positions,
+        size_t capacity,
+        size_t* written_waypoints
     );
     """
 )
@@ -81,6 +209,31 @@ class Result(enum.IntEnum):
     ERROR_EXECUTION_TIME_CALCULATION = -110
     ERROR_SYNCHRONIZATION_CALCULATION = -111
     ERROR_UNSUPPORTED = -200
+
+
+class ControlInterface(enum.IntEnum):
+    POSITION = 0
+    VELOCITY = 1
+
+
+class Synchronization(enum.IntEnum):
+    TIME = 0
+    TIME_IF_NECESSARY = 1
+    PHASE = 2
+    NONE = 3
+
+
+class DurationDiscretization(enum.IntEnum):
+    CONTINUOUS = 0
+    DISCRETE = 1
+
+
+@dataclass(frozen=True)
+class Bound:
+    min: float
+    max: float
+    t_min: float
+    t_max: float
 
 
 class RuckigError(RuntimeError):
@@ -195,6 +348,43 @@ def _copy_out(ptr, dofs: int) -> List[float]:
     return [float(ptr[index]) for index in range(dofs)]
 
 
+def _copy_in_array(values: Iterable[float]):
+    items = [float(value) for value in values]
+    c_values = ffi.new("double[]", len(items))
+    for index, value in enumerate(items):
+        c_values[index] = value
+    return items, c_values
+
+
+def _is_scalar(value) -> bool:
+    return isinstance(value, (int, float))
+
+
+def _flatten_points(points: Iterable[Sequence[float] | float], dofs: int, label: str):
+    items = list(points)
+    if not items:
+        return [], 0
+    if all(_is_scalar(item) for item in items):
+        if dofs != 1:
+            raise ValueError(f"{label} must contain {dofs}-value points")
+        return [float(item) for item in items], len(items)
+
+    flat: List[float] = []
+    for index, point in enumerate(items):
+        values = list(point)  # type: ignore[arg-type]
+        if len(values) != dofs:
+            raise ValueError(f"{label}[{index}] expected {dofs} values, got {len(values)}")
+        flat.extend(float(value) for value in values)
+    return flat, len(items)
+
+
+def _unflatten_points(flat, count: int, dofs: int) -> List[List[float]]:
+    return [
+        [float(flat[point * dofs + dof]) for dof in range(dofs)]
+        for point in range(count)
+    ]
+
+
 class _Handle:
     _destroy_name = ""
 
@@ -239,10 +429,26 @@ class _Handle:
 class Ruckig(_Handle):
     _destroy_name = "ruckig_destroy"
 
-    def __init__(self, dofs: int, delta_time: float):
+    def __init__(self, dofs: int, delta_time: float, max_number_of_waypoints: int = 0):
         out = ffi.new("ruckig_t**")
-        _result(_library().ruckig_create(out, dofs, float(delta_time)), "ruckig_create")
+        if max_number_of_waypoints:
+            _result(
+                _library().ruckig_create_with_waypoints(
+                    out,
+                    dofs,
+                    float(delta_time),
+                    int(max_number_of_waypoints),
+                ),
+                "ruckig_create_with_waypoints",
+            )
+        else:
+            _result(_library().ruckig_create(out, dofs, float(delta_time)), "ruckig_create")
         super().__init__(out[0], dofs)
+        self._max_number_of_waypoints = int(max_number_of_waypoints)
+
+    @property
+    def max_number_of_waypoints(self) -> int:
+        return int(_library().ruckig_get_max_number_of_waypoints(self.ptr))
 
     def calculate(self, input_: "Input", trajectory: "Trajectory") -> Result:
         return _result(
@@ -259,13 +465,48 @@ class Ruckig(_Handle):
     def reset(self) -> None:
         _library().ruckig_reset(self.ptr)
 
+    def filter_intermediate_positions(
+        self,
+        input_: "Input",
+        threshold_distance: Iterable[float],
+    ) -> List[List[float]]:
+        threshold_items, threshold = _copy_in_array(threshold_distance)
+        if len(threshold_items) != self.dofs:
+            raise ValueError(f"expected {self.dofs} threshold values, got {len(threshold_items)}")
+        waypoint_count = input_.intermediate_position_count
+        filtered = ffi.new("double[]", waypoint_count * self.dofs)
+        written = ffi.new("size_t*")
+        _result(
+            _library().ruckig_filter_intermediate_positions(
+                self.ptr,
+                input_.ptr,
+                threshold,
+                len(threshold_items),
+                filtered,
+                waypoint_count * self.dofs,
+                written,
+            ),
+            "ruckig_filter_intermediate_positions",
+        )
+        return _unflatten_points(filtered, int(written[0]), self.dofs)
+
 
 class Input(_Handle):
     _destroy_name = "ruckig_input_destroy"
 
-    def __init__(self, dofs: int):
+    def __init__(self, dofs: int, max_number_of_waypoints: int = 0):
         out = ffi.new("ruckig_input_t**")
-        _result(_library().ruckig_input_create(out, dofs), "ruckig_input_create")
+        if max_number_of_waypoints:
+            _result(
+                _library().ruckig_input_create_with_waypoints(
+                    out,
+                    dofs,
+                    int(max_number_of_waypoints),
+                ),
+                "ruckig_input_create_with_waypoints",
+            )
+        else:
+            _result(_library().ruckig_input_create(out, dofs), "ruckig_input_create")
         super().__init__(out[0], dofs)
 
     def _set_vector(self, accessor: str, values: Iterable[float]) -> None:
@@ -298,18 +539,244 @@ class Input(_Handle):
     def set_max_jerk(self, values: Iterable[float]) -> None:
         self._set_vector("ruckig_input_max_jerk_data", values)
 
+    def set_max_position(self, values: Iterable[float]) -> None:
+        self._set_vector("ruckig_input_max_position_data", values)
+
+    def set_min_position(self, values: Iterable[float]) -> None:
+        self._set_vector("ruckig_input_min_position_data", values)
+
+    def set_control_interface(self, value: ControlInterface) -> None:
+        _result(
+            _library().ruckig_input_set_control_interface(self.ptr, int(value)),
+            "ruckig_input_set_control_interface",
+        )
+
+    def set_synchronization(self, value: Synchronization) -> None:
+        _result(
+            _library().ruckig_input_set_synchronization(self.ptr, int(value)),
+            "ruckig_input_set_synchronization",
+        )
+
+    def set_duration_discretization(self, value: DurationDiscretization) -> None:
+        _result(
+            _library().ruckig_input_set_duration_discretization(self.ptr, int(value)),
+            "ruckig_input_set_duration_discretization",
+        )
+
+    def set_min_velocity(self, values: Iterable[float]) -> None:
+        items, c_values = _copy_in_array(values)
+        if len(items) != self.dofs:
+            raise ValueError(f"expected {self.dofs} values, got {len(items)}")
+        _result(
+            _library().ruckig_input_set_min_velocity(self.ptr, c_values, len(items)),
+            "ruckig_input_set_min_velocity",
+        )
+
+    def clear_min_velocity(self) -> None:
+        _library().ruckig_input_clear_min_velocity(self.ptr)
+
+    def set_min_acceleration(self, values: Iterable[float]) -> None:
+        items, c_values = _copy_in_array(values)
+        if len(items) != self.dofs:
+            raise ValueError(f"expected {self.dofs} values, got {len(items)}")
+        _result(
+            _library().ruckig_input_set_min_acceleration(self.ptr, c_values, len(items)),
+            "ruckig_input_set_min_acceleration",
+        )
+
+    def clear_min_acceleration(self) -> None:
+        _library().ruckig_input_clear_min_acceleration(self.ptr)
+
+    def set_minimum_duration(self, value: float) -> None:
+        _result(
+            _library().ruckig_input_set_minimum_duration(self.ptr, float(value)),
+            "ruckig_input_set_minimum_duration",
+        )
+
+    def clear_minimum_duration(self) -> None:
+        _library().ruckig_input_clear_minimum_duration(self.ptr)
+
+    def set_intermediate_positions(self, points: Iterable[Sequence[float] | float]) -> None:
+        flat, waypoint_count = _flatten_points(points, self.dofs, "intermediate_positions")
+        _, c_values = _copy_in_array(flat)
+        _result(
+            _library().ruckig_input_set_intermediate_positions(
+                self.ptr,
+                c_values,
+                waypoint_count,
+                self.dofs,
+            ),
+            "ruckig_input_set_intermediate_positions",
+        )
+
+    def clear_intermediate_positions(self) -> None:
+        _library().ruckig_input_clear_intermediate_positions(self.ptr)
+
+    @property
+    def intermediate_position_count(self) -> int:
+        return int(_library().ruckig_input_get_intermediate_position_count(self.ptr))
+
+    def intermediate_positions(self) -> List[List[float]]:
+        count = self.intermediate_position_count
+        values = ffi.new("double[]", count * self.dofs)
+        _result(
+            _library().ruckig_input_get_intermediate_positions(
+                self.ptr,
+                values,
+                count * self.dofs,
+            ),
+            "ruckig_input_get_intermediate_positions",
+        )
+        return _unflatten_points(values, count, self.dofs)
+
+    def _set_per_section_vector(self, suffix: str, values: Iterable[Sequence[float] | float]) -> None:
+        flat, section_count = _flatten_points(values, self.dofs, f"per_section_{suffix}")
+        _, c_values = _copy_in_array(flat)
+        _result(
+            getattr(_library(), f"ruckig_input_set_per_section_{suffix}")(
+                self.ptr,
+                c_values,
+                section_count,
+                self.dofs,
+            ),
+            f"ruckig_input_set_per_section_{suffix}",
+        )
+
+    def _get_per_section_vector(self, suffix: str) -> List[List[float]]:
+        count = self.intermediate_position_count + 1
+        values = ffi.new("double[]", count * self.dofs)
+        _result(
+            getattr(_library(), f"ruckig_input_get_per_section_{suffix}")(
+                self.ptr,
+                values,
+                count * self.dofs,
+            ),
+            f"ruckig_input_get_per_section_{suffix}",
+        )
+        return _unflatten_points(values, count, self.dofs)
+
+    def _clear_per_section_vector(self, suffix: str) -> None:
+        getattr(_library(), f"ruckig_input_clear_per_section_{suffix}")(self.ptr)
+
+    def set_per_section_max_velocity(self, values: Iterable[Sequence[float] | float]) -> None:
+        self._set_per_section_vector("max_velocity", values)
+
+    def clear_per_section_max_velocity(self) -> None:
+        self._clear_per_section_vector("max_velocity")
+
+    def per_section_max_velocity(self) -> List[List[float]]:
+        return self._get_per_section_vector("max_velocity")
+
+    def set_per_section_min_velocity(self, values: Iterable[Sequence[float] | float]) -> None:
+        self._set_per_section_vector("min_velocity", values)
+
+    def clear_per_section_min_velocity(self) -> None:
+        self._clear_per_section_vector("min_velocity")
+
+    def set_per_section_max_acceleration(self, values: Iterable[Sequence[float] | float]) -> None:
+        self._set_per_section_vector("max_acceleration", values)
+
+    def clear_per_section_max_acceleration(self) -> None:
+        self._clear_per_section_vector("max_acceleration")
+
+    def set_per_section_min_acceleration(self, values: Iterable[Sequence[float] | float]) -> None:
+        self._set_per_section_vector("min_acceleration", values)
+
+    def clear_per_section_min_acceleration(self) -> None:
+        self._clear_per_section_vector("min_acceleration")
+
+    def set_per_section_max_jerk(self, values: Iterable[Sequence[float] | float]) -> None:
+        self._set_per_section_vector("max_jerk", values)
+
+    def clear_per_section_max_jerk(self) -> None:
+        self._clear_per_section_vector("max_jerk")
+
+    def set_per_section_max_position(self, values: Iterable[Sequence[float] | float]) -> None:
+        self._set_per_section_vector("max_position", values)
+
+    def clear_per_section_max_position(self) -> None:
+        self._clear_per_section_vector("max_position")
+
+    def set_per_section_min_position(self, values: Iterable[Sequence[float] | float]) -> None:
+        self._set_per_section_vector("min_position", values)
+
+    def clear_per_section_min_position(self) -> None:
+        self._clear_per_section_vector("min_position")
+
+    def set_per_section_minimum_duration(self, values: Iterable[float]) -> None:
+        items, c_values = _copy_in_array(values)
+        _result(
+            _library().ruckig_input_set_per_section_minimum_duration(
+                self.ptr,
+                c_values,
+                len(items),
+            ),
+            "ruckig_input_set_per_section_minimum_duration",
+        )
+
+    def clear_per_section_minimum_duration(self) -> None:
+        _library().ruckig_input_clear_per_section_minimum_duration(self.ptr)
+
+    def per_section_minimum_duration(self) -> List[float]:
+        count = self.intermediate_position_count + 1
+        values = ffi.new("double[]", count)
+        _result(
+            _library().ruckig_input_get_per_section_minimum_duration(
+                self.ptr,
+                values,
+                count,
+            ),
+            "ruckig_input_get_per_section_minimum_duration",
+        )
+        return _copy_out(values, count)
+
+    def set_interrupt_calculation_duration(self, value: float) -> None:
+        _result(
+            _library().ruckig_input_set_interrupt_calculation_duration(self.ptr, float(value)),
+            "ruckig_input_set_interrupt_calculation_duration",
+        )
+
+    def clear_interrupt_calculation_duration(self) -> None:
+        _library().ruckig_input_clear_interrupt_calculation_duration(self.ptr)
+
 
 class Output(_Handle):
     _destroy_name = "ruckig_output_destroy"
 
-    def __init__(self, dofs: int):
+    def __init__(self, dofs: int, max_number_of_waypoints: int = 0):
         out = ffi.new("ruckig_output_t**")
-        _result(_library().ruckig_output_create(out, dofs), "ruckig_output_create")
+        if max_number_of_waypoints:
+            _result(
+                _library().ruckig_output_create_with_waypoints(
+                    out,
+                    dofs,
+                    int(max_number_of_waypoints),
+                ),
+                "ruckig_output_create_with_waypoints",
+            )
+        else:
+            _result(_library().ruckig_output_create(out, dofs), "ruckig_output_create")
         super().__init__(out[0], dofs)
 
     @property
     def time(self) -> float:
         return float(_library().ruckig_output_get_time(self.ptr))
+
+    @property
+    def new_section(self) -> int:
+        return int(_library().ruckig_output_get_new_section(self.ptr))
+
+    @property
+    def did_section_change(self) -> bool:
+        return bool(_library().ruckig_output_did_section_change(self.ptr))
+
+    @property
+    def new_calculation(self) -> bool:
+        return bool(_library().ruckig_output_new_calculation(self.ptr))
+
+    @property
+    def was_calculation_interrupted(self) -> bool:
+        return bool(_library().ruckig_output_was_calculation_interrupted(self.ptr))
 
     def new_position(self) -> List[float]:
         return _copy_out(_library().ruckig_output_new_position_data(self.ptr), self.dofs)
@@ -327,14 +794,41 @@ class Output(_Handle):
 class Trajectory(_Handle):
     _destroy_name = "ruckig_trajectory_destroy"
 
-    def __init__(self, dofs: int):
+    def __init__(self, dofs: int, max_number_of_waypoints: int = 0):
         out = ffi.new("ruckig_trajectory_t**")
-        _result(_library().ruckig_trajectory_create(out, dofs), "ruckig_trajectory_create")
+        if max_number_of_waypoints:
+            _result(
+                _library().ruckig_trajectory_create_with_waypoints(
+                    out,
+                    dofs,
+                    int(max_number_of_waypoints),
+                ),
+                "ruckig_trajectory_create_with_waypoints",
+            )
+        else:
+            _result(_library().ruckig_trajectory_create(out, dofs), "ruckig_trajectory_create")
         super().__init__(out[0], dofs)
 
     @property
     def duration(self) -> float:
         return float(_library().ruckig_trajectory_get_duration(self.ptr))
+
+    @property
+    def section_count(self) -> int:
+        return int(_library().ruckig_trajectory_get_section_count(self.ptr))
+
+    def intermediate_durations(self) -> List[float]:
+        count = int(_library().ruckig_trajectory_get_intermediate_duration_count(self.ptr))
+        values = ffi.new("double[]", count)
+        _result(
+            _library().ruckig_trajectory_get_intermediate_durations(
+                self.ptr,
+                values,
+                count,
+            ),
+            "ruckig_trajectory_get_intermediate_durations",
+        )
+        return _copy_out(values, count)
 
     def at_time(self, time: float):
         position = ffi.new("double[]", self.dofs)
@@ -361,3 +855,44 @@ class Trajectory(_Handle):
             "jerk": _copy_out(jerk, self.dofs),
             "section": int(section[0]),
         }
+
+    def position_extrema(self) -> List[Bound]:
+        extrema = ffi.new("ruckig_position_extrema_t[]", self.dofs)
+        _result(
+            _library().ruckig_trajectory_get_position_extrema(
+                self.ptr,
+                extrema,
+                self.dofs,
+            ),
+            "ruckig_trajectory_get_position_extrema",
+        )
+        return [
+            Bound(
+                min=float(extrema[index].min_position),
+                max=float(extrema[index].max_position),
+                t_min=float(extrema[index].time_min),
+                t_max=float(extrema[index].time_max),
+            )
+            for index in range(self.dofs)
+        ]
+
+    def first_time_at_position(
+        self,
+        dof: int,
+        position: float,
+        time_after: float = 0.0,
+    ) -> Optional[float]:
+        time = ffi.new("double*")
+        found = ffi.new("bool*")
+        _result(
+            _library().ruckig_trajectory_get_first_time_at_position(
+                self.ptr,
+                int(dof),
+                float(position),
+                float(time_after),
+                time,
+                found,
+            ),
+            "ruckig_trajectory_get_first_time_at_position",
+        )
+        return float(time[0]) if bool(found[0]) else None

@@ -8,8 +8,13 @@ static double* allocate_double_vector(size_t count) {
     return (double*)ruckig_calloc(count, sizeof(double));
 }
 
-RUCKIG_C_API ruckig_result_t ruckig_trajectory_create(ruckig_trajectory_t** trajectory, size_t dofs) {
+static ruckig_result_t ruckig_trajectory_create_impl(
+    ruckig_trajectory_t** trajectory,
+    size_t dofs,
+    size_t max_number_of_waypoints
+) {
     ruckig_trajectory_t* value;
+    const size_t section_capacity = max_number_of_waypoints + 1;
     if (!trajectory || dofs == 0) {
         return RUCKIG_ERROR_INVALID_INPUT;
     }
@@ -21,10 +26,13 @@ RUCKIG_C_API ruckig_result_t ruckig_trajectory_create(ruckig_trajectory_t** traj
     }
 
     value->dofs = dofs;
-    value->profiles = (ruckig_profile_t*)ruckig_calloc(dofs, sizeof(ruckig_profile_t));
+    value->max_number_of_waypoints = max_number_of_waypoints;
+    value->section_capacity = section_capacity;
+    value->section_count = 1;
+    value->profiles = (ruckig_profile_t*)ruckig_calloc(section_capacity * dofs, sizeof(ruckig_profile_t));
     value->blocks = (ruckig_block_t*)ruckig_calloc(dofs, sizeof(ruckig_block_t));
     value->independent_min_durations = allocate_double_vector(dofs);
-    value->cumulative_times = allocate_double_vector(1);
+    value->cumulative_times = allocate_double_vector(section_capacity);
     if (!value->profiles || !value->blocks || !value->independent_min_durations || !value->cumulative_times) {
         ruckig_trajectory_destroy(value);
         return RUCKIG_ERROR;
@@ -32,6 +40,18 @@ RUCKIG_C_API ruckig_result_t ruckig_trajectory_create(ruckig_trajectory_t** traj
 
     *trajectory = value;
     return RUCKIG_WORKING;
+}
+
+RUCKIG_C_API ruckig_result_t ruckig_trajectory_create(ruckig_trajectory_t** trajectory, size_t dofs) {
+    return ruckig_trajectory_create_impl(trajectory, dofs, 0);
+}
+
+RUCKIG_C_API ruckig_result_t ruckig_trajectory_create_with_waypoints(
+    ruckig_trajectory_t** trajectory,
+    size_t dofs,
+    size_t max_number_of_waypoints
+) {
+    return ruckig_trajectory_create_impl(trajectory, dofs, max_number_of_waypoints);
 }
 
 RUCKIG_C_API void ruckig_trajectory_destroy(ruckig_trajectory_t* trajectory) {
@@ -51,6 +71,30 @@ RUCKIG_C_API size_t ruckig_trajectory_get_dof_count(const ruckig_trajectory_t* t
 
 RUCKIG_C_API double ruckig_trajectory_get_duration(const ruckig_trajectory_t* trajectory) {
     return trajectory ? trajectory->duration : 0.0;
+}
+
+RUCKIG_C_API size_t ruckig_trajectory_get_section_count(const ruckig_trajectory_t* trajectory) {
+    return trajectory && trajectory->valid ? trajectory->section_count : 0;
+}
+
+RUCKIG_C_API size_t ruckig_trajectory_get_intermediate_duration_count(const ruckig_trajectory_t* trajectory) {
+    return trajectory && trajectory->valid && trajectory->section_count > 0 ? trajectory->section_count - 1 : 0;
+}
+
+RUCKIG_C_API ruckig_result_t ruckig_trajectory_get_intermediate_durations(
+    const ruckig_trajectory_t* trajectory,
+    double* durations,
+    size_t duration_count
+) {
+    size_t i;
+    const size_t count = ruckig_trajectory_get_intermediate_duration_count(trajectory);
+    if (!trajectory || !durations || duration_count < count || !trajectory->valid) {
+        return RUCKIG_ERROR_INVALID_INPUT;
+    }
+    for (i = 0; i < count; ++i) {
+        durations[i] = trajectory->cumulative_times[i];
+    }
+    return RUCKIG_WORKING;
 }
 
 RUCKIG_C_API ruckig_result_t ruckig_trajectory_get_independent_min_durations(
@@ -125,16 +169,39 @@ RUCKIG_C_API ruckig_result_t ruckig_trajectory_at_time(
     size_t* section
 ) {
     size_t i;
+    size_t selected_section = 0;
+    double section_start = 0.0;
+    double local_time;
     if (!trajectory || !position || time < 0.0 || isnan(time) || !trajectory->valid) {
         return RUCKIG_ERROR_INVALID_INPUT;
     }
+
+    if (trajectory->section_count == 0) {
+        return RUCKIG_ERROR_INVALID_INPUT;
+    }
+    if (time >= trajectory->duration) {
+        selected_section = trajectory->section_count - 1;
+        section_start = selected_section > 0 ? trajectory->cumulative_times[selected_section - 1] : 0.0;
+    } else {
+        for (selected_section = 0; selected_section < trajectory->section_count; ++selected_section) {
+            if (time < trajectory->cumulative_times[selected_section]) {
+                break;
+            }
+            section_start = trajectory->cumulative_times[selected_section];
+        }
+        if (selected_section >= trajectory->section_count) {
+            selected_section = trajectory->section_count - 1;
+            section_start = selected_section > 0 ? trajectory->cumulative_times[selected_section - 1] : 0.0;
+        }
+    }
+    local_time = time - section_start;
 
     for (i = 0; i < trajectory->dofs; ++i) {
         double local_velocity;
         double local_acceleration;
         profile_state_at_time(
-            &trajectory->profiles[i],
-            time,
+            &trajectory->profiles[selected_section * trajectory->dofs + i],
+            local_time,
             &position[i],
             velocity ? &velocity[i] : &local_velocity,
             acceleration ? &acceleration[i] : &local_acceleration,
@@ -142,7 +209,7 @@ RUCKIG_C_API ruckig_result_t ruckig_trajectory_at_time(
         );
     }
     if (section) {
-        *section = time >= trajectory->duration ? 1 : 0;
+        *section = time >= trajectory->duration ? trajectory->section_count : selected_section;
     }
     return RUCKIG_WORKING;
 }
@@ -157,11 +224,25 @@ RUCKIG_C_API ruckig_result_t ruckig_trajectory_get_position_extrema(
         return RUCKIG_ERROR_INVALID_INPUT;
     }
     for (i = 0; i < trajectory->dofs; ++i) {
-        const ruckig_bound_t bound = ruckig_profile_get_position_extrema(&trajectory->profiles[i]);
-        extrema[i].min_position = bound.min;
-        extrema[i].max_position = bound.max;
-        extrema[i].time_min = bound.t_min;
-        extrema[i].time_max = bound.t_max;
+        size_t section;
+        bool initialized = false;
+        extrema[i].min_position = INFINITY;
+        extrema[i].max_position = -INFINITY;
+        extrema[i].time_min = 0.0;
+        extrema[i].time_max = 0.0;
+        for (section = 0; section < trajectory->section_count; ++section) {
+            const double offset = section > 0 ? trajectory->cumulative_times[section - 1] : 0.0;
+            const ruckig_bound_t bound = ruckig_profile_get_position_extrema(&trajectory->profiles[section * trajectory->dofs + i]);
+            if (!initialized || bound.min < extrema[i].min_position) {
+                extrema[i].min_position = bound.min;
+                extrema[i].time_min = offset + bound.t_min;
+            }
+            if (!initialized || bound.max > extrema[i].max_position) {
+                extrema[i].max_position = bound.max;
+                extrema[i].time_max = offset + bound.t_max;
+            }
+            initialized = true;
+        }
     }
     return RUCKIG_WORKING;
 }
@@ -174,12 +255,26 @@ RUCKIG_C_API ruckig_result_t ruckig_trajectory_get_first_time_at_position(
     double* time,
     bool* found
 ) {
+    size_t section;
     if (!trajectory || dof >= trajectory->dofs || time_after < 0.0 || !time || !found || !trajectory->valid) {
         return RUCKIG_ERROR_INVALID_INPUT;
     }
-    *found = ruckig_profile_get_first_state_at_position(&trajectory->profiles[dof], position, time, time_after);
-    if (!*found) {
-        *time = 0.0;
+    for (section = 0; section < trajectory->section_count; ++section) {
+        double local_time = 0.0;
+        const double offset = section > 0 ? trajectory->cumulative_times[section - 1] : 0.0;
+        const double local_time_after = time_after > offset ? time_after - offset : 0.0;
+        if (ruckig_profile_get_first_state_at_position(
+                &trajectory->profiles[section * trajectory->dofs + dof],
+                position,
+                &local_time,
+                local_time_after
+            )) {
+            *time = offset + local_time;
+            *found = true;
+            return RUCKIG_WORKING;
+        }
     }
+    *found = false;
+    *time = 0.0;
     return RUCKIG_WORKING;
 }

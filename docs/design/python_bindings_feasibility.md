@@ -232,11 +232,11 @@ and public export hygiene are stable.
 Local prototype smoke evidence:
 
 ```text
-Python: 3.14.3 in build_python_proto_venv
+Python: 3.14.3 in out\python-prototype-venv
 cffi: 2.0.0
-Library: build_release_check_shared/ruckig_c.dll
-Command: python bindings/python_prototype/test_prototype.py
-Result: Ran 8 tests in 0.009s, OK
+Library: out\build\windows-clang-ninja-shared\ruckig_c.dll
+Command: out\python-prototype-venv\Scripts\python.exe bindings\python_prototype\test_prototype.py
+Result: Ran 11 tests in 0.012s, OK
 ```
 
 Current `0.3.0` prototype coverage includes:
@@ -256,3 +256,33 @@ source distribution, CMake install target, or routine CI job.
 
 Rust bindings should remain deferred until Python feasibility clarifies the
 ownership, packaging, and error model for one high-level FFI layer.
+
+## 0.4.0-Design Prototype Expansion
+
+The `0.4.0-design` line extends the same `cffi` ABI-mode prototype to the new
+waypoint-aware C ABI. This is still a prototype, not a released Python binding
+API, package, wheel, or CMake install component.
+
+New prototype coverage:
+
+- `Ruckig`, `Input`, `Output`, and `Trajectory` constructors accept
+  `max_number_of_waypoints`.
+- `Input` exposes global max/min position vectors, intermediate positions,
+  per-section max/min velocity, per-section max/min acceleration, per-section
+  max jerk, per-section max/min position, per-section minimum duration, and
+  interrupt-calculation-duration storage.
+- `Trajectory` exposes section count, intermediate durations, multi-section
+  sampling, position extrema as `Bound`, and first-time-at-position.
+- `Ruckig.filter_intermediate_positions` wraps the deterministic local C helper.
+- The array model remains list/tuple copy-in/copy-out. NumPy and buffer
+  protocol remain optional future work.
+- `RUCKIG_WORKING` and `RUCKIG_FINISHED` remain normal control flow; error
+  result codes still raise typed exceptions with the raw integer code attached.
+- Local runtime smoke passed against the current Windows shared `ruckig_c.dll`
+  with 11 tests, including waypoint offline, waypoint online, and
+  intermediate-position filtering.
+
+This expansion does not approve publishing wheels, vendoring a shared library,
+or adding a higher-level Pythonic API. Stable Python release scope should wait
+until the local waypoint optimizer has stronger alpha evidence and the C ABI is
+settled for `v0.4.0`.

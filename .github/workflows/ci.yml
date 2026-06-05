@@ -173,7 +173,7 @@ jobs:
       - name: Build
         run: cmake --build build-perf
 
-      - name: Run benchmark
+      - name: Run no-waypoint benchmark
         run: |
           {
             echo "uname: $(uname -a)"
@@ -182,7 +182,7 @@ jobs:
             echo "cxx_compiler: $(clang++ --version | head -n 1)"
             echo "cmake_build_type: Release"
             echo "cmake_generator: Ninja"
-            ./build-perf/ruckig_c_performance_benchmark --samples 10000 --seed 1
+            ./build-perf/ruckig_c_performance_benchmark --samples 10000 --seed 1 --enforce-threshold
           } | tee linux-performance.txt
           {
             echo "### Linux performance"
@@ -224,11 +224,31 @@ jobs:
           print(f"::notice title=Linux performance::{summary}")
           PY
 
+      - name: Run waypoint alpha benchmark
+        run: |
+          {
+            echo "uname: $(uname -a)"
+            echo "cpu_identifier: $(lscpu | sed -n 's/^Model name:[[:space:]]*//p' | head -n 1)"
+            echo "c_compiler: $(clang --version | head -n 1)"
+            echo "cmake_build_type: Release"
+            echo "cmake_generator: Ninja"
+            ./build-perf/ruckig_c_performance_benchmark --samples 10000 --seed 1 --waypoints
+          } | tee linux-waypoint-performance.txt
+          {
+            echo "### Linux waypoint alpha performance"
+            echo
+            echo '```text'
+            cat linux-waypoint-performance.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Upload benchmark output
         uses: actions/upload-artifact@v4
         with:
           name: linux-performance
-          path: linux-performance.txt
+          path: |
+            linux-performance.txt
+            linux-waypoint-performance.txt
 
   windows-mingw-consumers:
     name: ${{ matrix.name }}
@@ -292,21 +312,21 @@ jobs:
             cxx_compiler: clang++
             abi_platform: linux
             has_baseline: "true"
-            artifact_path: build-shared/artifacts/abi/0.3.0/*
+            artifact_path: build-shared/artifacts/abi/0.4.0-design/*
           - name: Windows exported symbols
             os: windows-latest
             c_compiler: clang
             cxx_compiler: clang++
             abi_platform: windows
             has_baseline: "true"
-            artifact_path: build-shared/artifacts/abi/0.3.0/*
+            artifact_path: build-shared/artifacts/abi/0.4.0-design/*
           - name: macOS exported symbols
             os: macos-latest
             c_compiler: clang
             cxx_compiler: clang++
             abi_platform: macos
             has_baseline: "false"
-            artifact_path: build-shared/artifacts/abi/0.3.0/*
+            artifact_path: build-shared/artifacts/abi/0.4.0-design/*
 
     steps:
       - uses: actions/checkout@v4
@@ -349,11 +369,11 @@ jobs:
         continue-on-error: true
         run: >
           cmake
-          "-DRUCKIG_C_CURRENT_EXPORTS=build-shared/artifacts/abi/0.3.0/${{ matrix.abi_platform }}-exports.txt"
+          "-DRUCKIG_C_CURRENT_EXPORTS=build-shared/artifacts/abi/0.4.0-design/${{ matrix.abi_platform }}-exports.txt"
           "-DRUCKIG_C_BASELINE_SYMBOLS=docs/abi/v0.2.5/${{ matrix.abi_platform }}-symbols.txt"
           "-DRUCKIG_C_PUBLIC_SYMBOLS=docs/abi/public-symbols.txt"
           "-DRUCKIG_C_PUBLIC_ABI_EXCEPTIONS=docs/abi/public-symbol-exceptions.txt"
-          "-DRUCKIG_C_PUBLIC_DIFF_OUTPUT=build-shared/artifacts/abi/0.3.0/${{ matrix.abi_platform }}-public-export-diff.txt"
+          "-DRUCKIG_C_PUBLIC_DIFF_OUTPUT=build-shared/artifacts/abi/0.4.0-design/${{ matrix.abi_platform }}-public-export-diff.txt"
           -DRUCKIG_C_STRICT_PUBLIC_ABI=ON
           -P cmake/compare_public_exported_symbols.cmake
 
@@ -373,7 +393,7 @@ jobs:
 
       - name: Print exported-symbol snapshot
         if: always()
-        run: cat build-shared/artifacts/abi/0.3.0/*
+        run: cat build-shared/artifacts/abi/0.4.0-design/*
         shell: bash
 
       - name: Upload exported-symbol snapshot
@@ -382,6 +402,117 @@ jobs:
         with:
           name: ${{ matrix.name }}
           path: ${{ matrix.artifact_path }}
+
+  python-prototype-smoke:
+    name: Python prototype smoke (${{ matrix.name }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows
+            os: windows-latest
+            c_compiler: clang
+            cxx_compiler: clang++
+          - name: Linux
+            os: ubuntu-latest
+            c_compiler: clang
+            cxx_compiler: clang++
+          - name: macOS
+            os: macos-latest
+            c_compiler: clang
+            cxx_compiler: clang++
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Prepare MSVC environment
+        if: runner.os == 'Windows'
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Install Linux build tools
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y ninja-build
+
+      - name: Install macOS build tools
+        if: runner.os == 'macOS'
+        run: brew install ninja
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Python prototype dependency
+        run: python -m pip install cffi
+
+      - name: Configure shared library
+        run: >
+          cmake -S . -B build-python-shared -G Ninja
+          -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
+          -DCMAKE_CXX_COMPILER=${{ matrix.cxx_compiler }}
+          -DBUILD_SHARED_LIBS=ON
+          -DBUILD_RUCKIG_C_TESTS=OFF
+          -DBUILD_RUCKIG_C_EXAMPLES=OFF
+          -DBUILD_RUCKIG_C_ORACLE_TESTS=OFF
+          -DBUILD_RUCKIG_C_PERFORMANCE_TESTS=OFF
+
+      - name: Build shared library
+        run: cmake --build build-python-shared --config Release
+
+      - name: Locate shared library
+        shell: bash
+        run: |
+          python - <<'PY'
+          import os
+          import pathlib
+
+          names = ("ruckig_c.dll", "libruckig_c.so", "libruckig_c.dylib")
+          matches = [path for path in pathlib.Path("build-python-shared").rglob("*") if path.name in names]
+          if not matches:
+              raise SystemExit("shared ruckig_c library not found")
+          library = matches[0].resolve()
+          with open(os.environ["GITHUB_ENV"], "a", encoding="utf-8") as env_file:
+              env_file.write(f"RUCKIG_C_SHARED_LIBRARY={library}\n")
+          print(library)
+          PY
+
+      - name: Run Python prototype tests
+        run: python bindings/python_prototype/test_prototype.py
+
+  rust-alpha-smoke:
+    name: Rust alpha wrapper smoke
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install build tools
+        run: sudo apt-get update && sudo apt-get install -y ninja-build
+
+      - name: Configure static library
+        run: >
+          cmake -S . -B build-rust -G Ninja
+          -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_C_COMPILER=clang
+          -DCMAKE_CXX_COMPILER=clang++
+          -DBUILD_SHARED_LIBS=OFF
+          -DBUILD_RUCKIG_C_TESTS=OFF
+          -DBUILD_RUCKIG_C_EXAMPLES=OFF
+          -DBUILD_RUCKIG_C_ORACLE_TESTS=OFF
+          -DBUILD_RUCKIG_C_PERFORMANCE_TESTS=OFF
+
+      - name: Build static library
+        run: cmake --build build-rust --config Release
+
+      - name: Run Rust wrapper tests
+        run: cargo test --manifest-path bindings/rust/Cargo.toml
+        env:
+          RUCKIG_C_LIB_DIR: ${{ github.workspace }}/build-rust
+
+      - name: Run Rust wrapper examples
+        run: cargo test --manifest-path bindings/rust/Cargo.toml --examples
+        env:
+          RUCKIG_C_LIB_DIR: ${{ github.workspace }}/build-rust
 
   release-random-oracle:
     name: Manual release random oracle

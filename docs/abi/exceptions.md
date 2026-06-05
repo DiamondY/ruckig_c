@@ -49,3 +49,17 @@ The `v0.2.5` Linux exported-symbol baseline includes implementation-internal
 `ruckig_*` symbols because strict symbol visibility was not yet enforced. Those
 symbols were never public API. Cleaning them up in `0.3.0` is export
 hygiene, not a public API removal.
+
+## 0.4.0-Design Public API Expansion
+
+`0.4.0-design` is the first planned public C ABI expansion after the `0.3.0`
+hardening release. The approved additions expose original-surface parity for
+waypoint-aware construction, global position bounds, intermediate waypoints,
+per-section constraints, intermediate duration queries, multi-section
+trajectory metadata, and local waypoint filtering.
+
+These additions are approved by `docs/design/0.4.0_original_parity.md`,
+recorded in `CHANGELOG.md`, tracked in `docs/abi/public-symbols.txt`, and
+listed as `allow-add` entries in `docs/abi/public-symbol-exceptions.txt`.
+Existing `v0.3.0` public symbols, signatures, enum values, and result-code
+numeric values remain frozen.
