@@ -124,6 +124,7 @@ Current same-platform release baselines:
 | `0.2.4` | `1.4087` | `1.29012` | Final Windows closeout and manual Linux release workflow evidence. |
 | `0.2.5` | `1.16244` | `1.30314` | Final planned pre-`0.3.0` stabilization baseline from local Windows closeout and manual Linux release workflow evidence. |
 | `0.3.0` | Not a separate 0.3.0 gate | `1.2875` | Hardening release final push CI run `27028896945`, artifact `7442364071`; local Windows release gates covered build/test/ABI rather than a separate benchmark rerun. |
+| `0.4.0` | `1.23622` | `1.17323` push CI; `1.29272` manual workflow | Original-surface parity release. Windows local alpha.4 pre-stable gate; Linux final push CI run `27038403450`, artifact `7446167572`; manual workflow run `27038538349`, artifact `7446219206`. |
 
 Store raw local or CI outputs outside version-controlled source unless the
 release process intentionally promotes a short excerpt into this report. Use a
@@ -852,6 +853,108 @@ Average C/oracle ratio: `1.23622`.
 | Worst | 7.6835e+06 ns |
 
 There is no C++ oracle ratio for this waypoint alpha corpus because the frozen
+Ruckig Community `0.17.3` baseline does not contain a local global waypoint
+optimizer.
+
+## 2026-06-06 Linux 0.4.0 Final Push No-Waypoint Run
+
+- Source: GitHub Actions push CI run `27038403450`, job `Linux Clang
+  performance`, artifact `7446167572`.
+- Command:
+  `./build-perf/ruckig_c_performance_benchmark --samples 10000 --seed 1 --enforce-threshold`.
+- OS: Linux.
+- Kernel: `Linux runnervm3jyl0 6.17.0-1015-azure #15~24.04.1-Ubuntu`.
+- CPU identifier: `AMD EPYC 7763 64-Core Processor`.
+- C compiler: `Ubuntu clang version 18.1.3 (1ubuntu1)`.
+- C++ compiler: `Ubuntu clang version 18.1.3 (1ubuntu1)`.
+- CMake build type: Release.
+- Generator: Ninja.
+- Seed: `1`.
+- Samples: `10000`.
+- Release threshold: average C/oracle ratio `<= 1.5`.
+
+| Metric | C | C++ oracle |
+| --- | ---: | ---: |
+| Average | 716.606 ns | 610.796 ns |
+| p99 | 5350 ns | 4409 ns |
+| Worst | 27141 ns | 40956 ns |
+
+Average C/oracle ratio: `1.17323`.
+
+## 2026-06-06 Linux 0.4.0 Final Push Waypoint Run
+
+- Source: GitHub Actions push CI run `27038403450`, job `Linux Clang
+  performance`, artifact `7446167572`.
+- Command:
+  `./build-perf/ruckig_c_performance_benchmark --samples 10000 --seed 1 --waypoints`.
+- OS: Linux.
+- Kernel: `Linux runnervm3jyl0 6.17.0-1015-azure #15~24.04.1-Ubuntu`.
+- CPU identifier: `AMD EPYC 7763 64-Core Processor`.
+- C compiler: `Ubuntu clang version 18.1.3 (1ubuntu1)`.
+- CMake build type: Release.
+- Generator: Ninja.
+- Seed: `1`.
+- Samples: `10000`.
+- Waypoint case count: `5`.
+
+| Metric | C waypoint optimizer |
+| --- | ---: |
+| Average | 1.11858e+06 ns |
+| p99 | 5.1804e+06 ns |
+| Worst | 8.57995e+06 ns |
+
+There is no C++ oracle ratio for this waypoint corpus because the frozen
+Ruckig Community `0.17.3` baseline does not contain a local global waypoint
+optimizer.
+
+## 2026-06-06 Linux 0.4.0 Manual Release No-Waypoint Run
+
+- Source: GitHub Actions workflow-dispatch run `27038538349`, job `Linux Clang
+  performance`, artifact `7446219206`.
+- Command:
+  `./build-perf/ruckig_c_performance_benchmark --samples 10000 --seed 1 --enforce-threshold`.
+- OS: Linux.
+- Kernel: `Linux runnervm3jyl0 6.17.0-1015-azure #15~24.04.1-Ubuntu`.
+- CPU identifier: `AMD EPYC 9V74 80-Core Processor`.
+- C compiler: `Ubuntu clang version 18.1.3 (1ubuntu1)`.
+- C++ compiler: `Ubuntu clang version 18.1.3 (1ubuntu1)`.
+- CMake build type: Release.
+- Generator: Ninja.
+- Seed: `1`.
+- Samples: `10000`.
+- Release threshold: average C/oracle ratio `<= 1.5`.
+
+| Metric | C | C++ oracle |
+| --- | ---: | ---: |
+| Average | 750.813 ns | 580.8 ns |
+| p99 | 5659 ns | 4417 ns |
+| Worst | 37195 ns | 25107 ns |
+
+Average C/oracle ratio: `1.29272`.
+
+## 2026-06-06 Linux 0.4.0 Manual Release Waypoint Run
+
+- Source: GitHub Actions workflow-dispatch run `27038538349`, job `Linux Clang
+  performance`, artifact `7446219206`.
+- Command:
+  `./build-perf/ruckig_c_performance_benchmark --samples 10000 --seed 1 --waypoints`.
+- OS: Linux.
+- Kernel: `Linux runnervm3jyl0 6.17.0-1015-azure #15~24.04.1-Ubuntu`.
+- CPU identifier: `AMD EPYC 9V74 80-Core Processor`.
+- C compiler: `Ubuntu clang version 18.1.3 (1ubuntu1)`.
+- CMake build type: Release.
+- Generator: Ninja.
+- Seed: `1`.
+- Samples: `10000`.
+- Waypoint case count: `5`.
+
+| Metric | C waypoint optimizer |
+| --- | ---: |
+| Average | 1.13993e+06 ns |
+| p99 | 5.28296e+06 ns |
+| Worst | 7.53232e+06 ns |
+
+There is no C++ oracle ratio for this waypoint corpus because the frozen
 Ruckig Community `0.17.3` baseline does not contain a local global waypoint
 optimizer.
 

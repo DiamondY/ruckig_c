@@ -2383,6 +2383,154 @@ Linux GCC C-only
 The `Manual release random oracle` job was skipped as expected for a
 push-triggered workflow.
 
+## 2026-06-06 0.4.0 Release Closeout Evidence
+
+The stable `v0.4.0` release closeout ran against release-candidate commit
+`379793cf7ff073108f3345beed7c5055379b0c79` (`Prepare ruckig_c 0.4.0
+release`). It keeps the local waypoint optimizer release claim explicitly
+bounded: no cloud or remote calculation, no formal Ruckig Pro/cloud global
+numerical equivalence claim, no hard real-time guarantee for waypoint
+optimization, and prototype-only Python/Rust wrappers.
+
+Final push CI:
+
+```text
+Run id: 27038403450
+Run URL: https://github.com/DiamondY/ruckig_c/actions/runs/27038403450
+Commit: 379793cf7ff073108f3345beed7c5055379b0c79
+Event: push
+Conclusion: success
+```
+
+Final manual release-random workflow:
+
+```text
+Run id: 27038538349
+Run URL: https://github.com/DiamondY/ruckig_c/actions/runs/27038538349
+Commit: 379793cf7ff073108f3345beed7c5055379b0c79
+Event: workflow_dispatch
+Input: release_random=true
+Conclusion: success
+```
+
+Successful routine CI jobs in both the final push CI and the manual workflow:
+
+```text
+Windows clang-cl C-only
+Windows clang-cl shared C-only
+Windows clang oracle
+Linux GCC C-only
+Linux Clang oracle
+macOS Clang C-only
+Linux Clang ASan UBSan
+Linux Valgrind
+Linux Clang performance
+Windows MinGW static consumer
+Windows MinGW DLL consumer
+Linux exported symbols
+Windows exported symbols
+macOS exported symbols
+Python prototype smoke (Windows)
+Python prototype smoke (Linux)
+Python prototype smoke (macOS)
+Rust alpha wrapper smoke
+```
+
+The final push-triggered workflow skipped `Manual release random oracle` as
+expected. The workflow-dispatch run executed `Manual release random oracle`
+successfully.
+
+Final push CI artifacts:
+
+```text
+linux-performance: artifact id 7446167572, size 1053 bytes.
+Linux exported symbols: artifact id 7446162536, size 4544 bytes.
+Windows exported symbols: artifact id 7446163794, size 4377 bytes.
+macOS exported symbols: artifact id 7446159976, size 2459 bytes.
+```
+
+Manual workflow artifacts:
+
+```text
+linux-performance: artifact id 7446219206, size 1056 bytes.
+Linux exported symbols: artifact id 7446213222, size 4544 bytes.
+Windows exported symbols: artifact id 7446238650, size 4377 bytes.
+macOS exported symbols: artifact id 7446210106, size 2459 bytes.
+```
+
+Downloaded artifact inspection:
+
+```text
+Artifacts were downloaded through the GitHub API and inspected from
+out\gh-artifacts\0.4.0-final before local cleanup.
+```
+
+ABI/export review:
+
+```text
+Public symbol allowlist:
+117 header public symbols, 117 expected public symbols, 0 missing, 0 extra.
+
+Linux exported symbols:
+status clean; 117 current exports; 127 historical baseline exports; 117
+approved public symbols; 117 current public symbols; 66 historical baseline
+public symbols; 51 exception-approved public additions; 0 missing public
+symbols; 0 removed public symbols; 0 unapproved exported symbols; 61
+historical Linux baseline internal symbols intentionally hidden.
+
+Windows exported symbols:
+status clean; 117 current exports; 66 historical baseline exports; 117
+approved public symbols; 117 current public symbols; 66 historical baseline
+public symbols; 51 exception-approved public additions; 0 missing public
+symbols; 0 removed public symbols; 0 unapproved exported symbols.
+
+macOS exported symbols:
+117 current exports; public allowlist verification clean. This remains
+platform snapshot evidence rather than a historical baseline diff.
+```
+
+Performance review:
+
+```text
+Windows local no-waypoint gate:
+average_ratio_c_over_oracle 1.23622, threshold 1.5.
+
+Windows local waypoint gate:
+waypoint_case_count 5; average 1.05448e+06 ns; p99 6.3575e+06 ns; worst
+7.6835e+06 ns.
+
+Linux final push no-waypoint:
+average_ratio_c_over_oracle 1.17323, threshold 1.5.
+
+Linux final push waypoint:
+waypoint_case_count 5; average 1.11858e+06 ns; p99 5.1804e+06 ns; worst
+8.57995e+06 ns.
+
+Linux manual no-waypoint:
+average_ratio_c_over_oracle 1.29272, threshold 1.5.
+
+Linux manual waypoint:
+waypoint_case_count 5; average 1.13993e+06 ns; p99 5.28296e+06 ns; worst
+7.53232e+06 ns.
+```
+
+Oracle and wrapper summary:
+
+```text
+Fixed no-waypoint oracle comparisons: 76.
+Waypoint section oracle comparisons: 4.
+Ordinary random oracle: 100000 cases each for seeds 1, 2, and 41.
+Per-DoF random oracle: 100000 cases for seed 1.
+Local release-random oracle: 1000000 cases for seed 1.
+Manual release-random workflow: success.
+Python prototype smoke: 13 tests, OK.
+Rust alpha wrapper smoke: 6 tests, OK; examples compile.
+```
+
+The tracked release notes source is `docs/release/notes/0.4.0.md`. Final tag
+and GitHub Release URLs are recorded by the annotated tag and GitHub Release
+created from the final release evidence commit.
+
 ## 2026-06-06 0.4.0-Design Local Alpha.4 Pre-Stable Gates
 
 This local pass ran the heavier pre-stable Windows gates that are short of a
