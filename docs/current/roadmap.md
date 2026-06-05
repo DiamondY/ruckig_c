@@ -110,8 +110,8 @@ API, solver dispatch, or the frozen oracle baseline during design evaluation.
   is implemented.
 - First `0.3.0-design` priorities:
   1. ABI/export hygiene and Linux internal symbol cleanup.
-  2. Strict public ABI diff gate trial, opt-in locally and enabled in the
-     dedicated exported-symbol CI jobs.
+  2. Strict public ABI diff gate trial, opt-in locally and warning/evidence-only
+     in the dedicated exported-symbol CI jobs.
   3. Windows consumer matrix hardening for MSVC `cl` and MinGW feasibility.
   4. Python `cffi` ABI-mode prototype design and prototype plan.
   5. vcpkg feasibility prototype plan.
