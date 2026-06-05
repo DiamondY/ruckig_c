@@ -2437,6 +2437,42 @@ pass.
 Python and Rust remain prototype-only. This evidence does not publish Python
 wheels, a Rust crate, package-manager recipes, or stable wrapper APIs.
 
+Remote GitHub Actions push CI for the alpha.3 wrapper commit:
+
+```text
+Run id: 27037328687
+Run URL: https://github.com/DiamondY/ruckig_c/actions/runs/27037328687
+Commit: fa1a406f17f1dcc90786e9994df5084b1da6dbcd
+Event: push
+Conclusion: success
+```
+
+Successful push CI jobs:
+
+```text
+Windows clang-cl C-only
+Windows clang-cl shared C-only
+Windows clang oracle
+Linux GCC C-only
+Linux Clang oracle
+macOS Clang C-only
+Linux Clang ASan UBSan
+Linux Valgrind
+Linux Clang performance
+Windows MinGW static consumer
+Windows MinGW DLL consumer
+Linux exported symbols
+Windows exported symbols
+macOS exported symbols
+Python prototype smoke (Windows)
+Python prototype smoke (Linux)
+Python prototype smoke (macOS)
+Rust alpha wrapper smoke
+```
+
+The `Manual release random oracle` job was skipped as expected for a
+push-triggered workflow.
+
 Uploaded artifacts:
 
 ```text
