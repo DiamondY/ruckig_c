@@ -2907,3 +2907,39 @@ pass; Waypoint section oracle comparisons passed: 4.
 This alpha.2 evidence still does not publish stable `v0.4.0`. The stable
 release checklist remains open for a later release decision, cross-platform CI
 evidence from the final release candidate, and release closeout.
+
+Remote GitHub Actions push CI for the alpha.2 evidence commit:
+
+```text
+Run id: 27036721061
+Run URL: https://github.com/DiamondY/ruckig_c/actions/runs/27036721061
+Commit: 5b0d967c197965eac741100d2aed2a8c401e0869
+Event: push
+Conclusion: success
+```
+
+Successful push CI jobs:
+
+```text
+Windows clang-cl C-only
+Windows clang-cl shared C-only
+Windows clang oracle
+Linux GCC C-only
+Linux Clang oracle
+macOS Clang C-only
+Linux Clang ASan UBSan
+Linux Valgrind
+Linux Clang performance
+Windows MinGW static consumer
+Windows MinGW DLL consumer
+Linux exported symbols
+Windows exported symbols
+macOS exported symbols
+Python prototype smoke (Windows)
+Python prototype smoke (Linux)
+Python prototype smoke (macOS)
+Rust alpha wrapper smoke
+```
+
+The `Manual release random oracle` job was skipped as expected for a
+push-triggered workflow.
