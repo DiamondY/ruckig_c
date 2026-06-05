@@ -1652,6 +1652,35 @@ static void test_waypoint_validation_and_filter(void) {
     ruckig_destroy(otg);
 }
 
+static void check_waypoint_samples(
+    const ruckig_trajectory_t* trajectory,
+    const double* waypoints,
+    size_t waypoint_count,
+    size_t dofs
+) {
+    double durations[4] = {0.0, 0.0, 0.0, 0.0};
+    double position[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+    size_t waypoint;
+    size_t dof;
+
+    CHECK_TRUE(waypoint_count <= 4);
+    CHECK_TRUE(dofs <= 6);
+    CHECK_EQ_INT(ruckig_trajectory_get_section_count(trajectory), waypoint_count + 1);
+    CHECK_EQ_INT(ruckig_trajectory_get_intermediate_duration_count(trajectory), waypoint_count);
+    CHECK_EQ_INT(ruckig_trajectory_get_intermediate_durations(trajectory, durations, waypoint_count), RUCKIG_WORKING);
+    for (waypoint = 0; waypoint < waypoint_count; ++waypoint) {
+        CHECK_TRUE(durations[waypoint] > 0.0);
+        CHECK_TRUE(durations[waypoint] < ruckig_trajectory_get_duration(trajectory));
+        if (waypoint > 0) {
+            CHECK_TRUE(durations[waypoint] > durations[waypoint - 1]);
+        }
+        CHECK_EQ_INT(ruckig_trajectory_at_time(trajectory, durations[waypoint], position, NULL, NULL, NULL, NULL), RUCKIG_WORKING);
+        for (dof = 0; dof < dofs; ++dof) {
+            CHECK_NEAR(position[dof], waypoints[waypoint * dofs + dof], 1e-7);
+        }
+    }
+}
+
 static void test_waypoint_fixed_regression_corpus(void) {
     {
         ruckig_t* otg = NULL;
@@ -1795,10 +1824,145 @@ static void test_waypoint_fixed_regression_corpus(void) {
     }
 }
 
+static void test_waypoint_alpha2_fixed_regression_corpus(void) {
+    {
+        const size_t dofs = 4;
+        ruckig_t* otg = NULL;
+        ruckig_input_t* input = NULL;
+        ruckig_trajectory_t* trajectory = NULL;
+        double waypoints[8] = {
+            0.25, -0.15, 0.20, -0.10,
+            0.75, -0.45, 0.45, -0.30
+        };
+        double per_section_minimum_duration[3] = {0.35, 0.60, 0.45};
+        double per_section_max_position[12] = {
+            0.30, 0.05, 0.25, 0.05,
+            0.80, -0.10, 0.50, -0.05,
+            1.25, -0.35, 0.80, -0.20
+        };
+        double per_section_min_position[12] = {
+            -0.05, -0.20, -0.05, -0.15,
+            0.20, -0.50, 0.15, -0.35,
+            0.70, -0.75, 0.40, -0.55
+        };
+        ruckig_position_extrema_t extrema[4];
+        size_t i;
+
+        CHECK_EQ_INT(ruckig_create_with_waypoints(&otg, dofs, 0.01, 2), RUCKIG_WORKING);
+        CHECK_EQ_INT(ruckig_input_create_with_waypoints(&input, dofs, 2), RUCKIG_WORKING);
+        CHECK_EQ_INT(ruckig_trajectory_create_with_waypoints(&trajectory, dofs, 2), RUCKIG_WORKING);
+        for (i = 0; i < dofs; ++i) {
+            ruckig_input_max_velocity_data(input)[i] = 1.4;
+            ruckig_input_max_acceleration_data(input)[i] = 2.0;
+            ruckig_input_max_jerk_data(input)[i] = 4.0;
+        }
+        ruckig_input_target_position_data(input)[0] = 1.10;
+        ruckig_input_target_position_data(input)[1] = -0.65;
+        ruckig_input_target_position_data(input)[2] = 0.70;
+        ruckig_input_target_position_data(input)[3] = -0.50;
+        CHECK_EQ_INT(ruckig_input_set_intermediate_positions(input, waypoints, 2, dofs), RUCKIG_WORKING);
+        CHECK_EQ_INT(ruckig_input_set_per_section_minimum_duration(input, per_section_minimum_duration, 3), RUCKIG_WORKING);
+        CHECK_EQ_INT(ruckig_input_set_per_section_max_position(input, per_section_max_position, 3, dofs), RUCKIG_WORKING);
+        CHECK_EQ_INT(ruckig_input_set_per_section_min_position(input, per_section_min_position, 3, dofs), RUCKIG_WORKING);
+        CHECK_EQ_INT(ruckig_calculate(otg, input, trajectory), RUCKIG_WORKING);
+        CHECK_TRUE(ruckig_trajectory_get_duration(trajectory) >= 1.40);
+        CHECK_TRUE(ruckig_trajectory_get_duration(trajectory) < 6.00);
+        check_waypoint_samples(trajectory, waypoints, 2, dofs);
+        CHECK_EQ_INT(ruckig_trajectory_get_position_extrema(trajectory, extrema, dofs), RUCKIG_WORKING);
+        CHECK_TRUE(extrema[0].min_position >= -0.05 - 1e-9);
+        CHECK_TRUE(extrema[0].max_position <= 1.25 + 1e-9);
+        CHECK_TRUE(extrema[1].min_position >= -0.75 - 1e-9);
+        CHECK_TRUE(extrema[1].max_position <= 0.05 + 1e-9);
+        ruckig_trajectory_destroy(trajectory);
+        ruckig_input_destroy(input);
+        ruckig_destroy(otg);
+    }
+
+    {
+        const size_t dofs = 6;
+        ruckig_t* otg = NULL;
+        ruckig_input_t* input = NULL;
+        ruckig_trajectory_t* trajectory = NULL;
+        double waypoint[6] = {0.20, -0.10, 0.30, -0.20, 5.0, -3.0};
+        double position[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+        size_t i;
+
+        CHECK_EQ_INT(ruckig_create_with_waypoints(&otg, dofs, 0.02, 1), RUCKIG_WORKING);
+        CHECK_EQ_INT(ruckig_input_create_with_waypoints(&input, dofs, 1), RUCKIG_WORKING);
+        CHECK_EQ_INT(ruckig_trajectory_create_with_waypoints(&trajectory, dofs, 1), RUCKIG_WORKING);
+        for (i = 0; i < dofs; ++i) {
+            ruckig_input_max_velocity_data(input)[i] = 1.5;
+            ruckig_input_max_acceleration_data(input)[i] = 2.0;
+            ruckig_input_max_jerk_data(input)[i] = 4.0;
+        }
+        ruckig_input_current_position_data(input)[4] = 5.0;
+        ruckig_input_current_position_data(input)[5] = -3.0;
+        ruckig_input_target_position_data(input)[0] = 0.50;
+        ruckig_input_target_position_data(input)[1] = -0.25;
+        ruckig_input_target_position_data(input)[2] = 0.75;
+        ruckig_input_target_position_data(input)[3] = -0.45;
+        ruckig_input_target_position_data(input)[4] = 5.0;
+        ruckig_input_target_position_data(input)[5] = -3.0;
+        CHECK_EQ_INT(ruckig_input_set_dof_enabled(input, 4, false), RUCKIG_WORKING);
+        CHECK_EQ_INT(ruckig_input_set_dof_enabled(input, 5, false), RUCKIG_WORKING);
+        CHECK_EQ_INT(ruckig_input_set_intermediate_positions(input, waypoint, 1, dofs), RUCKIG_WORKING);
+        CHECK_EQ_INT(ruckig_calculate(otg, input, trajectory), RUCKIG_WORKING);
+        check_waypoint_samples(trajectory, waypoint, 1, dofs);
+        CHECK_EQ_INT(ruckig_trajectory_at_time(trajectory, ruckig_trajectory_get_duration(trajectory), position, NULL, NULL, NULL, NULL), RUCKIG_WORKING);
+        CHECK_NEAR(position[4], 5.0, 1e-12);
+        CHECK_NEAR(position[5], -3.0, 1e-12);
+        ruckig_trajectory_destroy(trajectory);
+        ruckig_input_destroy(input);
+        ruckig_destroy(otg);
+    }
+}
+
+static void test_waypoint_alpha2_quality_regressions(void) {
+    {
+        ruckig_t* otg = NULL;
+        ruckig_input_t* input = NULL;
+        ruckig_trajectory_t* trajectory = NULL;
+        double waypoints[2] = {0.45, 0.95};
+        double durations[2] = {0.0, 0.0};
+
+        CHECK_EQ_INT(ruckig_create_with_waypoints(&otg, 1, 0.01, 2), RUCKIG_WORKING);
+        CHECK_EQ_INT(ruckig_input_create_with_waypoints(&input, 1, 2), RUCKIG_WORKING);
+        CHECK_EQ_INT(ruckig_trajectory_create_with_waypoints(&trajectory, 1, 2), RUCKIG_WORKING);
+        ruckig_input_target_position_data(input)[0] = 1.40;
+        ruckig_input_current_velocity_data(input)[0] = 0.10;
+        ruckig_input_target_velocity_data(input)[0] = -0.05;
+        ruckig_input_max_velocity_data(input)[0] = 1.2;
+        ruckig_input_max_acceleration_data(input)[0] = 2.4;
+        ruckig_input_max_jerk_data(input)[0] = 5.0;
+        CHECK_EQ_INT(ruckig_input_set_intermediate_positions(input, waypoints, 2, 1), RUCKIG_WORKING);
+        CHECK_EQ_INT(ruckig_calculate(otg, input, trajectory), RUCKIG_WORKING);
+        CHECK_TRUE(ruckig_trajectory_get_duration(trajectory) < 4.50);
+        CHECK_EQ_INT(ruckig_trajectory_get_intermediate_durations(trajectory, durations, 2), RUCKIG_WORKING);
+        CHECK_TRUE(durations[0] < durations[1]);
+        CHECK_TRUE(durations[1] < ruckig_trajectory_get_duration(trajectory));
+        ruckig_trajectory_destroy(trajectory);
+        ruckig_input_destroy(input);
+        ruckig_destroy(otg);
+    }
+}
+
 void run_waypoint_tests(void) {
     test_waypoint_constructors_storage_and_optimizer();
     test_waypoint_validation_and_filter();
     test_waypoint_fixed_regression_corpus();
+    test_waypoint_alpha2_fixed_regression_corpus();
+    test_waypoint_alpha2_quality_regressions();
+}
+
+void run_waypoint_per_section_tests(void) {
+    test_waypoint_constructors_storage_and_optimizer();
+    test_waypoint_alpha2_fixed_regression_corpus();
+}
+
+void run_waypoint_quality_tests(void) {
+    test_waypoint_constructors_storage_and_optimizer();
+    test_waypoint_fixed_regression_corpus();
+    test_waypoint_alpha2_quality_regressions();
 }
 
 void run_api_tests(void) {

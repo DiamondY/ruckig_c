@@ -2861,3 +2861,49 @@ Rust alpha wrapper smoke. Stable `v0.4.0` is still not released from this
 evidence; `docs/release/checklists/0.4.0-alpha.md` records the alpha decision
 that another alpha cycle is required before making a stable waypoint optimizer
 readiness claim.
+
+## 2026-06-06 0.4.0-Design Local Alpha.2 Waypoint Evidence
+
+The second local alpha pass strengthened waypoint optimizer evidence without
+changing the public C header, existing ABI symbols, or the frozen
+`original/ruckig-main` baseline.
+
+Code coverage added in this pass:
+
+```text
+Fixed waypoint corpus:
+- 4 DoF, two waypoints, per-section minimum duration, and per-section
+  position bounds.
+- 6 DoF, one waypoint, disabled constant DoFs, and waypoint/final-state checks.
+- 1 DoF, two waypoints, nonzero current and target velocities for quality
+  regression coverage.
+
+Section-level oracle corpus:
+- 3 DoF waypoint case with per-section velocity, acceleration, jerk, and
+  minimum-duration constraints.
+- 4 DoF waypoint case with three intermediate waypoints.
+
+CTest structure:
+- ruckig_c_waypoint_optimizer, ruckig_c_per_section_constraints, and
+  ruckig_c_waypoint_quality now run distinct focused subsets.
+```
+
+Local verification:
+
+```text
+ctest --test-dir out\build\windows-clang-ninja -R "ruckig_c_waypoint_optimizer|ruckig_c_per_section_constraints|ruckig_c_waypoint_quality" --output-on-failure:
+pass, 3/3.
+
+ctest --test-dir out\build\windows-clang-ninja --output-on-failure:
+pass, 24/24.
+
+ctest --test-dir out\build\windows-clang-ninja-oracle --output-on-failure -E ruckig_c_oracle_random_release:
+pass, 29/29.
+
+out\build\windows-clang-ninja-oracle\ruckig_c_oracle_tests.exe --waypoint-section-oracle:
+pass; Waypoint section oracle comparisons passed: 4.
+```
+
+This alpha.2 evidence still does not publish stable `v0.4.0`. The stable
+release checklist remains open for a later release decision, cross-platform CI
+evidence from the final release candidate, and release closeout.

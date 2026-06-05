@@ -94,13 +94,21 @@ void run_brake_tests(void);
 void run_profile_tests(void);
 void run_utils_tests(void);
 void run_waypoint_tests(void);
+void run_waypoint_per_section_tests(void);
+void run_waypoint_quality_tests(void);
 
 int main(int argc, char** argv) {
     if (argc == 2) {
-        if (strcmp(argv[1], "--waypoint") == 0
-            || strcmp(argv[1], "--per-section") == 0
-            || strcmp(argv[1], "--waypoint-quality") == 0) {
+        if (strcmp(argv[1], "--waypoint") == 0) {
             run_waypoint_tests();
+            return ruckig_c_test_failures == 0 ? 0 : 1;
+        }
+        if (strcmp(argv[1], "--per-section") == 0) {
+            run_waypoint_per_section_tests();
+            return ruckig_c_test_failures == 0 ? 0 : 1;
+        }
+        if (strcmp(argv[1], "--waypoint-quality") == 0) {
+            run_waypoint_quality_tests();
             return ruckig_c_test_failures == 0 ? 0 : 1;
         }
         fprintf(stderr, "unknown test selection: %s\n", argv[1]);
