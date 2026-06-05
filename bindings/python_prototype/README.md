@@ -1,6 +1,6 @@
 # Python cffi ABI-Mode Prototype
 
-This directory is an experimental `0.4.0-design` prototype. It is not a
+This directory is an experimental `0.4.0` prototype. It is not a
 released binding API, not installed by CMake, and not part of the public C ABI.
 
 The prototype loads an already-built shared `ruckig_c` library with `cffi`
@@ -15,7 +15,7 @@ ABI mode and validates the minimum wrapper model:
 - typed exceptions for error result codes;
 - wrapper lifecycle safety for context managers, double close, and after-close
   method calls.
-- `0.4.0-design` waypoint-aware constructors, intermediate positions,
+- `0.4.0` waypoint-aware constructors, intermediate positions,
   per-section constraints, intermediate duration queries, position extrema,
   first-time-at-position, and local intermediate-position filtering.
 
