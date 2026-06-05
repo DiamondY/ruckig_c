@@ -2531,6 +2531,18 @@ The tracked release notes source is `docs/release/notes/0.4.0.md`. Final tag
 and GitHub Release URLs are recorded by the annotated tag and GitHub Release
 created from the final release evidence commit.
 
+Post-publication record:
+
+```text
+Annotated tag: v0.4.0
+Annotated tag object: 61a7ce0cd738782b667f65a9ebb0761ef2121872
+Tag target commit: c95c6728d0ea55fd339d1512b4e79135a1d08d53
+GitHub Release URL: https://github.com/DiamondY/ruckig_c/releases/tag/v0.4.0
+GitHub Release id: 335173083
+GitHub Release title: ruckig_c 0.4.0
+GitHub Release publication time: 2026-06-05T20:41:47Z
+```
+
 ## 2026-06-06 0.4.0-Design Local Alpha.4 Pre-Stable Gates
 
 This local pass ran the heavier pre-stable Windows gates that are short of a
