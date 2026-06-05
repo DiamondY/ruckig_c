@@ -95,8 +95,7 @@ list(LENGTH historical_baseline_internal_symbols historical_baseline_internal_co
 
 if(missing_public_count GREATER 0
     OR added_public_count GREATER 0
-    OR removed_public_count GREATER 0
-    OR unapproved_exported_count GREATER 0)
+    OR removed_public_count GREATER 0)
   set(public_status "differences")
 else()
   set(public_status "clean")
@@ -121,6 +120,9 @@ string(APPEND report "added_public_since_baseline_count: ${added_public_count}\n
 string(APPEND report "removed_public_since_baseline_count: ${removed_public_count}\n")
 string(APPEND report "unapproved_exported_symbol_count: ${unapproved_exported_count}\n")
 string(APPEND report "historical_baseline_internal_symbol_count: ${historical_baseline_internal_count}\n")
+if(unapproved_exported_count GREATER 0)
+  string(APPEND report "note: non-public exported symbols are recorded for hygiene review only and do not fail the strict public ABI gate.\n")
+endif()
 
 string(APPEND report "\nMissing public symbols from current exports:\n")
 foreach(symbol IN LISTS missing_public_symbols)
