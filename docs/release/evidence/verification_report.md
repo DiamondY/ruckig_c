@@ -2434,6 +2434,42 @@ Stable `v0.4.0` remains unreleased after this pass. The final release still
 requires a release-candidate commit, final push CI, manual release-random
 workflow evidence, release decision, tag, and GitHub Release.
 
+Remote GitHub Actions push CI for the alpha.4 pre-stable gate evidence commit:
+
+```text
+Run id: 27037724185
+Run URL: https://github.com/DiamondY/ruckig_c/actions/runs/27037724185
+Commit: e3d836f6c84e0b6fb98d334e8f458b5358376d90
+Event: push
+Conclusion: success
+```
+
+Successful push CI jobs:
+
+```text
+Windows clang-cl C-only
+Windows clang-cl shared C-only
+Windows clang oracle
+Linux GCC C-only
+Linux Clang oracle
+macOS Clang C-only
+Linux Clang ASan UBSan
+Linux Valgrind
+Linux Clang performance
+Windows MinGW static consumer
+Windows MinGW DLL consumer
+Linux exported symbols
+Windows exported symbols
+macOS exported symbols
+Python prototype smoke (Windows)
+Python prototype smoke (Linux)
+Python prototype smoke (macOS)
+Rust alpha wrapper smoke
+```
+
+The `Manual release random oracle` job was skipped as expected for a
+push-triggered workflow.
+
 ## 2026-06-06 0.4.0-Design Local Alpha.3 Wrapper Parity Evidence
 
 The third local alpha pass strengthened Python and Rust prototype coverage for
