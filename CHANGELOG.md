@@ -9,8 +9,8 @@ Changed:
 - ABI comparison baselines now roll forward to `docs/abi/v0.2.5/`; strict
   public ABI diff failure remains opt-in for local builds, while the dedicated
   Linux/Windows exported-symbol CI jobs upload warning/evidence artifacts.
-- `0.3.0-design` priority now starts with ABI/export hygiene before binding or
-  package-manager prototypes.
+- `0.3.0-design` priority now starts with ABI/export hygiene and existing
+  installed-package consumer paths before binding prototypes.
 - Added `docs/abi/public-symbols.txt` as the approved public C ABI symbol
   allowlist derived from `include/ruckig_c/ruckig.h`.
 - Added a public symbol allowlist verification target that extracts
@@ -32,14 +32,21 @@ Changed:
   local shared `ruckig_c` build.
 - Added an experimental vcpkg overlay prototype and verified local
   `x64-windows` shared/default and `x64-windows-static` consumer paths.
+- Downgraded package-manager recipes and new package-manager prototypes to
+  long-term optional work; the existing vcpkg overlay is retained as frozen
+  reference evidence outside the active roadmap.
 - Added opt-in MSVC `cl` standalone static and DLL consumer CTest gates and
   verified both locally; they remain outside routine CI.
+- Added CMake presets that keep routine local builds under `out/build/`, plus
+  a dry-run-first local cleanup script for ignored build trees, caches, and
+  temporary files.
 
 Still deferred:
 
 - Intermediate waypoints, per-section constraints, cloud calculation, Python
-  binding implementation, Rust bindings, package-manager recipes, strict ABI
-  fail gates, and upstream baseline upgrades.
+  binding implementation, Rust bindings, package-manager recipes and new
+  package-manager prototypes, strict ABI fail gates, and upstream baseline
+  upgrades.
 
 ## 0.2.5 - 2026-06-05
 

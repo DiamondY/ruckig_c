@@ -1,7 +1,9 @@
 # vcpkg Overlay Prototype
 
 This is an experimental `0.3.0-design` workspace for vcpkg feasibility. It is
-not a supported package-manager recipe and is not part of release packaging.
+not a supported package-manager recipe, is not part of release packaging, and
+is not part of the active roadmap. Treat it as frozen reference evidence unless
+a separate packaging project is explicitly accepted.
 
 ## Run From A vcpkg Checkout
 
@@ -26,6 +28,7 @@ that DLL consumers do not define the static macro.
 ## Current Status
 
 - Prototype only.
+- Frozen reference unless package-manager work is explicitly reopened.
 - Overlay port uses the current repository checkout as its source.
 - No frozen C++ oracle sources are installed as runtime package contents.
 - No vcpkg recipe is promoted as supported release scope.

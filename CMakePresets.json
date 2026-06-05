@@ -1,0 +1,125 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 21,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "dev",
+      "displayName": "Developer default",
+      "description": "Default local build under out/build/dev.",
+      "binaryDir": "${sourceDir}/out/build/${presetName}",
+      "cacheVariables": {
+        "BUILD_RUCKIG_C": "ON",
+        "BUILD_RUCKIG_C_TESTS": "ON",
+        "BUILD_RUCKIG_C_EXAMPLES": "ON",
+        "BUILD_RUCKIG_C_ORACLE_TESTS": "OFF",
+        "BUILD_RUCKIG_C_PERFORMANCE_TESTS": "OFF"
+      }
+    },
+    {
+      "name": "release",
+      "displayName": "Release",
+      "description": "Release build under out/build/release.",
+      "binaryDir": "${sourceDir}/out/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "BUILD_RUCKIG_C": "ON",
+        "BUILD_RUCKIG_C_TESTS": "ON",
+        "BUILD_RUCKIG_C_EXAMPLES": "ON",
+        "BUILD_RUCKIG_C_ORACLE_TESTS": "OFF",
+        "BUILD_RUCKIG_C_PERFORMANCE_TESTS": "OFF"
+      }
+    },
+    {
+      "name": "shared",
+      "displayName": "Shared library",
+      "description": "Shared-library build under out/build/shared.",
+      "binaryDir": "${sourceDir}/out/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "BUILD_SHARED_LIBS": "ON",
+        "BUILD_RUCKIG_C": "ON",
+        "BUILD_RUCKIG_C_TESTS": "ON",
+        "BUILD_RUCKIG_C_EXAMPLES": "ON",
+        "BUILD_RUCKIG_C_ORACLE_TESTS": "OFF",
+        "BUILD_RUCKIG_C_PERFORMANCE_TESTS": "OFF"
+      }
+    },
+    {
+      "name": "oracle",
+      "displayName": "Oracle tests",
+      "description": "Oracle differential test build under out/build/oracle.",
+      "binaryDir": "${sourceDir}/out/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "BUILD_RUCKIG_C": "ON",
+        "BUILD_RUCKIG_C_TESTS": "ON",
+        "BUILD_RUCKIG_C_EXAMPLES": "ON",
+        "BUILD_RUCKIG_C_ORACLE_TESTS": "ON",
+        "BUILD_RUCKIG_C_PERFORMANCE_TESTS": "OFF"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "dev",
+      "configurePreset": "dev"
+    },
+    {
+      "name": "release",
+      "configurePreset": "release",
+      "configuration": "Release"
+    },
+    {
+      "name": "shared",
+      "configurePreset": "shared",
+      "configuration": "Release"
+    },
+    {
+      "name": "oracle",
+      "configurePreset": "oracle",
+      "configuration": "Release"
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "dev",
+      "configurePreset": "dev",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "release",
+      "configurePreset": "release",
+      "configuration": "Release",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "shared",
+      "configurePreset": "shared",
+      "configuration": "Release",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "oracle",
+      "configurePreset": "oracle",
+      "configuration": "Release",
+      "filter": {
+        "exclude": {
+          "name": "ruckig_c_oracle_random_release"
+        }
+      },
+      "output": {
+        "outputOnFailure": true
+      }
+    }
+  ]
+}

@@ -1,7 +1,9 @@
-# vcpkg Feasibility Prototype Plan
+# vcpkg Feasibility Prototype Reference
 
-This is a `0.3.0-design` prototype plan only. It does not add a vcpkg recipe to
-the release scope and does not promise package-manager support.
+This is an experimental `0.3.0-design` prototype reference only. It does not
+add a vcpkg recipe to the release scope, does not promise package-manager
+support, and is not part of the active `0.3.0-design` roadmap. It may remain
+frozen unless a separate packaging project is explicitly accepted.
 
 ## Preconditions
 
@@ -10,10 +12,9 @@ the release scope and does not promise package-manager support.
 - `original/ruckig-main` remains a test oracle only and is not packaged as a
   runtime dependency.
 
-## Prototype Layout To Test Externally
+## Prototype Layout
 
-Use an external vcpkg overlay port or an experimental branch outside the release
-scope. The prototype should install:
+The existing experimental overlay tested this package shape:
 
 - `include/ruckig_c/ruckig.h`.
 - the static or shared `ruckig_c` library;
@@ -24,11 +25,11 @@ Do not install oracle tests, performance benchmarks, examples, or
 `original/ruckig-main` as runtime package contents.
 
 This repository includes an experimental overlay prototype under
-`prototypes/vcpkg/`. It is intentionally not a supported release recipe. Use it
-to validate package shape and consumer behavior before deciding whether a real
-vcpkg packaging project should be opened.
+`prototypes/vcpkg/`. It is intentionally not a supported release recipe or
+active roadmap item. Treat it as reference evidence unless a future packaging
+project is accepted.
 
-## Required Matrix
+## Matrix That Would Be Required If Unfrozen
 
 - Windows static.
 - Windows shared/DLL.
@@ -47,7 +48,7 @@ target_link_libraries(app PRIVATE ruckig_c::ruckig_c)
 Windows static consumers must receive `RUCKIG_C_STATIC_DEFINE` through target
 metadata. Windows DLL consumers must not define `RUCKIG_C_STATIC_DEFINE`.
 
-## Prototype Checks
+## Prototype Checks If Unfrozen
 
 - Static and shared package options map directly to `BUILD_SHARED_LIBS`.
 - Test and oracle options remain disabled by default for package consumers.
@@ -60,7 +61,8 @@ metadata. Windows DLL consumers must not define `RUCKIG_C_STATIC_DEFINE`.
 
 ## Decision Gate
 
-The vcpkg prototype can be promoted to a real packaging project only after:
+The vcpkg prototype can be promoted to a real packaging project only if package
+manager work is unfrozen and all of the following conditions are met:
 
 - Linux and Windows public exported-symbol comparisons are clean.
 - MSVC `cl` static/DLL consumer smoke has repeatable evidence.

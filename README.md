@@ -38,14 +38,44 @@ queue is tracked in
 
 - Waypoints, per-section constraints, cloud, and Python/Rust bindings remain
   intentionally outside the public C API.
+- Package-manager recipes and new package-manager prototypes are outside the
+  active roadmap. Existing CMake install, pkg-config, static/DLL, and shared
+  install-tree consumption paths remain the supported integration surface.
 
 ## Build
 
 ```sh
-cmake -S . -B build
-cmake --build build
-ctest --test-dir build --output-on-failure
+cmake --preset dev
+cmake --build --preset dev
+ctest --preset dev
 ```
+
+Local build trees should stay under `out/build/` by using the checked-in
+CMake presets. This keeps ad hoc build directories from accumulating in the
+repository root.
+
+Useful presets:
+
+- `dev` builds the C library, C tests, and examples under `out/build/dev`.
+- `release` builds the same routine targets under `out/build/release`.
+- `shared` builds a shared library under `out/build/shared`.
+- `oracle` enables the frozen C++ differential oracle tests under
+  `out/build/oracle`.
+
+Clean ignored local build artifacts with a dry run first:
+
+```powershell
+.\scripts\clean-local.ps1
+```
+
+Then apply the cleanup when the preview is correct:
+
+```powershell
+.\scripts\clean-local.ps1 -Apply
+```
+
+Use `-KeepReleaseBuilds` to preserve `build_release_check_ninja`,
+`build_release_check_shared`, `out/build/release`, and `out/build/shared`.
 
 Useful CMake options:
 

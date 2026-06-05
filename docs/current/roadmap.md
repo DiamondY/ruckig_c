@@ -88,9 +88,9 @@ API, solver dispatch, or the frozen oracle baseline during design evaluation.
 
 - Current priority decision is recorded in
   `docs/design/0.3.0_priorities.md` and
-  `docs/design/0.3.0_readiness.md`: maintain ABI/export hygiene before binding
-  or package-manager prototypes depend on the shared-library surface; evaluate
-  Python bindings before Rust bindings once prerequisites are met.
+  `docs/design/0.3.0_readiness.md`: maintain ABI/export hygiene and existing
+  installed-package consumer paths; evaluate Python bindings before Rust
+  bindings once prerequisites are met.
 - The pre-`0.3.0` readiness decision is recorded in
   `docs/design/0.3.0_readiness.md`.
 - Python binding feasibility is scoped in
@@ -103,6 +103,11 @@ API, solver dispatch, or the frozen oracle baseline during design evaluation.
 - Evaluate Python or Rust bindings only after the C ABI has passed at least one
   `0.2.x` patch cycle, `docs/current/api_compatibility.md` is complete, and CMake,
   pkg-config, and shared/static consumer paths are stable.
+- Package-manager recipes and new package-manager prototypes are downgraded to
+  long-term optional work. The active roadmap keeps only the existing installed
+  CMake package, pkg-config, Windows static/DLL, and shared install-tree
+  consumption paths. Existing package-manager prototype notes may be frozen
+  unless a separate packaging project is explicitly accepted.
 - Evaluate an upstream Ruckig baseline upgrade only as a separate project with
   upstream diff review, source inventory update, tolerance review, oracle
   corpus update, full random stress, and new performance baselines.
@@ -116,6 +121,11 @@ API, solver dispatch, or the frozen oracle baseline during design evaluation.
      in the dedicated exported-symbol CI jobs.
   3. Windows consumer matrix hardening for MSVC `cl` and MinGW feasibility.
   4. Python `cffi` ABI-mode prototype design and prototype plan.
-  5. vcpkg feasibility prototype plan.
-  6. Upstream baseline upgrade evaluation as a separate project.
-  7. Rust binding feasibility after Python feasibility results.
+  5. Upstream baseline upgrade evaluation as a separate project.
+  6. Rust binding feasibility after Python feasibility results.
+
+Long-term optional, outside the active roadmap:
+
+- Package-manager recipes for vcpkg, Conan, Homebrew, FetchContent, and
+  vendored subdirectory use.
+- New package-manager prototype work beyond the existing experimental notes.

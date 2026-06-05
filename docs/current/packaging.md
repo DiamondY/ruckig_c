@@ -209,11 +209,16 @@ both installed CMake and pkg-config consumers against that shared install tree.
 
 ## Future Packaging
 
-The likely package-manager integration paths are vcpkg, Conan, Homebrew,
-CMake FetchContent, and vendored subdirectory use. These should be evaluated
-after `0.2.x` has completed at least one patch cycle with stable public ABI
-evidence.
+The active maintenance scope keeps the existing installed CMake package,
+pkg-config, Windows static/DLL, and shared install-tree consumption paths.
+Those paths are the supported downstream integration surface for now.
 
-See `docs/design/package_manager_feasibility.md` for the recommended evaluation order.
-No vcpkg, Conan, Homebrew, FetchContent, or vendored-subdirectory recipe is part
-of the current `0.2.x` release scope.
+vcpkg, Conan, Homebrew, CMake FetchContent, and vendored subdirectory recipes
+are downgraded to long-term optional work. The existing feasibility notes and
+experimental vcpkg overlay may remain as frozen reference material, but no new
+package-manager recipe, prototype, or release commitment is part of the active
+`0.3.0-design` roadmap unless a separate packaging project is accepted.
+
+See `docs/design/package_manager_feasibility.md` for the frozen feasibility
+record and the conditions that would need to be revisited before any future
+package-manager project is opened.

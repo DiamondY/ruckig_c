@@ -34,10 +34,10 @@ Historical rewrite plans and release evidence are retained for traceability.
   final planned `0.2.x` stabilization release.
 - `design/python_bindings_feasibility.md` - Python binding feasibility, without
   implementation approval.
-- `design/package_manager_feasibility.md` - package-manager feasibility, without
-  recipes.
-- `design/vcpkg_feasibility_prototype.md` - executable vcpkg prototype plan,
-  without adding a supported recipe.
+- `design/package_manager_feasibility.md` - frozen package-manager feasibility
+  record, without recipes or active roadmap scope.
+- `design/vcpkg_feasibility_prototype.md` - experimental vcpkg prototype
+  reference, without adding a supported recipe.
 
 ## Technical References
 
