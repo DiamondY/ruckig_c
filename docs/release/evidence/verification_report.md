@@ -2492,15 +2492,13 @@ RUCKIG_C_VERSION_PATCH 0 -> 1
 RUCKIG_C_VERSION_STRING "0.4.0" -> "0.4.1"
 ```
 
-Remote push CI and manual release-random workflow evidence remain to be
-recorded after the release-candidate commit is pushed.
-
-Remote GitHub Actions push CI for the `0.4.1` release-candidate line:
+Remote GitHub Actions push CI for the `0.4.1` release-candidate evidence
+commit:
 
 ```text
-Run id: 27056354459
-Run URL: https://github.com/DiamondY/ruckig_c/actions/runs/27056354459
-Commit: fa7a124dcdb272b1ee99f69cd8177474a0df2b33
+Run id: 27056498079
+Run URL: https://github.com/DiamondY/ruckig_c/actions/runs/27056498079
+Commit: 95d733b0094f320d968ac057151e8a0a62e0353e
 Event: push
 Conclusion: success
 ```
@@ -2531,34 +2529,90 @@ Rust alpha wrapper smoke
 Push CI artifacts:
 
 ```text
-linux-performance: 7452475903
-Windows exported symbols: 7452471422
-Linux exported symbols: 7452469979
-macOS exported symbols: 7452469376
+linux-performance: 7452526552
+Windows exported symbols: 7452523148
+Linux exported symbols: 7452523135
+macOS exported symbols: 7452519987
+```
+
+The `Linux Clang performance` job summary from push CI reported:
+
+```text
+No-waypoint benchmark:
+c_average_ns 717.409
+c_p99_ns 5330
+c_worst_ns 31699
+oracle_average_ns 553.731
+oracle_p99_ns 4198
+oracle_worst_ns 21069
+average_ratio_c_over_oracle 1.29559
+release_threshold_average_ratio 1.5
+
+Waypoint benchmark:
+waypoint_case_count 10
+waypoint_max_dofs 8
+waypoint_max_intermediate_positions 3
+waypoint_c_average_ns 3.5258e+06
+waypoint_c_p99_ns 1.28006e+07
+waypoint_c_worst_ns 2.01916e+07
+waypoint_oracle_ratio unavailable
 ```
 
 The first release-candidate push CI run `27056271899` failed only in the
 exported-symbol print/upload path because `.github/workflows/ci.yml` still
 referenced `artifacts/abi/0.4.0-design` after the CMake ABI artifact directory
 was moved to `artifacts/abi/0.4.1`. Commit
-`fa7a124dcdb272b1ee99f69cd8177474a0df2b33` fixes the workflow artifact path;
-the subsequent push CI run above passed.
+`fa7a124dcdb272b1ee99f69cd8177474a0df2b33` fixes the workflow artifact path.
+The later evidence commit `95d733b0094f320d968ac057151e8a0a62e0353e`
+recorded the passing push CI evidence above.
 
-Manual release-random workflow dispatch remains pending:
+Manual release-random workflow dispatch for `0.4.1`:
 
 ```text
-Attempted API:
-POST https://api.github.com/repos/DiamondY/ruckig_c/actions/workflows/ci.yml/dispatches
-Input:
-release_random=true
-Result:
-HTTP 401 Unauthorized
+Run id: 27058264617
+Run URL: https://github.com/DiamondY/ruckig_c/actions/runs/27058264617
+Commit: 95d733b0094f320d968ac057151e8a0a62e0353e
+Event: workflow_dispatch
+Input: release_random=true
+Conclusion: success
+Total duration: 1m 43s
 ```
 
-The environment can push through git credentials, but GitHub CLI/API
-authentication is not available for workflow dispatch, artifact zip download,
-or GitHub Release creation. Those final release steps require an authenticated
-operator or a configured `GH_TOKEN`.
+The workflow-dispatch run executed all routine CI jobs successfully and also
+ran `Manual release random oracle`:
+
+```text
+Manual release random oracle job: succeeded in 1m 23s.
+Release-random step command:
+ctest --test-dir build-release-random --output-on-failure -R ruckig_c_oracle_random_release
+
+Test #31: ruckig_c_oracle_random_release ... Passed 42.86 sec
+100% tests passed, 0 tests failed out of 1
+Total Test time (real) = 43.11 sec
+```
+
+The `Linux Clang performance` job summary from the manual workflow reported:
+
+```text
+No-waypoint benchmark:
+c_average_ns 735.815
+c_p99_ns 5440
+c_worst_ns 29295
+oracle_average_ns 560.325
+oracle_p99_ns 4198
+oracle_worst_ns 44332
+average_ratio_c_over_oracle 1.31319
+release_threshold_average_ratio 1.5
+
+Waypoint benchmark:
+waypoint_case_count 10
+waypoint_max_dofs 8
+waypoint_max_intermediate_positions 3
+waypoint_c_average_ns 3.53293e+06
+waypoint_c_p99_ns 1.28073e+07
+waypoint_c_worst_ns 1.91195e+07
+waypoint_oracle_ratio unavailable
+```
 
 ## 2026-06-06 0.4.0 Release Closeout Evidence
 
