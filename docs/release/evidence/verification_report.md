@@ -2635,6 +2635,66 @@ historical baseline exists, so the macOS exported-symbol job records bootstrap
 evidence.
 ```
 
+Remote GitHub Actions push CI for the `0.4.2` evidence commit:
+
+```text
+Run id: 27063955995
+Run URL: https://github.com/DiamondY/ruckig_c/actions/runs/27063955995
+Commit: 2ec935a7cb2ed42eea9d437a5e62daf6c9a91102
+Event: push
+Conclusion: success
+```
+
+This run verifies that the release evidence commit still passes the full
+routine CI matrix. The manual release-random job is skipped for push-triggered
+workflows as expected.
+
+Manual release-random workflow dispatch for `0.4.2`:
+
+```text
+Run id: 27064593851
+Run URL: https://github.com/DiamondY/ruckig_c/actions/runs/27064593851
+Commit: 2ec935a7cb2ed42eea9d437a5e62daf6c9a91102
+Event: workflow_dispatch
+Input: release_random=true
+Conclusion: success
+Total duration: 1m 39s
+```
+
+The workflow-dispatch run executed all routine CI jobs successfully and also
+ran `Manual release random oracle`:
+
+```text
+Manual release random oracle job: succeeded in 1m 23s.
+Manual release random oracle job id: 79883125032.
+Release-random step command:
+ctest --test-dir build-release-random --output-on-failure -R ruckig_c_oracle_random_release
+Run release random oracle step: success, 43s.
+```
+
+The `Linux Clang performance` job summary from the manual workflow reported:
+
+```text
+No-waypoint benchmark:
+c_average_ns 604.085
+c_p99_ns 4487
+c_worst_ns 25588
+oracle_average_ns 456.656
+oracle_p99_ns 3505
+oracle_worst_ns 17045
+average_ratio_c_over_oracle 1.32285
+release_threshold_average_ratio 1.5
+
+Waypoint benchmark:
+waypoint_case_count 10
+waypoint_max_dofs 8
+waypoint_max_intermediate_positions 3
+waypoint_c_average_ns 2.88561e+06
+waypoint_c_p99_ns 1.04851e+07
+waypoint_c_worst_ns 1.14663e+07
+waypoint_oracle_ratio unavailable
+```
+
 ## 2026-06-06 0.4.1 Local Release-Candidate Evidence
 
 The `0.4.1` local release-candidate pass deepened waypoint optimizer evidence

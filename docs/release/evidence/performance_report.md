@@ -126,6 +126,7 @@ Current same-platform release baselines:
 | `0.3.0` | Not a separate 0.3.0 gate | `1.2875` | Hardening release final push CI run `27028896945`, artifact `7442364071`; local Windows release gates covered build/test/ABI rather than a separate benchmark rerun. |
 | `0.4.0` | `1.23622` | `1.17323` push CI; `1.29272` manual workflow | Original-surface parity release. Windows local alpha.4 pre-stable gate; Linux final push CI run `27038403450`, artifact `7446167572`; manual workflow run `27038538349`, artifact `7446219206`. |
 | `0.4.1` | `1.18871` | `1.29559` push CI; `1.31319` manual workflow | Deep stabilization release. Windows local closeout gate; Linux final push CI run `27056498079`, artifact `7452526552`; manual workflow run `27058264617`. |
+| `0.4.2` | `1.35448` | `1.26819` push CI; `1.32285` manual workflow | Original parity coverage/evidence closeout. Windows local closeout gate; Linux release-candidate push CI run `27063738903`, artifact `7454827710`; manual workflow run `27064593851`. |
 
 Store raw local or CI outputs outside version-controlled source unless the
 release process intentionally promotes a short excerpt into this report. Use a
@@ -1220,6 +1221,57 @@ Average C/oracle ratio: `1.26819`.
 | Average | 3.63244e+06 ns |
 | p99 | 1.31755e+07 ns |
 | Worst | 1.8655e+07 ns |
+
+There is no C++ oracle ratio for this waypoint corpus because the frozen
+Ruckig Community `0.17.3` baseline does not contain a local global waypoint
+optimizer. This run is C-only trend evidence for the local optimizer.
+
+## 2026-06-06 Linux 0.4.2 Manual Workflow No-Waypoint Run
+
+- Source: GitHub Actions workflow-dispatch run `27064593851`, job `Linux Clang
+  performance`.
+- Commit: `2ec935a7cb2ed42eea9d437a5e62daf6c9a91102`.
+- Command:
+  `./build-perf/ruckig_c_performance_benchmark --samples 10000 --seed 1 --enforce-threshold`.
+- OS: Linux, GitHub-hosted Ubuntu runner.
+- C compiler: `Ubuntu clang version 18.1.3 (1ubuntu1)`.
+- C++ compiler: `Ubuntu clang version 18.1.3 (1ubuntu1)`.
+- CMake build type: Release.
+- Generator: Ninja.
+- Seed: `1`.
+- Samples: `10000`.
+- Release threshold: average C/oracle ratio `<= 1.5`.
+
+| Metric | C | C++ oracle |
+| --- | ---: | ---: |
+| Average | 604.085 ns | 456.656 ns |
+| p99 | 4487 ns | 3505 ns |
+| Worst | 25588 ns | 17045 ns |
+
+Average C/oracle ratio: `1.32285`.
+
+## 2026-06-06 Linux 0.4.2 Manual Workflow Waypoint Run
+
+- Source: GitHub Actions workflow-dispatch run `27064593851`, job `Linux Clang
+  performance`.
+- Commit: `2ec935a7cb2ed42eea9d437a5e62daf6c9a91102`.
+- Command:
+  `./build-perf/ruckig_c_performance_benchmark --samples 10000 --seed 1 --waypoints`.
+- OS: Linux, GitHub-hosted Ubuntu runner.
+- C compiler: `Ubuntu clang version 18.1.3 (1ubuntu1)`.
+- CMake build type: Release.
+- Generator: Ninja.
+- Seed: `1`.
+- Samples: `10000`.
+- Waypoint case count: `10`.
+- Max DoF: `8`.
+- Max intermediate positions: `3`.
+
+| Metric | C waypoint optimizer |
+| --- | ---: |
+| Average | 2.88561e+06 ns |
+| p99 | 1.04851e+07 ns |
+| Worst | 1.14663e+07 ns |
 
 There is no C++ oracle ratio for this waypoint corpus because the frozen
 Ruckig Community `0.17.3` baseline does not contain a local global waypoint
