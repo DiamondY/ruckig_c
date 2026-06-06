@@ -313,11 +313,8 @@ unsafe extern "C" {
         found: *mut bool,
     ) -> i32;
 
-    fn ruckig_tracking_create(
-        tracking: *mut *mut TrackingRaw,
-        dofs: usize,
-        delta_time: f64,
-    ) -> i32;
+    fn ruckig_tracking_create(tracking: *mut *mut TrackingRaw, dofs: usize, delta_time: f64)
+        -> i32;
     fn ruckig_tracking_destroy(tracking: *mut TrackingRaw);
     fn ruckig_tracking_get_delta_time(tracking: *const TrackingRaw) -> f64;
     fn ruckig_tracking_set_mode(tracking: *mut TrackingRaw, mode: i32) -> i32;
@@ -354,9 +351,7 @@ unsafe extern "C" {
         capacity: usize,
     ) -> i32;
     fn ruckig_target_state_sequence_destroy(sequence: *mut TargetStateSequenceRaw);
-    fn ruckig_target_state_sequence_get_capacity(
-        sequence: *const TargetStateSequenceRaw,
-    ) -> usize;
+    fn ruckig_target_state_sequence_get_capacity(sequence: *const TargetStateSequenceRaw) -> usize;
     fn ruckig_target_state_sequence_get_count(sequence: *const TargetStateSequenceRaw) -> usize;
     fn ruckig_target_state_sequence_set_count(
         sequence: *mut TargetStateSequenceRaw,
@@ -387,9 +382,21 @@ unsafe extern "C" {
     fn ruckig_tracking_output_sequence_new_position_const_data(
         sequence: *const TrackingOutputSequenceRaw,
     ) -> *const f64;
+    fn ruckig_tracking_output_sequence_new_velocity_const_data(
+        sequence: *const TrackingOutputSequenceRaw,
+    ) -> *const f64;
+    fn ruckig_tracking_output_sequence_new_acceleration_const_data(
+        sequence: *const TrackingOutputSequenceRaw,
+    ) -> *const f64;
+    fn ruckig_tracking_output_sequence_new_jerk_const_data(
+        sequence: *const TrackingOutputSequenceRaw,
+    ) -> *const f64;
     fn ruckig_tracking_output_sequence_time_const_data(
         sequence: *const TrackingOutputSequenceRaw,
     ) -> *const f64;
+    fn ruckig_tracking_output_sequence_section_const_data(
+        sequence: *const TrackingOutputSequenceRaw,
+    ) -> *const usize;
     fn ruckig_tracking_output_sequence_result_const_data(
         sequence: *const TrackingOutputSequenceRaw,
     ) -> *const i32;
@@ -1212,11 +1219,19 @@ impl TargetState {
     }
 
     pub fn set_position(&mut self, values: &[f64]) -> Result<()> {
-        self.set_vector(values, ruckig_target_state_position_data, "set_target_position")
+        self.set_vector(
+            values,
+            ruckig_target_state_position_data,
+            "set_target_position",
+        )
     }
 
     pub fn set_velocity(&mut self, values: &[f64]) -> Result<()> {
-        self.set_vector(values, ruckig_target_state_velocity_data, "set_target_velocity")
+        self.set_vector(
+            values,
+            ruckig_target_state_velocity_data,
+            "set_target_velocity",
+        )
     }
 
     pub fn set_acceleration(&mut self, values: &[f64]) -> Result<()> {
@@ -1291,9 +1306,18 @@ impl TargetStateSequence {
         unsafe {
             let position_ptr = ruckig_target_state_sequence_position_data(self.raw.as_ptr());
             let velocity_ptr = ruckig_target_state_sequence_velocity_data(self.raw.as_ptr());
-            let acceleration_ptr = ruckig_target_state_sequence_acceleration_data(self.raw.as_ptr());
-            write_data(position_ptr.add(offset), position, "target_sequence_set_position")?;
-            write_data(velocity_ptr.add(offset), velocity, "target_sequence_set_velocity")?;
+            let acceleration_ptr =
+                ruckig_target_state_sequence_acceleration_data(self.raw.as_ptr());
+            write_data(
+                position_ptr.add(offset),
+                position,
+                "target_sequence_set_position",
+            )?;
+            write_data(
+                velocity_ptr.add(offset),
+                velocity,
+                "target_sequence_set_velocity",
+            )?;
             write_data(
                 acceleration_ptr.add(offset),
                 acceleration,
@@ -1339,20 +1363,44 @@ impl TrackingOutputSequence {
         unsafe { ruckig_tracking_output_sequence_get_count(self.raw.as_ptr()) }
     }
 
+    fn flat_f64(
+        &self,
+        accessor: unsafe extern "C" fn(*const TrackingOutputSequenceRaw) -> *const f64,
+    ) -> Vec<f64> {
+        unsafe { slice::from_raw_parts(accessor(self.raw.as_ptr()), self.count() * self.dofs) }
+            .to_vec()
+    }
+
     pub fn new_positions_flat(&self) -> Vec<f64> {
-        unsafe {
-            slice::from_raw_parts(
-                ruckig_tracking_output_sequence_new_position_const_data(self.raw.as_ptr()),
-                self.count() * self.dofs,
-            )
-        }
-        .to_vec()
+        self.flat_f64(ruckig_tracking_output_sequence_new_position_const_data)
+    }
+
+    pub fn new_velocities_flat(&self) -> Vec<f64> {
+        self.flat_f64(ruckig_tracking_output_sequence_new_velocity_const_data)
+    }
+
+    pub fn new_accelerations_flat(&self) -> Vec<f64> {
+        self.flat_f64(ruckig_tracking_output_sequence_new_acceleration_const_data)
+    }
+
+    pub fn new_jerks_flat(&self) -> Vec<f64> {
+        self.flat_f64(ruckig_tracking_output_sequence_new_jerk_const_data)
     }
 
     pub fn times(&self) -> Vec<f64> {
         unsafe {
             slice::from_raw_parts(
                 ruckig_tracking_output_sequence_time_const_data(self.raw.as_ptr()),
+                self.count(),
+            )
+        }
+        .to_vec()
+    }
+
+    pub fn sections(&self) -> Vec<usize> {
+        unsafe {
+            slice::from_raw_parts(
+                ruckig_tracking_output_sequence_section_const_data(self.raw.as_ptr()),
                 self.count(),
             )
         }
@@ -1520,6 +1568,23 @@ mod tests {
         input.set_max_velocity(&[1.0])?;
         input.set_max_acceleration(&[2.0])?;
         input.set_max_jerk(&[5.0])?;
+        Ok(())
+    }
+
+    fn configure_tracking_input_nd(input: &mut InputParameter, dofs: usize) -> Result<()> {
+        let zeros = vec![0.0; dofs];
+        let max_velocity: Vec<f64> = (0..dofs).map(|dof| 1.0 + 0.1 * dof as f64).collect();
+        let max_acceleration: Vec<f64> = (0..dofs).map(|dof| 2.0 + 0.1 * dof as f64).collect();
+        let max_jerk: Vec<f64> = (0..dofs).map(|dof| 5.0 + 0.25 * dof as f64).collect();
+        input.set_current_position(&zeros)?;
+        input.set_current_velocity(&zeros)?;
+        input.set_current_acceleration(&zeros)?;
+        input.set_target_position(&zeros)?;
+        input.set_target_velocity(&zeros)?;
+        input.set_target_acceleration(&zeros)?;
+        input.set_max_velocity(&max_velocity)?;
+        input.set_max_acceleration(&max_acceleration)?;
+        input.set_max_jerk(&max_jerk)?;
         Ok(())
     }
 
@@ -1699,6 +1764,33 @@ mod tests {
     }
 
     #[test]
+    fn tracking_online_fast_multidof_loop() -> Result<()> {
+        let mut tracking = Tracking::new(2, 0.01)?;
+        let mut target = TargetState::new(2)?;
+        let mut input = InputParameter::new(2)?;
+        let mut output = OutputParameter::new(2)?;
+        configure_tracking_input_nd(&mut input, 2)?;
+        tracking.set_reactiveness(0.5)?;
+        tracking.set_look_ahead_cycles(2)?;
+
+        for step in 0..120 {
+            let t = step as f64 * tracking.delta_time();
+            target.set_position(&[0.35 * t, -0.2 * t])?;
+            target.set_velocity(&[0.35, -0.2])?;
+            target.set_acceleration(&[0.0, 0.0])?;
+            assert_eq!(
+                tracking.update(&target, &input, &mut output)?,
+                RuckigResult::Working
+            );
+            assert_eq!(output.new_position().len(), 2);
+            assert!(output.new_position().iter().all(|value| value.is_finite()));
+            assert!(output.new_velocity().iter().all(|value| value.is_finite()));
+            output.pass_to_input(&mut input);
+        }
+        Ok(())
+    }
+
+    #[test]
     fn tracking_offline_sequence() -> Result<()> {
         let count = 200;
         let mut tracking = Tracking::new(1, 0.01)?;
@@ -1717,12 +1809,58 @@ mod tests {
         );
         assert_eq!(outputs.count(), count);
         assert_eq!(outputs.times().len(), count);
+        assert_eq!(outputs.new_velocities_flat().len(), count);
+        assert_eq!(outputs.new_accelerations_flat().len(), count);
+        assert_eq!(outputs.new_jerks_flat().len(), count);
+        assert_eq!(outputs.sections().len(), count);
         assert!(outputs
             .result_codes()
             .iter()
-            .all(|code| *code == RuckigResult::Working as i32 || *code == RuckigResult::Finished as i32));
+            .all(|code| *code == RuckigResult::Working as i32
+                || *code == RuckigResult::Finished as i32));
         let positions = outputs.new_positions_flat();
         assert!(positions[count - 1] > positions[0]);
+        Ok(())
+    }
+
+    #[test]
+    fn tracking_offline_sequence_multidof() -> Result<()> {
+        let count = 80;
+        let mut tracking = Tracking::new(2, 0.01)?;
+        let mut targets = TargetStateSequence::new(2, count)?;
+        let mut outputs = TrackingOutputSequence::new(2, count)?;
+        let mut input = InputParameter::new(2)?;
+        configure_tracking_input_nd(&mut input, 2)?;
+        targets.set_count(count)?;
+        for step in 0..count {
+            let t = step as f64 * tracking.delta_time();
+            targets.set_state(step, &[0.25 * t, -0.1 * t], &[0.25, -0.1], &[0.0, 0.0])?;
+        }
+        assert_eq!(
+            tracking.calculate_sequence(&targets, &input, &mut outputs)?,
+            RuckigResult::Working
+        );
+        assert_eq!(outputs.count(), count);
+        assert_eq!(outputs.new_positions_flat().len(), count * 2);
+        assert!(outputs
+            .new_accelerations_flat()
+            .iter()
+            .all(|value| value.is_finite()));
+        assert!(outputs
+            .new_jerks_flat()
+            .iter()
+            .all(|value| value.is_finite()));
+        assert!(outputs.times().iter().all(|time| *time > 0.0));
+        Ok(())
+    }
+
+    #[test]
+    fn tracking_invalid_parameters_map_errors() -> Result<()> {
+        let mut tracking = Tracking::new(1, 0.01)?;
+        assert_eq!(tracking.set_reactiveness(-0.01).unwrap_err().code, -100);
+        assert_eq!(tracking.set_reactiveness(1.01).unwrap_err().code, -100);
+        assert_eq!(tracking.set_reactiveness(f64::NAN).unwrap_err().code, -100);
+        assert_eq!(tracking.set_look_ahead_cycles(0).unwrap_err().code, -100);
         Ok(())
     }
 
@@ -1730,16 +1868,28 @@ mod tests {
     fn tracking_optimized_is_unsupported_in_alpha() -> Result<()> {
         let mut tracking = Tracking::new(1, 0.01)?;
         let mut target = TargetState::new(1)?;
+        let mut targets = TargetStateSequence::new(1, 1)?;
+        let mut outputs = TrackingOutputSequence::new(1, 1)?;
         let mut input = InputParameter::new(1)?;
         let mut output = OutputParameter::new(1)?;
         configure_tracking_input(&mut input)?;
         target.set_position(&[0.0])?;
         target.set_velocity(&[0.5])?;
         target.set_acceleration(&[0.0])?;
+        targets.set_count(1)?;
+        targets.set_state(0, &[0.0], &[0.5], &[0.0])?;
         tracking.set_mode(TrackingMode::Optimized)?;
         let error = tracking.update(&target, &input, &mut output).unwrap_err();
         assert_eq!(error.code, -200);
         assert_eq!(error.operation, "ruckig_tracking_update");
+        let offline_error = tracking
+            .calculate_sequence(&targets, &input, &mut outputs)
+            .unwrap_err();
+        assert_eq!(offline_error.code, -200);
+        assert_eq!(
+            offline_error.operation,
+            "ruckig_tracking_calculate_sequence"
+        );
         Ok(())
     }
 }

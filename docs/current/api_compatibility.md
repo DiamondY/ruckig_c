@@ -432,8 +432,9 @@ Compatibility rules for the tracking alpha line:
   symbols.
 - `docs/abi/public-symbol-exceptions.txt` records all intentional
   `0.5.0-design` public additions as `allow-add` entries.
-- `RUCKIG_TRACKING_OPTIMIZED` is a public enum value but its first alpha
-  behavior is `RUCKIG_ERROR_UNSUPPORTED`, not an alias to Fast mode.
+- `RUCKIG_TRACKING_OPTIMIZED` is a public enum value but its `0.5.x` behavior
+  is `RUCKIG_ERROR_UNSUPPORTED`, not an alias to Fast mode. Implementation is
+  deferred to `0.6.0-design`.
 - Tracking internals, workspace structures, and candidate state must not be
   exported.
 - `original/ruckig-main` remains frozen as the Ruckig Community `0.17.3`

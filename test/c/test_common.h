@@ -4,7 +4,7 @@
 #include <math.h>
 #include <stdio.h>
 
-static int ruckig_c_test_failures = 0;
+extern int ruckig_c_test_failures;
 
 #define CHECK_TRUE(expr) \
     do { \

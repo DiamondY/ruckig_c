@@ -30,7 +30,7 @@ Implemented and covered by fixed C/oracle tests plus deterministic random oracle
   optimizer.
 - `0.5.0-design` tracking alpha C ABI and local Fast-mode online/offline
   tracking implementation. `Optimized` mode is declared but returns
-  `RUCKIG_ERROR_UNSUPPORTED` in the first alpha.
+  `RUCKIG_ERROR_UNSUPPORTED` and is deferred to `0.6.0-design`.
 - C examples for position, offline position, online update, per-DoF overrides,
   velocity, stop, minimum duration, waypoints, per-section minimum duration,
   and tracking alpha scenarios.
@@ -267,8 +267,10 @@ destroying the owning output handle.
 Tracking alpha usage on `main` creates a `ruckig_tracking_t` handle plus target
 state or target sequence handles. `Fast` mode performs local
 constant-acceleration lookahead and calls the existing update path; `Optimized`
-mode is declared but returns `RUCKIG_ERROR_UNSUPPORTED` in the first alpha.
-See `docs/design/tracking_interface.md` for the accepted alpha semantics.
+mode is declared but returns `RUCKIG_ERROR_UNSUPPORTED` and is deferred to
+`0.6.0-design`. See `docs/design/tracking_interface.md` for the accepted alpha
+semantics and `docs/design/0.5.0_release_decision.md` for the Fast-only stable
+release boundary.
 
 ## Memory Model
 

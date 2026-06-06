@@ -24,7 +24,9 @@ Historical rewrite plans and release evidence are retained for traceability.
   `release/checklists/0.4.0-alpha.md` retains the alpha evidence, and
   `release/checklists/0.4.2.md` records the published original-parity
   coverage/evidence closeout. `release/checklists/0.5.0-alpha.md` tracks the
-  tracking API and local Fast-mode alpha evidence on `main`.
+  tracking API and local Fast-mode alpha evidence on `main`;
+  `release/checklists/0.5.0-alpha.2.md` tracks the follow-up tracking
+  hardening checkpoint.
 - `release/evidence/verification_report.md` - local and CI verification
   history.
 - `release/evidence/performance_report.md` - performance procedure and release
@@ -46,6 +48,10 @@ Historical rewrite plans and release evidence are retained for traceability.
   local waypoint optimizer and public C ABI expansion.
 - `design/tracking_interface.md` - accepted `0.5.0-design` tracking API
   proposal, local Fast-mode alpha semantics, and evidence strategy.
+- `design/0.5.0_release_decision.md` - release-scope decision record for a
+  possible Fast-only stable `v0.5.0`.
+- `design/tracking_optimized_mode.md` - deferred `0.6.0-design` design entry
+  for bounded local `Optimized` tracking.
 - `design/interrupt_calculation_duration.md` - storage-only behavior in
   `0.4.x` and future soft-interruption semantics.
 - `../bindings/rust/README.md` - experimental Rust alpha wrapper over the

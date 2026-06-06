@@ -16,6 +16,9 @@ Added:
   lookahead prediction with default `look_ahead_cycles = 1`.
 - Added C tracking tests for API lifecycle, validation, online update, offline
   sequence calculation, quality smoke, and no-allocation paths.
+- Added `0.5.0-alpha.2` tracking hardening coverage: a deterministic C fixed
+  corpus, tuned ramp and constant-acceleration quality gates, multi-DoF C
+  no-allocation coverage, and stronger Python/Rust tracking smoke.
 - Added C tracking examples for online ramp tracking, online
   constant-acceleration tracking, and offline sequence tracking.
 - Extended the Python `cffi` prototype and Rust alpha wrapper with tracking
@@ -29,13 +32,17 @@ Changed:
   the intentional `0.5.0-design` tracking public symbols.
 - Keep `v0.4.2` as the latest stable release and original parity
   coverage/evidence baseline.
+- A stable `v0.5.0` release may remain Fast-only if the alpha evidence stays
+  clean; `Optimized` tracking implementation is now tracked for
+  `0.6.0-design`, not `0.5.x`.
 
 Still deferred:
 
 - Stable `v0.5.0` release closeout. The current line records alpha evidence
   first.
 - Tracking `Optimized` mode implementation; the enum is declared but calls
-  return `RUCKIG_ERROR_UNSUPPORTED` in the first alpha.
+  return `RUCKIG_ERROR_UNSUPPORTED` and implementation is deferred to
+  `0.6.0-design`.
 - Soft interruption checkpoints, released Python wheels, Rust crate
   publication, package-manager recipes, cloud/remote calculation, formal
   Pro/cloud numerical equivalence claims, and upstream baseline upgrades.

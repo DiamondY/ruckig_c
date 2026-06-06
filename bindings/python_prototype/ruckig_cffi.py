@@ -682,8 +682,26 @@ class TrackingOutputSequence(_Handle):
             self.dofs,
         )
 
+    def new_accelerations(self) -> List[List[float]]:
+        return _unflatten_points(
+            _library().ruckig_tracking_output_sequence_new_acceleration_const_data(self.ptr),
+            self.count,
+            self.dofs,
+        )
+
+    def new_jerks(self) -> List[List[float]]:
+        return _unflatten_points(
+            _library().ruckig_tracking_output_sequence_new_jerk_const_data(self.ptr),
+            self.count,
+            self.dofs,
+        )
+
     def times(self) -> List[float]:
         return _copy_out(_library().ruckig_tracking_output_sequence_time_const_data(self.ptr), self.count)
+
+    def sections(self) -> List[int]:
+        ptr = _library().ruckig_tracking_output_sequence_section_const_data(self.ptr)
+        return [int(ptr[index]) for index in range(self.count)]
 
     def results(self) -> List[Result]:
         ptr = _library().ruckig_tracking_output_sequence_result_const_data(self.ptr)

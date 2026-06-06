@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 import os
 import unittest
 
@@ -70,6 +71,18 @@ def configure_tracking_input(input_: Input) -> None:
     input_.set_max_velocity([1.0])
     input_.set_max_acceleration([2.0])
     input_.set_max_jerk([5.0])
+
+
+def configure_tracking_input_nd(input_: Input, dofs: int) -> None:
+    input_.set_current_position([0.0] * dofs)
+    input_.set_current_velocity([0.0] * dofs)
+    input_.set_current_acceleration([0.0] * dofs)
+    input_.set_target_position([0.0] * dofs)
+    input_.set_target_velocity([0.0] * dofs)
+    input_.set_target_acceleration([0.0] * dofs)
+    input_.set_max_velocity([1.0 + 0.1 * dof for dof in range(dofs)])
+    input_.set_max_acceleration([2.0 + 0.1 * dof for dof in range(dofs)])
+    input_.set_max_jerk([5.0 + 0.25 * dof for dof in range(dofs)])
 
 
 @unittest.skipUnless(
@@ -324,6 +337,23 @@ class PrototypeTests(unittest.TestCase):
             self.assertGreater(output.new_position()[0], 0.0)
             self.assertLess(output.new_position()[0], 1.0)
 
+    def test_tracking_online_fast_multidof_loop(self) -> None:
+        with Tracking(2, 0.01) as tracking, TargetState(2) as target, Input(2) as input_, Output(2) as output:
+            configure_tracking_input_nd(input_, 2)
+            tracking.set_reactiveness(0.5)
+            tracking.set_look_ahead_cycles(2)
+
+            for step in range(120):
+                t = step * tracking.delta_time
+                target.set_position([0.35 * t, -0.2 * t])
+                target.set_velocity([0.35, -0.2])
+                target.set_acceleration([0.0, 0.0])
+                self.assertEqual(tracking.update(target, input_, output), Result.WORKING)
+                self.assertEqual(len(output.new_position()), 2)
+                self.assertTrue(all(math.isfinite(value) for value in output.new_position()))
+                self.assertTrue(all(math.isfinite(value) for value in output.new_velocity()))
+                output.pass_to_input(input_)
+
     def test_tracking_offline_sequence(self) -> None:
         count = 200
         with (
@@ -341,19 +371,68 @@ class PrototypeTests(unittest.TestCase):
             self.assertEqual(tracking.calculate_sequence(targets, input_, outputs), Result.WORKING)
             self.assertEqual(outputs.count, count)
             self.assertEqual(len(outputs.new_positions()), count)
+            self.assertEqual(len(outputs.new_velocities()), count)
+            self.assertEqual(len(outputs.new_accelerations()), count)
+            self.assertEqual(len(outputs.new_jerks()), count)
             self.assertEqual(len(outputs.times()), count)
+            self.assertEqual(len(outputs.sections()), count)
             self.assertTrue(all(result in (Result.WORKING, Result.FINISHED) for result in outputs.results()))
             self.assertGreater(outputs.new_positions()[-1][0], outputs.new_positions()[0][0])
 
+    def test_tracking_offline_sequence_multidof(self) -> None:
+        count = 80
+        with (
+            Tracking(2, 0.01) as tracking,
+            TargetStateSequence(2, count) as targets,
+            TrackingOutputSequence(2, count) as outputs,
+            Input(2) as input_,
+        ):
+            configure_tracking_input_nd(input_, 2)
+            targets.set_count(count)
+            for step in range(count):
+                t = step * tracking.delta_time
+                targets.set_state(step, [0.25 * t, -0.1 * t], [0.25, -0.1], [0.0, 0.0])
+
+            self.assertEqual(tracking.calculate_sequence(targets, input_, outputs), Result.WORKING)
+            self.assertEqual(outputs.count, count)
+            self.assertEqual(len(outputs.new_positions()), count)
+            self.assertEqual(len(outputs.new_positions()[0]), 2)
+            self.assertTrue(all(math.isfinite(value) for row in outputs.new_accelerations() for value in row))
+            self.assertTrue(all(math.isfinite(value) for row in outputs.new_jerks() for value in row))
+            self.assertTrue(all(time > 0.0 for time in outputs.times()))
+            self.assertTrue(all(section >= 0 for section in outputs.sections()))
+
+    def test_tracking_invalid_parameters_map_typed_exceptions(self) -> None:
+        with Tracking(1, 0.01) as tracking:
+            with self.assertRaises(RuckigInvalidInputError):
+                tracking.set_reactiveness(-0.01)
+            with self.assertRaises(RuckigInvalidInputError):
+                tracking.set_reactiveness(1.01)
+            with self.assertRaises(RuckigInvalidInputError):
+                tracking.set_reactiveness(math.nan)
+            with self.assertRaises(RuckigInvalidInputError):
+                tracking.set_look_ahead_cycles(0)
+
     def test_tracking_optimized_is_unsupported_in_alpha(self) -> None:
-        with Tracking(1, 0.01) as tracking, TargetState(1) as target, Input(1) as input_, Output(1) as output:
+        with (
+            Tracking(1, 0.01) as tracking,
+            TargetState(1) as target,
+            TargetStateSequence(1, 1) as targets,
+            TrackingOutputSequence(1, 1) as outputs,
+            Input(1) as input_,
+            Output(1) as output,
+        ):
             configure_tracking_input(input_)
             target.set_position([0.0])
             target.set_velocity([0.5])
             target.set_acceleration([0.0])
+            targets.set_count(1)
+            targets.set_state(0, [0.0], [0.5], [0.0])
             tracking.set_mode(TrackingMode.OPTIMIZED)
             with self.assertRaises(RuckigUnsupportedError):
                 tracking.update(target, input_, output)
+            with self.assertRaises(RuckigUnsupportedError):
+                tracking.calculate_sequence(targets, input_, outputs)
 
     def test_tuple_copy_in_and_list_copy_out(self) -> None:
         with Ruckig(1, 0.1) as otg, Input(1) as input_, Trajectory(1) as trajectory:

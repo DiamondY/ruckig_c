@@ -1,6 +1,4 @@
-use ruckig_c_alpha::{
-    InputParameter, OutputParameter, RuckigResult, TargetState, Tracking,
-};
+use ruckig_c_alpha::{InputParameter, OutputParameter, RuckigResult, TargetState, Tracking};
 
 fn main() -> ruckig_c_alpha::Result<()> {
     let mut tracking = Tracking::new(1, 0.01)?;

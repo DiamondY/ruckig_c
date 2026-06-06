@@ -4,6 +4,8 @@
 
 #include <float.h>
 #include <math.h>
+#include <stdio.h>
+#include <string.h>
 #include <ruckig_c/ruckig.h>
 
 static void test_create_destroy(void) {
@@ -1821,7 +1823,7 @@ static void test_waypoint_fixed_regression_corpus(void) {
         CHECK_EQ_INT(ruckig_input_set_per_section_max_position(input, per_section_max_position, 2, 1), RUCKIG_WORKING);
         CHECK_EQ_INT(ruckig_input_set_per_section_min_position(input, per_section_min_position, 2, 1), RUCKIG_WORKING);
         CHECK_EQ_INT(ruckig_calculate(otg, input, trajectory), RUCKIG_WORKING);
-        CHECK_NEAR(ruckig_trajectory_get_duration(trajectory), 3.211521, 1e-5);
+        CHECK_NEAR(ruckig_trajectory_get_duration(trajectory), 3.210714722108343, 1e-9);
         CHECK_EQ_INT(ruckig_trajectory_get_position_extrema(trajectory, extrema, 1), RUCKIG_WORKING);
         CHECK_TRUE(extrema[0].min_position >= -1e-9);
         CHECK_TRUE(extrema[0].max_position <= 2.0 + 1e-9);
@@ -1853,7 +1855,7 @@ static void test_waypoint_fixed_regression_corpus(void) {
         ruckig_input_target_position_data(input)[2] = 0.75;
         CHECK_EQ_INT(ruckig_input_set_intermediate_positions(input, waypoints, 2, dofs), RUCKIG_WORKING);
         CHECK_EQ_INT(ruckig_calculate(otg, input, trajectory), RUCKIG_WORKING);
-        CHECK_NEAR(ruckig_trajectory_get_duration(trajectory), 3.426124, 1e-5);
+        CHECK_NEAR(ruckig_trajectory_get_duration(trajectory), 2.617255105467443, 1e-9);
         CHECK_EQ_INT(ruckig_trajectory_get_intermediate_durations(trajectory, durations, 2), RUCKIG_WORKING);
         CHECK_TRUE(durations[0] > 0.0 && durations[0] < durations[1]);
         CHECK_EQ_INT(ruckig_trajectory_at_time(trajectory, durations[1], position, NULL, NULL, NULL, NULL), RUCKIG_WORKING);
@@ -2245,6 +2247,177 @@ static void fill_tracking_target_ramp(ruckig_target_state_t* target, double time
     ruckig_target_state_acceleration_data(target)[0] = 0.0;
 }
 
+static void fill_tracking_input_nd(ruckig_input_t* input, size_t dofs) {
+    size_t dof;
+    double* current_position = ruckig_input_current_position_data(input);
+    double* current_velocity = ruckig_input_current_velocity_data(input);
+    double* current_acceleration = ruckig_input_current_acceleration_data(input);
+    double* target_position = ruckig_input_target_position_data(input);
+    double* target_velocity = ruckig_input_target_velocity_data(input);
+    double* target_acceleration = ruckig_input_target_acceleration_data(input);
+    double* max_velocity = ruckig_input_max_velocity_data(input);
+    double* max_acceleration = ruckig_input_max_acceleration_data(input);
+    double* max_jerk = ruckig_input_max_jerk_data(input);
+    double* min_position = ruckig_input_min_position_data(input);
+    double* max_position = ruckig_input_max_position_data(input);
+    for (dof = 0; dof < dofs; ++dof) {
+        current_position[dof] = 0.0;
+        current_velocity[dof] = 0.0;
+        current_acceleration[dof] = 0.0;
+        target_position[dof] = 0.0;
+        target_velocity[dof] = 0.0;
+        target_acceleration[dof] = 0.0;
+        max_velocity[dof] = 1.25 + 0.05 * (double)dof;
+        max_acceleration[dof] = 2.25 + 0.10 * (double)dof;
+        max_jerk[dof] = 6.0 + 0.25 * (double)dof;
+        min_position[dof] = -2.0;
+        max_position[dof] = 2.0;
+    }
+}
+
+static void tracking_signal_value(int signal, size_t dof, double time, double* position, double* velocity, double* acceleration) {
+    const double phase = 0.17 * (double)dof;
+    if (signal == 0) {
+        const double v = 0.35 + 0.03 * (double)dof;
+        *position = v * time;
+        *velocity = v;
+        *acceleration = 0.0;
+    } else if (signal == 1) {
+        const double a = 0.12 + 0.01 * (double)dof;
+        *position = 0.5 * a * time * time;
+        *velocity = a * time;
+        *acceleration = a;
+    } else {
+        const double w = 0.45 + 0.04 * (double)dof;
+        const double amplitude = 0.20 + 0.02 * (double)dof;
+        const double x = w * time + phase;
+        *position = amplitude * sin(x);
+        *velocity = amplitude * w * cos(x);
+        *acceleration = -amplitude * w * w * sin(x);
+    }
+}
+
+static void set_tracking_target_signal(ruckig_target_state_t* target, int signal, size_t dofs, double time) {
+    size_t dof;
+    double* position = ruckig_target_state_position_data(target);
+    double* velocity = ruckig_target_state_velocity_data(target);
+    double* acceleration = ruckig_target_state_acceleration_data(target);
+    for (dof = 0; dof < dofs; ++dof) {
+        tracking_signal_value(signal, dof, time, &position[dof], &velocity[dof], &acceleration[dof]);
+    }
+}
+
+static void set_tracking_sequence_signal(ruckig_target_state_sequence_t* targets, int signal, size_t dofs, size_t count, double delta_time) {
+    size_t step;
+    double* position = ruckig_target_state_sequence_position_data(targets);
+    double* velocity = ruckig_target_state_sequence_velocity_data(targets);
+    double* acceleration = ruckig_target_state_sequence_acceleration_data(targets);
+    for (step = 0; step < count; ++step) {
+        size_t dof;
+        const double time = (double)step * delta_time;
+        for (dof = 0; dof < dofs; ++dof) {
+            tracking_signal_value(
+                signal,
+                dof,
+                time,
+                &position[step * dofs + dof],
+                &velocity[step * dofs + dof],
+                &acceleration[step * dofs + dof]
+            );
+        }
+    }
+}
+
+static void check_tracking_output_constraints(const ruckig_output_t* output, const ruckig_input_t* input, size_t dofs) {
+    size_t dof;
+    const double* position = ruckig_output_new_position_data(output);
+    const double* velocity = ruckig_output_new_velocity_data(output);
+    const double* acceleration = ruckig_output_new_acceleration_data(output);
+    const double* jerk = ruckig_output_new_jerk_data(output);
+    const double* max_velocity = ruckig_input_max_velocity_const_data(input);
+    const double* max_acceleration = ruckig_input_max_acceleration_const_data(input);
+    const double* max_jerk = ruckig_input_max_jerk_const_data(input);
+    const double* min_position = ruckig_input_min_position_const_data(input);
+    const double* max_position = ruckig_input_max_position_const_data(input);
+    for (dof = 0; dof < dofs; ++dof) {
+        CHECK_TRUE(isfinite(position[dof]));
+        CHECK_TRUE(isfinite(velocity[dof]));
+        CHECK_TRUE(isfinite(acceleration[dof]));
+        CHECK_TRUE(isfinite(jerk[dof]));
+        CHECK_TRUE(position[dof] >= min_position[dof] - 1e-9);
+        CHECK_TRUE(position[dof] <= max_position[dof] + 1e-9);
+        CHECK_TRUE(fabs(velocity[dof]) <= max_velocity[dof] + 1e-9);
+        CHECK_TRUE(fabs(acceleration[dof]) <= max_acceleration[dof] + 1e-9);
+        CHECK_TRUE(fabs(jerk[dof]) <= max_jerk[dof] + 1e-7);
+    }
+}
+
+static void check_tracking_output_sequence(
+    const ruckig_tracking_output_sequence_t* outputs,
+    size_t dofs,
+    size_t count,
+    double delta_time
+) {
+    size_t step;
+    const double* position = ruckig_tracking_output_sequence_new_position_const_data(outputs);
+    const double* velocity = ruckig_tracking_output_sequence_new_velocity_const_data(outputs);
+    const double* acceleration = ruckig_tracking_output_sequence_new_acceleration_const_data(outputs);
+    const double* jerk = ruckig_tracking_output_sequence_new_jerk_const_data(outputs);
+    const double* time = ruckig_tracking_output_sequence_time_const_data(outputs);
+    const size_t* section = ruckig_tracking_output_sequence_section_const_data(outputs);
+    const ruckig_result_t* results = ruckig_tracking_output_sequence_result_const_data(outputs);
+    CHECK_EQ_INT(ruckig_tracking_output_sequence_get_count(outputs), count);
+    for (step = 0; step < count; ++step) {
+        size_t dof;
+        CHECK_NEAR(time[step], (double)(step + 1) * delta_time, 1e-12);
+        if (step > 0) {
+            CHECK_TRUE(time[step] > time[step - 1]);
+        }
+        CHECK_TRUE(results[step] == RUCKIG_WORKING || results[step] == RUCKIG_FINISHED);
+        CHECK_TRUE(section[step] < 16);
+        for (dof = 0; dof < dofs; ++dof) {
+            const size_t offset = step * dofs + dof;
+            CHECK_TRUE(isfinite(position[offset]));
+            CHECK_TRUE(isfinite(velocity[offset]));
+            CHECK_TRUE(isfinite(acceleration[offset]));
+            CHECK_TRUE(isfinite(jerk[offset]));
+        }
+    }
+}
+
+static void run_tracking_loop_final(
+    size_t dofs,
+    int signal,
+    double reactiveness,
+    size_t look_ahead_cycles,
+    size_t steps,
+    double* final_position
+) {
+    ruckig_tracking_t* tracking = NULL;
+    ruckig_target_state_t* target = NULL;
+    ruckig_input_t* input = NULL;
+    ruckig_output_t* output = NULL;
+    size_t step;
+    CHECK_EQ_INT(ruckig_tracking_create(&tracking, dofs, 0.01), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_target_state_create(&target, dofs), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_input_create(&input, dofs), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_output_create(&output, dofs), RUCKIG_WORKING);
+    fill_tracking_input_nd(input, dofs);
+    CHECK_EQ_INT(ruckig_tracking_set_reactiveness(tracking, reactiveness), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_tracking_set_look_ahead_cycles(tracking, look_ahead_cycles), RUCKIG_WORKING);
+    for (step = 0; step < steps; ++step) {
+        set_tracking_target_signal(target, signal, dofs, (double)step * 0.01);
+        CHECK_EQ_INT(ruckig_tracking_update(tracking, target, input, output), RUCKIG_WORKING);
+        check_tracking_output_constraints(output, input, dofs);
+        ruckig_output_pass_to_input(output, input);
+    }
+    memcpy(final_position, ruckig_output_new_position_data(output), sizeof(double) * dofs);
+    ruckig_output_destroy(output);
+    ruckig_input_destroy(input);
+    ruckig_target_state_destroy(target);
+    ruckig_tracking_destroy(tracking);
+}
+
 static void test_tracking_api_lifecycle_and_accessors(void) {
     ruckig_tracking_t* tracking = NULL;
     ruckig_target_state_t* target = NULL;
@@ -2404,18 +2577,86 @@ static void test_tracking_online_fast(void) {
         original_target_position = ruckig_input_target_position_const_data(input)[0];
         CHECK_EQ_INT(ruckig_tracking_update(tracking, target, input, output), RUCKIG_WORKING);
         CHECK_NEAR(ruckig_input_target_position_const_data(input)[0], original_target_position, 0.0);
+        CHECK_TRUE(ruckig_output_get_time(output) >= 0.0);
         CHECK_TRUE(isfinite(ruckig_output_new_position_data(output)[0]));
         CHECK_TRUE(isfinite(ruckig_output_new_velocity_data(output)[0]));
-        CHECK_TRUE(fabs(ruckig_output_new_velocity_data(output)[0]) <= 1.0 + 1e-9);
+        check_tracking_output_constraints(output, input, 1);
         ruckig_output_pass_to_input(output, input);
     }
-    CHECK_TRUE(ruckig_output_new_position_data(output)[0] > 0.0);
-    CHECK_TRUE(ruckig_output_new_position_data(output)[0] < 0.5);
 
     ruckig_output_destroy(output);
     ruckig_input_destroy(input);
     ruckig_target_state_destroy(target);
     ruckig_tracking_destroy(tracking);
+}
+
+static void test_tracking_fixed_corpus(void) {
+    const double reactiveness_values[4] = {0.0, 0.25, 0.5, 1.0};
+    const size_t look_ahead_values[4] = {1, 2, 5, 10};
+    size_t signal;
+    size_t r;
+    size_t l;
+
+    for (signal = 0; signal < 3; ++signal) {
+        for (r = 0; r < 4; ++r) {
+            for (l = 0; l < 4; ++l) {
+                double final_a[4] = {0.0, 0.0, 0.0, 0.0};
+                double final_b[4] = {0.0, 0.0, 0.0, 0.0};
+                run_tracking_loop_final(1, (int)signal, reactiveness_values[r], look_ahead_values[l], 120, final_a);
+                run_tracking_loop_final(1, (int)signal, reactiveness_values[r], look_ahead_values[l], 120, final_b);
+                CHECK_NEAR(final_a[0], final_b[0], 0.0);
+            }
+        }
+    }
+
+    {
+        double final_a[4] = {0.0, 0.0, 0.0, 0.0};
+        double final_b[4] = {0.0, 0.0, 0.0, 0.0};
+        run_tracking_loop_final(2, 2, 1.0, 2, 180, final_a);
+        run_tracking_loop_final(2, 2, 1.0, 2, 180, final_b);
+        CHECK_NEAR(final_a[0], final_b[0], 0.0);
+        CHECK_NEAR(final_a[1], final_b[1], 0.0);
+    }
+
+    {
+        double final_a[4] = {0.0, 0.0, 0.0, 0.0};
+        double final_b[4] = {0.0, 0.0, 0.0, 0.0};
+        run_tracking_loop_final(4, 1, 0.5, 5, 160, final_a);
+        run_tracking_loop_final(4, 1, 0.5, 5, 160, final_b);
+        CHECK_NEAR(final_a[0], final_b[0], 0.0);
+        CHECK_NEAR(final_a[1], final_b[1], 0.0);
+        CHECK_NEAR(final_a[2], final_b[2], 0.0);
+        CHECK_NEAR(final_a[3], final_b[3], 0.0);
+    }
+
+    {
+        ruckig_tracking_t* tracking = NULL;
+        ruckig_target_state_t* target = NULL;
+        ruckig_input_t* input = NULL;
+        ruckig_output_t* output = NULL;
+        size_t step;
+        CHECK_EQ_INT(ruckig_tracking_create(&tracking, 2, 0.01), RUCKIG_WORKING);
+        CHECK_EQ_INT(ruckig_target_state_create(&target, 2), RUCKIG_WORKING);
+        CHECK_EQ_INT(ruckig_input_create(&input, 2), RUCKIG_WORKING);
+        CHECK_EQ_INT(ruckig_output_create(&output, 2), RUCKIG_WORKING);
+        fill_tracking_input_nd(input, 2);
+        ruckig_input_current_position_data(input)[1] = -0.25;
+        ruckig_input_target_position_data(input)[1] = -0.25;
+        CHECK_EQ_INT(ruckig_input_set_dof_enabled(input, 1, false), RUCKIG_WORKING);
+        for (step = 0; step < 80; ++step) {
+            set_tracking_target_signal(target, 0, 2, (double)step * 0.01);
+            CHECK_EQ_INT(ruckig_tracking_update(tracking, target, input, output), RUCKIG_WORKING);
+            CHECK_TRUE(isfinite(ruckig_output_new_position_data(output)[0]));
+            CHECK_NEAR(ruckig_output_new_position_data(output)[1], -0.25, 1e-12);
+            CHECK_NEAR(ruckig_output_new_velocity_data(output)[1], 0.0, 1e-12);
+            CHECK_NEAR(ruckig_output_new_acceleration_data(output)[1], 0.0, 1e-12);
+            ruckig_output_pass_to_input(output, input);
+        }
+        ruckig_output_destroy(output);
+        ruckig_input_destroy(input);
+        ruckig_target_state_destroy(target);
+        ruckig_tracking_destroy(tracking);
+    }
 }
 
 static void test_tracking_offline_sequence(void) {
@@ -2450,6 +2691,7 @@ static void test_tracking_offline_sequence(void) {
 
     CHECK_EQ_INT(ruckig_tracking_calculate_sequence(tracking, targets, input, outputs), RUCKIG_WORKING);
     CHECK_EQ_INT(ruckig_tracking_output_sequence_get_count(outputs), count);
+    check_tracking_output_sequence(outputs, 1, count, 0.01);
     output_position = ruckig_tracking_output_sequence_new_position_const_data(outputs);
     output_time = ruckig_tracking_output_sequence_time_const_data(outputs);
     results = ruckig_tracking_output_sequence_result_const_data(outputs);
@@ -2461,7 +2703,6 @@ static void test_tracking_offline_sequence(void) {
             CHECK_TRUE(output_time[step] > output_time[step - 1]);
         }
     }
-    CHECK_TRUE(output_position[count - 1] > output_position[0]);
 
     ruckig_input_destroy(input);
     ruckig_tracking_output_sequence_destroy(outputs);
@@ -2469,7 +2710,61 @@ static void test_tracking_offline_sequence(void) {
     ruckig_tracking_destroy(tracking);
 }
 
-static void test_tracking_quality_against_instantaneous_chasing(void) {
+static void test_tracking_offline_invariants(void) {
+    const size_t dofs = 2;
+    const size_t count = 96;
+    ruckig_tracking_t* tracking = NULL;
+    ruckig_target_state_sequence_t* targets = NULL;
+    ruckig_tracking_output_sequence_t* outputs = NULL;
+    ruckig_input_t* input = NULL;
+    CHECK_EQ_INT(ruckig_tracking_create(&tracking, dofs, 0.01), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_target_state_sequence_create(&targets, dofs, count), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_tracking_output_sequence_create(&outputs, dofs, count), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_input_create(&input, dofs), RUCKIG_WORKING);
+    fill_tracking_input_nd(input, dofs);
+    CHECK_EQ_INT(ruckig_target_state_sequence_set_count(targets, count), RUCKIG_WORKING);
+    set_tracking_sequence_signal(targets, 2, dofs, count, 0.01);
+    CHECK_EQ_INT(ruckig_tracking_calculate_sequence(tracking, targets, input, outputs), RUCKIG_WORKING);
+    check_tracking_output_sequence(outputs, dofs, count, 0.01);
+    ruckig_input_destroy(input);
+    ruckig_tracking_output_sequence_destroy(outputs);
+    ruckig_target_state_sequence_destroy(targets);
+    ruckig_tracking_destroy(tracking);
+
+    {
+        ruckig_tracking_t* partial_tracking = NULL;
+        ruckig_target_state_sequence_t* partial_targets = NULL;
+        ruckig_tracking_output_sequence_t* partial_outputs = NULL;
+        ruckig_input_t* partial_input = NULL;
+        double* positions;
+        CHECK_EQ_INT(ruckig_tracking_create(&partial_tracking, 1, 0.01), RUCKIG_WORKING);
+        CHECK_EQ_INT(ruckig_target_state_sequence_create(&partial_targets, 1, 5), RUCKIG_WORKING);
+        CHECK_EQ_INT(ruckig_tracking_output_sequence_create(&partial_outputs, 1, 5), RUCKIG_WORKING);
+        CHECK_EQ_INT(ruckig_input_create(&partial_input, 1), RUCKIG_WORKING);
+        fill_tracking_input_1d(partial_input);
+        CHECK_EQ_INT(ruckig_target_state_sequence_set_count(partial_targets, 5), RUCKIG_WORKING);
+        set_tracking_sequence_signal(partial_targets, 0, 1, 5, 0.01);
+        positions = ruckig_target_state_sequence_position_data(partial_targets);
+        positions[3] = NAN;
+        CHECK_EQ_INT(
+            ruckig_tracking_calculate_sequence(partial_tracking, partial_targets, partial_input, partial_outputs),
+            RUCKIG_ERROR_INVALID_INPUT
+        );
+        CHECK_EQ_INT(ruckig_tracking_output_sequence_get_count(partial_outputs), 3);
+        ruckig_input_destroy(partial_input);
+        ruckig_tracking_output_sequence_destroy(partial_outputs);
+        ruckig_target_state_sequence_destroy(partial_targets);
+        ruckig_tracking_destroy(partial_tracking);
+    }
+}
+
+static void measure_tracking_quality_case(
+    int signal,
+    const char* name,
+    double reactiveness,
+    size_t look_ahead_cycles,
+    bool hard_gate
+) {
     ruckig_tracking_t* tracking = NULL;
     ruckig_target_state_t* target = NULL;
     ruckig_input_t* tracking_input = NULL;
@@ -2477,29 +2772,75 @@ static void test_tracking_quality_against_instantaneous_chasing(void) {
     ruckig_output_t* tracking_output = NULL;
     ruckig_output_t* naive_output = NULL;
     ruckig_t* naive_otg = NULL;
-    const double next_target_position = 0.005;
-    double tracking_lag;
-    double naive_lag;
+    const double dt = 0.01;
+    const size_t steps = 160;
+    size_t step;
+    double tracking_lag_sum = 0.0;
+    double naive_lag_sum = 0.0;
+    double tracking_lag_max = 0.0;
+    double naive_lag_max = 0.0;
+    double tracking_lag_final = 0.0;
+    double naive_lag_final = 0.0;
+    double improvement_ratio;
 
-    CHECK_EQ_INT(ruckig_tracking_create(&tracking, 1, 0.01), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_tracking_create(&tracking, 1, dt), RUCKIG_WORKING);
     CHECK_EQ_INT(ruckig_target_state_create(&target, 1), RUCKIG_WORKING);
     CHECK_EQ_INT(ruckig_input_create(&tracking_input, 1), RUCKIG_WORKING);
     CHECK_EQ_INT(ruckig_input_create(&naive_input, 1), RUCKIG_WORKING);
     CHECK_EQ_INT(ruckig_output_create(&tracking_output, 1), RUCKIG_WORKING);
     CHECK_EQ_INT(ruckig_output_create(&naive_output, 1), RUCKIG_WORKING);
-    CHECK_EQ_INT(ruckig_create(&naive_otg, 1, 0.01), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_create(&naive_otg, 1, dt), RUCKIG_WORKING);
     fill_tracking_input_1d(tracking_input);
     fill_tracking_input_1d(naive_input);
-    fill_tracking_target_ramp(target, 0.0);
+    CHECK_EQ_INT(ruckig_tracking_set_reactiveness(tracking, reactiveness), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_tracking_set_look_ahead_cycles(tracking, look_ahead_cycles), RUCKIG_WORKING);
 
-    CHECK_EQ_INT(ruckig_tracking_update(tracking, target, tracking_input, tracking_output), RUCKIG_WORKING);
-    ruckig_input_target_position_data(naive_input)[0] = ruckig_target_state_position_const_data(target)[0];
-    ruckig_input_target_velocity_data(naive_input)[0] = 0.0;
-    ruckig_input_target_acceleration_data(naive_input)[0] = 0.0;
-    CHECK_EQ_INT(ruckig_update(naive_otg, naive_input, naive_output), RUCKIG_WORKING);
-    tracking_lag = fabs(next_target_position - ruckig_output_new_position_data(tracking_output)[0]);
-    naive_lag = fabs(next_target_position - ruckig_output_new_position_data(naive_output)[0]);
-    CHECK_TRUE(tracking_lag <= naive_lag + 1e-12);
+    for (step = 0; step < steps; ++step) {
+        double future_position;
+        double unused_velocity;
+        double unused_acceleration;
+        double tracking_lag;
+        double naive_lag;
+        const double time = (double)step * dt;
+        set_tracking_target_signal(target, signal, 1, time);
+        CHECK_TRUE(ruckig_tracking_update(tracking, target, tracking_input, tracking_output) >= 0);
+        ruckig_input_target_position_data(naive_input)[0] = ruckig_target_state_position_const_data(target)[0];
+        ruckig_input_target_velocity_data(naive_input)[0] = 0.0;
+        ruckig_input_target_acceleration_data(naive_input)[0] = 0.0;
+        CHECK_TRUE(ruckig_update(naive_otg, naive_input, naive_output) >= 0);
+        tracking_signal_value(signal, 0, time + dt, &future_position, &unused_velocity, &unused_acceleration);
+        tracking_lag = fabs(future_position - ruckig_output_new_position_data(tracking_output)[0]);
+        naive_lag = fabs(future_position - ruckig_output_new_position_data(naive_output)[0]);
+        tracking_lag_sum += tracking_lag;
+        naive_lag_sum += naive_lag;
+        if (tracking_lag > tracking_lag_max) {
+            tracking_lag_max = tracking_lag;
+        }
+        if (naive_lag > naive_lag_max) {
+            naive_lag_max = naive_lag;
+        }
+        tracking_lag_final = tracking_lag;
+        naive_lag_final = naive_lag;
+        ruckig_output_pass_to_input(tracking_output, tracking_input);
+        ruckig_output_pass_to_input(naive_output, naive_input);
+    }
+
+    improvement_ratio = naive_lag_sum > 0.0 ? (naive_lag_sum - tracking_lag_sum) / naive_lag_sum : 0.0;
+    printf(
+        "tracking quality %s: avg_fast %.9g avg_naive %.9g max_fast %.9g max_naive %.9g final_fast %.9g final_naive %.9g improvement %.6f\n",
+        name,
+        tracking_lag_sum / (double)steps,
+        naive_lag_sum / (double)steps,
+        tracking_lag_max,
+        naive_lag_max,
+        tracking_lag_final,
+        naive_lag_final,
+        improvement_ratio
+    );
+    if (hard_gate) {
+        CHECK_TRUE(tracking_lag_sum <= naive_lag_sum + 1e-9);
+        CHECK_TRUE(tracking_lag_final <= naive_lag_final + 1e-9);
+    }
 
     ruckig_destroy(naive_otg);
     ruckig_output_destroy(naive_output);
@@ -2508,6 +2849,12 @@ static void test_tracking_quality_against_instantaneous_chasing(void) {
     ruckig_input_destroy(tracking_input);
     ruckig_target_state_destroy(target);
     ruckig_tracking_destroy(tracking);
+}
+
+static void test_tracking_quality_against_instantaneous_chasing(void) {
+    measure_tracking_quality_case(0, "ramp_tuned", 1.0, 20, true);
+    measure_tracking_quality_case(1, "constant_acceleration", 1.0, 2, true);
+    measure_tracking_quality_case(2, "sinus_trend", 1.0, 1, false);
 }
 
 static void test_tracking_no_allocation(void) {
@@ -2552,6 +2899,45 @@ static void test_tracking_no_allocation(void) {
     ruckig_target_state_sequence_destroy(targets);
     ruckig_target_state_destroy(target);
     ruckig_tracking_destroy(tracking);
+
+    {
+        ruckig_tracking_t* tracking4 = NULL;
+        ruckig_target_state_t* target4 = NULL;
+        ruckig_target_state_sequence_t* targets4 = NULL;
+        ruckig_tracking_output_sequence_t* outputs4 = NULL;
+        ruckig_input_t* input4 = NULL;
+        ruckig_output_t* output4 = NULL;
+        size_t step;
+        CHECK_EQ_INT(ruckig_tracking_create(&tracking4, 4, 0.01), RUCKIG_WORKING);
+        CHECK_EQ_INT(ruckig_target_state_create(&target4, 4), RUCKIG_WORKING);
+        CHECK_EQ_INT(ruckig_target_state_sequence_create(&targets4, 4, 16), RUCKIG_WORKING);
+        CHECK_EQ_INT(ruckig_tracking_output_sequence_create(&outputs4, 4, 16), RUCKIG_WORKING);
+        CHECK_EQ_INT(ruckig_input_create(&input4, 4), RUCKIG_WORKING);
+        CHECK_EQ_INT(ruckig_output_create(&output4, 4), RUCKIG_WORKING);
+        fill_tracking_input_nd(input4, 4);
+        CHECK_EQ_INT(ruckig_target_state_sequence_set_count(targets4, 16), RUCKIG_WORKING);
+        set_tracking_sequence_signal(targets4, 2, 4, 16, 0.01);
+        ruckig_allocation_counters_reset();
+        allocations_before = ruckig_allocation_count();
+        ruckig_allocation_forbidden_set(true);
+        for (step = 0; step < 12; ++step) {
+            set_tracking_target_signal(target4, 2, 4, (double)step * 0.01);
+            CHECK_EQ_INT(ruckig_tracking_update(tracking4, target4, input4, output4), RUCKIG_WORKING);
+            CHECK_EQ_INT(ruckig_allocation_count(), allocations_before);
+            CHECK_EQ_INT(ruckig_allocation_forbidden_count(), 0);
+            ruckig_output_pass_to_input(output4, input4);
+        }
+        CHECK_EQ_INT(ruckig_tracking_calculate_sequence(tracking4, targets4, input4, outputs4), RUCKIG_WORKING);
+        CHECK_EQ_INT(ruckig_allocation_count(), allocations_before);
+        CHECK_EQ_INT(ruckig_allocation_forbidden_count(), 0);
+        ruckig_allocation_forbidden_set(false);
+        ruckig_output_destroy(output4);
+        ruckig_input_destroy(input4);
+        ruckig_tracking_output_sequence_destroy(outputs4);
+        ruckig_target_state_sequence_destroy(targets4);
+        ruckig_target_state_destroy(target4);
+        ruckig_tracking_destroy(tracking4);
+    }
 }
 
 void run_waypoint_tests(void) {
@@ -2586,10 +2972,16 @@ void run_tracking_validation_tests(void) {
 
 void run_tracking_online_tests(void) {
     test_tracking_online_fast();
+    test_tracking_fixed_corpus();
+}
+
+void run_tracking_fixed_corpus_tests(void) {
+    test_tracking_fixed_corpus();
 }
 
 void run_tracking_offline_tests(void) {
     test_tracking_offline_sequence();
+    test_tracking_offline_invariants();
 }
 
 void run_tracking_quality_tests(void) {

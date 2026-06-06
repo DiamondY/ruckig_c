@@ -219,7 +219,7 @@ before `0.5.0-design` and a patch release, not a feature release.
 
 ## 0.5.0 Design Entry
 
-`main` now carries `0.5.0-design - Unreleased`. The accepted first alpha scope
+`main` now carries `0.5.0-design - Unreleased`. The accepted alpha scope
 is a local tracking interface over the public C runtime. This is alpha evidence
 for a future stable `v0.5.0`; `v0.4.2` remains the latest stable release until
 a deliberate release closeout.
@@ -229,10 +229,17 @@ a deliberate release closeout.
   tracking output sequences, online update, and offline sequence calculation.
 - Local `Fast` mode is implemented with deterministic constant-acceleration
   lookahead. `Optimized` mode is declared for API shape parity but returns
-  `RUCKIG_ERROR_UNSUPPORTED` in the first alpha.
+  `RUCKIG_ERROR_UNSUPPORTED` in `0.5.x`.
 - Tracking evidence is local and deterministic: API lifecycle and validation
   tests, online/offline C tests, quality smoke, no-allocation smoke, C examples,
   Python `cffi` prototype smoke, and Rust alpha wrapper smoke.
+- `0.5.0-alpha.2` hardens the local evidence without changing the public C API:
+  C tracking now includes a deterministic fixed corpus, tuned ramp and
+  constant-acceleration quality gates against naive instantaneous chasing,
+  multi-DoF no-allocation coverage, and expanded Python/Rust smoke.
+- A stable `v0.5.0` can be Fast-only if the evidence remains clean. The
+  `Optimized` tracking implementation is deferred to `0.6.0-design`; it must
+  not be aliased to Fast.
 - ABI review for this line uses `docs/abi/public-symbols.txt`,
   `docs/abi/public-symbol-exceptions.txt`, and artifact paths under
   `artifacts/abi/0.5.0-alpha`.

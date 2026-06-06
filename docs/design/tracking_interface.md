@@ -126,7 +126,7 @@ modified by `ruckig_tracking_update`; callers continue to use
 ## Validation and Ownership
 
 - Tracking requires position control input. Velocity-control tracking and
-  per-DoF control-interface overrides are rejected in the first alpha.
+  per-DoF control-interface overrides are rejected in the current alpha.
 - Target position, velocity, and acceleration values must be finite.
 - DoF counts must match the tracking handle and all input/output handles.
 - `reactiveness` must be finite and in `[0, 1]`.
@@ -137,7 +137,7 @@ modified by `ruckig_tracking_update`; callers continue to use
   preallocated sequence calculation must not allocate.
 - Destroying `NULL` handles is safe. Tracking handles do not own
   caller-provided input or output handles.
-- No public diagnostic getters are added in the first alpha.
+- No public diagnostic getters are added in the current alpha.
 - `interrupt_calculation_duration` is unrelated to tracking timeout behavior
   in this alpha and does not create hard or soft real-time guarantees.
 
@@ -146,16 +146,31 @@ modified by `ruckig_tracking_update`; callers continue to use
 Routine evidence is local and deterministic:
 
 - C tests cover tracking API lifecycle, validation, online Fast update,
-  offline sequence calculation, quality smoke, and no-allocation behavior.
+  deterministic fixed-corpus coverage, offline sequence calculation, tuned
+  ramp and constant-acceleration quality gates, trend-only sinus metrics, and
+  no-allocation behavior.
 - C examples cover online ramp, online constant-acceleration, and offline
   sequence tracking.
 - Python `cffi` prototype smoke covers target-state handles, target sequences,
-  online Fast tracking, offline sequence tracking, `Optimized` unsupported
-  behavior, and lifecycle errors.
+  online Fast tracking, offline sequence tracking, multi-DoF tracking,
+  invalid tracking parameters, `Optimized` unsupported behavior, and lifecycle
+  errors.
 - Rust alpha wrapper smoke covers online Fast tracking, offline sequence
-  tracking, and `Optimized` unsupported behavior.
+  tracking, multi-DoF tracking, invalid tracking parameters, `Optimized`
+  unsupported behavior, and examples.
 - Existing no-waypoint oracle and waypoint optimizer gates remain in scope to
   protect prior solver behavior.
+
+Quality interpretation:
+
+- Ramp and constant-acceleration evidence uses selected Fast configurations
+  that must not be worse than naive instantaneous target chasing under the
+  recorded lag metric.
+- Sinus and mixed target signals are recorded as trend metrics only in the
+  alpha. They are not stable release gates until the metric and acceptance
+  threshold are separately approved.
+- The default `look_ahead_cycles = 1` is retained for API behavior, but alpha
+  quality evidence must state the selected Fast configuration being measured.
 
 Optional Pro/cloud black-box evidence may be recorded manually for comparison
 notes, but it must not become routine CI, a release gate, or a claim of formal
@@ -164,7 +179,8 @@ Pro/cloud numerical equivalence.
 ## Deferred Work
 
 - Stable `v0.5.0` release closeout.
-- Bounded local `Optimized` tracking implementation.
+- Bounded local `Optimized` tracking implementation, now tracked for
+  `0.6.0-design` rather than `0.5.x`.
 - Soft interruption checkpoints and timeout fallback semantics.
 - Formal Python package/wheels and Rust crate publication.
 - Package-manager recipes.
