@@ -345,7 +345,7 @@ Compatibility rules for `0.4.0`:
   cloud/Pro black-box comparison evidence when available.
 
 Current local build artifacts continue to use the historical design-line
-artifact directory:
+artifact directory for `0.4.0` evidence:
 
 ```text
 out/build/<preset>/artifacts/abi/0.4.0-design/
@@ -356,4 +356,34 @@ Use these checks during release closeout and follow-up ABI review:
 ```powershell
 cmake --build out\build\windows-clang-ninja --target ruckig_c_verify_public_symbols
 cmake --build out\build\windows-clang-ninja-shared --target ruckig_c_compare_public_exported_symbols
+```
+
+## 0.4.1 Stabilization Policy
+
+`0.4.1` is a no-new-public-C-API stabilization release for the `0.4.x`
+original-surface parity line. It keeps the `v0.4.0` public C symbol set
+unchanged and uses the deepened waypoint optimizer evidence as release
+hardening, not as a new ABI expansion.
+
+Compatibility rules for `0.4.1`:
+
+- `include/ruckig_c/ruckig.h` may change only for version macros during
+  release closeout.
+- No public C functions may be added, removed, renamed, or signature-changed.
+- Enum numeric values and result-code numeric values must remain unchanged.
+- `docs/abi/public-symbols.txt` remains the authoritative `117`-symbol public
+  allowlist.
+- Exported-symbol comparison against the `v0.4.0` public set must report zero
+  public additions and zero public removals.
+- Optimizer diagnostics for `0.4.1` must remain internal, test-only, benchmark
+  output, or release artifact summary evidence. They must not become public
+  getters in this release.
+- `interrupt_calculation_duration` remains a stored API-surface parity field.
+  `0.4.1` does not claim soft interruption checkpoints, best-feasible timeout
+  fallback, or hard real-time waypoint optimization.
+
+`0.4.1` ABI artifact output paths use the release-specific directory:
+
+```text
+out/build/<preset>/artifacts/abi/0.4.1/
 ```

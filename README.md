@@ -25,21 +25,23 @@ Implemented and covered by fixed C/oracle tests plus deterministic random oracle
 - Disabled DoF behavior.
 - Offline `ruckig_calculate`, online `ruckig_update`, `ruckig_output_pass_to_input`.
 - Trajectory duration, independent minimum durations, sampling, position extrema, and first-time-at-position helpers.
-- `0.4.0` waypoint-aware C ABI, global position bounds, per-section
+- `0.4.x` waypoint-aware C ABI, global position bounds, per-section
   constraints, intermediate duration queries, and local coupled waypoint
   optimizer.
 - C examples for position, offline position, online update, per-DoF overrides,
   velocity, stop, minimum duration, waypoints, and per-section minimum duration.
 
 Release-readiness evidence is tracked under `docs/release/`; see
-`docs/index.md` for the organized documentation map. `v0.4.0` is the current
-release line for original-surface parity. It adds waypoint-aware C ABI entry
-points, per-section constraints, global position bounds, and a local coupled
-waypoint optimizer. `v0.3.0` remains the last no-new-C-API hardening release,
-and `v0.2.5` remains the final planned `0.2.x` stabilization baseline.
+`docs/index.md` for the organized documentation map. `v0.4.1` is the current
+stabilization release for the original-surface parity line. `v0.4.0` added
+waypoint-aware C ABI entry points, per-section constraints, global position
+bounds, and a local coupled waypoint optimizer; `v0.4.1` keeps that public C
+surface unchanged while deepening waypoint optimizer evidence. `v0.3.0`
+remains the last no-new-C-API hardening release, and `v0.2.5` remains the
+final planned `0.2.x` stabilization baseline.
 Current stable release scope intentionally excludes:
 
-- Cloud and remote calculation; `0.4.0` implements local optimizer work only.
+- Cloud and remote calculation; `0.4.x` implements local optimizer work only.
 - Formal Ruckig Pro/cloud global numerical equivalence claims.
 - Hard real-time guarantees for waypoint optimization.
 - Python/Rust binding publication. The Python `cffi` prototype and Rust alpha

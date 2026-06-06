@@ -160,6 +160,75 @@ class PrototypeTests(unittest.TestCase):
             self.assertLessEqual(extrema[0].max, 1.5 + 1e-7)
             self.assertGreaterEqual(extrema[1].min, -0.6 - 1e-7)
 
+    def test_waypoint_four_dof_mixed_per_section_constraints(self) -> None:
+        with (
+            Ruckig(4, 0.01, max_number_of_waypoints=2) as otg,
+            Input(4, max_number_of_waypoints=2) as input_,
+            Trajectory(4, max_number_of_waypoints=2) as trajectory,
+        ):
+            input_.set_target_position([1.15, -0.62, 0.70, -0.48])
+            input_.set_max_velocity([1.1, 1.1, 1.1, 1.1])
+            input_.set_max_acceleration([1.8, 1.8, 1.8, 1.8])
+            input_.set_max_jerk([4.0, 4.0, 4.0, 4.0])
+            input_.set_intermediate_positions([
+                [0.30, -0.15, 0.22, -0.10],
+                [0.82, -0.42, 0.46, -0.30],
+            ])
+            input_.set_per_section_min_velocity([
+                [-0.65, -0.75, -0.70, -0.60],
+                [-0.80, -0.85, -0.78, -0.70],
+                [-0.90, -0.95, -0.85, -0.80],
+            ])
+            input_.set_per_section_max_velocity([
+                [0.70, 0.75, 0.70, 0.65],
+                [0.85, 0.90, 0.82, 0.75],
+                [1.00, 1.05, 0.92, 0.88],
+            ])
+            input_.set_per_section_max_jerk([
+                [3.0, 3.0, 2.8, 2.6],
+                [3.4, 3.4, 3.2, 3.0],
+                [3.8, 3.8, 3.5, 3.3],
+            ])
+            input_.set_per_section_min_position([
+                [-0.05, -0.20, -0.05, -0.15],
+                [0.25, -0.50, 0.15, -0.35],
+                [0.75, -0.75, 0.38, -0.55],
+            ])
+            input_.set_per_section_max_position([
+                [0.35, 0.05, 0.25, 0.05],
+                [0.88, -0.10, 0.50, -0.05],
+                [1.25, -0.38, 0.78, -0.22],
+            ])
+            input_.set_per_section_minimum_duration([0.40, 0.70, 0.50])
+
+            self.assertEqual(otg.calculate(input_, trajectory), Result.WORKING)
+            self.assertEqual(trajectory.section_count, 3)
+            durations = trajectory.intermediate_durations()
+            self.assertEqual(len(durations), 2)
+            self.assertLess(durations[0], durations[1])
+
+            first_waypoint = trajectory.at_time(durations[0])
+            second_waypoint = trajectory.at_time(durations[1])
+            self.assertEqual(first_waypoint["section"], 1)
+            self.assertEqual(second_waypoint["section"], 2)
+            self.assertAlmostEqual(first_waypoint["position"][0], 0.30, places=7)
+            self.assertAlmostEqual(second_waypoint["position"][1], -0.42, places=7)
+
+            starts = [0.0, durations[0], durations[1]]
+            ends = [durations[0], durations[1], trajectory.duration]
+            for section, (start, end) in enumerate(zip(starts, ends)):
+                sample = trajectory.at_time(start + (end - start) * 0.5)
+                self.assertEqual(sample["section"], section)
+
+            extrema = trajectory.position_extrema()
+            self.assertLessEqual(extrema[0].max, 1.25 + 1e-7)
+            self.assertGreaterEqual(extrema[1].min, -0.75 - 1e-7)
+            self.assertAlmostEqual(
+                trajectory.first_time_at_position(0, 0.82, durations[0] + 1e-9),
+                durations[1],
+                places=7,
+            )
+
     def test_waypoint_clear_and_interrupt_surface(self) -> None:
         with (
             Ruckig(1, 0.05, max_number_of_waypoints=1) as otg,

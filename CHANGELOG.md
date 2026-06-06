@@ -1,5 +1,44 @@
 # Changelog
 
+## 0.4.1 - 2026-06-06
+
+`0.4.1` is a stabilization and evidence release for the `0.4.x`
+original-surface parity line. It does not add public C API, does not change
+existing public function signatures, does not change enum or result-code
+numeric values, and does not update the frozen upstream oracle baseline.
+
+Added:
+
+- Added deeper waypoint optimizer regression coverage for 1D, 2D, 4D, and 8D
+  multi-waypoint cases, including tight per-section bounds, disabled DoFs,
+  nonzero boundary derivatives, per-section minimum duration, and global
+  position-bound stress.
+- Added stronger waypoint trajectory invariant checks for intermediate
+  duration ordering, waypoint section sampling, per-section sampled limits,
+  position extrema, and first-time-at-position across sections.
+- Expanded the local waypoint performance corpus from 5 to 10 deterministic
+  case families, now covering up to 8 DoF and 3 intermediate waypoints.
+- Strengthened the experimental Python `cffi` prototype smoke tests with a
+  four-DoF mixed per-section waypoint scenario.
+- Added `0.4.1` release checklist and release-note source material.
+
+Changed:
+
+- `CMakeLists.txt` and public version macros now point at `0.4.1`.
+- ABI artifact output paths now use `artifacts/abi/0.4.1`.
+- `0.4.1` keeps the `v0.4.0` public C symbol set unchanged; all optimizer
+  diagnostics remain internal, test-only, or benchmark-output evidence.
+- `interrupt_calculation_duration` remains a storage/API-surface parity field
+  in this release. `0.4.1` documents the future soft-interruption design
+  boundary but does not implement optimizer interruption checkpoints.
+
+Still deferred:
+
+- Formal cloud/Pro numerical equivalence claims, cloud or remote calculation,
+  hard real-time guarantees for waypoint optimization, released Python wheels,
+  published Rust crate, package-manager recipes, new public C API expansion,
+  and upstream baseline upgrades.
+
 ## 0.4.0 - 2026-06-06
 
 `0.4.0` starts the full original-surface parity line after `v0.3.0`. This

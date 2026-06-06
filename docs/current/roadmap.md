@@ -143,10 +143,12 @@ Long-term optional, outside the active roadmap:
   vendored subdirectory use.
 - New package-manager prototype work beyond the existing experimental notes.
 
-## 0.4.0 Original-Surface Parity
+## 0.4.x Original-Surface Parity
 
-`main` now carries the `0.4.0` release line. This is the first planned public C
-ABI expansion after the `v0.3.0` hardening release. The goal is full
+`main` now carries the `0.4.x` release line. `v0.4.0` was the first planned
+public C ABI expansion after the `v0.3.0` hardening release. `v0.4.1` is a
+stabilization release for that surface: it keeps the `v0.4.0` public C ABI
+unchanged while deepening local waypoint optimizer evidence. The goal remains
 original-surface parity with a local waypoint optimizer, not a cloud client.
 
 - Added waypoint-aware C constructors and input/trajectory APIs for
@@ -165,9 +167,28 @@ original-surface parity with a local waypoint optimizer, not a cloud client.
   oracle path.
 - Python `cffi` and Rust wrappers now have prototypes over the public C ABI.
   They remain unpublished and outside stable package scope.
-- CI configuration now includes `0.4.0-design` ABI artifact paths, Linux
+- CI configuration now includes `0.4.x` ABI artifact paths, Linux
   waypoint performance output, Python prototype smoke, and Rust alpha wrapper
   smoke. Multiple alpha push CI runs have passed; the stable release closeout
   uses the same artifact path for final CI evidence.
 - Package-manager recipes, cloud API support, and upstream baseline upgrades
   remain separate projects.
+
+## 0.4.1 Deep Stabilization
+
+`0.4.1` is the immediate follow-up stabilization release after `v0.4.0`.
+
+- No new public C API is planned for `0.4.1`; the only public header change is
+  the release version macros.
+- Waypoint optimizer evidence is strengthened with deeper fixed C corpus,
+  sampled invariant checks, per-section limit sampling, section-oracle
+  coverage, and an expanded local waypoint benchmark corpus.
+- Routine stress remains local and deterministic. CI and release gates do not
+  depend on Ruckig cloud, Ruckig Pro, network access, or external licenses.
+- `interrupt_calculation_duration` remains storage/API-surface parity in
+  `0.4.1`; optimizer interruption checkpoints require a later design and are
+  not claimed as hard or soft real-time behavior in this release.
+- The Python `cffi` prototype receives smoke-test hardening only. Python wheel
+  publication, Rust crate publication, package-manager recipes, new public C
+  API expansion, and upstream baseline upgrades move to separate future design
+  work such as `0.5.0-design`.

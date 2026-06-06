@@ -287,3 +287,25 @@ This expansion does not approve publishing wheels, vendoring a shared library,
 or adding a higher-level Pythonic API. Stable Python release scope should wait
 until the local waypoint optimizer has stronger alpha evidence and the C ABI is
 settled for `v0.4.0`.
+
+## 0.4.1 Prototype Stabilization
+
+`0.4.1` keeps the Python work prototype-only. It does not publish wheels, does
+not define a stable Python package API, and does not change the public C ABI.
+
+The prototype smoke suite is strengthened to cover the deepened `0.4.x`
+waypoint surface:
+
+- offline calculate and online update loop;
+- waypoint offline and online paths;
+- 4 DoF mixed per-section waypoint constraints;
+- global and per-section position bounds;
+- intermediate-duration and first-time-at-position queries;
+- list/tuple copy-in and list copy-out behavior;
+- lifecycle double-close, after-close error, and context-manager release;
+- typed exception mapping while preserving the raw result code.
+
+The acceptance bar for moving beyond prototype remains separate from `0.4.1`:
+cross-platform shared-library loading evidence, packaging layout, wheel build
+strategy, and user-facing Python API stability must be decided in a later
+design line.

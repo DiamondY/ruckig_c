@@ -205,7 +205,7 @@ WaypointCaseData make_waypoint_case(size_t index) {
     const double inf = std::numeric_limits<double>::infinity();
     WaypointCaseData test_case;
 
-    switch (index % 5) {
+    switch (index % 10) {
         case 0:
             test_case.dofs = 2;
             test_case.waypoint_count = 1;
@@ -299,6 +299,140 @@ WaypointCaseData make_waypoint_case(size_t index) {
             test_case.min_position = {-1.0};
             test_case.intermediate_positions = {1.0};
             test_case.per_section_minimum_duration = {2.0, 1.0};
+            break;
+        case 5:
+            test_case.dofs = 4;
+            test_case.waypoint_count = 2;
+            test_case.delta_time = 0.01;
+            test_case.current_position = {0.0, 0.0, 0.0, 0.0};
+            test_case.current_velocity = {0.0, 0.0, 0.0, 0.0};
+            test_case.current_acceleration = {0.0, 0.0, 0.0, 0.0};
+            test_case.target_position = {1.15, -0.62, 0.70, -0.48};
+            test_case.target_velocity = {0.0, 0.0, 0.0, 0.0};
+            test_case.target_acceleration = {0.0, 0.0, 0.0, 0.0};
+            test_case.max_velocity = {1.1, 1.1, 1.1, 1.1};
+            test_case.max_acceleration = {1.8, 1.8, 1.8, 1.8};
+            test_case.max_jerk = {4.0, 4.0, 4.0, 4.0};
+            test_case.max_position = {inf, inf, inf, inf};
+            test_case.min_position = {-inf, -inf, -inf, -inf};
+            test_case.intermediate_positions = {
+                0.30, -0.15, 0.22, -0.10,
+                0.82, -0.42, 0.46, -0.30
+            };
+            test_case.per_section_max_velocity = {
+                0.70, 0.75, 0.70, 0.65,
+                0.85, 0.90, 0.82, 0.75,
+                1.00, 1.05, 0.92, 0.88
+            };
+            test_case.per_section_min_velocity = {
+                -0.65, -0.75, -0.70, -0.60,
+                -0.80, -0.85, -0.78, -0.70,
+                -0.90, -0.95, -0.85, -0.80
+            };
+            test_case.per_section_max_acceleration = {
+                1.2, 1.2, 1.1, 1.0,
+                1.4, 1.4, 1.3, 1.2,
+                1.6, 1.6, 1.5, 1.4
+            };
+            test_case.per_section_min_acceleration = {
+                -1.2, -1.2, -1.1, -1.0,
+                -1.4, -1.4, -1.3, -1.2,
+                -1.6, -1.6, -1.5, -1.4
+            };
+            test_case.per_section_max_jerk = {
+                3.0, 3.0, 2.8, 2.6,
+                3.4, 3.4, 3.2, 3.0,
+                3.8, 3.8, 3.5, 3.3
+            };
+            test_case.per_section_max_position = {
+                0.35, 0.05, 0.25, 0.05,
+                0.88, -0.10, 0.50, -0.05,
+                1.25, -0.38, 0.78, -0.22
+            };
+            test_case.per_section_min_position = {
+                -0.05, -0.20, -0.05, -0.15,
+                0.25, -0.50, 0.15, -0.35,
+                0.75, -0.75, 0.38, -0.55
+            };
+            test_case.per_section_minimum_duration = {0.40, 0.70, 0.50};
+            break;
+        case 6:
+            test_case.dofs = 8;
+            test_case.waypoint_count = 3;
+            test_case.delta_time = 0.01;
+            test_case.current_position = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 7.0, -2.0};
+            test_case.current_velocity = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+            test_case.current_acceleration = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+            test_case.target_position = {1.00, -0.65, 0.75, -0.55, 0.45, -0.33, 7.0, -2.0};
+            test_case.target_velocity = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+            test_case.target_acceleration = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+            test_case.max_velocity = {1.8, 1.8, 1.8, 1.8, 1.8, 1.8, 1.8, 1.8};
+            test_case.max_acceleration = {2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5};
+            test_case.max_jerk = {5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0};
+            test_case.max_position = {inf, inf, inf, inf, inf, inf, inf, inf};
+            test_case.min_position = {-inf, -inf, -inf, -inf, -inf, -inf, -inf, -inf};
+            test_case.enabled = {true, true, true, true, true, true, false, false};
+            test_case.intermediate_positions = {
+                0.10, -0.05, 0.12, -0.08, 0.06, -0.04, 7.0, -2.0,
+                0.35, -0.20, 0.30, -0.25, 0.18, -0.12, 7.0, -2.0,
+                0.70, -0.45, 0.55, -0.40, 0.32, -0.24, 7.0, -2.0
+            };
+            break;
+        case 7:
+            test_case.dofs = 1;
+            test_case.waypoint_count = 2;
+            test_case.delta_time = 0.01;
+            test_case.current_position = {0.0};
+            test_case.current_velocity = {0.20};
+            test_case.current_acceleration = {0.0};
+            test_case.target_position = {1.40};
+            test_case.target_velocity = {-0.10};
+            test_case.target_acceleration = {0.0};
+            test_case.max_velocity = {1.2};
+            test_case.max_acceleration = {2.4};
+            test_case.max_jerk = {5.0};
+            test_case.max_position = {2.0};
+            test_case.min_position = {-0.5};
+            test_case.intermediate_positions = {0.45, 0.95};
+            break;
+        case 8:
+            test_case.dofs = 2;
+            test_case.waypoint_count = 2;
+            test_case.delta_time = 0.02;
+            test_case.current_position = {0.0, 0.0};
+            test_case.current_velocity = {0.0, 0.0};
+            test_case.current_acceleration = {0.0, 0.0};
+            test_case.target_position = {1.6, -0.8};
+            test_case.target_velocity = {0.0, 0.0};
+            test_case.target_acceleration = {0.0, 0.0};
+            test_case.max_velocity = {1.4, 1.2};
+            test_case.max_acceleration = {2.0, 1.8};
+            test_case.max_jerk = {4.0, 3.5};
+            test_case.max_position = {1.7, 0.1};
+            test_case.min_position = {-0.1, -0.9};
+            test_case.intermediate_positions = {0.45, -0.20, 1.05, -0.55};
+            test_case.per_section_minimum_duration = {0.25, 0.45, 0.30};
+            break;
+        case 9:
+            test_case.dofs = 3;
+            test_case.waypoint_count = 3;
+            test_case.delta_time = 0.05;
+            test_case.current_position = {0.0, 0.0, 0.0};
+            test_case.current_velocity = {0.10, -0.05, 0.0};
+            test_case.current_acceleration = {0.0, 0.0, 0.0};
+            test_case.target_position = {1.20, -0.90, 0.60};
+            test_case.target_velocity = {-0.05, 0.05, 0.0};
+            test_case.target_acceleration = {0.0, 0.0, 0.0};
+            test_case.max_velocity = {1.1, 1.1, 1.0};
+            test_case.max_acceleration = {1.6, 1.6, 1.5};
+            test_case.max_jerk = {3.5, 3.5, 3.0};
+            test_case.max_position = {1.4, 0.1, 0.8};
+            test_case.min_position = {-0.1, -1.1, -0.1};
+            test_case.intermediate_positions = {
+                0.25, -0.20, 0.15,
+                0.55, -0.45, 0.30,
+                0.90, -0.70, 0.45
+            };
             break;
     }
 
@@ -482,21 +616,24 @@ const char* os_string() {
 }
 
 int run_waypoint_benchmark(size_t sample_count, std::uint64_t seed) {
+    constexpr size_t max_dofs = 8;
+    constexpr size_t max_number_of_waypoints = 3;
+    constexpr size_t waypoint_case_count = 10;
     std::vector<WaypointCaseData> cases;
     cases.reserve(sample_count);
     for (size_t i = 0; i < sample_count; ++i) {
         cases.push_back(make_waypoint_case(static_cast<size_t>(seed) + i));
     }
 
-    ruckig_t* c_otg[3][3] = {};
-    ruckig_input_t* c_input[3] = {};
-    ruckig_trajectory_t* c_trajectory[3] = {};
-    for (size_t dof = 1; dof <= 3; ++dof) {
-        if (ruckig_input_create_with_waypoints(&c_input[dof - 1], dof, 2) != RUCKIG_WORKING
-            || ruckig_trajectory_create_with_waypoints(&c_trajectory[dof - 1], dof, 2) != RUCKIG_WORKING
-            || ruckig_create_with_waypoints(&c_otg[0][dof - 1], dof, 0.01, 2) != RUCKIG_WORKING
-            || ruckig_create_with_waypoints(&c_otg[1][dof - 1], dof, 0.02, 2) != RUCKIG_WORKING
-            || ruckig_create_with_waypoints(&c_otg[2][dof - 1], dof, 0.05, 2) != RUCKIG_WORKING) {
+    ruckig_t* c_otg[3][max_dofs] = {};
+    ruckig_input_t* c_input[max_dofs] = {};
+    ruckig_trajectory_t* c_trajectory[max_dofs] = {};
+    for (size_t dof = 1; dof <= max_dofs; ++dof) {
+        if (ruckig_input_create_with_waypoints(&c_input[dof - 1], dof, max_number_of_waypoints) != RUCKIG_WORKING
+            || ruckig_trajectory_create_with_waypoints(&c_trajectory[dof - 1], dof, max_number_of_waypoints) != RUCKIG_WORKING
+            || ruckig_create_with_waypoints(&c_otg[0][dof - 1], dof, 0.01, max_number_of_waypoints) != RUCKIG_WORKING
+            || ruckig_create_with_waypoints(&c_otg[1][dof - 1], dof, 0.02, max_number_of_waypoints) != RUCKIG_WORKING
+            || ruckig_create_with_waypoints(&c_otg[2][dof - 1], dof, 0.05, max_number_of_waypoints) != RUCKIG_WORKING) {
             std::cerr << "failed to create C waypoint benchmark handles\n";
             return 1;
         }
@@ -529,14 +666,16 @@ int run_waypoint_benchmark(size_t sample_count, std::uint64_t seed) {
     std::cout << "seed: " << seed << '\n';
     std::cout << "compiler: " << compiler_string() << '\n';
     std::cout << "os: " << os_string() << '\n';
-    std::cout << "waypoint_case_count: 5\n";
+    std::cout << "waypoint_case_count: " << waypoint_case_count << '\n';
+    std::cout << "waypoint_max_dofs: " << max_dofs << '\n';
+    std::cout << "waypoint_max_intermediate_positions: " << max_number_of_waypoints << '\n';
     std::cout << "waypoint_c_average_ns: " << c_stats.average_ns << '\n';
     std::cout << "waypoint_c_p99_ns: " << c_stats.p99_ns << '\n';
     std::cout << "waypoint_c_worst_ns: " << c_stats.worst_ns << '\n';
     std::cout << "waypoint_oracle_ratio: unavailable\n";
     std::cout << "waypoint_benchmark_policy: alpha C-only local optimizer corpus\n";
 
-    for (size_t dof = 1; dof <= 3; ++dof) {
+    for (size_t dof = 1; dof <= max_dofs; ++dof) {
         ruckig_destroy(c_otg[0][dof - 1]);
         ruckig_destroy(c_otg[1][dof - 1]);
         ruckig_destroy(c_otg[2][dof - 1]);

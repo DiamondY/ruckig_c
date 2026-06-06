@@ -125,6 +125,7 @@ Current same-platform release baselines:
 | `0.2.5` | `1.16244` | `1.30314` | Final planned pre-`0.3.0` stabilization baseline from local Windows closeout and manual Linux release workflow evidence. |
 | `0.3.0` | Not a separate 0.3.0 gate | `1.2875` | Hardening release final push CI run `27028896945`, artifact `7442364071`; local Windows release gates covered build/test/ABI rather than a separate benchmark rerun. |
 | `0.4.0` | `1.23622` | `1.17323` push CI; `1.29272` manual workflow | Original-surface parity release. Windows local alpha.4 pre-stable gate; Linux final push CI run `27038403450`, artifact `7446167572`; manual workflow run `27038538349`, artifact `7446219206`. |
+| `0.4.1` | `1.18871` | TBD from final push CI/manual workflow | Deep stabilization release candidate. Windows local closeout gate; Linux evidence to be recorded from final CI artifacts. |
 
 Store raw local or CI outputs outside version-controlled source unless the
 release process intentionally promotes a short excerpt into this report. Use a
@@ -479,6 +480,59 @@ Average C/oracle ratio:
 Release threshold:
 Result:
 ```
+
+## 2026-06-06 Windows 0.4.1 Local Release-Candidate No-Waypoint Run
+
+- Source: Local `0.4.1` release-candidate gate before release-candidate
+  commit creation.
+- Command:
+  `out\build\windows-clang-ninja-performance\ruckig_c_performance_benchmark.exe --samples 10000 --seed 1`.
+- OS: Windows.
+- CPU identifier: `Intel64 Family 6 Model 165 Stepping 5, GenuineIntel`.
+- C compiler: `clang 21.1.8`.
+- C++ compiler: `clang 21.1.8`.
+- CMake build type: Release.
+- Generator: Ninja.
+- Seed: `1`.
+- Samples: `10000`.
+
+| Metric | C implementation | C++ oracle |
+| --- | ---: | ---: |
+| Average | 651.78 ns | 548.31 ns |
+| p99 | 4800 ns | 4000 ns |
+| Worst | 18000 ns | 29500 ns |
+
+Average C/oracle ratio: `1.18871`.
+
+This Windows release-candidate run is within the release threshold of average
+calculation time no worse than `1.5x` the C++ oracle on the same no-waypoint
+benchmark corpus.
+
+## 2026-06-06 Windows 0.4.1 Local Release-Candidate Waypoint Run
+
+- Source: Local `0.4.1` release-candidate waypoint benchmark corpus.
+- Command:
+  `out\build\windows-clang-ninja-performance\ruckig_c_performance_benchmark.exe --samples 10000 --seed 1 --waypoints`.
+- OS: Windows.
+- CPU identifier: `Intel64 Family 6 Model 165 Stepping 5, GenuineIntel`.
+- C compiler: `clang 21.1.8`.
+- CMake build type: Release.
+- Generator: Ninja.
+- Seed: `1`.
+- Samples: `10000`.
+- Waypoint case count: `10`.
+- Maximum DoF count: `8`.
+- Maximum intermediate waypoint count: `3`.
+
+| Metric | C waypoint optimizer |
+| --- | ---: |
+| Average | 3.27228e+06 ns |
+| p99 | 1.21478e+07 ns |
+| Worst | 1.70838e+07 ns |
+
+There is no C++ oracle ratio for this waypoint corpus because the frozen
+Ruckig Community `0.17.3` baseline does not contain a local global waypoint
+optimizer. This evidence is same-platform local optimizer trend data only.
 
 ## 2026-06-04 Windows 0.2.3 Maintenance Preparation Run
 

@@ -2383,6 +2383,118 @@ Linux GCC C-only
 The `Manual release random oracle` job was skipped as expected for a
 push-triggered workflow.
 
+## 2026-06-06 0.4.1 Local Release-Candidate Evidence
+
+The `0.4.1` local release-candidate pass deepened waypoint optimizer evidence
+without adding public C API, changing public function signatures, changing enum
+or result-code numeric values, or modifying `original/ruckig-main`.
+
+Code coverage added in this pass:
+
+```text
+Fixed waypoint corpus:
+- 8 DoF, three waypoints, disabled constant DoFs, and final-state checks.
+- 4 DoF, two waypoints, tight per-section min/max position, min/max velocity,
+  min/max acceleration, max jerk, and per-section minimum duration.
+- 1 DoF, two waypoints, nonzero current/target boundary velocity, zero-
+  derivative segment baseline comparison, and first-time-at-position after a
+  prior waypoint.
+
+Trajectory invariant coverage:
+- Intermediate-duration monotonicity.
+- Waypoint boundary section selection.
+- Per-section interior position, velocity, acceleration, and jerk sampling.
+- Multi-section position extrema and first-time-at-position.
+
+Performance corpus:
+- Waypoint benchmark corpus expanded from 5 to 10 deterministic case families,
+  covering up to 8 DoF and 3 intermediate waypoints.
+
+Prototype wrapper coverage:
+- Python cffi prototype smoke expanded to 14 tests with a 4 DoF mixed
+  per-section waypoint scenario.
+```
+
+Local verification:
+
+```text
+cmake --build out\build\windows-clang-ninja:
+pass.
+
+cmake --build out\build\windows-clang-ninja-shared:
+pass.
+
+cmake --build out\build\windows-clang-ninja-oracle:
+pass.
+
+cmake --build out\build\windows-clang-ninja-performance:
+pass.
+
+ctest --test-dir out\build\windows-clang-ninja --output-on-failure -E ruckig_c_oracle_random_release:
+pass, 24/24.
+
+ctest --test-dir out\build\windows-clang-ninja-shared --output-on-failure -E ruckig_c_oracle_random_release:
+pass, 24/24.
+
+out\build\windows-clang-ninja-oracle\ruckig_c_oracle_tests.exe:
+pass; Waypoint section oracle comparisons passed: 4; Oracle comparisons
+passed: 76.
+
+ctest --test-dir out\build\windows-clang-ninja-oracle -R ruckig_c_waypoint_section_oracle --output-on-failure:
+pass, 1/1.
+
+out\build\windows-clang-ninja-oracle\ruckig_c_oracle_tests.exe --random 100000 --seed 1:
+pass.
+
+out\build\windows-clang-ninja-oracle\ruckig_c_oracle_tests.exe --random 100000 --seed 2:
+pass.
+
+out\build\windows-clang-ninja-oracle\ruckig_c_oracle_tests.exe --random 100000 --seed 41:
+pass.
+
+out\build\windows-clang-ninja-oracle\ruckig_c_oracle_tests.exe --random-per-dof 100000 --seed 1:
+pass.
+
+ctest --test-dir out\build\windows-clang-ninja-oracle -R ruckig_c_oracle_random_release --output-on-failure:
+pass, 1/1; 56.78 seconds.
+
+cmake --build out\build\windows-clang-ninja-shared --target ruckig_c_verify_public_symbols:
+pass; 117 public header symbols; 117 expected public symbols; 0 missing; 0
+extra.
+
+cmake --build out\build\windows-clang-ninja-shared --target ruckig_c_compare_public_exported_symbols:
+pass; current public exports 117; missing public symbols 0; removed public
+symbols 0; unapproved exported symbols 0.
+
+cmake --build out\build\windows-clang-ninja-shared --target ruckig_c_compare_exported_symbols:
+warning/evidence-only historical comparison completed. Public exported-symbol
+comparison is clean; full historical comparison output is stored under
+out\build\windows-clang-ninja-shared\artifacts\abi\0.4.1.
+
+out\build\windows-clang-ninja-performance\ruckig_c_performance_benchmark.exe --samples 10000 --seed 1:
+pass; average_ratio_c_over_oracle 1.18871, threshold 1.5.
+
+out\build\windows-clang-ninja-performance\ruckig_c_performance_benchmark.exe --samples 10000 --seed 1 --waypoints:
+pass; waypoint_case_count 10; max DoF 8; max intermediate positions 3;
+average 3.27228e+06 ns; p99 1.21478e+07 ns; worst 1.70838e+07 ns.
+
+out\python-prototype-venv\Scripts\python.exe bindings\python_prototype\test_prototype.py:
+pass; 14 tests, OK.
+
+cargo test --manifest-path bindings\rust\Cargo.toml:
+pass; 6 tests, OK.
+```
+
+Public header diff from `v0.4.0` is limited to version macros:
+
+```text
+RUCKIG_C_VERSION_PATCH 0 -> 1
+RUCKIG_C_VERSION_STRING "0.4.0" -> "0.4.1"
+```
+
+Remote push CI and manual release-random workflow evidence remain to be
+recorded after the release-candidate commit is pushed.
+
 ## 2026-06-06 0.4.0 Release Closeout Evidence
 
 The stable `v0.4.0` release closeout ran against release-candidate commit
