@@ -125,7 +125,7 @@ Current same-platform release baselines:
 | `0.2.5` | `1.16244` | `1.30314` | Final planned pre-`0.3.0` stabilization baseline from local Windows closeout and manual Linux release workflow evidence. |
 | `0.3.0` | Not a separate 0.3.0 gate | `1.2875` | Hardening release final push CI run `27028896945`, artifact `7442364071`; local Windows release gates covered build/test/ABI rather than a separate benchmark rerun. |
 | `0.4.0` | `1.23622` | `1.17323` push CI; `1.29272` manual workflow | Original-surface parity release. Windows local alpha.4 pre-stable gate; Linux final push CI run `27038403450`, artifact `7446167572`; manual workflow run `27038538349`, artifact `7446219206`. |
-| `0.4.1` | `1.18871` | TBD from final push CI/manual workflow | Deep stabilization release candidate. Windows local closeout gate; Linux evidence to be recorded from final CI artifacts. |
+| `0.4.1` | `1.18871` | Push CI success, artifact `7452475903`; raw ratio not downloaded in this unauthenticated environment | Deep stabilization release candidate. Windows local closeout gate; Linux performance job succeeded in push CI run `27056354459`. |
 
 Store raw local or CI outputs outside version-controlled source unless the
 release process intentionally promotes a short excerpt into this report. Use a
@@ -533,6 +533,19 @@ benchmark corpus.
 There is no C++ oracle ratio for this waypoint corpus because the frozen
 Ruckig Community `0.17.3` baseline does not contain a local global waypoint
 optimizer. This evidence is same-platform local optimizer trend data only.
+
+## 2026-06-06 Linux 0.4.1 Push CI Performance Evidence
+
+- Source: GitHub Actions push CI run `27056354459`, job `Linux Clang
+  performance`.
+- Commit: `fa7a124dcdb272b1ee99f69cd8177474a0df2b33`.
+- Artifact: `linux-performance`, artifact id `7452475903`.
+- Result: job succeeded.
+
+The artifact zip download endpoint returned HTTP 401 in this unauthenticated
+environment, so the raw Linux no-waypoint ratio and waypoint timing excerpt are
+not promoted into this tracked report yet. The release checklist records the
+artifact id for authenticated follow-up.
 
 ## 2026-06-04 Windows 0.2.3 Maintenance Preparation Run
 

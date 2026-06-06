@@ -2495,6 +2495,71 @@ RUCKIG_C_VERSION_STRING "0.4.0" -> "0.4.1"
 Remote push CI and manual release-random workflow evidence remain to be
 recorded after the release-candidate commit is pushed.
 
+Remote GitHub Actions push CI for the `0.4.1` release-candidate line:
+
+```text
+Run id: 27056354459
+Run URL: https://github.com/DiamondY/ruckig_c/actions/runs/27056354459
+Commit: fa7a124dcdb272b1ee99f69cd8177474a0df2b33
+Event: push
+Conclusion: success
+```
+
+Successful push CI jobs:
+
+```text
+Windows clang-cl C-only
+Windows clang-cl shared C-only
+Windows clang oracle
+Linux GCC C-only
+Linux Clang oracle
+macOS Clang C-only
+Linux Clang ASan UBSan
+Linux Valgrind
+Linux Clang performance
+Windows MinGW static consumer
+Windows MinGW DLL consumer
+Linux exported symbols
+Windows exported symbols
+macOS exported symbols
+Python prototype smoke (Windows)
+Python prototype smoke (Linux)
+Python prototype smoke (macOS)
+Rust alpha wrapper smoke
+```
+
+Push CI artifacts:
+
+```text
+linux-performance: 7452475903
+Windows exported symbols: 7452471422
+Linux exported symbols: 7452469979
+macOS exported symbols: 7452469376
+```
+
+The first release-candidate push CI run `27056271899` failed only in the
+exported-symbol print/upload path because `.github/workflows/ci.yml` still
+referenced `artifacts/abi/0.4.0-design` after the CMake ABI artifact directory
+was moved to `artifacts/abi/0.4.1`. Commit
+`fa7a124dcdb272b1ee99f69cd8177474a0df2b33` fixes the workflow artifact path;
+the subsequent push CI run above passed.
+
+Manual release-random workflow dispatch remains pending:
+
+```text
+Attempted API:
+POST https://api.github.com/repos/DiamondY/ruckig_c/actions/workflows/ci.yml/dispatches
+Input:
+release_random=true
+Result:
+HTTP 401 Unauthorized
+```
+
+The environment can push through git credentials, but GitHub CLI/API
+authentication is not available for workflow dispatch, artifact zip download,
+or GitHub Release creation. Those final release steps require an authenticated
+operator or a configured `GH_TOKEN`.
+
 ## 2026-06-06 0.4.0 Release Closeout Evidence
 
 The stable `v0.4.0` release closeout ran against release-candidate commit
