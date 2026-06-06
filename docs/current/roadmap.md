@@ -145,13 +145,14 @@ Long-term optional, outside the active roadmap:
 
 ## 0.4.x Original-Surface Parity
 
-`main` now carries the `0.4.x` release line. `v0.4.0` was the first planned
-public C ABI expansion after the `v0.3.0` hardening release. `v0.4.1` is a
-deep waypoint optimizer stabilization release. `v0.4.2` is the coverage and
-evidence closeout release for the surface: it keeps the `v0.4.0` public C ABI
-unchanged while recording original parity coverage, tracking design scope, and
-soft-interruption design boundaries. The goal remains original-surface parity
-with a local waypoint optimizer, not a cloud client.
+The planned `0.4.x` original-surface parity line is complete through published
+`v0.4.2`. `v0.4.0` was the first planned public C ABI expansion after the
+`v0.3.0` hardening release. `v0.4.1` was a deep waypoint optimizer
+stabilization release. `v0.4.2` is the coverage and evidence closeout release
+for the surface: it keeps the `v0.4.0` public C ABI unchanged while recording
+original parity coverage, tracking design scope, and soft-interruption design
+boundaries. The goal remains original-surface parity with a local waypoint
+optimizer, not a cloud client.
 
 - Added waypoint-aware C constructors and input/trajectory APIs for
   intermediate waypoints, global position bounds, per-section constraints,
@@ -197,8 +198,8 @@ with a local waypoint optimizer, not a cloud client.
 
 ## 0.4.2 Original Parity Coverage Closeout
 
-`0.4.2` is the final planned `0.4.x` evidence closeout before opening
-`0.5.0-design`. It is a patch release, not a feature release.
+Published as `v0.4.2`. It is the final planned `0.4.x` evidence closeout
+before `0.5.0-design` and a patch release, not a feature release.
 
 - No new public C API is planned for `0.4.2`; the only public header change is
   the release version macros.
@@ -218,7 +219,10 @@ with a local waypoint optimizer, not a cloud client.
 
 ## 0.5.0 Design Entry
 
-After `v0.4.2` is published, the default next line is `0.5.0-design`.
+`main` now carries `0.5.0-design - Unreleased`. The default next line is
+tracking design and local implementation planning. Public C API additions are
+allowed only after a dedicated tracking API decision updates the public header,
+ABI allowlist, changelog, and API compatibility notes.
 
 1. Design and implement a local tracking interface over the public C runtime.
 2. Add tracking fixed examples, local invariants, lag/error metrics, and

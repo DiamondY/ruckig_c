@@ -33,21 +33,25 @@ Implemented and covered by fixed C/oracle tests plus deterministic random oracle
 
 Release-readiness evidence is tracked under `docs/release/`; see
 `docs/index.md` for the organized documentation map. `v0.4.2` is the current
-coverage and evidence closeout release for the original-surface parity line.
+stable release and coverage/evidence baseline for the original-surface parity
+line. `main` is now `0.5.0-design - Unreleased`, with tracking interface
+design and local implementation planning as the first priority.
 `v0.4.0` added waypoint-aware C ABI entry points, per-section constraints,
 global position bounds, and a local coupled waypoint optimizer; `v0.4.1`
 deepened waypoint optimizer evidence; `v0.4.2` keeps that public C surface
 unchanged while recording the original parity coverage matrix and the
-`0.5.0-design` tracking/soft-interruption preparation work. `v0.3.0` remains
-the last no-new-C-API hardening release, and `v0.2.5` remains the final planned
-`0.2.x` stabilization baseline.
+`0.5.0-design` tracking/soft-interruption preparation work. Tracking has not
+shipped yet and no tracking public C API is exposed in `v0.4.2`. `v0.3.0`
+remains the last no-new-C-API hardening release, and `v0.2.5` remains the final
+planned `0.2.x` stabilization baseline.
 Current stable release scope intentionally excludes:
 
 - Cloud and remote calculation; `0.4.x` implements local optimizer work only.
 - Formal Ruckig Pro/cloud global numerical equivalence claims.
 - Hard real-time guarantees for waypoint optimization.
 - Tracking interface implementation. Tracking is a required future full
-  original-parity gap and is planned for `0.5.0-design`, not `0.4.2`.
+  original-parity gap and is the first `0.5.0-design` priority, not a shipped
+  `0.4.2` feature.
 - Soft interruption checkpoints for waypoint optimization; the interrupt
   duration field remains storage/API-surface parity only.
 - Python/Rust binding publication. The Python `cffi` prototype and Rust alpha

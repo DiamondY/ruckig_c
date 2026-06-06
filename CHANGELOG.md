@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.5.0-design - Unreleased
+
+`main` is now on the `0.5.0-design` line after the published `v0.4.2`
+original-parity coverage closeout. This line is for tracking interface design
+and local implementation planning before any stable `0.5.0` release.
+
+Changed:
+
+- Opened the post-`v0.4.2` design line for tracking C ABI design, local
+  tracking implementation planning, and tracking evidence strategy.
+- Keep `v0.4.2` as the latest stable release and original parity
+  coverage/evidence baseline.
+
+Still deferred:
+
+- Tracking public C API and implementation until the `0.5.0-design` API and
+  algorithm plan is accepted.
+- Soft interruption checkpoints, released Python wheels, Rust crate
+  publication, package-manager recipes, cloud/remote calculation, formal
+  Pro/cloud numerical equivalence claims, and upstream baseline upgrades.
+
 ## 0.4.2 - 2026-06-06
 
 `0.4.2` is an original-parity coverage and evidence closeout release for the

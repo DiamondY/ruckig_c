@@ -22,7 +22,8 @@ Historical rewrite plans and release evidence are retained for traceability.
 
 - `release/checklists/` - release checklists by version.
   `release/checklists/0.4.0-alpha.md` retains the alpha evidence, and
-  `release/checklists/0.4.2.md` tracks the active stable release closeout.
+  `release/checklists/0.4.2.md` records the published original-parity
+  coverage/evidence closeout.
 - `release/evidence/verification_report.md` - local and CI verification
   history.
 - `release/evidence/performance_report.md` - performance procedure and release
