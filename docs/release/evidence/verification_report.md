@@ -2695,6 +2695,96 @@ waypoint_c_worst_ns 1.14663e+07
 waypoint_oracle_ratio unavailable
 ```
 
+Final `v0.4.2` publication evidence:
+
+```text
+Final release evidence commit:
+002795293006c8205ade408706dadd70d0567f87
+
+Annotated tag:
+v0.4.2
+
+Tag target commit:
+002795293006c8205ade408706dadd70d0567f87
+
+GitHub Release:
+https://github.com/DiamondY/ruckig_c/releases/tag/v0.4.2
+
+GitHub Release title:
+ruckig_c 0.4.2
+
+Release status:
+Published and marked latest.
+```
+
+Final evidence push CI:
+
+```text
+Run id: 27064800235
+Run URL: https://github.com/DiamondY/ruckig_c/actions/runs/27064800235
+Commit: 002795293006c8205ade408706dadd70d0567f87
+Event: push
+Conclusion: success
+```
+
+Tag push CI:
+
+```text
+Run id: 27064861621
+Run URL: https://github.com/DiamondY/ruckig_c/actions/runs/27064861621
+Ref: v0.4.2
+Commit: 002795293006c8205ade408706dadd70d0567f87
+Conclusion: success
+```
+
+Final manual release-random workflow on the published tag:
+
+```text
+Run id: 27064919699
+Run URL: https://github.com/DiamondY/ruckig_c/actions/runs/27064919699
+Ref: v0.4.2
+Commit: 002795293006c8205ade408706dadd70d0567f87
+Event: workflow_dispatch
+Input: release_random=true
+Conclusion: success
+Manual release random oracle job id: 79883985377
+Manual release random oracle job result: success, 1m 17s
+```
+
+The `Linux Clang performance` job summary from the tag manual workflow
+reported:
+
+```text
+No-waypoint benchmark:
+c_average_ns 726.891
+c_p99_ns 5330
+c_worst_ns 44072
+oracle_average_ns 556.996
+oracle_p99_ns 4228
+oracle_worst_ns 28403
+average_ratio_c_over_oracle 1.30502
+release_threshold_average_ratio 1.5
+
+Waypoint benchmark:
+waypoint_case_count 10
+waypoint_max_dofs 8
+waypoint_max_intermediate_positions 3
+waypoint_c_average_ns 3.52565e+06
+waypoint_c_p99_ns 1.27822e+07
+waypoint_c_worst_ns 1.83234e+07
+waypoint_oracle_ratio unavailable
+```
+
+Post-release `0.5.0-design` transition:
+
+```text
+Commit: f69e4e8d2937b7871f4b70be1ed153743beb4ef4
+Subject: Start 0.5.0 design line
+Run id: 27065118116
+Run URL: https://github.com/DiamondY/ruckig_c/actions/runs/27065118116
+Conclusion: success
+```
+
 ## 2026-06-06 0.4.1 Local Release-Candidate Evidence
 
 The `0.4.1` local release-candidate pass deepened waypoint optimizer evidence
