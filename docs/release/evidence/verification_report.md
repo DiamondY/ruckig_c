@@ -2569,6 +2569,72 @@ docs/design/interrupt_calculation_duration.md records storage-only behavior in
 fallback, and hard/soft real-time claims.
 ```
 
+Remote GitHub Actions push CI for the `0.4.2` release-candidate commit:
+
+```text
+Run id: 27063738903
+Run URL: https://github.com/DiamondY/ruckig_c/actions/runs/27063738903
+Commit: e055e1e789f04e34f1a7f6a1e9e854d1a3690b51
+Event: push
+Conclusion: success
+Created: 2026-06-06T13:35:29Z
+Completed: 2026-06-06T13:37:07Z
+```
+
+Successful push CI jobs:
+
+```text
+Windows clang-cl C-only
+Windows clang-cl shared C-only
+Windows clang oracle
+Linux GCC C-only
+Linux Clang oracle
+macOS Clang C-only
+Windows MinGW static consumer
+Windows MinGW DLL consumer
+Linux Clang ASan UBSan
+Linux Valgrind
+Linux Clang performance
+Linux exported symbols
+Windows exported symbols
+macOS exported symbols
+Python prototype smoke (Windows)
+Python prototype smoke (Linux)
+Python prototype smoke (macOS)
+Rust alpha wrapper smoke
+```
+
+Push CI artifact metadata:
+
+```text
+linux-performance: artifact id 7454827710, size 1082 bytes.
+Windows exported symbols: artifact id 7454824233, size 4364 bytes.
+Linux exported symbols: artifact id 7454821663, size 4531 bytes.
+macOS exported symbols: artifact id 7454821447, size 2455 bytes.
+```
+
+Downloaded artifact inspection:
+
+```text
+The artifacts were downloaded with gh run download 27063738903 into
+out\gh-artifacts\27063738903 before local cleanup.
+
+Linux public exported-symbol comparison: status clean, strict_public_abi ON,
+117 current symbols, 127 historical baseline symbols, 117 approved public
+symbols, 0 missing public symbols, 0 added public symbols, 0 removed public
+symbols, 0 unapproved exported symbols, and 61 historical baseline internal
+symbols intentionally hidden from the current public-only shared library.
+
+Windows public exported-symbol comparison: status clean, strict_public_abi ON,
+117 current symbols, 66 historical baseline symbols, 117 approved public
+symbols, 0 missing public symbols, 0 added public symbols, 0 removed public
+symbols, and 0 unapproved exported symbols.
+
+macOS public symbol allowlist verification: status clean. No v0.2.5 macOS
+historical baseline exists, so the macOS exported-symbol job records bootstrap
+evidence.
+```
+
 ## 2026-06-06 0.4.1 Local Release-Candidate Evidence
 
 The `0.4.1` local release-candidate pass deepened waypoint optimizer evidence

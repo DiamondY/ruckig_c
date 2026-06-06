@@ -1172,6 +1172,59 @@ There is no C++ oracle ratio for this waypoint corpus because the frozen
 Ruckig Community `0.17.3` baseline does not contain a local global waypoint
 optimizer. This run is C-only trend evidence for the local optimizer.
 
+## 2026-06-06 Linux 0.4.2 Push CI No-Waypoint Run
+
+- Source: GitHub Actions push CI run `27063738903`, job `Linux Clang
+  performance`, artifact `7454827710`.
+- Command:
+  `./build-perf/ruckig_c_performance_benchmark --samples 10000 --seed 1 --enforce-threshold`.
+- OS: Linux.
+- Kernel: `Linux runnervm3jyl0 6.17.0-1015-azure #15~24.04.1-Ubuntu`.
+- CPU identifier: `AMD EPYC 9V74 80-Core Processor`.
+- C compiler: `Ubuntu clang version 18.1.3 (1ubuntu1)`.
+- C++ compiler: `Ubuntu clang version 18.1.3 (1ubuntu1)`.
+- CMake build type: Release.
+- Generator: Ninja.
+- Seed: `1`.
+- Samples: `10000`.
+- Release threshold: average C/oracle ratio `<= 1.5`.
+
+| Metric | C | C++ oracle |
+| --- | ---: | ---: |
+| Average | 754.922 ns | 595.274 ns |
+| p99 | 5658 ns | 4486 ns |
+| Worst | 30075 ns | 49553 ns |
+
+Average C/oracle ratio: `1.26819`.
+
+## 2026-06-06 Linux 0.4.2 Push CI Waypoint Run
+
+- Source: GitHub Actions push CI run `27063738903`, job `Linux Clang
+  performance`, artifact `7454827710`.
+- Command:
+  `./build-perf/ruckig_c_performance_benchmark --samples 10000 --seed 1 --waypoints`.
+- OS: Linux.
+- Kernel: `Linux runnervm3jyl0 6.17.0-1015-azure #15~24.04.1-Ubuntu`.
+- CPU identifier: `AMD EPYC 9V74 80-Core Processor`.
+- C compiler: `Ubuntu clang version 18.1.3 (1ubuntu1)`.
+- CMake build type: Release.
+- Generator: Ninja.
+- Seed: `1`.
+- Samples: `10000`.
+- Waypoint case count: `10`.
+- Max DoF: `8`.
+- Max intermediate positions: `3`.
+
+| Metric | C waypoint optimizer |
+| --- | ---: |
+| Average | 3.63244e+06 ns |
+| p99 | 1.31755e+07 ns |
+| Worst | 1.8655e+07 ns |
+
+There is no C++ oracle ratio for this waypoint corpus because the frozen
+Ruckig Community `0.17.3` baseline does not contain a local global waypoint
+optimizer. This run is C-only trend evidence for the local optimizer.
+
 ### Windows clang release
 
 ```text
