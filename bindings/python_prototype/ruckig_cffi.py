@@ -17,6 +17,10 @@ ffi.cdef(
     typedef struct ruckig_input ruckig_input_t;
     typedef struct ruckig_output ruckig_output_t;
     typedef struct ruckig_trajectory ruckig_trajectory_t;
+    typedef struct ruckig_tracking ruckig_tracking_t;
+    typedef struct ruckig_target_state ruckig_target_state_t;
+    typedef struct ruckig_target_state_sequence ruckig_target_state_sequence_t;
+    typedef struct ruckig_tracking_output_sequence ruckig_tracking_output_sequence_t;
     typedef int ruckig_result_t;
     typedef _Bool bool;
 
@@ -194,6 +198,67 @@ ffi.cdef(
         size_t capacity,
         size_t* written_waypoints
     );
+
+    ruckig_result_t ruckig_tracking_create(ruckig_tracking_t** tracking, size_t dofs, double delta_time);
+    void ruckig_tracking_destroy(ruckig_tracking_t* tracking);
+    size_t ruckig_tracking_get_dof_count(const ruckig_tracking_t* tracking);
+    double ruckig_tracking_get_delta_time(const ruckig_tracking_t* tracking);
+    ruckig_result_t ruckig_tracking_set_mode(ruckig_tracking_t* tracking, int mode);
+    int ruckig_tracking_get_mode(const ruckig_tracking_t* tracking);
+    ruckig_result_t ruckig_tracking_set_reactiveness(ruckig_tracking_t* tracking, double reactiveness);
+    double ruckig_tracking_get_reactiveness(const ruckig_tracking_t* tracking);
+    ruckig_result_t ruckig_tracking_set_look_ahead_cycles(ruckig_tracking_t* tracking, size_t look_ahead_cycles);
+    size_t ruckig_tracking_get_look_ahead_cycles(const ruckig_tracking_t* tracking);
+    ruckig_result_t ruckig_tracking_update(
+        ruckig_tracking_t* tracking,
+        const ruckig_target_state_t* target_state,
+        const ruckig_input_t* input,
+        ruckig_output_t* output
+    );
+    ruckig_result_t ruckig_tracking_calculate_sequence(
+        ruckig_tracking_t* tracking,
+        const ruckig_target_state_sequence_t* target_sequence,
+        const ruckig_input_t* input,
+        ruckig_tracking_output_sequence_t* output_sequence
+    );
+
+    ruckig_result_t ruckig_target_state_create(ruckig_target_state_t** target_state, size_t dofs);
+    void ruckig_target_state_destroy(ruckig_target_state_t* target_state);
+    size_t ruckig_target_state_get_dof_count(const ruckig_target_state_t* target_state);
+    double* ruckig_target_state_position_data(ruckig_target_state_t* target_state);
+    double* ruckig_target_state_velocity_data(ruckig_target_state_t* target_state);
+    double* ruckig_target_state_acceleration_data(ruckig_target_state_t* target_state);
+    const double* ruckig_target_state_position_const_data(const ruckig_target_state_t* target_state);
+    const double* ruckig_target_state_velocity_const_data(const ruckig_target_state_t* target_state);
+    const double* ruckig_target_state_acceleration_const_data(const ruckig_target_state_t* target_state);
+
+    ruckig_result_t ruckig_target_state_sequence_create(ruckig_target_state_sequence_t** sequence, size_t dofs, size_t capacity);
+    void ruckig_target_state_sequence_destroy(ruckig_target_state_sequence_t* sequence);
+    size_t ruckig_target_state_sequence_get_dof_count(const ruckig_target_state_sequence_t* sequence);
+    size_t ruckig_target_state_sequence_get_capacity(const ruckig_target_state_sequence_t* sequence);
+    size_t ruckig_target_state_sequence_get_count(const ruckig_target_state_sequence_t* sequence);
+    ruckig_result_t ruckig_target_state_sequence_set_count(ruckig_target_state_sequence_t* sequence, size_t count);
+    void ruckig_target_state_sequence_clear(ruckig_target_state_sequence_t* sequence);
+    double* ruckig_target_state_sequence_position_data(ruckig_target_state_sequence_t* sequence);
+    double* ruckig_target_state_sequence_velocity_data(ruckig_target_state_sequence_t* sequence);
+    double* ruckig_target_state_sequence_acceleration_data(ruckig_target_state_sequence_t* sequence);
+    const double* ruckig_target_state_sequence_position_const_data(const ruckig_target_state_sequence_t* sequence);
+    const double* ruckig_target_state_sequence_velocity_const_data(const ruckig_target_state_sequence_t* sequence);
+    const double* ruckig_target_state_sequence_acceleration_const_data(const ruckig_target_state_sequence_t* sequence);
+
+    ruckig_result_t ruckig_tracking_output_sequence_create(ruckig_tracking_output_sequence_t** sequence, size_t dofs, size_t capacity);
+    void ruckig_tracking_output_sequence_destroy(ruckig_tracking_output_sequence_t* sequence);
+    size_t ruckig_tracking_output_sequence_get_dof_count(const ruckig_tracking_output_sequence_t* sequence);
+    size_t ruckig_tracking_output_sequence_get_capacity(const ruckig_tracking_output_sequence_t* sequence);
+    size_t ruckig_tracking_output_sequence_get_count(const ruckig_tracking_output_sequence_t* sequence);
+    void ruckig_tracking_output_sequence_clear(ruckig_tracking_output_sequence_t* sequence);
+    const double* ruckig_tracking_output_sequence_new_position_const_data(const ruckig_tracking_output_sequence_t* sequence);
+    const double* ruckig_tracking_output_sequence_new_velocity_const_data(const ruckig_tracking_output_sequence_t* sequence);
+    const double* ruckig_tracking_output_sequence_new_acceleration_const_data(const ruckig_tracking_output_sequence_t* sequence);
+    const double* ruckig_tracking_output_sequence_new_jerk_const_data(const ruckig_tracking_output_sequence_t* sequence);
+    const double* ruckig_tracking_output_sequence_time_const_data(const ruckig_tracking_output_sequence_t* sequence);
+    const size_t* ruckig_tracking_output_sequence_section_const_data(const ruckig_tracking_output_sequence_t* sequence);
+    const ruckig_result_t* ruckig_tracking_output_sequence_result_const_data(const ruckig_tracking_output_sequence_t* sequence);
     """
 )
 
@@ -226,6 +291,11 @@ class Synchronization(enum.IntEnum):
 class DurationDiscretization(enum.IntEnum):
     CONTINUOUS = 0
     DISCRETE = 1
+
+
+class TrackingMode(enum.IntEnum):
+    FAST = 0
+    OPTIMIZED = 1
 
 
 @dataclass(frozen=True)
@@ -489,6 +559,200 @@ class Ruckig(_Handle):
             "ruckig_filter_intermediate_positions",
         )
         return _unflatten_points(filtered, int(written[0]), self.dofs)
+
+
+class TargetState(_Handle):
+    _destroy_name = "ruckig_target_state_destroy"
+
+    def __init__(self, dofs: int):
+        out = ffi.new("ruckig_target_state_t**")
+        _result(_library().ruckig_target_state_create(out, dofs), "ruckig_target_state_create")
+        super().__init__(out[0], dofs)
+
+    def _set_vector(self, accessor: str, values: Iterable[float]) -> None:
+        _copy_in(getattr(_library(), accessor)(self.ptr), values, self.dofs)
+
+    def set_position(self, values: Iterable[float]) -> None:
+        self._set_vector("ruckig_target_state_position_data", values)
+
+    def set_velocity(self, values: Iterable[float]) -> None:
+        self._set_vector("ruckig_target_state_velocity_data", values)
+
+    def set_acceleration(self, values: Iterable[float]) -> None:
+        self._set_vector("ruckig_target_state_acceleration_data", values)
+
+    def position(self) -> List[float]:
+        return _copy_out(_library().ruckig_target_state_position_const_data(self.ptr), self.dofs)
+
+    def velocity(self) -> List[float]:
+        return _copy_out(_library().ruckig_target_state_velocity_const_data(self.ptr), self.dofs)
+
+    def acceleration(self) -> List[float]:
+        return _copy_out(_library().ruckig_target_state_acceleration_const_data(self.ptr), self.dofs)
+
+
+class TargetStateSequence(_Handle):
+    _destroy_name = "ruckig_target_state_sequence_destroy"
+
+    def __init__(self, dofs: int, capacity: int):
+        out = ffi.new("ruckig_target_state_sequence_t**")
+        _result(
+            _library().ruckig_target_state_sequence_create(out, dofs, int(capacity)),
+            "ruckig_target_state_sequence_create",
+        )
+        super().__init__(out[0], dofs)
+        self._capacity = int(capacity)
+
+    @property
+    def capacity(self) -> int:
+        return int(_library().ruckig_target_state_sequence_get_capacity(self.ptr))
+
+    @property
+    def count(self) -> int:
+        return int(_library().ruckig_target_state_sequence_get_count(self.ptr))
+
+    def set_count(self, count: int) -> None:
+        _result(
+            _library().ruckig_target_state_sequence_set_count(self.ptr, int(count)),
+            "ruckig_target_state_sequence_set_count",
+        )
+
+    def clear(self) -> None:
+        _library().ruckig_target_state_sequence_clear(self.ptr)
+
+    def set_state(self, index: int, position: Iterable[float], velocity: Iterable[float], acceleration: Iterable[float]) -> None:
+        if index < 0 or index >= self.capacity:
+            raise ValueError(f"target state index out of range: {index}")
+        offset = int(index) * self.dofs
+        position_values = list(position)
+        velocity_values = list(velocity)
+        acceleration_values = list(acceleration)
+        if len(position_values) != self.dofs or len(velocity_values) != self.dofs or len(acceleration_values) != self.dofs:
+            raise ValueError(f"expected {self.dofs} values for position, velocity, and acceleration")
+        pos = _library().ruckig_target_state_sequence_position_data(self.ptr)
+        vel = _library().ruckig_target_state_sequence_velocity_data(self.ptr)
+        acc = _library().ruckig_target_state_sequence_acceleration_data(self.ptr)
+        for dof in range(self.dofs):
+            pos[offset + dof] = float(position_values[dof])
+            vel[offset + dof] = float(velocity_values[dof])
+            acc[offset + dof] = float(acceleration_values[dof])
+
+    def positions(self) -> List[List[float]]:
+        return _unflatten_points(
+            _library().ruckig_target_state_sequence_position_const_data(self.ptr),
+            self.count,
+            self.dofs,
+        )
+
+
+class TrackingOutputSequence(_Handle):
+    _destroy_name = "ruckig_tracking_output_sequence_destroy"
+
+    def __init__(self, dofs: int, capacity: int):
+        out = ffi.new("ruckig_tracking_output_sequence_t**")
+        _result(
+            _library().ruckig_tracking_output_sequence_create(out, dofs, int(capacity)),
+            "ruckig_tracking_output_sequence_create",
+        )
+        super().__init__(out[0], dofs)
+        self._capacity = int(capacity)
+
+    @property
+    def capacity(self) -> int:
+        return int(_library().ruckig_tracking_output_sequence_get_capacity(self.ptr))
+
+    @property
+    def count(self) -> int:
+        return int(_library().ruckig_tracking_output_sequence_get_count(self.ptr))
+
+    def clear(self) -> None:
+        _library().ruckig_tracking_output_sequence_clear(self.ptr)
+
+    def new_positions(self) -> List[List[float]]:
+        return _unflatten_points(
+            _library().ruckig_tracking_output_sequence_new_position_const_data(self.ptr),
+            self.count,
+            self.dofs,
+        )
+
+    def new_velocities(self) -> List[List[float]]:
+        return _unflatten_points(
+            _library().ruckig_tracking_output_sequence_new_velocity_const_data(self.ptr),
+            self.count,
+            self.dofs,
+        )
+
+    def times(self) -> List[float]:
+        return _copy_out(_library().ruckig_tracking_output_sequence_time_const_data(self.ptr), self.count)
+
+    def results(self) -> List[Result]:
+        ptr = _library().ruckig_tracking_output_sequence_result_const_data(self.ptr)
+        return [Result(int(ptr[index])) for index in range(self.count)]
+
+
+class Tracking(_Handle):
+    _destroy_name = "ruckig_tracking_destroy"
+
+    def __init__(self, dofs: int, delta_time: float):
+        out = ffi.new("ruckig_tracking_t**")
+        _result(
+            _library().ruckig_tracking_create(out, dofs, float(delta_time)),
+            "ruckig_tracking_create",
+        )
+        super().__init__(out[0], dofs)
+
+    @property
+    def delta_time(self) -> float:
+        return float(_library().ruckig_tracking_get_delta_time(self.ptr))
+
+    @property
+    def mode(self) -> TrackingMode:
+        return TrackingMode(int(_library().ruckig_tracking_get_mode(self.ptr)))
+
+    def set_mode(self, mode: TrackingMode) -> None:
+        _result(_library().ruckig_tracking_set_mode(self.ptr, int(mode)), "ruckig_tracking_set_mode")
+
+    @property
+    def reactiveness(self) -> float:
+        return float(_library().ruckig_tracking_get_reactiveness(self.ptr))
+
+    def set_reactiveness(self, reactiveness: float) -> None:
+        _result(
+            _library().ruckig_tracking_set_reactiveness(self.ptr, float(reactiveness)),
+            "ruckig_tracking_set_reactiveness",
+        )
+
+    @property
+    def look_ahead_cycles(self) -> int:
+        return int(_library().ruckig_tracking_get_look_ahead_cycles(self.ptr))
+
+    def set_look_ahead_cycles(self, look_ahead_cycles: int) -> None:
+        _result(
+            _library().ruckig_tracking_set_look_ahead_cycles(self.ptr, int(look_ahead_cycles)),
+            "ruckig_tracking_set_look_ahead_cycles",
+        )
+
+    def update(self, target_state: TargetState, input_: "Input", output: "Output") -> Result:
+        return _result(
+            _library().ruckig_tracking_update(self.ptr, target_state.ptr, input_.ptr, output.ptr),
+            "ruckig_tracking_update",
+        )
+
+    def calculate_sequence(
+        self,
+        target_sequence: TargetStateSequence,
+        input_: "Input",
+        output_sequence: TrackingOutputSequence,
+    ) -> Result:
+        return _result(
+            _library().ruckig_tracking_calculate_sequence(
+                self.ptr,
+                target_sequence.ptr,
+                input_.ptr,
+                output_sequence.ptr,
+            ),
+            "ruckig_tracking_calculate_sequence",
+        )
 
 
 class Input(_Handle):

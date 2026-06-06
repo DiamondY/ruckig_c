@@ -219,18 +219,26 @@ before `0.5.0-design` and a patch release, not a feature release.
 
 ## 0.5.0 Design Entry
 
-`main` now carries `0.5.0-design - Unreleased`. The default next line is
-tracking design and local implementation planning. Public C API additions are
-allowed only after a dedicated tracking API decision updates the public header,
-ABI allowlist, changelog, and API compatibility notes.
+`main` now carries `0.5.0-design - Unreleased`. The accepted first alpha scope
+is a local tracking interface over the public C runtime. This is alpha evidence
+for a future stable `v0.5.0`; `v0.4.2` remains the latest stable release until
+a deliberate release closeout.
 
-1. Design and implement a local tracking interface over the public C runtime.
-2. Add tracking fixed examples, local invariants, lag/error metrics, and
-   constraint sampling evidence.
-3. Extend the Python `cffi` prototype and Rust alpha wrapper only after the C
-   tracking ABI design is accepted.
-4. Continue soft-interruption implementation design without coupling it to the
-   first tracking implementation.
-5. Keep cloud/remote calculation, package-manager recipes, formal Pro/cloud
-   numerical equivalence claims, and upstream baseline upgrades outside the
-   default `0.5.0-design` scope unless separately accepted.
+- The public C tracking ABI is intentionally added on the design line:
+  opaque tracking handles, target-state handles, target-state sequences,
+  tracking output sequences, online update, and offline sequence calculation.
+- Local `Fast` mode is implemented with deterministic constant-acceleration
+  lookahead. `Optimized` mode is declared for API shape parity but returns
+  `RUCKIG_ERROR_UNSUPPORTED` in the first alpha.
+- Tracking evidence is local and deterministic: API lifecycle and validation
+  tests, online/offline C tests, quality smoke, no-allocation smoke, C examples,
+  Python `cffi` prototype smoke, and Rust alpha wrapper smoke.
+- ABI review for this line uses `docs/abi/public-symbols.txt`,
+  `docs/abi/public-symbol-exceptions.txt`, and artifact paths under
+  `artifacts/abi/0.5.0-alpha`.
+- Soft-interruption implementation design continues separately and is not
+  coupled to the first tracking implementation.
+- Cloud/remote calculation, package-manager recipes, formal Pro/cloud
+  numerical equivalence claims, stable Python wheels, Rust crate publication,
+  and upstream baseline upgrades stay outside the default `0.5.0-design` scope
+  unless separately accepted.

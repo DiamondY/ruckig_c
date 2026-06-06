@@ -24,6 +24,26 @@ struct TrajectoryRaw {
 }
 
 #[repr(C)]
+struct TrackingRaw {
+    _private: [u8; 0],
+}
+
+#[repr(C)]
+struct TargetStateRaw {
+    _private: [u8; 0],
+}
+
+#[repr(C)]
+struct TargetStateSequenceRaw {
+    _private: [u8; 0],
+}
+
+#[repr(C)]
+struct TrackingOutputSequenceRaw {
+    _private: [u8; 0],
+}
+
+#[repr(C)]
 #[derive(Clone, Copy)]
 struct CBound {
     min_position: f64,
@@ -60,6 +80,13 @@ pub enum Synchronization {
 pub enum DurationDiscretization {
     Continuous = 0,
     Discrete = 1,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[repr(i32)]
+pub enum TrackingMode {
+    Fast = 0,
+    Optimized = 1,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -285,6 +312,87 @@ unsafe extern "C" {
         time: *mut f64,
         found: *mut bool,
     ) -> i32;
+
+    fn ruckig_tracking_create(
+        tracking: *mut *mut TrackingRaw,
+        dofs: usize,
+        delta_time: f64,
+    ) -> i32;
+    fn ruckig_tracking_destroy(tracking: *mut TrackingRaw);
+    fn ruckig_tracking_get_delta_time(tracking: *const TrackingRaw) -> f64;
+    fn ruckig_tracking_set_mode(tracking: *mut TrackingRaw, mode: i32) -> i32;
+    fn ruckig_tracking_get_mode(tracking: *const TrackingRaw) -> i32;
+    fn ruckig_tracking_set_reactiveness(tracking: *mut TrackingRaw, reactiveness: f64) -> i32;
+    fn ruckig_tracking_get_reactiveness(tracking: *const TrackingRaw) -> f64;
+    fn ruckig_tracking_set_look_ahead_cycles(
+        tracking: *mut TrackingRaw,
+        look_ahead_cycles: usize,
+    ) -> i32;
+    fn ruckig_tracking_get_look_ahead_cycles(tracking: *const TrackingRaw) -> usize;
+    fn ruckig_tracking_update(
+        tracking: *mut TrackingRaw,
+        target_state: *const TargetStateRaw,
+        input: *const InputRaw,
+        output: *mut OutputRaw,
+    ) -> i32;
+    fn ruckig_tracking_calculate_sequence(
+        tracking: *mut TrackingRaw,
+        target_sequence: *const TargetStateSequenceRaw,
+        input: *const InputRaw,
+        output_sequence: *mut TrackingOutputSequenceRaw,
+    ) -> i32;
+
+    fn ruckig_target_state_create(target_state: *mut *mut TargetStateRaw, dofs: usize) -> i32;
+    fn ruckig_target_state_destroy(target_state: *mut TargetStateRaw);
+    fn ruckig_target_state_position_data(target_state: *mut TargetStateRaw) -> *mut f64;
+    fn ruckig_target_state_velocity_data(target_state: *mut TargetStateRaw) -> *mut f64;
+    fn ruckig_target_state_acceleration_data(target_state: *mut TargetStateRaw) -> *mut f64;
+
+    fn ruckig_target_state_sequence_create(
+        sequence: *mut *mut TargetStateSequenceRaw,
+        dofs: usize,
+        capacity: usize,
+    ) -> i32;
+    fn ruckig_target_state_sequence_destroy(sequence: *mut TargetStateSequenceRaw);
+    fn ruckig_target_state_sequence_get_capacity(
+        sequence: *const TargetStateSequenceRaw,
+    ) -> usize;
+    fn ruckig_target_state_sequence_get_count(sequence: *const TargetStateSequenceRaw) -> usize;
+    fn ruckig_target_state_sequence_set_count(
+        sequence: *mut TargetStateSequenceRaw,
+        count: usize,
+    ) -> i32;
+    fn ruckig_target_state_sequence_position_data(
+        sequence: *mut TargetStateSequenceRaw,
+    ) -> *mut f64;
+    fn ruckig_target_state_sequence_velocity_data(
+        sequence: *mut TargetStateSequenceRaw,
+    ) -> *mut f64;
+    fn ruckig_target_state_sequence_acceleration_data(
+        sequence: *mut TargetStateSequenceRaw,
+    ) -> *mut f64;
+
+    fn ruckig_tracking_output_sequence_create(
+        sequence: *mut *mut TrackingOutputSequenceRaw,
+        dofs: usize,
+        capacity: usize,
+    ) -> i32;
+    fn ruckig_tracking_output_sequence_destroy(sequence: *mut TrackingOutputSequenceRaw);
+    fn ruckig_tracking_output_sequence_get_capacity(
+        sequence: *const TrackingOutputSequenceRaw,
+    ) -> usize;
+    fn ruckig_tracking_output_sequence_get_count(
+        sequence: *const TrackingOutputSequenceRaw,
+    ) -> usize;
+    fn ruckig_tracking_output_sequence_new_position_const_data(
+        sequence: *const TrackingOutputSequenceRaw,
+    ) -> *const f64;
+    fn ruckig_tracking_output_sequence_time_const_data(
+        sequence: *const TrackingOutputSequenceRaw,
+    ) -> *const f64;
+    fn ruckig_tracking_output_sequence_result_const_data(
+        sequence: *const TrackingOutputSequenceRaw,
+    ) -> *const i32;
 }
 
 fn check_code(code: i32, operation: &'static str) -> Result<RuckigResult> {
@@ -1072,6 +1180,315 @@ impl Drop for Trajectory {
     }
 }
 
+pub struct TargetState {
+    raw: NonNull<TargetStateRaw>,
+    dofs: usize,
+}
+
+impl TargetState {
+    pub fn new(dofs: usize) -> Result<Self> {
+        let mut raw = std::ptr::null_mut();
+        check_code(
+            unsafe { ruckig_target_state_create(&mut raw, dofs) },
+            "ruckig_target_state_create",
+        )?;
+        Ok(Self {
+            raw: NonNull::new(raw).ok_or(Error {
+                code: -1,
+                operation: "ruckig_target_state_create",
+            })?,
+            dofs,
+        })
+    }
+
+    fn set_vector(
+        &mut self,
+        values: &[f64],
+        accessor: unsafe extern "C" fn(*mut TargetStateRaw) -> *mut f64,
+        operation: &'static str,
+    ) -> Result<()> {
+        require_len(values, self.dofs, operation)?;
+        unsafe { write_data(accessor(self.raw.as_ptr()), values, operation) }
+    }
+
+    pub fn set_position(&mut self, values: &[f64]) -> Result<()> {
+        self.set_vector(values, ruckig_target_state_position_data, "set_target_position")
+    }
+
+    pub fn set_velocity(&mut self, values: &[f64]) -> Result<()> {
+        self.set_vector(values, ruckig_target_state_velocity_data, "set_target_velocity")
+    }
+
+    pub fn set_acceleration(&mut self, values: &[f64]) -> Result<()> {
+        self.set_vector(
+            values,
+            ruckig_target_state_acceleration_data,
+            "set_target_acceleration",
+        )
+    }
+}
+
+impl Drop for TargetState {
+    fn drop(&mut self) {
+        unsafe { ruckig_target_state_destroy(self.raw.as_ptr()) };
+    }
+}
+
+pub struct TargetStateSequence {
+    raw: NonNull<TargetStateSequenceRaw>,
+    dofs: usize,
+}
+
+impl TargetStateSequence {
+    pub fn new(dofs: usize, capacity: usize) -> Result<Self> {
+        let mut raw = std::ptr::null_mut();
+        check_code(
+            unsafe { ruckig_target_state_sequence_create(&mut raw, dofs, capacity) },
+            "ruckig_target_state_sequence_create",
+        )?;
+        Ok(Self {
+            raw: NonNull::new(raw).ok_or(Error {
+                code: -1,
+                operation: "ruckig_target_state_sequence_create",
+            })?,
+            dofs,
+        })
+    }
+
+    pub fn capacity(&self) -> usize {
+        unsafe { ruckig_target_state_sequence_get_capacity(self.raw.as_ptr()) }
+    }
+
+    pub fn count(&self) -> usize {
+        unsafe { ruckig_target_state_sequence_get_count(self.raw.as_ptr()) }
+    }
+
+    pub fn set_count(&mut self, count: usize) -> Result<()> {
+        check_code(
+            unsafe { ruckig_target_state_sequence_set_count(self.raw.as_ptr(), count) },
+            "ruckig_target_state_sequence_set_count",
+        )?;
+        Ok(())
+    }
+
+    pub fn set_state(
+        &mut self,
+        index: usize,
+        position: &[f64],
+        velocity: &[f64],
+        acceleration: &[f64],
+    ) -> Result<()> {
+        require_len(position, self.dofs, "target_sequence_set_position")?;
+        require_len(velocity, self.dofs, "target_sequence_set_velocity")?;
+        require_len(acceleration, self.dofs, "target_sequence_set_acceleration")?;
+        if index >= self.capacity() {
+            return Err(Error {
+                code: -100,
+                operation: "target_sequence_set_state",
+            });
+        }
+        let offset = index * self.dofs;
+        unsafe {
+            let position_ptr = ruckig_target_state_sequence_position_data(self.raw.as_ptr());
+            let velocity_ptr = ruckig_target_state_sequence_velocity_data(self.raw.as_ptr());
+            let acceleration_ptr = ruckig_target_state_sequence_acceleration_data(self.raw.as_ptr());
+            write_data(position_ptr.add(offset), position, "target_sequence_set_position")?;
+            write_data(velocity_ptr.add(offset), velocity, "target_sequence_set_velocity")?;
+            write_data(
+                acceleration_ptr.add(offset),
+                acceleration,
+                "target_sequence_set_acceleration",
+            )?;
+        }
+        Ok(())
+    }
+}
+
+impl Drop for TargetStateSequence {
+    fn drop(&mut self) {
+        unsafe { ruckig_target_state_sequence_destroy(self.raw.as_ptr()) };
+    }
+}
+
+pub struct TrackingOutputSequence {
+    raw: NonNull<TrackingOutputSequenceRaw>,
+    dofs: usize,
+}
+
+impl TrackingOutputSequence {
+    pub fn new(dofs: usize, capacity: usize) -> Result<Self> {
+        let mut raw = std::ptr::null_mut();
+        check_code(
+            unsafe { ruckig_tracking_output_sequence_create(&mut raw, dofs, capacity) },
+            "ruckig_tracking_output_sequence_create",
+        )?;
+        Ok(Self {
+            raw: NonNull::new(raw).ok_or(Error {
+                code: -1,
+                operation: "ruckig_tracking_output_sequence_create",
+            })?,
+            dofs,
+        })
+    }
+
+    pub fn capacity(&self) -> usize {
+        unsafe { ruckig_tracking_output_sequence_get_capacity(self.raw.as_ptr()) }
+    }
+
+    pub fn count(&self) -> usize {
+        unsafe { ruckig_tracking_output_sequence_get_count(self.raw.as_ptr()) }
+    }
+
+    pub fn new_positions_flat(&self) -> Vec<f64> {
+        unsafe {
+            slice::from_raw_parts(
+                ruckig_tracking_output_sequence_new_position_const_data(self.raw.as_ptr()),
+                self.count() * self.dofs,
+            )
+        }
+        .to_vec()
+    }
+
+    pub fn times(&self) -> Vec<f64> {
+        unsafe {
+            slice::from_raw_parts(
+                ruckig_tracking_output_sequence_time_const_data(self.raw.as_ptr()),
+                self.count(),
+            )
+        }
+        .to_vec()
+    }
+
+    pub fn result_codes(&self) -> Vec<i32> {
+        unsafe {
+            slice::from_raw_parts(
+                ruckig_tracking_output_sequence_result_const_data(self.raw.as_ptr()),
+                self.count(),
+            )
+        }
+        .to_vec()
+    }
+}
+
+impl Drop for TrackingOutputSequence {
+    fn drop(&mut self) {
+        unsafe { ruckig_tracking_output_sequence_destroy(self.raw.as_ptr()) };
+    }
+}
+
+pub struct Tracking {
+    raw: NonNull<TrackingRaw>,
+    dofs: usize,
+}
+
+impl Tracking {
+    pub fn new(dofs: usize, delta_time: f64) -> Result<Self> {
+        let mut raw = std::ptr::null_mut();
+        check_code(
+            unsafe { ruckig_tracking_create(&mut raw, dofs, delta_time) },
+            "ruckig_tracking_create",
+        )?;
+        Ok(Self {
+            raw: NonNull::new(raw).ok_or(Error {
+                code: -1,
+                operation: "ruckig_tracking_create",
+            })?,
+            dofs,
+        })
+    }
+
+    pub fn dofs(&self) -> usize {
+        self.dofs
+    }
+
+    pub fn delta_time(&self) -> f64 {
+        unsafe { ruckig_tracking_get_delta_time(self.raw.as_ptr()) }
+    }
+
+    pub fn mode(&self) -> TrackingMode {
+        match unsafe { ruckig_tracking_get_mode(self.raw.as_ptr()) } {
+            1 => TrackingMode::Optimized,
+            _ => TrackingMode::Fast,
+        }
+    }
+
+    pub fn set_mode(&mut self, mode: TrackingMode) -> Result<()> {
+        check_code(
+            unsafe { ruckig_tracking_set_mode(self.raw.as_ptr(), mode as i32) },
+            "ruckig_tracking_set_mode",
+        )?;
+        Ok(())
+    }
+
+    pub fn reactiveness(&self) -> f64 {
+        unsafe { ruckig_tracking_get_reactiveness(self.raw.as_ptr()) }
+    }
+
+    pub fn set_reactiveness(&mut self, reactiveness: f64) -> Result<()> {
+        check_code(
+            unsafe { ruckig_tracking_set_reactiveness(self.raw.as_ptr(), reactiveness) },
+            "ruckig_tracking_set_reactiveness",
+        )?;
+        Ok(())
+    }
+
+    pub fn look_ahead_cycles(&self) -> usize {
+        unsafe { ruckig_tracking_get_look_ahead_cycles(self.raw.as_ptr()) }
+    }
+
+    pub fn set_look_ahead_cycles(&mut self, cycles: usize) -> Result<()> {
+        check_code(
+            unsafe { ruckig_tracking_set_look_ahead_cycles(self.raw.as_ptr(), cycles) },
+            "ruckig_tracking_set_look_ahead_cycles",
+        )?;
+        Ok(())
+    }
+
+    pub fn update(
+        &mut self,
+        target_state: &TargetState,
+        input: &InputParameter,
+        output: &mut OutputParameter,
+    ) -> Result<RuckigResult> {
+        check_code(
+            unsafe {
+                ruckig_tracking_update(
+                    self.raw.as_ptr(),
+                    target_state.raw.as_ptr(),
+                    input.raw.as_ptr(),
+                    output.raw.as_ptr(),
+                )
+            },
+            "ruckig_tracking_update",
+        )
+    }
+
+    pub fn calculate_sequence(
+        &mut self,
+        target_sequence: &TargetStateSequence,
+        input: &InputParameter,
+        output_sequence: &mut TrackingOutputSequence,
+    ) -> Result<RuckigResult> {
+        check_code(
+            unsafe {
+                ruckig_tracking_calculate_sequence(
+                    self.raw.as_ptr(),
+                    target_sequence.raw.as_ptr(),
+                    input.raw.as_ptr(),
+                    output_sequence.raw.as_ptr(),
+                )
+            },
+            "ruckig_tracking_calculate_sequence",
+        )
+    }
+}
+
+impl Drop for Tracking {
+    fn drop(&mut self) {
+        unsafe { ruckig_tracking_destroy(self.raw.as_ptr()) };
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1090,6 +1507,19 @@ mod tests {
         input.set_max_acceleration(&[2.0])?;
         input.set_max_jerk(&[4.0])?;
         input.set_intermediate_positions_flat(&[1.0], 1)?;
+        Ok(())
+    }
+
+    fn configure_tracking_input(input: &mut InputParameter) -> Result<()> {
+        input.set_current_position(&[0.0])?;
+        input.set_current_velocity(&[0.0])?;
+        input.set_current_acceleration(&[0.0])?;
+        input.set_target_position(&[0.0])?;
+        input.set_target_velocity(&[0.0])?;
+        input.set_target_acceleration(&[0.0])?;
+        input.set_max_velocity(&[1.0])?;
+        input.set_max_acceleration(&[2.0])?;
+        input.set_max_jerk(&[5.0])?;
         Ok(())
     }
 
@@ -1238,6 +1668,78 @@ mod tests {
         assert_eq!(output.new_jerk().len(), 1);
         assert!(!output.was_calculation_interrupted());
         assert!(output.calculation_duration() >= 0.0);
+        Ok(())
+    }
+
+    #[test]
+    fn tracking_online_fast_loop() -> Result<()> {
+        let mut tracking = Tracking::new(1, 0.01)?;
+        let mut target = TargetState::new(1)?;
+        let mut input = InputParameter::new(1)?;
+        let mut output = OutputParameter::new(1)?;
+        configure_tracking_input(&mut input)?;
+        assert_eq!(tracking.mode(), TrackingMode::Fast);
+        assert_eq!(tracking.look_ahead_cycles(), 1);
+        assert!((tracking.reactiveness() - 1.0).abs() < f64::EPSILON);
+
+        for step in 0..200 {
+            let t = step as f64 * tracking.delta_time();
+            target.set_position(&[0.5 * t])?;
+            target.set_velocity(&[0.5])?;
+            target.set_acceleration(&[0.0])?;
+            assert_eq!(
+                tracking.update(&target, &input, &mut output)?,
+                RuckigResult::Working
+            );
+            output.pass_to_input(&mut input);
+        }
+        assert!(output.new_position()[0] > 0.0);
+        assert!(output.new_position()[0] < 1.0);
+        Ok(())
+    }
+
+    #[test]
+    fn tracking_offline_sequence() -> Result<()> {
+        let count = 200;
+        let mut tracking = Tracking::new(1, 0.01)?;
+        let mut targets = TargetStateSequence::new(1, count)?;
+        let mut outputs = TrackingOutputSequence::new(1, count)?;
+        let mut input = InputParameter::new(1)?;
+        configure_tracking_input(&mut input)?;
+        targets.set_count(count)?;
+        for step in 0..count {
+            let t = step as f64 * tracking.delta_time();
+            targets.set_state(step, &[0.5 * t], &[0.5], &[0.0])?;
+        }
+        assert_eq!(
+            tracking.calculate_sequence(&targets, &input, &mut outputs)?,
+            RuckigResult::Working
+        );
+        assert_eq!(outputs.count(), count);
+        assert_eq!(outputs.times().len(), count);
+        assert!(outputs
+            .result_codes()
+            .iter()
+            .all(|code| *code == RuckigResult::Working as i32 || *code == RuckigResult::Finished as i32));
+        let positions = outputs.new_positions_flat();
+        assert!(positions[count - 1] > positions[0]);
+        Ok(())
+    }
+
+    #[test]
+    fn tracking_optimized_is_unsupported_in_alpha() -> Result<()> {
+        let mut tracking = Tracking::new(1, 0.01)?;
+        let mut target = TargetState::new(1)?;
+        let mut input = InputParameter::new(1)?;
+        let mut output = OutputParameter::new(1)?;
+        configure_tracking_input(&mut input)?;
+        target.set_position(&[0.0])?;
+        target.set_velocity(&[0.5])?;
+        target.set_acceleration(&[0.0])?;
+        tracking.set_mode(TrackingMode::Optimized)?;
+        let error = tracking.update(&target, &input, &mut output).unwrap_err();
+        assert_eq!(error.code, -200);
+        assert_eq!(error.operation, "ruckig_tracking_update");
         Ok(())
     }
 }

@@ -28,20 +28,26 @@ Implemented and covered by fixed C/oracle tests plus deterministic random oracle
 - `0.4.x` waypoint-aware C ABI, global position bounds, per-section
   constraints, intermediate duration queries, and local coupled waypoint
   optimizer.
+- `0.5.0-design` tracking alpha C ABI and local Fast-mode online/offline
+  tracking implementation. `Optimized` mode is declared but returns
+  `RUCKIG_ERROR_UNSUPPORTED` in the first alpha.
 - C examples for position, offline position, online update, per-DoF overrides,
-  velocity, stop, minimum duration, waypoints, and per-section minimum duration.
+  velocity, stop, minimum duration, waypoints, per-section minimum duration,
+  and tracking alpha scenarios.
 
 Release-readiness evidence is tracked under `docs/release/`; see
 `docs/index.md` for the organized documentation map. `v0.4.2` is the current
 stable release and coverage/evidence baseline for the original-surface parity
-line. `main` is now `0.5.0-design - Unreleased`, with tracking interface
-design and local implementation planning as the first priority.
+line. `main` is now `0.5.0-design - Unreleased`, with tracking alpha evidence
+as the first priority.
 `v0.4.0` added waypoint-aware C ABI entry points, per-section constraints,
 global position bounds, and a local coupled waypoint optimizer; `v0.4.1`
 deepened waypoint optimizer evidence; `v0.4.2` keeps that public C surface
 unchanged while recording the original parity coverage matrix and the
-`0.5.0-design` tracking/soft-interruption preparation work. Tracking has not
-shipped yet and no tracking public C API is exposed in `v0.4.2`. `v0.3.0`
+`0.5.0-design` tracking/soft-interruption preparation work. `0.5.0-design`
+adds tracking public C API and a local Fast-mode alpha implementation on
+`main`, but it is not a stable `v0.5.0` release. No tracking public C API is
+exposed in `v0.4.2`. `v0.3.0`
 remains the last no-new-C-API hardening release, and `v0.2.5` remains the final
 planned `0.2.x` stabilization baseline.
 Current stable release scope intentionally excludes:
@@ -49,9 +55,9 @@ Current stable release scope intentionally excludes:
 - Cloud and remote calculation; `0.4.x` implements local optimizer work only.
 - Formal Ruckig Pro/cloud global numerical equivalence claims.
 - Hard real-time guarantees for waypoint optimization.
-- Tracking interface implementation. Tracking is a required future full
-  original-parity gap and is the first `0.5.0-design` priority, not a shipped
-  `0.4.2` feature.
+- Stable tracking release support. Tracking is present on `main` as
+  `0.5.0-design` alpha evidence, not as a shipped `v0.4.2` feature or stable
+  `v0.5.0` release.
 - Soft interruption checkpoints for waypoint optimization; the interrupt
   duration field remains storage/API-surface parity only.
 - Python/Rust binding publication. The Python `cffi` prototype and Rust alpha
@@ -180,6 +186,10 @@ The public API exposes opaque handle types:
 - `ruckig_input_t`
 - `ruckig_output_t`
 - `ruckig_trajectory_t`
+- `ruckig_tracking_t`
+- `ruckig_target_state_t`
+- `ruckig_target_state_sequence_t`
+- `ruckig_tracking_output_sequence_t`
 
 Handles are created once for a fixed DoF count. Data vectors are accessed through preallocated arrays returned by accessors such as `ruckig_input_current_position_data` and `ruckig_input_max_velocity_data`.
 
@@ -254,6 +264,12 @@ Online usage calls `ruckig_update`, reads `ruckig_output_new_*_data`, then calls
 the next cycle. The caller should read the output arrays before mutating or
 destroying the owning output handle.
 
+Tracking alpha usage on `main` creates a `ruckig_tracking_t` handle plus target
+state or target sequence handles. `Fast` mode performs local
+constant-acceleration lookahead and calls the existing update path; `Optimized`
+mode is declared but returns `RUCKIG_ERROR_UNSUPPORTED` in the first alpha.
+See `docs/design/tracking_interface.md` for the accepted alpha semantics.
+
 ## Memory Model
 
 Create functions allocate handles and all vectors owned by those handles. The intended release contract is that `ruckig_calculate`, `ruckig_update`, trajectory sampling, and root solvers do not allocate heap memory.
@@ -267,6 +283,8 @@ Ownership rules:
 - Destroy functions accept `NULL`.
 - `ruckig_output_t` owns its internal trajectory.
 - A standalone `ruckig_trajectory_t` created by `ruckig_trajectory_create` is owned by the caller.
+- `ruckig_tracking_t` owns only its internal workspace; it does not own caller
+  input, output, target-state, or sequence handles.
 - Accessor-returned arrays are borrowed pointers. They remain valid until the owning handle is destroyed, and output-owned trajectory pointers remain valid until the next successful `ruckig_update` with that output handle.
 
 ## Thread Safety
@@ -311,6 +329,9 @@ The C examples are in `examples/c`:
 - `12_per_section_limits.c`
 - `13_filter_intermediate_positions.c`
 - `14_dynamic_dofs_waypoints.c`
+- `15_tracking_online_fast_ramp.c`
+- `16_tracking_online_constant_acceleration.c`
+- `17_tracking_offline_sequence.c`
 
 All examples are wired into CMake when `BUILD_RUCKIG_C_EXAMPLES=ON`.
 

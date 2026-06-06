@@ -6,17 +6,36 @@
 original-parity coverage closeout. This line is for tracking interface design
 and local implementation planning before any stable `0.5.0` release.
 
+Added:
+
+- Added the accepted tracking public C ABI proposal and first local alpha
+  implementation surface: opaque tracking handles, target-state handles,
+  target-state sequences, tracking output sequences, online tracking update,
+  and offline sequence calculation.
+- Added local Fast-mode tracking using deterministic constant-acceleration
+  lookahead prediction with default `look_ahead_cycles = 1`.
+- Added C tracking tests for API lifecycle, validation, online update, offline
+  sequence calculation, quality smoke, and no-allocation paths.
+- Added C tracking examples for online ramp tracking, online
+  constant-acceleration tracking, and offline sequence tracking.
+- Extended the Python `cffi` prototype and Rust alpha wrapper with tracking
+  smoke coverage.
+
 Changed:
 
-- Opened the post-`v0.4.2` design line for tracking C ABI design, local
-  tracking implementation planning, and tracking evidence strategy.
+- ABI artifact output paths now use `artifacts/abi/0.5.0-alpha` for the
+  tracking alpha evidence line.
+- `docs/abi/public-symbols.txt` and public ABI exception approvals now include
+  the intentional `0.5.0-design` tracking public symbols.
 - Keep `v0.4.2` as the latest stable release and original parity
   coverage/evidence baseline.
 
 Still deferred:
 
-- Tracking public C API and implementation until the `0.5.0-design` API and
-  algorithm plan is accepted.
+- Stable `v0.5.0` release closeout. The current line records alpha evidence
+  first.
+- Tracking `Optimized` mode implementation; the enum is declared but calls
+  return `RUCKIG_ERROR_UNSUPPORTED` in the first alpha.
 - Soft interruption checkpoints, released Python wheels, Rust crate
   publication, package-manager recipes, cloud/remote calculation, formal
   Pro/cloud numerical equivalence claims, and upstream baseline upgrades.

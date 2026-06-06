@@ -109,6 +109,46 @@ struct ruckig {
     bool waypoint_last_improved_baseline;
 };
 
+struct ruckig_target_state {
+    size_t dofs;
+    double* position;
+    double* velocity;
+    double* acceleration;
+};
+
+struct ruckig_target_state_sequence {
+    size_t dofs;
+    size_t capacity;
+    size_t count;
+    double* position;
+    double* velocity;
+    double* acceleration;
+};
+
+struct ruckig_tracking_output_sequence {
+    size_t dofs;
+    size_t capacity;
+    size_t count;
+    double* new_position;
+    double* new_velocity;
+    double* new_acceleration;
+    double* new_jerk;
+    double* time;
+    size_t* section;
+    ruckig_result_t* result;
+};
+
+struct ruckig_tracking {
+    size_t dofs;
+    double delta_time;
+    ruckig_tracking_mode_t mode;
+    double reactiveness;
+    size_t look_ahead_cycles;
+    struct ruckig* otg;
+    struct ruckig_input* work_input;
+    struct ruckig_output* work_output;
+};
+
 ruckig_result_t ruckig_input_copy_state(const ruckig_input_t* src, ruckig_input_t* dst);
 bool ruckig_input_same_dofs(const ruckig_input_t* input, size_t dofs);
 bool ruckig_input_equals(const ruckig_input_t* lhs, const ruckig_input_t* rhs);

@@ -59,6 +59,7 @@ set(RUCKIG_C_SOURCES
   src/ruckig_c/profile.c
   src/ruckig_c/roots.c
   src/ruckig_c/ruckig.c
+  src/ruckig_c/tracking.c
   src/ruckig_c/trajectory.c
   src/ruckig_c/utils.c
   src/ruckig_c/velocity_second_step1.c
@@ -180,6 +181,12 @@ if(BUILD_RUCKIG_C_TESTS)
   add_test(NAME ruckig_c_waypoint_optimizer COMMAND ruckig_c_tests --waypoint)
   add_test(NAME ruckig_c_per_section_constraints COMMAND ruckig_c_tests --per-section)
   add_test(NAME ruckig_c_waypoint_quality COMMAND ruckig_c_tests --waypoint-quality)
+  add_test(NAME ruckig_c_tracking_api COMMAND ruckig_c_tests --tracking-api)
+  add_test(NAME ruckig_c_tracking_validation COMMAND ruckig_c_tests --tracking-validation)
+  add_test(NAME ruckig_c_tracking_online COMMAND ruckig_c_tests --tracking-online)
+  add_test(NAME ruckig_c_tracking_offline COMMAND ruckig_c_tests --tracking-offline)
+  add_test(NAME ruckig_c_tracking_quality COMMAND ruckig_c_tests --tracking-quality)
+  add_test(NAME ruckig_c_tracking_no_allocation COMMAND ruckig_c_tests --tracking-no-allocation)
   add_test(NAME ruckig_c_allocation_audit
     COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/test/c/audit_allocations.cmake
   )
@@ -346,6 +353,21 @@ if(BUILD_RUCKIG_C_EXAMPLES)
   target_link_libraries(example-ruckig-c-14-dynamic-dofs-waypoints PRIVATE ruckig_c)
   add_test(NAME example_ruckig_c_14_dynamic_dofs_waypoints COMMAND example-ruckig-c-14-dynamic-dofs-waypoints)
 
+  add_executable(example-ruckig-c-15-tracking-online-fast-ramp examples/c/15_tracking_online_fast_ramp.c)
+  target_link_libraries(example-ruckig-c-15-tracking-online-fast-ramp PRIVATE ruckig_c)
+  add_test(NAME example_ruckig_c_15_tracking_online_fast_ramp COMMAND example-ruckig-c-15-tracking-online-fast-ramp)
+
+  add_executable(example-ruckig-c-16-tracking-online-constant-acceleration examples/c/16_tracking_online_constant_acceleration.c)
+  target_link_libraries(example-ruckig-c-16-tracking-online-constant-acceleration PRIVATE ruckig_c)
+  add_test(NAME example_ruckig_c_16_tracking_online_constant_acceleration COMMAND example-ruckig-c-16-tracking-online-constant-acceleration)
+
+  add_executable(example-ruckig-c-17-tracking-offline-sequence examples/c/17_tracking_offline_sequence.c)
+  target_link_libraries(example-ruckig-c-17-tracking-offline-sequence PRIVATE ruckig_c)
+  if(NOT WIN32)
+    target_link_libraries(example-ruckig-c-17-tracking-offline-sequence PRIVATE m)
+  endif()
+  add_test(NAME example_ruckig_c_17_tracking_offline_sequence COMMAND example-ruckig-c-17-tracking-offline-sequence)
+
   add_custom_target(ruckig_c_examples
     DEPENDS
       example-ruckig-c-00-minimal-offline
@@ -363,6 +385,9 @@ if(BUILD_RUCKIG_C_EXAMPLES)
       example-ruckig-c-12-per-section-limits
       example-ruckig-c-13-filter-intermediate-positions
       example-ruckig-c-14-dynamic-dofs-waypoints
+      example-ruckig-c-15-tracking-online-fast-ramp
+      example-ruckig-c-16-tracking-online-constant-acceleration
+      example-ruckig-c-17-tracking-offline-sequence
   )
 endif()
 
@@ -439,7 +464,7 @@ if(BUILD_RUCKIG_C_PERFORMANCE_TESTS)
   add_test(NAME ruckig_c_waypoint_performance_benchmark COMMAND ruckig_c_performance_benchmark --samples 1000 --seed 1 --waypoints)
 endif()
 
-set(RUCKIG_C_ABI_OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/artifacts/abi/0.4.2")
+set(RUCKIG_C_ABI_OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/artifacts/abi/0.5.0-alpha")
 set(RUCKIG_C_ABI_PUBLIC_GENERATED_FILE "${RUCKIG_C_ABI_OUTPUT_DIR}/public-symbols-from-header.txt")
 set(RUCKIG_C_ABI_PUBLIC_VERIFY_FILE "${RUCKIG_C_ABI_OUTPUT_DIR}/public-symbols-verify.txt")
 add_custom_command(

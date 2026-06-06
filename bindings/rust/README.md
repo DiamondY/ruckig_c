@@ -1,7 +1,8 @@
 # Rust Alpha Wrapper
 
-This directory is an experimental `0.4.0-design` wrapper over the public
-`ruckig_c` C ABI. It is not a published crate and is not installed by CMake.
+This directory is an experimental alpha wrapper over the public `ruckig_c` C
+ABI. It covers the `0.4.x` waypoint ABI and `0.5.0-design` tracking alpha
+smoke. It is not a published crate and is not installed by CMake.
 
 The wrapper owns the same opaque C handles as the C API:
 
@@ -9,6 +10,10 @@ The wrapper owns the same opaque C handles as the C API:
 - `InputParameter`
 - `OutputParameter`
 - `Trajectory`
+- `Tracking`
+- `TargetState`
+- `TargetStateSequence`
+- `TrackingOutputSequence`
 
 Current alpha coverage:
 
@@ -23,8 +28,10 @@ Current alpha coverage:
   position extrema and first-time-at-position;
 - output position, velocity, acceleration, jerk, section, calculation-state,
   and calculation-duration accessors;
-- Rust examples for position, offline, velocity, waypoints, and per-section
-  minimum duration.
+- tracking alpha online Fast update, offline sequence smoke, and `Optimized`
+  unsupported behavior;
+- Rust examples for position, offline, velocity, waypoints, per-section
+  minimum duration, and tracking alpha.
 
 The build script links an already-built `ruckig_c` static library. By default
 it looks in `out/build/windows-clang-ninja`. Set `RUCKIG_C_LIB_DIR` to override
@@ -45,3 +52,5 @@ Boundaries:
 - No generated bindings.
 - No direct dependency on original C++ Ruckig.
 - No package-manager recipe.
+- No stable Rust tracking API commitment before a deliberate `v0.5.0`
+  release decision.

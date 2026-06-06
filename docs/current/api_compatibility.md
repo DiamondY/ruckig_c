@@ -227,10 +227,9 @@ build-shared/artifacts/abi/0.3.0/linux-public-export-diff.txt
 The report includes machine-readable summary fields and human-readable symbol
 sections. Public symbol additions fail strict mode unless the symbol has an
 explicit `allow-add ruckig_symbol_name` entry in
-`docs/abi/public-symbol-exceptions.txt`; that file is empty by default and is
-only for separately approved public API additions. By default the target is
-warning/evidence-only. Setting `RUCKIG_C_STRICT_PUBLIC_ABI=ON` makes public ABI
-drift fail the target.
+`docs/abi/public-symbol-exceptions.txt`; that file is only for separately
+approved public API additions. By default the target is warning/evidence-only.
+Setting `RUCKIG_C_STRICT_PUBLIC_ABI=ON` makes public ABI drift fail the target.
 The dedicated Linux and Windows exported-symbol GitHub Actions jobs currently
 run the public-only comparison through the strict comparison script in
 non-blocking trial mode while uploading the same exported-symbol artifacts and
@@ -414,4 +413,44 @@ Compatibility rules for `0.4.2`:
 
 ```text
 out/build/<preset>/artifacts/abi/0.4.2/
+```
+
+## 0.5.0-design Tracking API Expansion Policy
+
+`0.5.0-design` intentionally expands the public C ABI for tracking alpha
+evidence. `v0.4.2` remains the latest stable release until a deliberate stable
+release closeout. The expansion must not remove or modify any existing
+`v0.4.2` public function, function signature, enum numeric value, or result-code
+numeric value.
+
+Compatibility rules for the tracking alpha line:
+
+- Existing `v0.4.2` public symbols must remain exported.
+- New public symbols must be limited to the accepted tracking ABI in
+  `docs/design/tracking_interface.md`.
+- `docs/abi/public-symbols.txt` is expanded only for intentional tracking
+  symbols.
+- `docs/abi/public-symbol-exceptions.txt` records all intentional
+  `0.5.0-design` public additions as `allow-add` entries.
+- `RUCKIG_TRACKING_OPTIMIZED` is a public enum value but its first alpha
+  behavior is `RUCKIG_ERROR_UNSUPPORTED`, not an alias to Fast mode.
+- Tracking internals, workspace structures, and candidate state must not be
+  exported.
+- `original/ruckig-main` remains frozen as the Ruckig Community `0.17.3`
+  reference baseline.
+- Tracking evidence is local invariant and smoke evidence. It must not be
+  described as source-level oracle parity or formal Ruckig Pro/cloud numerical
+  equivalence.
+
+`0.5.0-design` ABI artifact output paths use the alpha evidence directory:
+
+```text
+out/build/<preset>/artifacts/abi/0.5.0-alpha/
+```
+
+Use these checks during alpha evidence review:
+
+```powershell
+cmake --build out\build\windows-clang-ninja-shared --target ruckig_c_verify_public_symbols
+cmake --build out\build\windows-clang-ninja-shared --target ruckig_c_compare_public_exported_symbols
 ```

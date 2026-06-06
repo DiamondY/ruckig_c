@@ -13,8 +13,14 @@ from ruckig_cffi import (
     Ruckig,
     RuckigInvalidInputError,
     RuckigLifecycleError,
+    RuckigUnsupportedError,
     Synchronization,
+    TargetState,
+    TargetStateSequence,
     Trajectory,
+    Tracking,
+    TrackingMode,
+    TrackingOutputSequence,
     configure_library,
 )
 
@@ -52,6 +58,18 @@ def configure_waypoint_input(input_: Input) -> None:
     input_.set_per_section_max_position([1.5, 2.5])
     input_.set_per_section_min_position([-0.5, 0.5])
     input_.set_per_section_minimum_duration([0.0, 0.0])
+
+
+def configure_tracking_input(input_: Input) -> None:
+    input_.set_current_position([0.0])
+    input_.set_current_velocity([0.0])
+    input_.set_current_acceleration([0.0])
+    input_.set_target_position([0.0])
+    input_.set_target_velocity([0.0])
+    input_.set_target_acceleration([0.0])
+    input_.set_max_velocity([1.0])
+    input_.set_max_acceleration([2.0])
+    input_.set_max_jerk([5.0])
 
 
 @unittest.skipUnless(
@@ -286,6 +304,57 @@ class PrototypeTests(unittest.TestCase):
             input_.set_intermediate_positions([1.0, 2.0, 3.0])
             self.assertEqual(otg.filter_intermediate_positions(input_, [0.25]), [])
 
+    def test_tracking_online_fast_loop(self) -> None:
+        with Tracking(1, 0.01) as tracking, TargetState(1) as target, Input(1) as input_, Output(1) as output:
+            configure_tracking_input(input_)
+            self.assertEqual(tracking.mode, TrackingMode.FAST)
+            self.assertEqual(tracking.look_ahead_cycles, 1)
+            self.assertAlmostEqual(tracking.reactiveness, 1.0)
+            tracking.set_reactiveness(1.0)
+            tracking.set_look_ahead_cycles(1)
+
+            for step in range(200):
+                t = step * tracking.delta_time
+                target.set_position([0.5 * t])
+                target.set_velocity([0.5])
+                target.set_acceleration([0.0])
+                self.assertEqual(tracking.update(target, input_, output), Result.WORKING)
+                output.pass_to_input(input_)
+
+            self.assertGreater(output.new_position()[0], 0.0)
+            self.assertLess(output.new_position()[0], 1.0)
+
+    def test_tracking_offline_sequence(self) -> None:
+        count = 200
+        with (
+            Tracking(1, 0.01) as tracking,
+            TargetStateSequence(1, count) as targets,
+            TrackingOutputSequence(1, count) as outputs,
+            Input(1) as input_,
+        ):
+            configure_tracking_input(input_)
+            targets.set_count(count)
+            for step in range(count):
+                t = step * tracking.delta_time
+                targets.set_state(step, [0.5 * t], [0.5], [0.0])
+
+            self.assertEqual(tracking.calculate_sequence(targets, input_, outputs), Result.WORKING)
+            self.assertEqual(outputs.count, count)
+            self.assertEqual(len(outputs.new_positions()), count)
+            self.assertEqual(len(outputs.times()), count)
+            self.assertTrue(all(result in (Result.WORKING, Result.FINISHED) for result in outputs.results()))
+            self.assertGreater(outputs.new_positions()[-1][0], outputs.new_positions()[0][0])
+
+    def test_tracking_optimized_is_unsupported_in_alpha(self) -> None:
+        with Tracking(1, 0.01) as tracking, TargetState(1) as target, Input(1) as input_, Output(1) as output:
+            configure_tracking_input(input_)
+            target.set_position([0.0])
+            target.set_velocity([0.5])
+            target.set_acceleration([0.0])
+            tracking.set_mode(TrackingMode.OPTIMIZED)
+            with self.assertRaises(RuckigUnsupportedError):
+                tracking.update(target, input_, output)
+
     def test_tuple_copy_in_and_list_copy_out(self) -> None:
         with Ruckig(1, 0.1) as otg, Input(1) as input_, Trajectory(1) as trajectory:
             input_.set_current_position((0.0,))
@@ -326,6 +395,30 @@ class PrototypeTests(unittest.TestCase):
         trajectory.close()
         with self.assertRaises(RuckigLifecycleError):
             _ = trajectory.duration
+
+        tracking = Tracking(1, 0.01)
+        tracking.close()
+        tracking.close()
+        with self.assertRaises(RuckigLifecycleError):
+            _ = tracking.delta_time
+
+        target = TargetState(1)
+        target.close()
+        target.close()
+        with self.assertRaises(RuckigLifecycleError):
+            target.set_position([0.0])
+
+        targets = TargetStateSequence(1, 2)
+        targets.close()
+        targets.close()
+        with self.assertRaises(RuckigLifecycleError):
+            targets.set_count(1)
+
+        outputs = TrackingOutputSequence(1, 2)
+        outputs.close()
+        outputs.close()
+        with self.assertRaises(RuckigLifecycleError):
+            _ = outputs.count
 
     def test_constructor_cleanup_context_manager(self) -> None:
         with Ruckig(1, 0.1) as otg:
