@@ -147,9 +147,11 @@ Long-term optional, outside the active roadmap:
 
 `main` now carries the `0.4.x` release line. `v0.4.0` was the first planned
 public C ABI expansion after the `v0.3.0` hardening release. `v0.4.1` is a
-stabilization release for that surface: it keeps the `v0.4.0` public C ABI
-unchanged while deepening local waypoint optimizer evidence. The goal remains
-original-surface parity with a local waypoint optimizer, not a cloud client.
+deep waypoint optimizer stabilization release. `v0.4.2` is the coverage and
+evidence closeout release for the surface: it keeps the `v0.4.0` public C ABI
+unchanged while recording original parity coverage, tracking design scope, and
+soft-interruption design boundaries. The goal remains original-surface parity
+with a local waypoint optimizer, not a cloud client.
 
 - Added waypoint-aware C constructors and input/trajectory APIs for
   intermediate waypoints, global position bounds, per-section constraints,
@@ -192,3 +194,39 @@ original-surface parity with a local waypoint optimizer, not a cloud client.
   publication, Rust crate publication, package-manager recipes, new public C
   API expansion, and upstream baseline upgrades move to separate future design
   work such as `0.5.0-design`.
+
+## 0.4.2 Original Parity Coverage Closeout
+
+`0.4.2` is the final planned `0.4.x` evidence closeout before opening
+`0.5.0-design`. It is a patch release, not a feature release.
+
+- No new public C API is planned for `0.4.2`; the only public header change is
+  the release version macros.
+- `docs/current/original_parity_coverage.md` records the current engineering
+  coverage estimates and remaining original parity gaps. The estimates are not
+  formal line, branch, or proof coverage.
+- Tracking is now a mandatory full-original-parity gap. `0.4.2` records the
+  future API and evidence direction only; implementation and public C API
+  additions move to `0.5.0-design`.
+- `interrupt_calculation_duration` remains storage/API-surface parity in
+  `0.4.2`; optimizer interruption checkpoints and timeout fallback semantics
+  require future implementation work.
+- Python `cffi` and Rust remain prototype/alpha evidence. Wheels, crate
+  publication, package-manager recipes, cloud/remote calculation, formal
+  Pro/cloud numerical equivalence claims, and upstream baseline upgrades remain
+  separate projects.
+
+## 0.5.0 Design Entry
+
+After `v0.4.2` is published, the default next line is `0.5.0-design`.
+
+1. Design and implement a local tracking interface over the public C runtime.
+2. Add tracking fixed examples, local invariants, lag/error metrics, and
+   constraint sampling evidence.
+3. Extend the Python `cffi` prototype and Rust alpha wrapper only after the C
+   tracking ABI design is accepted.
+4. Continue soft-interruption implementation design without coupling it to the
+   first tracking implementation.
+5. Keep cloud/remote calculation, package-manager recipes, formal Pro/cloud
+   numerical equivalence claims, and upstream baseline upgrades outside the
+   default `0.5.0-design` scope unless separately accepted.

@@ -2383,6 +2383,192 @@ Linux GCC C-only
 The `Manual release random oracle` job was skipped as expected for a
 push-triggered workflow.
 
+## 2026-06-06 0.4.2 Local Release Candidate Evidence
+
+Local `0.4.2` release-candidate verification records coverage/evidence
+closeout work only. It does not add public C API, does not add public symbols,
+does not implement tracking, does not implement soft interruption checkpoints,
+and does not modify `original/ruckig-main`.
+
+Release-candidate base commit before local edits:
+
+```text
+e7f2e111abcb9691a85a669559784faabd0ec023
+```
+
+Local scope changes:
+
+```text
+- Version bumped to 0.4.2 in CMake and public version macros.
+- ABI artifact paths moved to artifacts/abi/0.4.2.
+- Added docs/current/original_parity_coverage.md.
+- Added docs/design/tracking_interface.md.
+- Added docs/design/interrupt_calculation_duration.md.
+- Added docs/release/checklists/0.4.2.md.
+- Added docs/release/notes/0.4.2.md.
+```
+
+Public header diff:
+
+```text
+git diff v0.4.1 -- include/ruckig_c/ruckig.h
+
+Only version macros changed:
+RUCKIG_C_VERSION_PATCH 1 -> 2
+RUCKIG_C_VERSION_STRING "0.4.1" -> "0.4.2"
+```
+
+Static CTest:
+
+```text
+ctest --test-dir out\build\windows-clang-ninja --output-on-failure -E ruckig_c_oracle_random_release
+
+Result: pass, 24/24.
+```
+
+Shared CTest:
+
+```text
+ctest --test-dir out\build\windows-clang-ninja-shared --output-on-failure -E ruckig_c_oracle_random_release
+
+Result: pass, 24/24.
+```
+
+Oracle CTest:
+
+```text
+ctest --test-dir out\build\windows-clang-ninja-oracle --output-on-failure -E ruckig_c_oracle_random_release
+
+Result: pass, 29/29.
+```
+
+Fixed oracle:
+
+```text
+out\build\windows-clang-ninja-oracle\ruckig_c_oracle_tests.exe
+
+Waypoint section oracle comparisons passed: 4
+Oracle comparisons passed: 76
+```
+
+Waypoint section oracle:
+
+```text
+out\build\windows-clang-ninja-oracle\ruckig_c_oracle_tests.exe --waypoint-section-oracle
+
+Waypoint section oracle comparisons passed: 4
+```
+
+Random oracle:
+
+```text
+out\build\windows-clang-ninja-oracle\ruckig_c_oracle_tests.exe --random 100000 --seed 1
+Random oracle comparisons passed: 100000 seed 1
+
+out\build\windows-clang-ninja-oracle\ruckig_c_oracle_tests.exe --random 100000 --seed 2
+Random oracle comparisons passed: 100000 seed 2
+
+out\build\windows-clang-ninja-oracle\ruckig_c_oracle_tests.exe --random 100000 --seed 41
+Random oracle comparisons passed: 100000 seed 41
+```
+
+Random per-DoF oracle:
+
+```text
+out\build\windows-clang-ninja-oracle\ruckig_c_oracle_tests.exe --random-per-dof 100000 --seed 1
+
+Random per-DoF oracle comparisons passed: 100000 seed 1
+```
+
+Local release random:
+
+```text
+ctest --test-dir out\build\windows-clang-ninja-oracle -R ruckig_c_oracle_random_release --output-on-failure
+
+Result: pass, 1/1. ruckig_c_oracle_random_release passed in 59.59 seconds.
+```
+
+Public symbol allowlist:
+
+```text
+cmake --build out\build\windows-clang-ninja-shared --target ruckig_c_verify_public_symbols
+
+status: clean
+header_public_symbol_count: 117
+expected_public_symbol_count: 117
+missing_from_expected_count: 0
+extra_in_expected_count: 0
+```
+
+Windows public exported-symbol comparison:
+
+```text
+cmake --build out\build\windows-clang-ninja-shared --target ruckig_c_compare_public_exported_symbols
+
+status: clean
+current_symbol_count: 117
+approved_public_symbol_count: 117
+current_public_symbol_count: 117
+missing_public_symbol_count: 0
+added_public_since_baseline_count: 0
+exception_approved_added_public_count: 51
+removed_public_since_baseline_count: 0
+unapproved_exported_symbol_count: 0
+```
+
+Python prototype smoke:
+
+```text
+$env:RUCKIG_C_SHARED_LIBRARY='E:\Yww\DownLoad\source\ruckig_c\out\build\windows-clang-ninja-shared\ruckig_c.dll'
+.\out\python-prototype-venv\Scripts\python.exe bindings\python_prototype\test_prototype.py
+
+Ran 14 tests in 0.018s
+OK
+```
+
+The system Python environment did not have `cffi`; the existing project venv
+`out\python-prototype-venv` was used for the prototype smoke.
+
+Rust alpha wrapper smoke:
+
+```text
+cargo test --manifest-path bindings\rust\Cargo.toml
+
+Result: pass, 6 tests.
+```
+
+Original parity coverage decision:
+
+```text
+docs/current/original_parity_coverage.md records layered engineering estimates:
+- Community no-waypoint target solver behavior: 93-96%.
+- C runtime / motion API replacement surface: 82-87%.
+- Waypoint and per-section behavior versus full Pro/cloud behavior: 60-70%.
+- Waypoint and per-section behavior versus declared local optimizer scope: 75-80%.
+- Bindings and ecosystem: 35-45%.
+- Full original repository/product parity: 70-75%.
+
+The document states that these are engineering estimates, not line coverage,
+branch coverage, or formal proof. Tracking is recorded as a mandatory
+full-original-parity gap for 0.5.0-design.
+```
+
+Tracking design decision:
+
+```text
+docs/design/tracking_interface.md records that the frozen Community baseline
+has README/examples but no include/ruckig/trackig.hpp source. Tracking is
+deferred to 0.5.0-design for public C API and local implementation.
+```
+
+Interrupt design decision:
+
+```text
+docs/design/interrupt_calculation_duration.md records storage-only behavior in
+0.4.x and defers optimizer interruption checkpoints, best-feasible timeout
+fallback, and hard/soft real-time claims.
+```
+
 ## 2026-06-06 0.4.1 Local Release-Candidate Evidence
 
 The `0.4.1` local release-candidate pass deepened waypoint optimizer evidence

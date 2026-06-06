@@ -1,5 +1,41 @@
 # Changelog
 
+## 0.4.2 - 2026-06-06
+
+`0.4.2` is an original-parity coverage and evidence closeout release for the
+`0.4.x` line. It does not add public C API, does not change existing public
+function signatures, does not change enum or result-code numeric values, and
+does not update the frozen upstream oracle baseline.
+
+Added:
+
+- Added an original parity coverage matrix that separates no-waypoint target
+  solver coverage, local waypoint optimizer coverage, trajectory semantics,
+  bindings, packaging, cloud/Pro gaps, tracking, and C++-specific ergonomics.
+- Added tracking interface design preparation for the future `0.5.0-design`
+  line. Tracking is now recorded as a required full-original-parity gap, but no
+  tracking public API or implementation is added in `0.4.2`.
+- Added an `interrupt_calculation_duration` design note that documents the
+  storage-only behavior in `0.4.2` and the future soft-interruption semantics
+  that must be designed before implementation.
+- Added `0.4.2` release checklist and release-note source material.
+
+Changed:
+
+- `CMakeLists.txt` and public version macros now point at `0.4.2`.
+- ABI artifact output paths now use `artifacts/abi/0.4.2`.
+- README, roadmap, API compatibility notes, and documentation index now treat
+  `v0.4.2` as the coverage/evidence closeout baseline before
+  `0.5.0-design`.
+
+Still deferred:
+
+- Tracking implementation and public tracking C API, soft interruption
+  checkpoints, formal cloud/Pro numerical equivalence claims, cloud or remote
+  calculation, hard real-time guarantees for waypoint optimization, released
+  Python wheels, published Rust crate, package-manager recipes, new public C
+  API expansion outside `0.5.0-design`, and upstream baseline upgrades.
+
 ## 0.4.1 - 2026-06-06
 
 `0.4.1` is a stabilization and evidence release for the `0.4.x`

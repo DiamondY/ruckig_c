@@ -11,6 +11,8 @@ Historical rewrite plans and release evidence are retained for traceability.
 - `current/api_compatibility.md` - patch-release API/ABI policy and
   exported-symbol review.
 - `current/api_diagnostics.md` - C API validation and diagnostics behavior.
+- `current/original_parity_coverage.md` - current coverage estimates and gaps
+  against the frozen original reference and original product surface.
 - `current/packaging.md` - installed CMake, pkg-config, static, DLL, and shared
   install-tree consumer notes.
 - `current/upstream_baseline_policy.md` - frozen upstream oracle baseline
@@ -20,7 +22,7 @@ Historical rewrite plans and release evidence are retained for traceability.
 
 - `release/checklists/` - release checklists by version.
   `release/checklists/0.4.0-alpha.md` retains the alpha evidence, and
-  `release/checklists/0.4.1.md` tracks the active stable release closeout.
+  `release/checklists/0.4.2.md` tracks the active stable release closeout.
 - `release/evidence/verification_report.md` - local and CI verification
   history.
 - `release/evidence/performance_report.md` - performance procedure and release
@@ -40,6 +42,10 @@ Historical rewrite plans and release evidence are retained for traceability.
   checklist for `0.3.0-design`.
 - `design/0.4.0_original_parity.md` - original-surface parity design for the
   local waypoint optimizer and public C ABI expansion.
+- `design/tracking_interface.md` - future `0.5.0-design` tracking interface
+  scope, C ABI direction, and evidence strategy.
+- `design/interrupt_calculation_duration.md` - storage-only behavior in
+  `0.4.x` and future soft-interruption semantics.
 - `../bindings/rust/README.md` - experimental Rust alpha wrapper over the
   public C ABI.
 - `design/python_bindings_feasibility.md` - Python binding feasibility, without

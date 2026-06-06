@@ -387,3 +387,31 @@ Compatibility rules for `0.4.1`:
 ```text
 out/build/<preset>/artifacts/abi/0.4.1/
 ```
+
+## 0.4.2 Coverage Closeout Policy
+
+`0.4.2` is a no-new-public-C-API patch release for the `0.4.x`
+original-surface parity line. It records coverage, tracking design scope, and
+soft-interruption design boundaries without changing the exported C ABI.
+
+Compatibility rules for `0.4.2`:
+
+- `include/ruckig_c/ruckig.h` may change only for version macros during release
+  closeout.
+- No public C functions may be added, removed, renamed, or signature-changed.
+- Enum numeric values and result-code numeric values must remain unchanged.
+- `docs/abi/public-symbols.txt` remains the authoritative `117`-symbol public
+  allowlist.
+- Exported-symbol comparison against the approved public set must report zero
+  public additions and zero public removals.
+- Tracking interface material in `0.4.2` is design-only and must not add public
+  symbols.
+- `interrupt_calculation_duration` remains a stored API-surface parity field.
+  `0.4.2` does not claim soft interruption checkpoints, best-feasible timeout
+  fallback, or hard real-time waypoint optimization.
+
+`0.4.2` ABI artifact output paths use the release-specific directory:
+
+```text
+out/build/<preset>/artifacts/abi/0.4.2/
+```
