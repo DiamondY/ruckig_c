@@ -82,13 +82,26 @@ tracking quality constant_acceleration: avg_fast 0.0003657225 avg_naive 0.013235
 tracking quality sinus_trend: avg_fast 0.0145618942 avg_naive 0.01135288 max_fast 0.0333028253 max_naive 0.0148639852 final_fast 0.00347732196 final_naive 0.00888145933 improvement -0.282661
 ```
 
-Remote publication status:
+Remote release-candidate evidence:
 
-- `gh auth status -h github.com` failed because the configured token for
-  `DiamondY` is invalid.
-- Push CI run ids, manual release-random workflow ids, annotated tag
-  `v0.5.0`, GitHub Release publication, and post-release `0.6.0-design`
-  transition remain blocked until GitHub authentication is repaired.
+- Push CI run:
+  [27084086361](https://github.com/DiamondY/ruckig_c/actions/runs/27084086361),
+  conclusion `success`, commit
+  `924f0de7a0ec18b75f1d360e25cda96f4dc348bc`.
+- Push CI artifact ids: linux-performance `7461165998`, Linux exported
+  symbols `7461160970`, Windows exported symbols `7461160228`, macOS exported
+  symbols `7461158963`.
+- All routine push CI jobs concluded `success`. The `Manual release random
+  oracle` job was skipped in the push-triggered run as expected.
+- Manual release-random workflow-dispatch run:
+  [27084303942](https://github.com/DiamondY/ruckig_c/actions/runs/27084303942),
+  conclusion `success`, commit
+  `924f0de7a0ec18b75f1d360e25cda96f4dc348bc`.
+- Manual release-random job: `Manual release random oracle`, job id
+  `79935641824`, conclusion `success`.
+- `gh auth status -h github.com` still reports the configured token for
+  `DiamondY` as invalid, but `git push` and `gh workflow run` both succeeded.
+  Remaining tag and GitHub Release operations must be verified explicitly.
 
 ## 2026-06-03 Windows Clang Verification
 
