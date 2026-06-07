@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.7.0-design - Unreleased
+
+`0.7.0-design` is the post-`v0.6.0` design line on `main`. The first
+priority is Optimized tracking quality and stability deepening: broader fixed
+corpus coverage, stronger trend metrics, deterministic stress, and release
+evidence strategy. `0.6.1` remains reserved for emergency patch work only.
+
+Deferred unless separately accepted:
+
+- Soft interruption implementation, formal Python/Rust publication,
+  package-manager recipes, cloud/remote calculation, formal Pro/cloud
+  equivalence claims, and upstream baseline upgrade remain outside the default
+  `0.7.0-design` entry scope.
+
 ## 0.6.0 - 2026-06-07
 
 `0.6.0` is the stable bounded local `Optimized` tracking release. It

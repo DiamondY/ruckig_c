@@ -270,7 +270,7 @@ tracking release from `v0.5.0`.
 
 ## 0.7.0 Design Entry
 
-After `v0.6.0`, the next design line is `0.7.0-design - Unreleased`.
+After `v0.6.0`, `main` tracks `0.7.0-design - Unreleased`.
 
 - First priority: deepen Optimized tracking quality and stability evidence.
 - Expand tracking fixed corpus, quality trend metrics, deterministic stress,
