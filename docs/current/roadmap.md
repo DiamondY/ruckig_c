@@ -255,8 +255,16 @@ tracking release; `Optimized` remains declared for API shape parity but returns
 `main` now carries `0.6.0-design - Unreleased` after the published `v0.5.0`
 Fast-only tracking release.
 
-- First priority: bounded local `Optimized` tracking design and evidence
-  strategy.
+- First priority: bounded local `Optimized` tracking. The `0.6.0-alpha` MVP is
+  implemented on `main` with deterministic candidate search, online lookahead
+  update, offline sliding-window sequence calculation, Fast fallback
+  diagnostics, and local C/Python/Rust smoke evidence.
+- The alpha evidence line adds intentional public C symbols for Optimized
+  tracking diagnostics and lookahead update. ABI artifact paths use
+  `artifacts/abi/0.6.0-alpha`.
+- Stable `v0.6.0` remains a later release decision. It requires broader CI,
+  ABI/export review, tracking quality trend review, and explicit release
+  closeout.
 - `0.5.1` is reserved for emergency patches only.
 - Soft-interruption implementation, formal Python/Rust publication,
   package-manager recipes, cloud/remote calculation, formal Pro/cloud

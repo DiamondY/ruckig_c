@@ -20,6 +20,7 @@ from ruckig_cffi import (
     TargetStateSequence,
     Trajectory,
     Tracking,
+    TrackingCalculationStatus,
     TrackingMode,
     TrackingOutputSequence,
     configure_library,
@@ -322,9 +323,14 @@ class PrototypeTests(unittest.TestCase):
             configure_tracking_input(input_)
             self.assertEqual(tracking.mode, TrackingMode.FAST)
             self.assertEqual(tracking.look_ahead_cycles, 1)
+            self.assertEqual(tracking.max_optimized_candidates, 16)
+            self.assertEqual(tracking.last_calculation_status, TrackingCalculationStatus.NONE)
+            self.assertEqual(tracking.last_candidate_count, 0)
             self.assertAlmostEqual(tracking.reactiveness, 1.0)
             tracking.set_reactiveness(1.0)
             tracking.set_look_ahead_cycles(1)
+            tracking.set_max_optimized_candidates(8)
+            self.assertEqual(tracking.max_optimized_candidates, 8)
 
             for step in range(200):
                 t = step * tracking.delta_time
@@ -412,13 +418,17 @@ class PrototypeTests(unittest.TestCase):
                 tracking.set_reactiveness(math.nan)
             with self.assertRaises(RuckigInvalidInputError):
                 tracking.set_look_ahead_cycles(0)
+            with self.assertRaises(RuckigInvalidInputError):
+                tracking.set_max_optimized_candidates(0)
+            with self.assertRaises(RuckigInvalidInputError):
+                tracking.set_max_optimized_candidates(129)
 
-    def test_tracking_optimized_is_unsupported_in_alpha(self) -> None:
+    def test_tracking_optimized_smoke(self) -> None:
         with (
             Tracking(1, 0.01) as tracking,
             TargetState(1) as target,
-            TargetStateSequence(1, 1) as targets,
-            TrackingOutputSequence(1, 1) as outputs,
+            TargetStateSequence(1, 4) as targets,
+            TrackingOutputSequence(1, 4) as outputs,
             Input(1) as input_,
             Output(1) as output,
         ):
@@ -426,13 +436,36 @@ class PrototypeTests(unittest.TestCase):
             target.set_position([0.0])
             target.set_velocity([0.5])
             target.set_acceleration([0.0])
-            targets.set_count(1)
-            targets.set_state(0, [0.0], [0.5], [0.0])
+            targets.set_count(4)
+            for step in range(4):
+                t = step * tracking.delta_time
+                targets.set_state(step, [0.5 * t], [0.5], [0.0])
             tracking.set_mode(TrackingMode.OPTIMIZED)
-            with self.assertRaises(RuckigUnsupportedError):
-                tracking.update(target, input_, output)
-            with self.assertRaises(RuckigUnsupportedError):
-                tracking.calculate_sequence(targets, input_, outputs)
+            tracking.set_look_ahead_cycles(4)
+            tracking.set_max_optimized_candidates(16)
+
+            self.assertIn(tracking.update(target, input_, output), (Result.WORKING, Result.FINISHED))
+            self.assertIn(
+                tracking.last_calculation_status,
+                (TrackingCalculationStatus.OPTIMIZED, TrackingCalculationStatus.FAST_FALLBACK),
+            )
+            self.assertGreaterEqual(tracking.last_candidate_count, 1)
+            self.assertLessEqual(tracking.last_candidate_count, tracking.max_optimized_candidates)
+
+            self.assertIn(tracking.update_with_lookahead(targets, input_, output), (Result.WORKING, Result.FINISHED))
+            self.assertIn(
+                tracking.last_calculation_status,
+                (TrackingCalculationStatus.OPTIMIZED, TrackingCalculationStatus.FAST_FALLBACK),
+            )
+            self.assertGreaterEqual(tracking.last_candidate_count, 1)
+
+            self.assertEqual(tracking.calculate_sequence(targets, input_, outputs), Result.WORKING)
+            self.assertEqual(outputs.count, 4)
+            self.assertIn(
+                tracking.last_calculation_status,
+                (TrackingCalculationStatus.OPTIMIZED, TrackingCalculationStatus.FAST_FALLBACK),
+            )
+            self.assertGreaterEqual(tracking.last_candidate_count, 4)
 
     def test_tuple_copy_in_and_list_copy_out(self) -> None:
         with Ruckig(1, 0.1) as otg, Input(1) as input_, Trajectory(1) as trajectory:

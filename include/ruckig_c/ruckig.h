@@ -66,6 +66,14 @@ typedef enum ruckig_tracking_mode {
     RUCKIG_TRACKING_OPTIMIZED = 1
 } ruckig_tracking_mode_t;
 
+typedef enum ruckig_tracking_calculation_status {
+    RUCKIG_TRACKING_CALCULATION_NONE = 0,
+    RUCKIG_TRACKING_CALCULATION_FAST = 1,
+    RUCKIG_TRACKING_CALCULATION_OPTIMIZED = 2,
+    RUCKIG_TRACKING_CALCULATION_FAST_FALLBACK = 3,
+    RUCKIG_TRACKING_CALCULATION_ERROR = 4
+} ruckig_tracking_calculation_status_t;
+
 typedef struct ruckig_position_extrema {
     double min_position;
     double max_position;
@@ -94,12 +102,11 @@ typedef struct ruckig_tracking_output_sequence ruckig_tracking_output_sequence_t
 #endif
 
 /*
- * 0.5.0 scope:
+ * 0.6.0-design scope:
  * - Intermediate waypoints and per-section constraints are exposed through the
  *   C ABI and solved locally by the waypoint optimizer.
- * - Tracking exposes a local Fast-mode implementation. Optimized mode is
- *   declared for API shape parity but returns RUCKIG_ERROR_UNSUPPORTED until
- *   a bounded local implementation is accepted in a future version.
+ * - Tracking exposes local Fast mode and an alpha bounded local Optimized mode
+ *   with deterministic candidate search and Fast fallback diagnostics.
  * - No cloud API, remote fallback, or Pro/cloud equivalence claim is provided.
  * - Python and Rust bindings remain separate layers over this C ABI.
  */
@@ -461,9 +468,24 @@ RUCKIG_C_API ruckig_result_t ruckig_tracking_set_reactiveness(ruckig_tracking_t*
 RUCKIG_C_API double ruckig_tracking_get_reactiveness(const ruckig_tracking_t* tracking);
 RUCKIG_C_API ruckig_result_t ruckig_tracking_set_look_ahead_cycles(ruckig_tracking_t* tracking, size_t look_ahead_cycles);
 RUCKIG_C_API size_t ruckig_tracking_get_look_ahead_cycles(const ruckig_tracking_t* tracking);
+RUCKIG_C_API ruckig_result_t ruckig_tracking_set_max_optimized_candidates(
+    ruckig_tracking_t* tracking,
+    size_t max_candidates
+);
+RUCKIG_C_API size_t ruckig_tracking_get_max_optimized_candidates(const ruckig_tracking_t* tracking);
+RUCKIG_C_API ruckig_tracking_calculation_status_t ruckig_tracking_get_last_calculation_status(
+    const ruckig_tracking_t* tracking
+);
+RUCKIG_C_API size_t ruckig_tracking_get_last_candidate_count(const ruckig_tracking_t* tracking);
 RUCKIG_C_API ruckig_result_t ruckig_tracking_update(
     ruckig_tracking_t* tracking,
     const ruckig_target_state_t* target_state,
+    const ruckig_input_t* input,
+    ruckig_output_t* output
+);
+RUCKIG_C_API ruckig_result_t ruckig_tracking_update_with_lookahead(
+    ruckig_tracking_t* tracking,
+    const ruckig_target_state_sequence_t* target_sequence,
     const ruckig_input_t* input,
     ruckig_output_t* output
 );

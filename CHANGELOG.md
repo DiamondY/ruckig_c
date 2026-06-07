@@ -7,16 +7,37 @@ Fast-only tracking release. The first priority is bounded local
 `Optimized` tracking design and evidence. `0.5.1` is reserved for emergency
 patch work only.
 
-Planned:
+Added:
 
-- Design a bounded local `RUCKIG_TRACKING_OPTIMIZED` implementation rather than
-  aliasing it to Fast mode.
-- Define deterministic local evidence for Optimized tracking before any stable
-  `0.6.0` release decision.
-- Keep soft interruption checkpoints, formal Python/Rust publication,
-  package-manager recipes, cloud/remote calculation, formal Pro/cloud
-  equivalence claims, and upstream baseline upgrade as separate projects unless
-  explicitly accepted.
+- Added a `0.6.0-alpha` local `RUCKIG_TRACKING_OPTIMIZED` MVP with bounded
+  deterministic candidate search, horizon-error scoring, and Fast fallback.
+- Added online lookahead tracking through
+  `ruckig_tracking_update_with_lookahead`.
+- Added Optimized tracking candidate-budget and diagnostic public C APIs:
+  `ruckig_tracking_set_max_optimized_candidates`,
+  `ruckig_tracking_get_max_optimized_candidates`,
+  `ruckig_tracking_get_last_calculation_status`, and
+  `ruckig_tracking_get_last_candidate_count`.
+- Added C tests for Optimized API lifecycle, validation, online lookahead,
+  offline sliding-window calculation, quality dominance against Fast baseline,
+  fallback diagnostics, and no-allocation prepared paths.
+- Added Optimized tracking C examples and Python/Rust prototype smoke coverage.
+
+Changed:
+
+- `ruckig_tracking_update` now supports `RUCKIG_TRACKING_OPTIMIZED` with a
+  single-sample lookahead instead of returning `RUCKIG_ERROR_UNSUPPORTED`.
+- `ruckig_tracking_calculate_sequence` now uses sliding-window lookahead in
+  Optimized mode.
+- ABI artifact paths now use `artifacts/abi/0.6.0-alpha` for the current design
+  evidence line.
+
+Still deferred:
+
+- Stable `v0.6.0` release closeout, Pro/cloud numerical equivalence claims,
+  cloud/remote calculation, soft interruption checkpoints, formal Python/Rust
+  publication, package-manager recipes, and upstream baseline upgrade remain
+  separate projects unless explicitly accepted.
 
 ## 0.5.0 - 2026-06-07
 

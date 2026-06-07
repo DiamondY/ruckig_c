@@ -1,9 +1,9 @@
 # Python cffi ABI-Mode Prototype
 
 This directory is an experimental prototype over the public `ruckig_c` C ABI.
-It covers the `0.4.x` waypoint ABI and the `0.5.0-design` tracking alpha. It
-is not a released binding API, not installed by CMake, and not part of the
-public C ABI.
+It covers the `0.4.x` waypoint ABI, the stable `v0.5.0` Fast tracking ABI, and
+the `0.6.0-design` Optimized tracking alpha additions. It is not a released
+binding API, not installed by CMake, and not part of the public C ABI.
 
 The prototype loads an already-built shared `ruckig_c` library with `cffi`
 ABI mode and validates the minimum wrapper model:
@@ -20,8 +20,9 @@ ABI mode and validates the minimum wrapper model:
 - `0.4.0` waypoint-aware constructors, intermediate positions,
   per-section constraints, intermediate duration queries, position extrema,
   first-time-at-position, and local intermediate-position filtering.
-- `0.5.0-design` tracking alpha handles, online Fast tracking, offline target
-  sequences, `Optimized` unsupported errors, and tracking lifecycle checks.
+- tracking handles, online Fast tracking, offline target sequences,
+  `0.6.0-design` Optimized lookahead update, candidate-budget diagnostics, and
+  tracking lifecycle checks.
 
 ## Prerequisites
 

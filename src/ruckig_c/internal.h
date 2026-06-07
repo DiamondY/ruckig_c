@@ -144,6 +144,16 @@ struct ruckig_tracking {
     ruckig_tracking_mode_t mode;
     double reactiveness;
     size_t look_ahead_cycles;
+    size_t max_optimized_candidates;
+    ruckig_tracking_calculation_status_t last_calculation_status;
+    size_t last_candidate_count;
+    double* optimized_candidate_position;
+    double* optimized_candidate_velocity;
+    double* optimized_candidate_acceleration;
+    double* optimized_candidate_jerk;
+    double* optimized_best_position;
+    double* optimized_best_velocity;
+    double* optimized_best_acceleration;
     struct ruckig* otg;
     struct ruckig_input* work_input;
     struct ruckig_output* work_output;

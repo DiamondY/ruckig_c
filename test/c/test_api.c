@@ -2418,6 +2418,11 @@ static void run_tracking_loop_final(
     ruckig_tracking_destroy(tracking);
 }
 
+static bool tracking_optimized_status_is_success(ruckig_tracking_calculation_status_t status) {
+    return status == RUCKIG_TRACKING_CALCULATION_OPTIMIZED
+        || status == RUCKIG_TRACKING_CALCULATION_FAST_FALLBACK;
+}
+
 static void test_tracking_api_lifecycle_and_accessors(void) {
     ruckig_tracking_t* tracking = NULL;
     ruckig_target_state_t* target = NULL;
@@ -2432,11 +2437,18 @@ static void test_tracking_api_lifecycle_and_accessors(void) {
     CHECK_EQ_INT(ruckig_tracking_get_mode(tracking), RUCKIG_TRACKING_FAST);
     CHECK_NEAR(ruckig_tracking_get_reactiveness(tracking), 1.0, 0.0);
     CHECK_EQ_INT(ruckig_tracking_get_look_ahead_cycles(tracking), 1);
+    CHECK_EQ_INT(ruckig_tracking_get_max_optimized_candidates(tracking), 16);
+    CHECK_EQ_INT(ruckig_tracking_get_last_calculation_status(tracking), RUCKIG_TRACKING_CALCULATION_NONE);
+    CHECK_EQ_INT(ruckig_tracking_get_last_candidate_count(tracking), 0);
     CHECK_EQ_INT(ruckig_tracking_set_mode(tracking, RUCKIG_TRACKING_FAST), RUCKIG_WORKING);
     CHECK_EQ_INT(ruckig_tracking_set_reactiveness(tracking, 0.25), RUCKIG_WORKING);
     CHECK_NEAR(ruckig_tracking_get_reactiveness(tracking), 0.25, 0.0);
     CHECK_EQ_INT(ruckig_tracking_set_look_ahead_cycles(tracking, 3), RUCKIG_WORKING);
     CHECK_EQ_INT(ruckig_tracking_get_look_ahead_cycles(tracking), 3);
+    CHECK_EQ_INT(ruckig_tracking_set_max_optimized_candidates(tracking, 8), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_tracking_get_max_optimized_candidates(tracking), 8);
+    CHECK_EQ_INT(ruckig_tracking_set_max_optimized_candidates(tracking, 0), RUCKIG_ERROR_INVALID_INPUT);
+    CHECK_EQ_INT(ruckig_tracking_set_max_optimized_candidates(tracking, 129), RUCKIG_ERROR_INVALID_INPUT);
 
     CHECK_EQ_INT(ruckig_target_state_create(&target, 2), RUCKIG_WORKING);
     CHECK_EQ_INT(ruckig_target_state_get_dof_count(target), 2);
@@ -2530,19 +2542,27 @@ static void test_tracking_validation(void) {
     ruckig_input_clear_per_dof_control_interface(input);
 
     CHECK_EQ_INT(ruckig_tracking_set_mode(tracking, RUCKIG_TRACKING_OPTIMIZED), RUCKIG_WORKING);
-    CHECK_EQ_INT(ruckig_tracking_update(tracking, target, input, output), RUCKIG_ERROR_UNSUPPORTED);
+    {
+        ruckig_result_t optimized_result = ruckig_tracking_update(tracking, target, input, output);
+        CHECK_TRUE(optimized_result == RUCKIG_WORKING || optimized_result == RUCKIG_FINISHED);
+        CHECK_TRUE(
+            ruckig_tracking_get_last_calculation_status(tracking) == RUCKIG_TRACKING_CALCULATION_OPTIMIZED
+            || ruckig_tracking_get_last_calculation_status(tracking) == RUCKIG_TRACKING_CALCULATION_FAST_FALLBACK
+        );
+        CHECK_TRUE(ruckig_tracking_get_last_candidate_count(tracking) >= 1);
+    }
     CHECK_EQ_INT(ruckig_tracking_set_mode(tracking, RUCKIG_TRACKING_FAST), RUCKIG_WORKING);
 
     CHECK_EQ_INT(ruckig_target_state_sequence_set_count(target_sequence, 2), RUCKIG_WORKING);
     CHECK_EQ_INT(ruckig_tracking_set_mode(tracking, RUCKIG_TRACKING_OPTIMIZED), RUCKIG_WORKING);
-    CHECK_EQ_INT(ruckig_tracking_calculate_sequence(tracking, target_sequence, input, output_sequence), RUCKIG_ERROR_UNSUPPORTED);
-    CHECK_EQ_INT(ruckig_tracking_output_sequence_get_count(output_sequence), 0);
+    CHECK_EQ_INT(ruckig_tracking_calculate_sequence(tracking, target_sequence, input, output_sequence), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_tracking_output_sequence_get_count(output_sequence), 2);
     CHECK_EQ_INT(ruckig_tracking_set_mode(tracking, RUCKIG_TRACKING_FAST), RUCKIG_WORKING);
     CHECK_EQ_INT(ruckig_tracking_calculate_sequence(tracking, target_sequence, input, small_output_sequence), RUCKIG_ERROR_INVALID_INPUT);
     CHECK_EQ_INT(ruckig_tracking_calculate_sequence(tracking, empty_target_sequence, input, output_sequence), RUCKIG_ERROR_INVALID_INPUT);
     ruckig_target_state_sequence_position_data(target_sequence)[0] = INFINITY;
     CHECK_EQ_INT(ruckig_tracking_calculate_sequence(tracking, target_sequence, input, output_sequence), RUCKIG_ERROR_INVALID_INPUT);
-    CHECK_EQ_INT(ruckig_tracking_output_sequence_get_count(output_sequence), 0);
+    CHECK_EQ_INT(ruckig_tracking_get_last_calculation_status(tracking), RUCKIG_TRACKING_CALCULATION_ERROR);
 
     ruckig_tracking_output_sequence_destroy(small_output_sequence);
     ruckig_tracking_output_sequence_destroy(output_sequence);
@@ -2758,6 +2778,196 @@ static void test_tracking_offline_invariants(void) {
     }
 }
 
+static void test_tracking_optimized_single_target_and_lookahead(void) {
+    ruckig_tracking_t* tracking = NULL;
+    ruckig_target_state_t* target = NULL;
+    ruckig_target_state_sequence_t* lookahead = NULL;
+    ruckig_input_t* input = NULL;
+    ruckig_output_t* output = NULL;
+    size_t step;
+    const size_t lookahead_count = 4;
+
+    CHECK_EQ_INT(ruckig_tracking_create(&tracking, 1, 0.01), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_target_state_create(&target, 1), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_target_state_sequence_create(&lookahead, 1, lookahead_count), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_input_create(&input, 1), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_output_create(&output, 1), RUCKIG_WORKING);
+    fill_tracking_input_1d(input);
+    CHECK_EQ_INT(ruckig_tracking_set_mode(tracking, RUCKIG_TRACKING_OPTIMIZED), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_tracking_set_look_ahead_cycles(tracking, lookahead_count), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_tracking_set_max_optimized_candidates(tracking, 16), RUCKIG_WORKING);
+
+    for (step = 0; step < 24; ++step) {
+        set_tracking_target_signal(target, 0, 1, (double)step * 0.01);
+        {
+            ruckig_result_t result = ruckig_tracking_update(tracking, target, input, output);
+            CHECK_TRUE(result == RUCKIG_WORKING || result == RUCKIG_FINISHED);
+        }
+        CHECK_TRUE(tracking_optimized_status_is_success(ruckig_tracking_get_last_calculation_status(tracking)));
+        CHECK_TRUE(ruckig_tracking_get_last_candidate_count(tracking) >= 1);
+        CHECK_TRUE(ruckig_tracking_get_last_candidate_count(tracking) <= 16);
+        check_tracking_output_constraints(output, input, 1);
+        ruckig_output_pass_to_input(output, input);
+    }
+
+    CHECK_EQ_INT(ruckig_target_state_sequence_set_count(lookahead, lookahead_count), RUCKIG_WORKING);
+    set_tracking_sequence_signal(lookahead, 1, 1, lookahead_count, 0.01);
+    {
+        ruckig_result_t result = ruckig_tracking_update_with_lookahead(tracking, lookahead, input, output);
+        CHECK_TRUE(result == RUCKIG_WORKING || result == RUCKIG_FINISHED);
+    }
+    CHECK_TRUE(tracking_optimized_status_is_success(ruckig_tracking_get_last_calculation_status(tracking)));
+    CHECK_TRUE(ruckig_tracking_get_last_candidate_count(tracking) >= 1);
+    CHECK_TRUE(ruckig_tracking_get_last_candidate_count(tracking) <= 16);
+    check_tracking_output_constraints(output, input, 1);
+
+    ruckig_output_destroy(output);
+    ruckig_input_destroy(input);
+    ruckig_target_state_sequence_destroy(lookahead);
+    ruckig_target_state_destroy(target);
+    ruckig_tracking_destroy(tracking);
+}
+
+static void test_tracking_optimized_offline_sequence(void) {
+    const size_t dofs = 2;
+    const size_t count = 48;
+    ruckig_tracking_t* tracking = NULL;
+    ruckig_target_state_sequence_t* targets = NULL;
+    ruckig_tracking_output_sequence_t* outputs = NULL;
+    ruckig_input_t* input = NULL;
+
+    CHECK_EQ_INT(ruckig_tracking_create(&tracking, dofs, 0.01), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_target_state_sequence_create(&targets, dofs, count), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_tracking_output_sequence_create(&outputs, dofs, count), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_input_create(&input, dofs), RUCKIG_WORKING);
+    fill_tracking_input_nd(input, dofs);
+    CHECK_EQ_INT(ruckig_tracking_set_mode(tracking, RUCKIG_TRACKING_OPTIMIZED), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_tracking_set_look_ahead_cycles(tracking, 5), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_tracking_set_max_optimized_candidates(tracking, 12), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_target_state_sequence_set_count(targets, count), RUCKIG_WORKING);
+    set_tracking_sequence_signal(targets, 2, dofs, count, 0.01);
+
+    CHECK_EQ_INT(ruckig_tracking_calculate_sequence(tracking, targets, input, outputs), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_tracking_output_sequence_get_count(outputs), count);
+    CHECK_TRUE(tracking_optimized_status_is_success(ruckig_tracking_get_last_calculation_status(tracking)));
+    CHECK_TRUE(ruckig_tracking_get_last_candidate_count(tracking) >= count);
+    CHECK_TRUE(ruckig_tracking_get_last_candidate_count(tracking) <= count * 12);
+    check_tracking_output_sequence(outputs, dofs, count, 0.01);
+
+    ruckig_input_destroy(input);
+    ruckig_tracking_output_sequence_destroy(outputs);
+    ruckig_target_state_sequence_destroy(targets);
+    ruckig_tracking_destroy(tracking);
+}
+
+static void test_tracking_optimized_validation_and_diagnostics(void) {
+    ruckig_tracking_t* tracking = NULL;
+    ruckig_target_state_t* target = NULL;
+    ruckig_target_state_sequence_t* empty_lookahead = NULL;
+    ruckig_target_state_sequence_t* lookahead = NULL;
+    ruckig_input_t* input = NULL;
+    ruckig_output_t* output = NULL;
+
+    CHECK_EQ_INT(ruckig_tracking_create(&tracking, 1, 0.01), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_target_state_create(&target, 1), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_target_state_sequence_create(&empty_lookahead, 1, 1), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_target_state_sequence_create(&lookahead, 1, 2), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_input_create(&input, 1), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_output_create(&output, 1), RUCKIG_WORKING);
+    fill_tracking_input_1d(input);
+    fill_tracking_target_ramp(target, 0.0);
+    CHECK_EQ_INT(ruckig_tracking_set_mode(tracking, RUCKIG_TRACKING_OPTIMIZED), RUCKIG_WORKING);
+
+    CHECK_EQ_INT(ruckig_tracking_update_with_lookahead(tracking, empty_lookahead, input, output), RUCKIG_ERROR_INVALID_INPUT);
+    CHECK_EQ_INT(ruckig_tracking_get_last_calculation_status(tracking), RUCKIG_TRACKING_CALCULATION_ERROR);
+    CHECK_EQ_INT(ruckig_target_state_sequence_set_count(lookahead, 2), RUCKIG_WORKING);
+    set_tracking_sequence_signal(lookahead, 0, 1, 2, 0.01);
+    ruckig_target_state_sequence_position_data(lookahead)[1] = NAN;
+    CHECK_EQ_INT(ruckig_tracking_update_with_lookahead(tracking, lookahead, input, output), RUCKIG_ERROR_INVALID_INPUT);
+    CHECK_EQ_INT(ruckig_tracking_get_last_calculation_status(tracking), RUCKIG_TRACKING_CALCULATION_ERROR);
+
+    ruckig_target_state_position_data(target)[0] = NAN;
+    CHECK_EQ_INT(ruckig_tracking_update(tracking, target, input, output), RUCKIG_ERROR_INVALID_INPUT);
+    CHECK_EQ_INT(ruckig_tracking_get_last_calculation_status(tracking), RUCKIG_TRACKING_CALCULATION_ERROR);
+
+    ruckig_output_destroy(output);
+    ruckig_input_destroy(input);
+    ruckig_target_state_sequence_destroy(lookahead);
+    ruckig_target_state_sequence_destroy(empty_lookahead);
+    ruckig_target_state_destroy(target);
+    ruckig_tracking_destroy(tracking);
+}
+
+static void test_tracking_optimized_quality_against_fast_baseline(void) {
+    ruckig_tracking_t* fast_tracking = NULL;
+    ruckig_tracking_t* optimized_tracking = NULL;
+    ruckig_target_state_sequence_t* lookahead = NULL;
+    ruckig_input_t* fast_input = NULL;
+    ruckig_input_t* optimized_input = NULL;
+    ruckig_output_t* fast_output = NULL;
+    ruckig_output_t* optimized_output = NULL;
+    const double dt = 0.01;
+    const size_t steps = 120;
+    const size_t lookahead_count = 5;
+    size_t step;
+    double fast_error_sum = 0.0;
+    double optimized_error_sum = 0.0;
+
+    CHECK_EQ_INT(ruckig_tracking_create(&fast_tracking, 1, dt), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_tracking_create(&optimized_tracking, 1, dt), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_target_state_sequence_create(&lookahead, 1, lookahead_count), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_input_create(&fast_input, 1), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_input_create(&optimized_input, 1), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_output_create(&fast_output, 1), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_output_create(&optimized_output, 1), RUCKIG_WORKING);
+    fill_tracking_input_1d(fast_input);
+    fill_tracking_input_1d(optimized_input);
+    CHECK_EQ_INT(ruckig_tracking_set_look_ahead_cycles(fast_tracking, lookahead_count), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_tracking_set_look_ahead_cycles(optimized_tracking, lookahead_count), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_tracking_set_mode(optimized_tracking, RUCKIG_TRACKING_OPTIMIZED), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_tracking_set_max_optimized_candidates(optimized_tracking, 16), RUCKIG_WORKING);
+
+    for (step = 0; step < steps; ++step) {
+        size_t sample;
+        double target_position;
+        double target_velocity;
+        double target_acceleration;
+        CHECK_EQ_INT(ruckig_target_state_sequence_set_count(lookahead, lookahead_count), RUCKIG_WORKING);
+        for (sample = 0; sample < lookahead_count; ++sample) {
+            tracking_signal_value(1, 0, (double)(step + sample) * dt, &target_position, &target_velocity, &target_acceleration);
+            ruckig_target_state_sequence_position_data(lookahead)[sample] = target_position;
+            ruckig_target_state_sequence_velocity_data(lookahead)[sample] = target_velocity;
+            ruckig_target_state_sequence_acceleration_data(lookahead)[sample] = target_acceleration;
+        }
+        CHECK_EQ_INT(ruckig_tracking_update_with_lookahead(fast_tracking, lookahead, fast_input, fast_output), RUCKIG_WORKING);
+        CHECK_EQ_INT(ruckig_tracking_update_with_lookahead(optimized_tracking, lookahead, optimized_input, optimized_output), RUCKIG_WORKING);
+        tracking_signal_value(1, 0, (double)(step + 1) * dt, &target_position, &target_velocity, &target_acceleration);
+        (void)target_velocity;
+        (void)target_acceleration;
+        fast_error_sum += fabs(target_position - ruckig_output_new_position_data(fast_output)[0]);
+        optimized_error_sum += fabs(target_position - ruckig_output_new_position_data(optimized_output)[0]);
+        ruckig_output_pass_to_input(fast_output, fast_input);
+        ruckig_output_pass_to_input(optimized_output, optimized_input);
+    }
+
+    printf(
+        "tracking optimized quality constant_acceleration: optimized %.9g fast %.9g candidates %zu status %d\n",
+        optimized_error_sum,
+        fast_error_sum,
+        ruckig_tracking_get_last_candidate_count(optimized_tracking),
+        (int)ruckig_tracking_get_last_calculation_status(optimized_tracking)
+    );
+    CHECK_TRUE(optimized_error_sum <= fast_error_sum + 1e-9);
+
+    ruckig_output_destroy(optimized_output);
+    ruckig_output_destroy(fast_output);
+    ruckig_input_destroy(optimized_input);
+    ruckig_input_destroy(fast_input);
+    ruckig_target_state_sequence_destroy(lookahead);
+    ruckig_tracking_destroy(optimized_tracking);
+    ruckig_tracking_destroy(fast_tracking);
+}
+
 static void measure_tracking_quality_case(
     int signal,
     const char* name,
@@ -2893,6 +3103,29 @@ static void test_tracking_no_allocation(void) {
     CHECK_EQ_INT(ruckig_allocation_forbidden_count(), 0);
     ruckig_allocation_forbidden_set(false);
 
+    CHECK_EQ_INT(ruckig_tracking_set_mode(tracking, RUCKIG_TRACKING_OPTIMIZED), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_tracking_set_look_ahead_cycles(tracking, 2), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_tracking_set_max_optimized_candidates(tracking, 8), RUCKIG_WORKING);
+    ruckig_allocation_counters_reset();
+    allocations_before = ruckig_allocation_count();
+    ruckig_allocation_forbidden_set(true);
+    {
+        ruckig_result_t result = ruckig_tracking_update(tracking, target, input, output);
+        CHECK_TRUE(result == RUCKIG_WORKING || result == RUCKIG_FINISHED);
+    }
+    CHECK_EQ_INT(ruckig_allocation_count(), allocations_before);
+    CHECK_EQ_INT(ruckig_allocation_forbidden_count(), 0);
+    {
+        ruckig_result_t result = ruckig_tracking_update_with_lookahead(tracking, targets, input, output);
+        CHECK_TRUE(result == RUCKIG_WORKING || result == RUCKIG_FINISHED);
+    }
+    CHECK_EQ_INT(ruckig_allocation_count(), allocations_before);
+    CHECK_EQ_INT(ruckig_allocation_forbidden_count(), 0);
+    CHECK_EQ_INT(ruckig_tracking_calculate_sequence(tracking, targets, input, outputs), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_allocation_count(), allocations_before);
+    CHECK_EQ_INT(ruckig_allocation_forbidden_count(), 0);
+    ruckig_allocation_forbidden_set(false);
+
     ruckig_output_destroy(output);
     ruckig_input_destroy(input);
     ruckig_tracking_output_sequence_destroy(outputs);
@@ -2984,8 +3217,16 @@ void run_tracking_offline_tests(void) {
     test_tracking_offline_invariants();
 }
 
+void run_tracking_optimized_tests(void) {
+    test_tracking_optimized_single_target_and_lookahead();
+    test_tracking_optimized_offline_sequence();
+    test_tracking_optimized_validation_and_diagnostics();
+    test_tracking_optimized_quality_against_fast_baseline();
+}
+
 void run_tracking_quality_tests(void) {
     test_tracking_quality_against_instantaneous_chasing();
+    test_tracking_optimized_quality_against_fast_baseline();
 }
 
 void run_tracking_no_allocation_tests(void) {
@@ -2997,6 +3238,7 @@ void run_tracking_tests(void) {
     run_tracking_validation_tests();
     run_tracking_online_tests();
     run_tracking_offline_tests();
+    run_tracking_optimized_tests();
     run_tracking_quality_tests();
     run_tracking_no_allocation_tests();
 }

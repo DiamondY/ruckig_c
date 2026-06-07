@@ -209,9 +209,19 @@ ffi.cdef(
     double ruckig_tracking_get_reactiveness(const ruckig_tracking_t* tracking);
     ruckig_result_t ruckig_tracking_set_look_ahead_cycles(ruckig_tracking_t* tracking, size_t look_ahead_cycles);
     size_t ruckig_tracking_get_look_ahead_cycles(const ruckig_tracking_t* tracking);
+    ruckig_result_t ruckig_tracking_set_max_optimized_candidates(ruckig_tracking_t* tracking, size_t max_candidates);
+    size_t ruckig_tracking_get_max_optimized_candidates(const ruckig_tracking_t* tracking);
+    int ruckig_tracking_get_last_calculation_status(const ruckig_tracking_t* tracking);
+    size_t ruckig_tracking_get_last_candidate_count(const ruckig_tracking_t* tracking);
     ruckig_result_t ruckig_tracking_update(
         ruckig_tracking_t* tracking,
         const ruckig_target_state_t* target_state,
+        const ruckig_input_t* input,
+        ruckig_output_t* output
+    );
+    ruckig_result_t ruckig_tracking_update_with_lookahead(
+        ruckig_tracking_t* tracking,
+        const ruckig_target_state_sequence_t* target_sequence,
         const ruckig_input_t* input,
         ruckig_output_t* output
     );
@@ -296,6 +306,14 @@ class DurationDiscretization(enum.IntEnum):
 class TrackingMode(enum.IntEnum):
     FAST = 0
     OPTIMIZED = 1
+
+
+class TrackingCalculationStatus(enum.IntEnum):
+    NONE = 0
+    FAST = 1
+    OPTIMIZED = 2
+    FAST_FALLBACK = 3
+    ERROR = 4
 
 
 @dataclass(frozen=True)
@@ -750,10 +768,44 @@ class Tracking(_Handle):
             "ruckig_tracking_set_look_ahead_cycles",
         )
 
+    @property
+    def max_optimized_candidates(self) -> int:
+        return int(_library().ruckig_tracking_get_max_optimized_candidates(self.ptr))
+
+    def set_max_optimized_candidates(self, max_candidates: int) -> None:
+        _result(
+            _library().ruckig_tracking_set_max_optimized_candidates(self.ptr, int(max_candidates)),
+            "ruckig_tracking_set_max_optimized_candidates",
+        )
+
+    @property
+    def last_calculation_status(self) -> TrackingCalculationStatus:
+        return TrackingCalculationStatus(int(_library().ruckig_tracking_get_last_calculation_status(self.ptr)))
+
+    @property
+    def last_candidate_count(self) -> int:
+        return int(_library().ruckig_tracking_get_last_candidate_count(self.ptr))
+
     def update(self, target_state: TargetState, input_: "Input", output: "Output") -> Result:
         return _result(
             _library().ruckig_tracking_update(self.ptr, target_state.ptr, input_.ptr, output.ptr),
             "ruckig_tracking_update",
+        )
+
+    def update_with_lookahead(
+        self,
+        target_sequence: TargetStateSequence,
+        input_: "Input",
+        output: "Output",
+    ) -> Result:
+        return _result(
+            _library().ruckig_tracking_update_with_lookahead(
+                self.ptr,
+                target_sequence.ptr,
+                input_.ptr,
+                output.ptr,
+            ),
+            "ruckig_tracking_update_with_lookahead",
         )
 
     def calculate_sequence(

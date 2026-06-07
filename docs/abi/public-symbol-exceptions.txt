@@ -104,3 +104,10 @@ allow-add ruckig_tracking_set_look_ahead_cycles
 allow-add ruckig_tracking_set_mode
 allow-add ruckig_tracking_set_reactiveness
 allow-add ruckig_tracking_update
+
+# 0.6.0-design Optimized tracking alpha public API additions.
+allow-add ruckig_tracking_get_last_calculation_status
+allow-add ruckig_tracking_get_last_candidate_count
+allow-add ruckig_tracking_get_max_optimized_candidates
+allow-add ruckig_tracking_set_max_optimized_candidates
+allow-add ruckig_tracking_update_with_lookahead

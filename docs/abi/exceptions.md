@@ -63,3 +63,32 @@ recorded in `CHANGELOG.md`, tracked in `docs/abi/public-symbols.txt`, and
 listed as `allow-add` entries in `docs/abi/public-symbol-exceptions.txt`.
 Existing `v0.3.0` public symbols, signatures, enum values, and result-code
 numeric values remain frozen.
+
+## 0.5.0 Tracking API Expansion
+
+`0.5.0` stabilizes the public C tracking ABI for local Fast-mode online and
+offline tracking. The approved additions expose tracking handles, target-state
+handles, target-state sequences, tracking output sequences, mode/reactiveness
+configuration, online update, and offline sequence calculation.
+
+These additions are approved by `docs/design/tracking_interface.md`, recorded
+in `CHANGELOG.md`, tracked in `docs/abi/public-symbols.txt`, and listed as
+`allow-add` entries in `docs/abi/public-symbol-exceptions.txt`.
+
+## 0.6.0-alpha Optimized Tracking API Expansion
+
+`0.6.0-alpha` is a design-line evidence checkpoint, not a stable release. The
+approved additions expose bounded local Optimized tracking controls and
+diagnostics:
+
+- `ruckig_tracking_set_max_optimized_candidates`
+- `ruckig_tracking_get_max_optimized_candidates`
+- `ruckig_tracking_get_last_calculation_status`
+- `ruckig_tracking_get_last_candidate_count`
+- `ruckig_tracking_update_with_lookahead`
+
+These additions are approved by `docs/design/tracking_optimized_mode.md`,
+recorded in `CHANGELOG.md`, tracked in `docs/abi/public-symbols.txt`, and
+listed as `allow-add` entries in `docs/abi/public-symbol-exceptions.txt`.
+Existing `v0.5.0` public symbols, signatures, enum values, and result-code
+numeric values remain frozen.

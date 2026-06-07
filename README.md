@@ -29,19 +29,22 @@ Implemented and covered by fixed C/oracle tests plus deterministic random oracle
   constraints, intermediate duration queries, and local coupled waypoint
   optimizer.
 - `v0.5.0` tracking C ABI and local Fast-mode online/offline tracking
-  implementation. `Optimized` mode is declared but returns
-  `RUCKIG_ERROR_UNSUPPORTED` and is deferred to `0.6.0-design`.
+  implementation.
+- `0.6.0-design` alpha local `Optimized` tracking MVP on `main`, including
+  bounded deterministic candidate search, online lookahead update, offline
+  sliding-window sequence calculation, Fast fallback diagnostics, and
+  Python/Rust prototype smoke coverage.
 - C examples for position, offline position, online update, per-DoF overrides,
   velocity, stop, minimum duration, waypoints, per-section minimum duration,
-  and tracking Fast-mode scenarios.
+  tracking Fast-mode scenarios, and `0.6.0-design` Optimized tracking alpha
+  scenarios.
 
 Release-readiness evidence is tracked under `docs/release/`; see
 `docs/index.md` for the organized documentation map. `v0.5.0` is the current
 stable release. It stabilizes the tracking C ABI and local Fast-mode tracking
-implementation while keeping `Optimized` tracking unsupported until
-`0.6.0-design`. `main` is now `0.6.0-design - Unreleased`, with bounded local
-`Optimized` tracking design and evidence as the first priority. `0.5.1` is
-reserved for emergency patch work only.
+implementation. `main` is now `0.6.0-design - Unreleased`; it contains
+`0.6.0-alpha` evidence for bounded local `Optimized` tracking, but this is not
+a stable `v0.6.0` release. `0.5.1` is reserved for emergency patch work only.
 `v0.4.0` added waypoint-aware C ABI entry points, per-section constraints,
 global position bounds, and a local coupled waypoint optimizer; `v0.4.1`
 deepened waypoint optimizer evidence; `v0.4.2` keeps that public C surface
@@ -56,8 +59,9 @@ Current stable release scope intentionally excludes:
 - Cloud and remote calculation; local optimizer and tracking work only.
 - Formal Ruckig Pro/cloud global numerical equivalence claims.
 - Hard real-time guarantees for waypoint optimization.
-- `Optimized` tracking implementation. The enum is present for API shape
-  parity, but calls return `RUCKIG_ERROR_UNSUPPORTED` in `0.5.x`.
+- Stable `Optimized` tracking release guarantees. `main` contains an alpha
+  local implementation, but `v0.5.0` remains Fast-only and `v0.6.0` is not
+  released.
 - Soft interruption checkpoints for waypoint optimization; the interrupt
   duration field remains storage/API-surface parity only.
 - Python/Rust binding publication. The Python `cffi` prototype and Rust alpha
@@ -266,11 +270,14 @@ destroying the owning output handle.
 
 Tracking usage creates a `ruckig_tracking_t` handle plus target
 state or target sequence handles. `Fast` mode performs local
-constant-acceleration lookahead and calls the existing update path; `Optimized`
-mode is declared but returns `RUCKIG_ERROR_UNSUPPORTED` and is deferred to
-`0.6.0-design`. See `docs/design/tracking_interface.md` for the tracking
-semantics and `docs/design/0.5.0_release_decision.md` for the Fast-only stable
-release boundary.
+constant-acceleration lookahead and calls the existing update path. On `main`,
+`0.6.0-design` also includes an alpha local `Optimized` mode with bounded
+candidate search, online lookahead sequences, offline sliding-window sequence
+calculation, and fallback diagnostics. `v0.5.0` remains the current stable
+Fast-only release. See `docs/design/tracking_interface.md` for the stable
+tracking ABI semantics, `docs/design/tracking_optimized_mode.md` for the alpha
+Optimized design, and `docs/design/0.5.0_release_decision.md` for the Fast-only
+stable release boundary.
 
 ## Memory Model
 
@@ -334,6 +341,9 @@ The C examples are in `examples/c`:
 - `15_tracking_online_fast_ramp.c`
 - `16_tracking_online_constant_acceleration.c`
 - `17_tracking_offline_sequence.c`
+- `18_tracking_online_optimized_lookahead.c`
+- `19_tracking_online_optimized_sinus.c`
+- `20_tracking_offline_optimized_sequence.c`
 
 All examples are wired into CMake when `BUILD_RUCKIG_C_EXAMPLES=ON`.
 

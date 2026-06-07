@@ -186,6 +186,7 @@ if(BUILD_RUCKIG_C_TESTS)
   add_test(NAME ruckig_c_tracking_online COMMAND ruckig_c_tests --tracking-online)
   add_test(NAME ruckig_c_tracking_fixed_corpus COMMAND ruckig_c_tests --tracking-fixed-corpus)
   add_test(NAME ruckig_c_tracking_offline COMMAND ruckig_c_tests --tracking-offline)
+  add_test(NAME ruckig_c_tracking_optimized COMMAND ruckig_c_tests --tracking-optimized)
   add_test(NAME ruckig_c_tracking_quality COMMAND ruckig_c_tests --tracking-quality)
   add_test(NAME ruckig_c_tracking_no_allocation COMMAND ruckig_c_tests --tracking-no-allocation)
   add_test(NAME ruckig_c_allocation_audit
@@ -369,6 +370,24 @@ if(BUILD_RUCKIG_C_EXAMPLES)
   endif()
   add_test(NAME example_ruckig_c_17_tracking_offline_sequence COMMAND example-ruckig-c-17-tracking-offline-sequence)
 
+  add_executable(example-ruckig-c-18-tracking-online-optimized-lookahead examples/c/18_tracking_online_optimized_lookahead.c)
+  target_link_libraries(example-ruckig-c-18-tracking-online-optimized-lookahead PRIVATE ruckig_c)
+  add_test(NAME example_ruckig_c_18_tracking_online_optimized_lookahead COMMAND example-ruckig-c-18-tracking-online-optimized-lookahead)
+
+  add_executable(example-ruckig-c-19-tracking-online-optimized-sinus examples/c/19_tracking_online_optimized_sinus.c)
+  target_link_libraries(example-ruckig-c-19-tracking-online-optimized-sinus PRIVATE ruckig_c)
+  if(NOT WIN32)
+    target_link_libraries(example-ruckig-c-19-tracking-online-optimized-sinus PRIVATE m)
+  endif()
+  add_test(NAME example_ruckig_c_19_tracking_online_optimized_sinus COMMAND example-ruckig-c-19-tracking-online-optimized-sinus)
+
+  add_executable(example-ruckig-c-20-tracking-offline-optimized-sequence examples/c/20_tracking_offline_optimized_sequence.c)
+  target_link_libraries(example-ruckig-c-20-tracking-offline-optimized-sequence PRIVATE ruckig_c)
+  if(NOT WIN32)
+    target_link_libraries(example-ruckig-c-20-tracking-offline-optimized-sequence PRIVATE m)
+  endif()
+  add_test(NAME example_ruckig_c_20_tracking_offline_optimized_sequence COMMAND example-ruckig-c-20-tracking-offline-optimized-sequence)
+
   add_custom_target(ruckig_c_examples
     DEPENDS
       example-ruckig-c-00-minimal-offline
@@ -389,6 +408,9 @@ if(BUILD_RUCKIG_C_EXAMPLES)
       example-ruckig-c-15-tracking-online-fast-ramp
       example-ruckig-c-16-tracking-online-constant-acceleration
       example-ruckig-c-17-tracking-offline-sequence
+      example-ruckig-c-18-tracking-online-optimized-lookahead
+      example-ruckig-c-19-tracking-online-optimized-sinus
+      example-ruckig-c-20-tracking-offline-optimized-sequence
   )
 endif()
 
@@ -465,7 +487,7 @@ if(BUILD_RUCKIG_C_PERFORMANCE_TESTS)
   add_test(NAME ruckig_c_waypoint_performance_benchmark COMMAND ruckig_c_performance_benchmark --samples 1000 --seed 1 --waypoints)
 endif()
 
-set(RUCKIG_C_ABI_OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/artifacts/abi/0.5.0")
+set(RUCKIG_C_ABI_OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/artifacts/abi/0.6.0-alpha")
 set(RUCKIG_C_ABI_PUBLIC_GENERATED_FILE "${RUCKIG_C_ABI_OUTPUT_DIR}/public-symbols-from-header.txt")
 set(RUCKIG_C_ABI_PUBLIC_VERIFY_FILE "${RUCKIG_C_ABI_OUTPUT_DIR}/public-symbols-verify.txt")
 add_custom_command(

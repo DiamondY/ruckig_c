@@ -89,6 +89,16 @@ pub enum TrackingMode {
     Optimized = 1,
 }
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[repr(i32)]
+pub enum TrackingCalculationStatus {
+    None = 0,
+    Fast = 1,
+    Optimized = 2,
+    FastFallback = 3,
+    Error = 4,
+}
+
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Bound {
     pub min: f64,
@@ -326,9 +336,22 @@ unsafe extern "C" {
         look_ahead_cycles: usize,
     ) -> i32;
     fn ruckig_tracking_get_look_ahead_cycles(tracking: *const TrackingRaw) -> usize;
+    fn ruckig_tracking_set_max_optimized_candidates(
+        tracking: *mut TrackingRaw,
+        max_candidates: usize,
+    ) -> i32;
+    fn ruckig_tracking_get_max_optimized_candidates(tracking: *const TrackingRaw) -> usize;
+    fn ruckig_tracking_get_last_calculation_status(tracking: *const TrackingRaw) -> i32;
+    fn ruckig_tracking_get_last_candidate_count(tracking: *const TrackingRaw) -> usize;
     fn ruckig_tracking_update(
         tracking: *mut TrackingRaw,
         target_state: *const TargetStateRaw,
+        input: *const InputRaw,
+        output: *mut OutputRaw,
+    ) -> i32;
+    fn ruckig_tracking_update_with_lookahead(
+        tracking: *mut TrackingRaw,
+        target_sequence: *const TargetStateSequenceRaw,
         input: *const InputRaw,
         output: *mut OutputRaw,
     ) -> i32;
@@ -1492,6 +1515,34 @@ impl Tracking {
         Ok(())
     }
 
+    pub fn max_optimized_candidates(&self) -> usize {
+        unsafe { ruckig_tracking_get_max_optimized_candidates(self.raw.as_ptr()) }
+    }
+
+    pub fn set_max_optimized_candidates(&mut self, max_candidates: usize) -> Result<()> {
+        check_code(
+            unsafe {
+                ruckig_tracking_set_max_optimized_candidates(self.raw.as_ptr(), max_candidates)
+            },
+            "ruckig_tracking_set_max_optimized_candidates",
+        )?;
+        Ok(())
+    }
+
+    pub fn last_calculation_status(&self) -> TrackingCalculationStatus {
+        match unsafe { ruckig_tracking_get_last_calculation_status(self.raw.as_ptr()) } {
+            1 => TrackingCalculationStatus::Fast,
+            2 => TrackingCalculationStatus::Optimized,
+            3 => TrackingCalculationStatus::FastFallback,
+            4 => TrackingCalculationStatus::Error,
+            _ => TrackingCalculationStatus::None,
+        }
+    }
+
+    pub fn last_candidate_count(&self) -> usize {
+        unsafe { ruckig_tracking_get_last_candidate_count(self.raw.as_ptr()) }
+    }
+
     pub fn update(
         &mut self,
         target_state: &TargetState,
@@ -1508,6 +1559,25 @@ impl Tracking {
                 )
             },
             "ruckig_tracking_update",
+        )
+    }
+
+    pub fn update_with_lookahead(
+        &mut self,
+        target_sequence: &TargetStateSequence,
+        input: &InputParameter,
+        output: &mut OutputParameter,
+    ) -> Result<RuckigResult> {
+        check_code(
+            unsafe {
+                ruckig_tracking_update_with_lookahead(
+                    self.raw.as_ptr(),
+                    target_sequence.raw.as_ptr(),
+                    input.raw.as_ptr(),
+                    output.raw.as_ptr(),
+                )
+            },
+            "ruckig_tracking_update_with_lookahead",
         )
     }
 
@@ -1745,6 +1815,12 @@ mod tests {
         configure_tracking_input(&mut input)?;
         assert_eq!(tracking.mode(), TrackingMode::Fast);
         assert_eq!(tracking.look_ahead_cycles(), 1);
+        assert_eq!(tracking.max_optimized_candidates(), 16);
+        assert_eq!(
+            tracking.last_calculation_status(),
+            TrackingCalculationStatus::None
+        );
+        assert_eq!(tracking.last_candidate_count(), 0);
         assert!((tracking.reactiveness() - 1.0).abs() < f64::EPSILON);
 
         for step in 0..200 {
@@ -1861,35 +1937,64 @@ mod tests {
         assert_eq!(tracking.set_reactiveness(1.01).unwrap_err().code, -100);
         assert_eq!(tracking.set_reactiveness(f64::NAN).unwrap_err().code, -100);
         assert_eq!(tracking.set_look_ahead_cycles(0).unwrap_err().code, -100);
+        assert_eq!(
+            tracking.set_max_optimized_candidates(0).unwrap_err().code,
+            -100
+        );
+        assert_eq!(
+            tracking.set_max_optimized_candidates(129).unwrap_err().code,
+            -100
+        );
         Ok(())
     }
 
     #[test]
-    fn tracking_optimized_is_unsupported_in_alpha() -> Result<()> {
+    fn tracking_optimized_smoke() -> Result<()> {
         let mut tracking = Tracking::new(1, 0.01)?;
         let mut target = TargetState::new(1)?;
-        let mut targets = TargetStateSequence::new(1, 1)?;
-        let mut outputs = TrackingOutputSequence::new(1, 1)?;
+        let mut targets = TargetStateSequence::new(1, 4)?;
+        let mut outputs = TrackingOutputSequence::new(1, 4)?;
         let mut input = InputParameter::new(1)?;
         let mut output = OutputParameter::new(1)?;
         configure_tracking_input(&mut input)?;
         target.set_position(&[0.0])?;
         target.set_velocity(&[0.5])?;
         target.set_acceleration(&[0.0])?;
-        targets.set_count(1)?;
-        targets.set_state(0, &[0.0], &[0.5], &[0.0])?;
+        targets.set_count(4)?;
+        for step in 0..4 {
+            let t = step as f64 * tracking.delta_time();
+            targets.set_state(step, &[0.5 * t], &[0.5], &[0.0])?;
+        }
         tracking.set_mode(TrackingMode::Optimized)?;
-        let error = tracking.update(&target, &input, &mut output).unwrap_err();
-        assert_eq!(error.code, -200);
-        assert_eq!(error.operation, "ruckig_tracking_update");
-        let offline_error = tracking
-            .calculate_sequence(&targets, &input, &mut outputs)
-            .unwrap_err();
-        assert_eq!(offline_error.code, -200);
-        assert_eq!(
-            offline_error.operation,
-            "ruckig_tracking_calculate_sequence"
+        tracking.set_look_ahead_cycles(4)?;
+        tracking.set_max_optimized_candidates(16)?;
+        let result = tracking.update(&target, &input, &mut output)?;
+        assert!(result == RuckigResult::Working || result == RuckigResult::Finished);
+        assert!(
+            tracking.last_calculation_status() == TrackingCalculationStatus::Optimized
+                || tracking.last_calculation_status() == TrackingCalculationStatus::FastFallback
         );
+        assert!(tracking.last_candidate_count() >= 1);
+        assert!(tracking.last_candidate_count() <= tracking.max_optimized_candidates());
+
+        let result = tracking.update_with_lookahead(&targets, &input, &mut output)?;
+        assert!(result == RuckigResult::Working || result == RuckigResult::Finished);
+        assert!(
+            tracking.last_calculation_status() == TrackingCalculationStatus::Optimized
+                || tracking.last_calculation_status() == TrackingCalculationStatus::FastFallback
+        );
+        assert!(tracking.last_candidate_count() >= 1);
+
+        assert_eq!(
+            tracking.calculate_sequence(&targets, &input, &mut outputs)?,
+            RuckigResult::Working
+        );
+        assert_eq!(outputs.count(), 4);
+        assert!(
+            tracking.last_calculation_status() == TrackingCalculationStatus::Optimized
+                || tracking.last_calculation_status() == TrackingCalculationStatus::FastFallback
+        );
+        assert!(tracking.last_candidate_count() >= 4);
         Ok(())
     }
 }

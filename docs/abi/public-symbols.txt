@@ -2,7 +2,9 @@
 #
 # Source of truth: declarations marked RUCKIG_C_API in
 # include/ruckig_c/ruckig.h. The 0.4.0 line intentionally expands the
-# public C ABI for original-surface waypoint/per-section parity.
+# public C ABI for original-surface waypoint/per-section parity, 0.5.0
+# adds stable tracking Fast-mode ABI, and 0.6.0-alpha adds approved
+# Optimized tracking alpha diagnostics and lookahead update.
 ruckig_calculate
 ruckig_create
 ruckig_create_with_waypoints
@@ -134,6 +136,9 @@ ruckig_tracking_destroy
 ruckig_tracking_get_delta_time
 ruckig_tracking_get_dof_count
 ruckig_tracking_get_look_ahead_cycles
+ruckig_tracking_get_last_calculation_status
+ruckig_tracking_get_last_candidate_count
+ruckig_tracking_get_max_optimized_candidates
 ruckig_tracking_get_mode
 ruckig_tracking_get_reactiveness
 ruckig_tracking_output_sequence_clear
@@ -150,9 +155,11 @@ ruckig_tracking_output_sequence_result_const_data
 ruckig_tracking_output_sequence_section_const_data
 ruckig_tracking_output_sequence_time_const_data
 ruckig_tracking_set_look_ahead_cycles
+ruckig_tracking_set_max_optimized_candidates
 ruckig_tracking_set_mode
 ruckig_tracking_set_reactiveness
 ruckig_tracking_update
+ruckig_tracking_update_with_lookahead
 ruckig_trajectory_at_time
 ruckig_trajectory_create
 ruckig_trajectory_create_with_waypoints

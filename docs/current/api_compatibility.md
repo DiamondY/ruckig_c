@@ -455,3 +455,34 @@ Use these checks during release evidence review:
 cmake --build out\build\windows-clang-ninja-shared --target ruckig_c_verify_public_symbols
 cmake --build out\build\windows-clang-ninja-shared --target ruckig_c_compare_public_exported_symbols
 ```
+
+## 0.6.0-alpha Optimized Tracking API Expansion
+
+`0.6.0-alpha` is an evidence checkpoint on `main`, not a stable release. It
+adds a bounded local Optimized tracking MVP on top of the stable `v0.5.0`
+tracking ABI. Existing `v0.5.0` public functions, function signatures, enum
+numeric values, and result-code numeric values must remain unchanged.
+
+Compatibility rules for the `0.6.0-alpha` tracking line:
+
+- Existing `v0.5.0` public symbols must remain exported.
+- New public symbols are limited to the accepted Optimized tracking alpha API
+  in `docs/design/tracking_optimized_mode.md`.
+- `docs/abi/public-symbols.txt` contains 169 approved public symbols: the
+  `v0.5.0` 164-symbol set plus 5 intentional Optimized tracking symbols.
+- `docs/abi/public-symbol-exceptions.txt` records the intentional
+  `0.6.0-design` additions as `allow-add` entries.
+- `ruckig_tracking_calculation_status_t` is additive. Existing enum numeric
+  values and result-code numeric values are unchanged.
+- `RUCKIG_TRACKING_OPTIMIZED` now has alpha local behavior on `main`, but this
+  is not a Pro/cloud equivalence claim and not a stable `v0.6.0` release.
+- Tracking internals, candidate buffers, scoring helpers, and workspace
+  structures must not be exported.
+- `original/ruckig-main` remains frozen as the Ruckig Community `0.17.3`
+  reference baseline.
+
+`0.6.0-alpha` ABI artifact output paths use the design evidence directory:
+
+```text
+out/build/<preset>/artifacts/abi/0.6.0-alpha/
+```

@@ -103,6 +103,7 @@ void run_tracking_validation_tests(void);
 void run_tracking_online_tests(void);
 void run_tracking_fixed_corpus_tests(void);
 void run_tracking_offline_tests(void);
+void run_tracking_optimized_tests(void);
 void run_tracking_quality_tests(void);
 void run_tracking_no_allocation_tests(void);
 void run_tracking_tests(void);
@@ -145,6 +146,10 @@ int main(int argc, char** argv) {
             run_tracking_offline_tests();
             return ruckig_c_test_failures == 0 ? 0 : 1;
         }
+        if (strcmp(argv[1], "--tracking-optimized") == 0) {
+            run_tracking_optimized_tests();
+            return ruckig_c_test_failures == 0 ? 0 : 1;
+        }
         if (strcmp(argv[1], "--tracking-quality") == 0) {
             run_tracking_quality_tests();
             return ruckig_c_test_failures == 0 ? 0 : 1;
@@ -157,7 +162,7 @@ int main(int argc, char** argv) {
         return 2;
     }
     if (argc > 2) {
-        fprintf(stderr, "usage: ruckig_c_tests [--waypoint|--per-section|--waypoint-quality|--tracking|--tracking-api|--tracking-validation|--tracking-online|--tracking-fixed-corpus|--tracking-offline|--tracking-quality|--tracking-no-allocation]\n");
+        fprintf(stderr, "usage: ruckig_c_tests [--waypoint|--per-section|--waypoint-quality|--tracking|--tracking-api|--tracking-validation|--tracking-online|--tracking-fixed-corpus|--tracking-offline|--tracking-optimized|--tracking-quality|--tracking-no-allocation]\n");
         return 2;
     }
 
