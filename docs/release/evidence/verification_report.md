@@ -3,6 +3,93 @@
 This report records verification runs for the C rewrite. Commands are run from
 the repository root unless noted otherwise.
 
+## 2026-06-07 Windows 0.5.0 Release-Candidate Verification
+
+Environment:
+
+- OS: Windows
+- Compiler: clang 21.1.8, target `x86_64-pc-windows-msvc`
+- CMake build presets:
+  - `windows-clang-ninja`
+  - `windows-clang-ninja-shared`
+  - `windows-clang-ninja-oracle`
+  - `windows-clang-ninja-performance`
+
+Scope:
+
+- Stable `v0.5.0` tracking Fast-mode release closeout.
+- Public C symbol allowlist baseline: 164 symbols.
+- `RUCKIG_TRACKING_OPTIMIZED` remains declared but unsupported.
+- `original/ruckig-main` diff is empty.
+
+Local release-candidate commands and results:
+
+```text
+cmake --build --preset windows-clang-ninja
+Result: passed.
+
+cmake --build --preset windows-clang-ninja-shared
+Result: passed.
+
+ctest --test-dir out\build\windows-clang-ninja --output-on-failure -E ruckig_c_oracle_random_release
+Result: 34/34 passed.
+
+ctest --test-dir out\build\windows-clang-ninja-shared --output-on-failure -E ruckig_c_oracle_random_release
+Result: 34/34 passed.
+
+ctest --test-dir out\build\windows-clang-ninja -R ruckig_c_tracking --output-on-failure
+Result: 7/7 passed.
+
+cmake --build out\build\windows-clang-ninja-shared --target ruckig_c_verify_public_symbols
+Result: clean, header public symbols 164, expected public symbols 164, missing 0, extra 0.
+
+cmake --build out\build\windows-clang-ninja-shared --target ruckig_c_compare_public_exported_symbols
+Result: clean, current exports 164, approved public symbols 164, missing public 0, removed public 0, unapproved exported 0.
+
+out\build\windows-clang-ninja-oracle\ruckig_c_oracle_tests.exe
+Result: fixed oracle 76, waypoint section oracle 4.
+
+out\build\windows-clang-ninja-oracle\ruckig_c_oracle_tests.exe --random 100000 --seed 1
+Result: passed.
+
+out\build\windows-clang-ninja-oracle\ruckig_c_oracle_tests.exe --random 100000 --seed 2
+Result: passed.
+
+out\build\windows-clang-ninja-oracle\ruckig_c_oracle_tests.exe --random 100000 --seed 41
+Result: passed.
+
+out\build\windows-clang-ninja-oracle\ruckig_c_oracle_tests.exe --random-per-dof 100000 --seed 1
+Result: passed.
+
+ctest --test-dir out\build\windows-clang-ninja-oracle -R ruckig_c_oracle_random_release --output-on-failure
+Result: passed in 57.05 seconds.
+
+python bindings\python_prototype\test_prototype.py
+Result: 20 tests, OK, with RUCKIG_C_SHARED_LIBRARY pointing to the Windows shared build.
+
+cargo test --manifest-path bindings\rust\Cargo.toml
+Result: 12 tests, OK.
+
+cargo test --manifest-path bindings\rust\Cargo.toml --examples
+Result: examples test target passed.
+```
+
+Tracking quality output:
+
+```text
+tracking quality ramp_tuned: avg_fast 0.0770257605 avg_naive 0.0931857678 max_fast 0.138649318 max_naive 0.111951035 final_fast 0.0115753955 final_naive 0.0955496694 improvement 0.173417
+tracking quality constant_acceleration: avg_fast 0.0003657225 avg_naive 0.0132352167 max_fast 0.00047575897 max_naive 0.0336833918 final_fast 0.00047575897 final_naive 0.0336833918 improvement 0.972367
+tracking quality sinus_trend: avg_fast 0.0145618942 avg_naive 0.01135288 max_fast 0.0333028253 max_naive 0.0148639852 final_fast 0.00347732196 final_naive 0.00888145933 improvement -0.282661
+```
+
+Remote publication status:
+
+- `gh auth status -h github.com` failed because the configured token for
+  `DiamondY` is invalid.
+- Push CI run ids, manual release-random workflow ids, annotated tag
+  `v0.5.0`, GitHub Release publication, and post-release `0.6.0-design`
+  transition remain blocked until GitHub authentication is repaired.
+
 ## 2026-06-03 Windows Clang Verification
 
 Environment:

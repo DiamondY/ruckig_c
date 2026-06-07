@@ -1,14 +1,15 @@
 # Changelog
 
-## 0.5.0-design - Unreleased
+## 0.5.0 - 2026-06-07
 
-`main` is now on the `0.5.0-design` line after the published `v0.4.2`
-original-parity coverage closeout. This line is for tracking interface design
-and local implementation planning before any stable `0.5.0` release.
+`0.5.0` is the stable tracking Fast-mode release. It stabilizes the public C
+tracking ABI added during `0.5.0-design`, includes local online/offline Fast
+tracking, and keeps `RUCKIG_TRACKING_OPTIMIZED` declared but unsupported until
+the separate `0.6.0-design` implementation work.
 
 Added:
 
-- Added the accepted tracking public C ABI proposal and first local alpha
+- Added the accepted tracking public C ABI and first local
   implementation surface: opaque tracking handles, target-state handles,
   target-state sequences, tracking output sequences, online tracking update,
   and offline sequence calculation.
@@ -26,20 +27,17 @@ Added:
 
 Changed:
 
-- ABI artifact output paths now use `artifacts/abi/0.5.0-alpha` for the
-  tracking alpha evidence line.
+- ABI artifact output paths now use `artifacts/abi/0.5.0` for the stable
+  tracking release evidence line.
 - `docs/abi/public-symbols.txt` and public ABI exception approvals now include
   the intentional `0.5.0-design` tracking public symbols.
-- Keep `v0.4.2` as the latest stable release and original parity
-  coverage/evidence baseline.
-- A stable `v0.5.0` release may remain Fast-only if the alpha evidence stays
-  clean; `Optimized` tracking implementation is now tracked for
-  `0.6.0-design`, not `0.5.x`.
+- `v0.5.0` becomes the current stable release. `v0.4.2` remains the
+  original-parity coverage/evidence baseline before tracking stabilization.
+- `Optimized` tracking implementation is tracked for `0.6.0-design`, not
+  `0.5.x`.
 
 Still deferred:
 
-- Stable `v0.5.0` release closeout. The current line records alpha evidence
-  first.
 - Tracking `Optimized` mode implementation; the enum is declared but calls
   return `RUCKIG_ERROR_UNSUPPORTED` and implementation is deferred to
   `0.6.0-design`.

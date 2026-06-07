@@ -127,6 +127,7 @@ Current same-platform release baselines:
 | `0.4.0` | `1.23622` | `1.17323` push CI; `1.29272` manual workflow | Original-surface parity release. Windows local alpha.4 pre-stable gate; Linux final push CI run `27038403450`, artifact `7446167572`; manual workflow run `27038538349`, artifact `7446219206`. |
 | `0.4.1` | `1.18871` | `1.29559` push CI; `1.31319` manual workflow | Deep stabilization release. Windows local closeout gate; Linux final push CI run `27056498079`, artifact `7452526552`; manual workflow run `27058264617`. |
 | `0.4.2` | `1.35448` | `1.26819` push CI; `1.30502` tag manual workflow | Original parity coverage/evidence closeout. Windows local closeout gate; Linux release-candidate push CI run `27063738903`, artifact `7454827710`; tag manual workflow run `27064919699`. |
+| `0.5.0-rc` | `1.27789` | Pending remote CI | Stable tracking Fast-mode release candidate. Windows local closeout gate passed; Linux evidence is blocked until GitHub authentication is repaired. |
 
 Store raw local or CI outputs outside version-controlled source unless the
 release process intentionally promotes a short excerpt into this report. Use a
@@ -174,6 +175,53 @@ run:
 ```
 
 or the equivalent executable path for the release-check build directory.
+
+## 2026-06-07 Windows 0.5.0 Release-Candidate Performance
+
+- Source: Local `v0.5.0` release-candidate gate.
+- Command:
+  `out\build\windows-clang-ninja-performance\ruckig_c_performance_benchmark.exe --samples 10000 --seed 1`
+- OS: Windows.
+- C compiler: clang 21.1.8.
+- C++ compiler: clang 21.1.8.
+- CMake build type: Release.
+- Generator: Ninja.
+- Seed: `1`.
+- Samples: `10000`.
+
+| Metric | C implementation | C++ oracle |
+| --- | ---: | ---: |
+| Average | 651.76 ns | 510.03 ns |
+| p99 | 4800 ns | 3800 ns |
+| Worst | 23800 ns | 27500 ns |
+
+Average C/oracle ratio: `1.27789`.
+
+This Windows local release-candidate run is within the release threshold of
+average calculation time no worse than `1.5x` the C++ oracle on the same
+benchmark corpus.
+
+Waypoint benchmark command:
+
+```powershell
+out\build\windows-clang-ninja-performance\ruckig_c_performance_benchmark.exe --samples 10000 --seed 1 --waypoints
+```
+
+Waypoint output:
+
+```text
+waypoint_case_count: 10
+waypoint_max_dofs: 8
+waypoint_max_intermediate_positions: 3
+waypoint_c_average_ns: 3.26093e+06
+waypoint_c_p99_ns: 1.20148e+07
+waypoint_c_worst_ns: 1.77536e+07
+waypoint_oracle_ratio: unavailable
+waypoint_benchmark_policy: alpha C-only local optimizer corpus
+```
+
+The waypoint benchmark remains same-platform local optimizer trend evidence
+and is not mixed with the no-waypoint C++ oracle ratio.
 
 ## 2026-06-03 Linux 0.2.0 Release Push CI Run
 

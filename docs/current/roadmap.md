@@ -217,14 +217,14 @@ before `0.5.0-design` and a patch release, not a feature release.
   Pro/cloud numerical equivalence claims, and upstream baseline upgrades remain
   separate projects.
 
-## 0.5.0 Design Entry
+## 0.5.0 Stable Tracking Release
 
-`main` now carries `0.5.0-design - Unreleased`. The accepted alpha scope
-is a local tracking interface over the public C runtime. This is alpha evidence
-for a future stable `v0.5.0`; `v0.4.2` remains the latest stable release until
-a deliberate release closeout.
+Published as `v0.5.0`. This release stabilizes the public C tracking ABI and
+the local Fast-mode online/offline tracking implementation. It is a Fast-only
+tracking release; `Optimized` remains declared for API shape parity but returns
+`RUCKIG_ERROR_UNSUPPORTED` throughout `0.5.x`.
 
-- The public C tracking ABI is intentionally added on the design line:
+- The public C tracking ABI is now part of the stable C surface:
   opaque tracking handles, target-state handles, target-state sequences,
   tracking output sequences, online update, and offline sequence calculation.
 - Local `Fast` mode is implemented with deterministic constant-acceleration
@@ -242,10 +242,22 @@ a deliberate release closeout.
   not be aliased to Fast.
 - ABI review for this line uses `docs/abi/public-symbols.txt`,
   `docs/abi/public-symbol-exceptions.txt`, and artifact paths under
-  `artifacts/abi/0.5.0-alpha`.
+  `artifacts/abi/0.5.0`.
 - Soft-interruption implementation design continues separately and is not
   coupled to the first tracking implementation.
 - Cloud/remote calculation, package-manager recipes, formal Pro/cloud
   numerical equivalence claims, stable Python wheels, Rust crate publication,
-  and upstream baseline upgrades stay outside the default `0.5.0-design` scope
-  unless separately accepted.
+  and upstream baseline upgrades stay outside the `0.5.x` patch scope and
+  require a separate `0.6.0-design` or later decision.
+
+## 0.6.0 Design Entry
+
+After `v0.5.0`, `main` moves to `0.6.0-design - Unreleased`.
+
+- First priority: bounded local `Optimized` tracking design and evidence
+  strategy.
+- `0.5.1` is reserved for emergency patches only.
+- Soft-interruption implementation, formal Python/Rust publication,
+  package-manager recipes, cloud/remote calculation, formal Pro/cloud
+  equivalence claims, and upstream baseline upgrades remain separate projects
+  unless explicitly accepted.

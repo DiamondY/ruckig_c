@@ -415,23 +415,23 @@ Compatibility rules for `0.4.2`:
 out/build/<preset>/artifacts/abi/0.4.2/
 ```
 
-## 0.5.0-design Tracking API Expansion Policy
+## 0.5.0 Tracking API Baseline
 
-`0.5.0-design` intentionally expands the public C ABI for tracking alpha
-evidence. `v0.4.2` remains the latest stable release until a deliberate stable
-release closeout. The expansion must not remove or modify any existing
-`v0.4.2` public function, function signature, enum numeric value, or result-code
-numeric value.
+`v0.5.0` stabilizes the public C tracking ABI that was added on the
+`0.5.0-design` line. `v0.4.2` remains the prior stable baseline and original
+parity coverage closeout. The `v0.5.0` release must not remove or modify any
+existing `v0.4.2` public function, function signature, enum numeric value, or
+result-code numeric value.
 
-Compatibility rules for the tracking alpha line:
+Compatibility rules for the `v0.5.0` tracking line:
 
 - Existing `v0.4.2` public symbols must remain exported.
-- New public symbols must be limited to the accepted tracking ABI in
+- New public symbols are limited to the accepted tracking ABI in
   `docs/design/tracking_interface.md`.
-- `docs/abi/public-symbols.txt` is expanded only for intentional tracking
-  symbols.
-- `docs/abi/public-symbol-exceptions.txt` records all intentional
-  `0.5.0-design` public additions as `allow-add` entries.
+- `docs/abi/public-symbols.txt` contains 164 approved public symbols: the
+  `v0.4.2` 117-symbol set plus 47 intentional tracking symbols.
+- `docs/abi/public-symbol-exceptions.txt` records the intentional
+  `0.5.0-design` tracking additions as `allow-add` entries.
 - `RUCKIG_TRACKING_OPTIMIZED` is a public enum value but its `0.5.x` behavior
   is `RUCKIG_ERROR_UNSUPPORTED`, not an alias to Fast mode. Implementation is
   deferred to `0.6.0-design`.
@@ -443,13 +443,13 @@ Compatibility rules for the tracking alpha line:
   described as source-level oracle parity or formal Ruckig Pro/cloud numerical
   equivalence.
 
-`0.5.0-design` ABI artifact output paths use the alpha evidence directory:
+`v0.5.0` ABI artifact output paths use the release evidence directory:
 
 ```text
-out/build/<preset>/artifacts/abi/0.5.0-alpha/
+out/build/<preset>/artifacts/abi/0.5.0/
 ```
 
-Use these checks during alpha evidence review:
+Use these checks during release evidence review:
 
 ```powershell
 cmake --build out\build\windows-clang-ninja-shared --target ruckig_c_verify_public_symbols

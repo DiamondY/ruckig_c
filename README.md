@@ -28,36 +28,34 @@ Implemented and covered by fixed C/oracle tests plus deterministic random oracle
 - `0.4.x` waypoint-aware C ABI, global position bounds, per-section
   constraints, intermediate duration queries, and local coupled waypoint
   optimizer.
-- `0.5.0-design` tracking alpha C ABI and local Fast-mode online/offline
-  tracking implementation. `Optimized` mode is declared but returns
+- `v0.5.0` tracking C ABI and local Fast-mode online/offline tracking
+  implementation. `Optimized` mode is declared but returns
   `RUCKIG_ERROR_UNSUPPORTED` and is deferred to `0.6.0-design`.
 - C examples for position, offline position, online update, per-DoF overrides,
   velocity, stop, minimum duration, waypoints, per-section minimum duration,
-  and tracking alpha scenarios.
+  and tracking Fast-mode scenarios.
 
 Release-readiness evidence is tracked under `docs/release/`; see
-`docs/index.md` for the organized documentation map. `v0.4.2` is the current
-stable release and coverage/evidence baseline for the original-surface parity
-line. `main` is now `0.5.0-design - Unreleased`, with tracking alpha evidence
-as the first priority.
+`docs/index.md` for the organized documentation map. `v0.5.0` is the current
+stable release. It stabilizes the tracking C ABI and local Fast-mode tracking
+implementation while keeping `Optimized` tracking unsupported until
+`0.6.0-design`.
 `v0.4.0` added waypoint-aware C ABI entry points, per-section constraints,
 global position bounds, and a local coupled waypoint optimizer; `v0.4.1`
 deepened waypoint optimizer evidence; `v0.4.2` keeps that public C surface
 unchanged while recording the original parity coverage matrix and the
-`0.5.0-design` tracking/soft-interruption preparation work. `0.5.0-design`
-adds tracking public C API and a local Fast-mode alpha implementation on
-`main`, but it is not a stable `v0.5.0` release. No tracking public C API is
-exposed in `v0.4.2`. `v0.3.0`
+`0.5.0-design` tracking/soft-interruption preparation work. `v0.5.0`
+stabilizes the tracking public C API and local Fast-mode implementation.
+Tracking public C API is not exposed in `v0.4.2`. `v0.3.0`
 remains the last no-new-C-API hardening release, and `v0.2.5` remains the final
 planned `0.2.x` stabilization baseline.
 Current stable release scope intentionally excludes:
 
-- Cloud and remote calculation; `0.4.x` implements local optimizer work only.
+- Cloud and remote calculation; local optimizer and tracking work only.
 - Formal Ruckig Pro/cloud global numerical equivalence claims.
 - Hard real-time guarantees for waypoint optimization.
-- Stable tracking release support. Tracking is present on `main` as
-  `0.5.0-design` alpha evidence, not as a shipped `v0.4.2` feature or stable
-  `v0.5.0` release.
+- `Optimized` tracking implementation. The enum is present for API shape
+  parity, but calls return `RUCKIG_ERROR_UNSUPPORTED` in `0.5.x`.
 - Soft interruption checkpoints for waypoint optimization; the interrupt
   duration field remains storage/API-surface parity only.
 - Python/Rust binding publication. The Python `cffi` prototype and Rust alpha
@@ -264,11 +262,11 @@ Online usage calls `ruckig_update`, reads `ruckig_output_new_*_data`, then calls
 the next cycle. The caller should read the output arrays before mutating or
 destroying the owning output handle.
 
-Tracking alpha usage on `main` creates a `ruckig_tracking_t` handle plus target
+Tracking usage creates a `ruckig_tracking_t` handle plus target
 state or target sequence handles. `Fast` mode performs local
 constant-acceleration lookahead and calls the existing update path; `Optimized`
 mode is declared but returns `RUCKIG_ERROR_UNSUPPORTED` and is deferred to
-`0.6.0-design`. See `docs/design/tracking_interface.md` for the accepted alpha
+`0.6.0-design`. See `docs/design/tracking_interface.md` for the tracking
 semantics and `docs/design/0.5.0_release_decision.md` for the Fast-only stable
 release boundary.
 

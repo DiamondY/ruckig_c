@@ -1,9 +1,8 @@
-# Tracking Interface API Proposal and Alpha Semantics
+# Tracking Interface API and Fast-Mode Semantics
 
-This document records the accepted `0.5.0-design` tracking interface scope. It
-supersedes the `v0.4.2` design-preparation note. The implementation is alpha
-evidence for a future stable `0.5.0`; `v0.4.2` remains the latest stable
-release until a deliberate release closeout.
+This document records the accepted `v0.5.0` tracking interface scope. It
+supersedes the `v0.4.2` design-preparation note and the `0.5.0-design` alpha
+evidence notes. `v0.5.0` stabilizes local Fast-mode online/offline tracking.
 
 ## Source Inventory
 
@@ -23,8 +22,8 @@ recorded manually but are never CI gates or release blockers.
 
 ## Accepted C ABI
 
-The tracking API adds intentional public C symbols in `0.5.0-design` while
-keeping all `v0.4.2` functions, signatures, enum values, and result-code values
+The tracking API adds intentional public C symbols in `v0.5.0` while keeping
+all `v0.4.2` functions, signatures, enum values, and result-code values
 unchanged. The approved symbols are listed in `docs/abi/public-symbols.txt`,
 and the intentional additions are recorded in
 `docs/abi/public-symbol-exceptions.txt`.
@@ -89,13 +88,13 @@ ruckig_tracking_calculate_sequence(tracking, target_sequence, input, output_sequ
 ```
 
 The offline API returns an output state sequence, not a `ruckig_trajectory_t`.
-For successful alpha offline calculation, the output sequence count equals the
+For successful offline calculation, the output sequence count equals the
 target sequence count. Each step records the sampled state after one tracking
 cycle, `time = (step + 1) * delta_time`, the output section, and the step
 result code. If an error occurs after some steps, the output sequence count is
 the number of fully written successful steps.
 
-## Alpha Behavior
+## Fast-Mode Behavior
 
 `Fast` mode is implemented locally with constant-acceleration lookahead:
 
@@ -114,8 +113,8 @@ Defaults:
 
 `reactiveness = 0` tracks the instantaneous target state. `reactiveness = 1`
 uses the full configured lookahead horizon. `Optimized` mode is declared for
-API shape parity but returns `RUCKIG_ERROR_UNSUPPORTED` until a bounded local
-implementation is accepted.
+API shape parity but returns `RUCKIG_ERROR_UNSUPPORTED` throughout `0.5.x`;
+implementation is deferred to `0.6.0-design`.
 
 The local implementation reuses the existing target solver. It copies the
 caller input into internal tracking workspace, writes the predicted target
@@ -126,7 +125,7 @@ modified by `ruckig_tracking_update`; callers continue to use
 ## Validation and Ownership
 
 - Tracking requires position control input. Velocity-control tracking and
-  per-DoF control-interface overrides are rejected in the current alpha.
+  per-DoF control-interface overrides are rejected in `v0.5.0`.
 - Target position, velocity, and acceleration values must be finite.
 - DoF counts must match the tracking handle and all input/output handles.
 - `reactiveness` must be finite and in `[0, 1]`.
@@ -137,9 +136,9 @@ modified by `ruckig_tracking_update`; callers continue to use
   preallocated sequence calculation must not allocate.
 - Destroying `NULL` handles is safe. Tracking handles do not own
   caller-provided input or output handles.
-- No public diagnostic getters are added in the current alpha.
+- No public diagnostic getters are added in `v0.5.0`.
 - `interrupt_calculation_duration` is unrelated to tracking timeout behavior
-  in this alpha and does not create hard or soft real-time guarantees.
+  in `v0.5.0` and does not create hard or soft real-time guarantees.
 
 ## Evidence Strategy
 
@@ -166,10 +165,10 @@ Quality interpretation:
 - Ramp and constant-acceleration evidence uses selected Fast configurations
   that must not be worse than naive instantaneous target chasing under the
   recorded lag metric.
-- Sinus and mixed target signals are recorded as trend metrics only in the
-  alpha. They are not stable release gates until the metric and acceptance
-  threshold are separately approved.
-- The default `look_ahead_cycles = 1` is retained for API behavior, but alpha
+- Sinus and mixed target signals are recorded as trend metrics only in
+  `v0.5.0`. They are not hard gates until the metric and acceptance threshold
+  are separately approved.
+- The default `look_ahead_cycles = 1` is retained for API behavior, but release
   quality evidence must state the selected Fast configuration being measured.
 
 Optional Pro/cloud black-box evidence may be recorded manually for comparison
@@ -178,7 +177,6 @@ Pro/cloud numerical equivalence.
 
 ## Deferred Work
 
-- Stable `v0.5.0` release closeout.
 - Bounded local `Optimized` tracking implementation, now tracked for
   `0.6.0-design` rather than `0.5.x`.
 - Soft interruption checkpoints and timeout fallback semantics.

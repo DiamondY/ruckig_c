@@ -23,10 +23,9 @@ Historical rewrite plans and release evidence are retained for traceability.
 - `release/checklists/` - release checklists by version.
   `release/checklists/0.4.0-alpha.md` retains the alpha evidence, and
   `release/checklists/0.4.2.md` records the published original-parity
-  coverage/evidence closeout. `release/checklists/0.5.0-alpha.md` tracks the
-  tracking API and local Fast-mode alpha evidence on `main`;
-  `release/checklists/0.5.0-alpha.2.md` tracks the follow-up tracking
-  hardening checkpoint.
+  coverage/evidence closeout. `release/checklists/0.5.0.md` records the stable
+  tracking Fast-mode release closeout; `release/checklists/0.5.0-alpha.md` and
+  `release/checklists/0.5.0-alpha.2.md` retain the tracking alpha evidence.
 - `release/evidence/verification_report.md` - local and CI verification
   history.
 - `release/evidence/performance_report.md` - performance procedure and release
@@ -46,8 +45,8 @@ Historical rewrite plans and release evidence are retained for traceability.
   checklist for `0.3.0-design`.
 - `design/0.4.0_original_parity.md` - original-surface parity design for the
   local waypoint optimizer and public C ABI expansion.
-- `design/tracking_interface.md` - accepted `0.5.0-design` tracking API
-  proposal, local Fast-mode alpha semantics, and evidence strategy.
+- `design/tracking_interface.md` - accepted `v0.5.0` tracking API semantics,
+  local Fast-mode behavior, and evidence strategy.
 - `design/0.5.0_release_decision.md` - release-scope decision record for a
   possible Fast-only stable `v0.5.0`.
 - `design/tracking_optimized_mode.md` - deferred `0.6.0-design` design entry
@@ -79,8 +78,7 @@ Historical rewrite plans and release evidence are retained for traceability.
 - `abi/public-symbols.txt` - approved public C ABI symbol allowlist generated
   from the public header.
 - `abi/public-symbol-exceptions.txt` - approval file for intentional public
-  symbol additions such as the `0.4.0` waypoint ABI and `0.5.0-design`
-  tracking ABI.
+  symbol additions such as the `0.4.0` waypoint ABI and `0.5.0` tracking ABI.
 - `abi/exceptions.md` - public ABI exception policy.
 - `abi/v0.2.2/` - exported-symbol baselines used by the `0.2.3` ABI
   comparison helper.
