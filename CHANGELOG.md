@@ -1,15 +1,16 @@
 # Changelog
 
-## 0.6.0-design - Unreleased
+## 0.6.0 - 2026-06-07
 
-`main` is now on the `0.6.0-design` line after the published `v0.5.0`
-Fast-only tracking release. The first priority is bounded local
-`Optimized` tracking design and evidence. `0.5.1` is reserved for emergency
-patch work only.
+`0.6.0` is the stable bounded local `Optimized` tracking release. It
+stabilizes the public C Optimized tracking API added during `0.6.0-design`,
+keeps the existing Fast tracking behavior, and does not claim formal global
+optimality or Pro/cloud numerical equivalence. `0.6.1` is reserved for
+emergency patch work only.
 
 Added:
 
-- Added a `0.6.0-alpha` local `RUCKIG_TRACKING_OPTIMIZED` MVP with bounded
+- Added a local `RUCKIG_TRACKING_OPTIMIZED` MVP with bounded
   deterministic candidate search, horizon-error scoring, and Fast fallback.
 - Added online lookahead tracking through
   `ruckig_tracking_update_with_lookahead`.
@@ -29,15 +30,15 @@ Changed:
   single-sample lookahead instead of returning `RUCKIG_ERROR_UNSUPPORTED`.
 - `ruckig_tracking_calculate_sequence` now uses sliding-window lookahead in
   Optimized mode.
-- ABI artifact paths now use `artifacts/abi/0.6.0-alpha` for the current design
-  evidence line.
+- ABI artifact paths now use `artifacts/abi/0.6.0` for stable release
+  evidence.
 
 Still deferred:
 
-- Stable `v0.6.0` release closeout, Pro/cloud numerical equivalence claims,
-  cloud/remote calculation, soft interruption checkpoints, formal Python/Rust
-  publication, package-manager recipes, and upstream baseline upgrade remain
-  separate projects unless explicitly accepted.
+- Pro/cloud numerical equivalence claims, cloud/remote calculation, soft
+  interruption checkpoints, formal Python/Rust publication, package-manager
+  recipes, and upstream baseline upgrade remain separate projects unless
+  explicitly accepted.
 
 ## 0.5.0 - 2026-06-07
 

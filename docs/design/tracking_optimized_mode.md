@@ -1,13 +1,13 @@
-# Tracking Optimized Mode Alpha Design
+# Tracking Optimized Mode Design
 
-`0.6.0-design` accepts a bounded local `RUCKIG_TRACKING_OPTIMIZED` alpha MVP.
-This is not a stable `v0.6.0` release decision and does not claim source-level
-or Pro/cloud numerical equivalence. The frozen Community baseline still has no
-local tracking optimizer source to use as an oracle.
+`v0.6.0` stabilizes a bounded local `RUCKIG_TRACKING_OPTIMIZED` MVP. This does
+not claim source-level oracle parity, formal global optimality, or Pro/cloud
+numerical equivalence. The frozen Community baseline still has no local
+tracking optimizer source to use as an oracle.
 
 ## Public C ABI Additions
 
-The alpha adds intentional public C symbols on top of the stable `v0.5.0`
+The release adds intentional public C symbols on top of the stable `v0.5.0`
 tracking ABI:
 
 - `ruckig_tracking_set_max_optimized_candidates`
@@ -69,7 +69,7 @@ default Optimized workspace. The candidate-budget setter validates the budget
 outside the calculation path. Prepared online and offline calculation paths must
 not allocate.
 
-The alpha does not implement timeout checkpoints. `interrupt_calculation_duration`
+`v0.6.0` does not implement timeout checkpoints. `interrupt_calculation_duration`
 does not create hard or soft real-time interruption behavior for tracking.
 
 ## Evidence Strategy
@@ -94,7 +94,6 @@ equivalence.
 
 ## Deferred
 
-- Stable `v0.6.0` release closeout.
 - Formal proof of global optimality.
 - Formal Pro/cloud numerical equivalence.
 - Cloud/remote calculation.

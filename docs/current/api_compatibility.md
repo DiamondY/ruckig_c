@@ -456,14 +456,14 @@ cmake --build out\build\windows-clang-ninja-shared --target ruckig_c_verify_publ
 cmake --build out\build\windows-clang-ninja-shared --target ruckig_c_compare_public_exported_symbols
 ```
 
-## 0.6.0-alpha Optimized Tracking API Expansion
+## v0.6.0 Optimized Tracking API Baseline
 
-`0.6.0-alpha` is an evidence checkpoint on `main`, not a stable release. It
-adds a bounded local Optimized tracking MVP on top of the stable `v0.5.0`
-tracking ABI. Existing `v0.5.0` public functions, function signatures, enum
-numeric values, and result-code numeric values must remain unchanged.
+`v0.6.0` stabilizes the bounded local Optimized tracking MVP on top of the
+stable `v0.5.0` tracking ABI. Existing `v0.5.0` public functions, function
+signatures, enum numeric values, and result-code numeric values remain
+unchanged.
 
-Compatibility rules for the `0.6.0-alpha` tracking line:
+Compatibility rules for the `v0.6.0` tracking line:
 
 - Existing `v0.5.0` public symbols must remain exported.
 - New public symbols are limited to the accepted Optimized tracking alpha API
@@ -474,15 +474,15 @@ Compatibility rules for the `0.6.0-alpha` tracking line:
   `0.6.0-design` additions as `allow-add` entries.
 - `ruckig_tracking_calculation_status_t` is additive. Existing enum numeric
   values and result-code numeric values are unchanged.
-- `RUCKIG_TRACKING_OPTIMIZED` now has alpha local behavior on `main`, but this
-  is not a Pro/cloud equivalence claim and not a stable `v0.6.0` release.
+- `RUCKIG_TRACKING_OPTIMIZED` has bounded local behavior. This is not a formal
+  global optimality guarantee and not a Pro/cloud equivalence claim.
 - Tracking internals, candidate buffers, scoring helpers, and workspace
   structures must not be exported.
 - `original/ruckig-main` remains frozen as the Ruckig Community `0.17.3`
   reference baseline.
 
-`0.6.0-alpha` ABI artifact output paths use the design evidence directory:
+`v0.6.0` ABI artifact output paths use the release evidence directory:
 
 ```text
-out/build/<preset>/artifacts/abi/0.6.0-alpha/
+out/build/<preset>/artifacts/abi/0.6.0/
 ```

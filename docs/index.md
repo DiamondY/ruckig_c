@@ -26,8 +26,9 @@ Historical rewrite plans and release evidence are retained for traceability.
   coverage/evidence closeout. `release/checklists/0.5.0.md` records the stable
   tracking Fast-mode release closeout; `release/checklists/0.5.0-alpha.md` and
   `release/checklists/0.5.0-alpha.2.md` retain the tracking alpha evidence.
-  `release/checklists/0.6.0-alpha.md` records the Optimized tracking alpha
-  evidence on the current design line.
+  `release/checklists/0.6.0-alpha.md` retains the Optimized tracking alpha
+  evidence, and `release/checklists/0.6.0.md` records the stable Optimized
+  tracking release closeout.
 - `release/evidence/verification_report.md` - local and CI verification
   history.
 - `release/evidence/performance_report.md` - performance procedure and release
@@ -51,8 +52,8 @@ Historical rewrite plans and release evidence are retained for traceability.
   local Fast-mode behavior, and evidence strategy.
 - `design/0.5.0_release_decision.md` - release-scope decision record for a
   possible Fast-only stable `v0.5.0`.
-- `design/tracking_optimized_mode.md` - accepted `0.6.0-alpha` design for
-  bounded local `Optimized` tracking.
+- `design/tracking_optimized_mode.md` - accepted `v0.6.0` design for bounded
+  local `Optimized` tracking.
 - `design/interrupt_calculation_duration.md` - storage-only behavior in
   `0.4.x` and future soft-interruption semantics.
 - `../bindings/rust/README.md` - experimental Rust alpha wrapper over the
@@ -81,7 +82,7 @@ Historical rewrite plans and release evidence are retained for traceability.
   from the public header.
 - `abi/public-symbol-exceptions.txt` - approval file for intentional public
   symbol additions such as the `0.4.0` waypoint ABI, `0.5.0` tracking ABI, and
-  `0.6.0-alpha` Optimized tracking API.
+  `0.6.0` Optimized tracking API.
 - `abi/exceptions.md` - public ABI exception policy.
 - `abi/v0.2.2/` - exported-symbol baselines used by the `0.2.3` ABI
   comparison helper.

@@ -75,11 +75,9 @@ These additions are approved by `docs/design/tracking_interface.md`, recorded
 in `CHANGELOG.md`, tracked in `docs/abi/public-symbols.txt`, and listed as
 `allow-add` entries in `docs/abi/public-symbol-exceptions.txt`.
 
-## 0.6.0-alpha Optimized Tracking API Expansion
+## 0.6.0 Optimized Tracking API Expansion
 
-`0.6.0-alpha` is a design-line evidence checkpoint, not a stable release. The
-approved additions expose bounded local Optimized tracking controls and
-diagnostics:
+`0.6.0` stabilizes bounded local Optimized tracking controls and diagnostics:
 
 - `ruckig_tracking_set_max_optimized_candidates`
 - `ruckig_tracking_get_max_optimized_candidates`

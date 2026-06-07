@@ -250,23 +250,31 @@ tracking release; `Optimized` remains declared for API shape parity but returns
   and upstream baseline upgrades stay outside the `0.5.x` patch scope and
   require a separate `0.6.0-design` or later decision.
 
-## 0.6.0 Design Entry
+## 0.6.0 Optimized Tracking Release
 
-`main` now carries `0.6.0-design - Unreleased` after the published `v0.5.0`
-Fast-only tracking release.
+Published as `v0.6.0`. This release stabilizes the bounded local
+`Optimized` tracking MVP on top of the public C tracking ABI and local Fast
+tracking release from `v0.5.0`.
 
-- First priority: bounded local `Optimized` tracking. The `0.6.0-alpha` MVP is
-  implemented on `main` with deterministic candidate search, online lookahead
-  update, offline sliding-window sequence calculation, Fast fallback
-  diagnostics, and local C/Python/Rust smoke evidence.
-- The alpha evidence line adds intentional public C symbols for Optimized
-  tracking diagnostics and lookahead update. ABI artifact paths use
-  `artifacts/abi/0.6.0-alpha`.
-- Stable `v0.6.0` remains a later release decision. It requires broader CI,
-  ABI/export review, tracking quality trend review, and explicit release
-  closeout.
-- `0.5.1` is reserved for emergency patches only.
+- `Optimized` tracking is local-only and bounded. It uses deterministic
+  candidate search, online lookahead update, offline sliding-window sequence
+  calculation, and Fast fallback diagnostics.
+- The release adds intentional public C symbols for Optimized tracking
+  diagnostics and lookahead update. ABI artifact paths use
+  `artifacts/abi/0.6.0`.
+- `0.6.1` is reserved for emergency patches only.
 - Soft-interruption implementation, formal Python/Rust publication,
   package-manager recipes, cloud/remote calculation, formal Pro/cloud
   equivalence claims, and upstream baseline upgrades remain separate projects
   unless explicitly accepted.
+
+## 0.7.0 Design Entry
+
+After `v0.6.0`, the next design line is `0.7.0-design - Unreleased`.
+
+- First priority: deepen Optimized tracking quality and stability evidence.
+- Expand tracking fixed corpus, quality trend metrics, deterministic stress,
+  and release evidence strategy before considering broader ecosystem work.
+- Soft interruption, formal Python/Rust publication, package-manager recipes,
+  cloud/remote calculation, formal Pro/cloud equivalence claims, and upstream
+  baseline upgrades remain deferred unless separately accepted.

@@ -3,8 +3,8 @@
 # Source of truth: declarations marked RUCKIG_C_API in
 # include/ruckig_c/ruckig.h. The 0.4.0 line intentionally expands the
 # public C ABI for original-surface waypoint/per-section parity, 0.5.0
-# adds stable tracking Fast-mode ABI, and 0.6.0-alpha adds approved
-# Optimized tracking alpha diagnostics and lookahead update.
+# adds stable tracking Fast-mode ABI, and 0.6.0 adds approved Optimized
+# tracking diagnostics and lookahead update.
 ruckig_calculate
 ruckig_create
 ruckig_create_with_waypoints

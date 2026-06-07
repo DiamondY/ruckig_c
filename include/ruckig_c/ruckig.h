@@ -9,9 +9,9 @@ extern "C" {
 #endif
 
 #define RUCKIG_C_VERSION_MAJOR 0
-#define RUCKIG_C_VERSION_MINOR 5
+#define RUCKIG_C_VERSION_MINOR 6
 #define RUCKIG_C_VERSION_PATCH 0
-#define RUCKIG_C_VERSION_STRING "0.5.0"
+#define RUCKIG_C_VERSION_STRING "0.6.0"
 
 #ifndef RUCKIG_C_API
 #  if defined(RUCKIG_C_STATIC_DEFINE)
@@ -102,11 +102,11 @@ typedef struct ruckig_tracking_output_sequence ruckig_tracking_output_sequence_t
 #endif
 
 /*
- * 0.6.0-design scope:
+ * 0.6.0 scope:
  * - Intermediate waypoints and per-section constraints are exposed through the
  *   C ABI and solved locally by the waypoint optimizer.
- * - Tracking exposes local Fast mode and an alpha bounded local Optimized mode
- *   with deterministic candidate search and Fast fallback diagnostics.
+ * - Tracking exposes local Fast mode and a bounded local Optimized mode with
+ *   deterministic candidate search and Fast fallback diagnostics.
  * - No cloud API, remote fallback, or Pro/cloud equivalence claim is provided.
  * - Python and Rust bindings remain separate layers over this C ABI.
  */
