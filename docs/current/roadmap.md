@@ -252,7 +252,8 @@ tracking release; `Optimized` remains declared for API shape parity but returns
 
 ## 0.6.0 Design Entry
 
-After `v0.5.0`, `main` moves to `0.6.0-design - Unreleased`.
+`main` now carries `0.6.0-design - Unreleased` after the published `v0.5.0`
+Fast-only tracking release.
 
 - First priority: bounded local `Optimized` tracking design and evidence
   strategy.

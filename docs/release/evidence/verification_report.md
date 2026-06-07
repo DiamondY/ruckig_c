@@ -99,9 +99,35 @@ Remote release-candidate evidence:
   `924f0de7a0ec18b75f1d360e25cda96f4dc348bc`.
 - Manual release-random job: `Manual release random oracle`, job id
   `79935641824`, conclusion `success`.
+- Final evidence push CI run:
+  [27084397483](https://github.com/DiamondY/ruckig_c/actions/runs/27084397483),
+  conclusion `success`, commit
+  `cc7f347b809ff4ae3f1dc85c652dcd15d02fab74`.
+- Final evidence push CI artifact ids: linux-performance `7461267576`,
+  Windows exported symbols `7461264406`, Linux exported symbols `7461263421`,
+  macOS exported symbols `7461261179`.
+- Annotated tag `v0.5.0` object
+  `fa629413c8f17397ae235b68313f461700d56dbb` points to commit
+  `cc7f347b809ff4ae3f1dc85c652dcd15d02fab74`.
+- Tag push CI run:
+  [27084478323](https://github.com/DiamondY/ruckig_c/actions/runs/27084478323),
+  conclusion `success`, tag `v0.5.0`, commit
+  `cc7f347b809ff4ae3f1dc85c652dcd15d02fab74`.
+- Tag push CI artifact ids: linux-performance `7461291915`, Linux exported
+  symbols `7461288062`, Windows exported symbols `7461287399`, macOS exported
+  symbols `7461285872`.
+- Final tag manual release-random workflow-dispatch run:
+  [27084525023](https://github.com/DiamondY/ruckig_c/actions/runs/27084525023),
+  conclusion `success`, tag `v0.5.0`, commit
+  `cc7f347b809ff4ae3f1dc85c652dcd15d02fab74`.
+- Final tag manual release-random job: `Manual release random oracle`, job id
+  `79936230289`, conclusion `success`.
+- GitHub Release:
+  [ruckig_c 0.5.0](https://github.com/DiamondY/ruckig_c/releases/tag/v0.5.0),
+  published, not a prerelease, not a draft.
 - `gh auth status -h github.com` still reports the configured token for
-  `DiamondY` as invalid, but `git push` and `gh workflow run` both succeeded.
-  Remaining tag and GitHub Release operations must be verified explicitly.
+  `DiamondY` as invalid, but `git push`, `gh workflow run`, and
+  `gh release create` succeeded and were verified for this release.
 
 ## 2026-06-03 Windows Clang Verification
 

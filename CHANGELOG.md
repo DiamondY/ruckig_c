@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.6.0-design - Unreleased
+
+`main` is now on the `0.6.0-design` line after the published `v0.5.0`
+Fast-only tracking release. The first priority is bounded local
+`Optimized` tracking design and evidence. `0.5.1` is reserved for emergency
+patch work only.
+
+Planned:
+
+- Design a bounded local `RUCKIG_TRACKING_OPTIMIZED` implementation rather than
+  aliasing it to Fast mode.
+- Define deterministic local evidence for Optimized tracking before any stable
+  `0.6.0` release decision.
+- Keep soft interruption checkpoints, formal Python/Rust publication,
+  package-manager recipes, cloud/remote calculation, formal Pro/cloud
+  equivalence claims, and upstream baseline upgrade as separate projects unless
+  explicitly accepted.
+
 ## 0.5.0 - 2026-06-07
 
 `0.5.0` is the stable tracking Fast-mode release. It stabilizes the public C

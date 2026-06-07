@@ -39,7 +39,9 @@ Release-readiness evidence is tracked under `docs/release/`; see
 `docs/index.md` for the organized documentation map. `v0.5.0` is the current
 stable release. It stabilizes the tracking C ABI and local Fast-mode tracking
 implementation while keeping `Optimized` tracking unsupported until
-`0.6.0-design`.
+`0.6.0-design`. `main` is now `0.6.0-design - Unreleased`, with bounded local
+`Optimized` tracking design and evidence as the first priority. `0.5.1` is
+reserved for emergency patch work only.
 `v0.4.0` added waypoint-aware C ABI entry points, per-section constraints,
 global position bounds, and a local coupled waypoint optimizer; `v0.4.1`
 deepened waypoint optimizer evidence; `v0.4.2` keeps that public C surface

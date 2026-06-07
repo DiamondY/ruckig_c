@@ -127,7 +127,7 @@ Current same-platform release baselines:
 | `0.4.0` | `1.23622` | `1.17323` push CI; `1.29272` manual workflow | Original-surface parity release. Windows local alpha.4 pre-stable gate; Linux final push CI run `27038403450`, artifact `7446167572`; manual workflow run `27038538349`, artifact `7446219206`. |
 | `0.4.1` | `1.18871` | `1.29559` push CI; `1.31319` manual workflow | Deep stabilization release. Windows local closeout gate; Linux final push CI run `27056498079`, artifact `7452526552`; manual workflow run `27058264617`. |
 | `0.4.2` | `1.35448` | `1.26819` push CI; `1.30502` tag manual workflow | Original parity coverage/evidence closeout. Windows local closeout gate; Linux release-candidate push CI run `27063738903`, artifact `7454827710`; tag manual workflow run `27064919699`. |
-| `0.5.0-rc` | `1.27789` | Pending remote CI | Stable tracking Fast-mode release candidate. Windows local closeout gate passed; Linux evidence is blocked until GitHub authentication is repaired. |
+| `0.5.0` | `1.27789` | Tag CI performance job success, artifact id `7461291915` | Stable tracking Fast-mode release. Windows local closeout gate passed; Linux tag CI run `27084478323` succeeded. Artifact download requires authenticated GitHub access, so the tracked report records job success and artifact id rather than raw ratio. |
 
 Store raw local or CI outputs outside version-controlled source unless the
 release process intentionally promotes a short excerpt into this report. Use a
