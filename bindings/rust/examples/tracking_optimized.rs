@@ -1,5 +1,6 @@
 use ruckig_c_alpha::{
     InputParameter, OutputParameter, RuckigResult, TargetStateSequence, Tracking, TrackingMode,
+    TrackingOptimizedStrategy,
 };
 
 fn main() -> ruckig_c_alpha::Result<()> {
@@ -13,6 +14,7 @@ fn main() -> ruckig_c_alpha::Result<()> {
     input.set_max_acceleration(&[2.0])?;
     input.set_max_jerk(&[5.0])?;
     tracking.set_mode(TrackingMode::Optimized)?;
+    tracking.set_optimized_strategy(TrackingOptimizedStrategy::Aggressive)?;
     tracking.set_look_ahead_cycles(lookahead)?;
     targets.set_count(lookahead)?;
 

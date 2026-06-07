@@ -188,6 +188,7 @@ if(BUILD_RUCKIG_C_TESTS)
   add_test(NAME ruckig_c_tracking_offline COMMAND ruckig_c_tests --tracking-offline)
   add_test(NAME ruckig_c_tracking_optimized COMMAND ruckig_c_tests --tracking-optimized)
   add_test(NAME ruckig_c_tracking_quality COMMAND ruckig_c_tests --tracking-quality)
+  add_test(NAME ruckig_c_tracking_random_smoke COMMAND ruckig_c_tests --tracking-random 10000 --seed 1)
   add_test(NAME ruckig_c_tracking_no_allocation COMMAND ruckig_c_tests --tracking-no-allocation)
   add_test(NAME ruckig_c_allocation_audit
     COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/test/c/audit_allocations.cmake
@@ -487,7 +488,7 @@ if(BUILD_RUCKIG_C_PERFORMANCE_TESTS)
   add_test(NAME ruckig_c_waypoint_performance_benchmark COMMAND ruckig_c_performance_benchmark --samples 1000 --seed 1 --waypoints)
 endif()
 
-set(RUCKIG_C_ABI_OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/artifacts/abi/0.6.0")
+set(RUCKIG_C_ABI_OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/artifacts/abi/0.7.0-alpha")
 set(RUCKIG_C_ABI_PUBLIC_GENERATED_FILE "${RUCKIG_C_ABI_OUTPUT_DIR}/public-symbols-from-header.txt")
 set(RUCKIG_C_ABI_PUBLIC_VERIFY_FILE "${RUCKIG_C_ABI_OUTPUT_DIR}/public-symbols-verify.txt")
 add_custom_command(

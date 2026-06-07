@@ -2,7 +2,7 @@
 
 This directory is an experimental alpha wrapper over the public `ruckig_c` C
 ABI. It covers the `0.4.x` waypoint ABI, the stable `v0.5.0` Fast tracking
-ABI, and the `0.6.0-design` Optimized tracking alpha additions. It is not a
+ABI, and the `0.7.0-alpha` Optimized tracking strategy additions. It is not a
 published crate and is not installed by CMake.
 
 The wrapper owns the same opaque C handles as the C API:
@@ -29,8 +29,8 @@ Current alpha coverage:
   position extrema and first-time-at-position;
 - output position, velocity, acceleration, jerk, section, calculation-state,
   and calculation-duration accessors;
-- tracking alpha online Fast update, offline sequence smoke,
-  `0.6.0-design` Optimized lookahead update, candidate-budget diagnostics, and
+- tracking alpha online Fast update, offline sequence smoke, Optimized
+  lookahead update, candidate-budget diagnostics, strategy presets, and
   fallback status smoke;
 - Rust examples for position, offline, velocity, waypoints, per-section
   minimum duration, tracking Fast, and tracking Optimized alpha.

@@ -99,6 +99,14 @@ pub enum TrackingCalculationStatus {
     Error = 4,
 }
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[repr(i32)]
+pub enum TrackingOptimizedStrategy {
+    Stable = 0,
+    Balanced = 1,
+    Aggressive = 2,
+}
+
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Bound {
     pub min: f64,
@@ -341,6 +349,11 @@ unsafe extern "C" {
         max_candidates: usize,
     ) -> i32;
     fn ruckig_tracking_get_max_optimized_candidates(tracking: *const TrackingRaw) -> usize;
+    fn ruckig_tracking_set_optimized_strategy(
+        tracking: *mut TrackingRaw,
+        strategy: i32,
+    ) -> i32;
+    fn ruckig_tracking_get_optimized_strategy(tracking: *const TrackingRaw) -> i32;
     fn ruckig_tracking_get_last_calculation_status(tracking: *const TrackingRaw) -> i32;
     fn ruckig_tracking_get_last_candidate_count(tracking: *const TrackingRaw) -> usize;
     fn ruckig_tracking_update(
@@ -1529,6 +1542,22 @@ impl Tracking {
         Ok(())
     }
 
+    pub fn optimized_strategy(&self) -> TrackingOptimizedStrategy {
+        match unsafe { ruckig_tracking_get_optimized_strategy(self.raw.as_ptr()) } {
+            0 => TrackingOptimizedStrategy::Stable,
+            2 => TrackingOptimizedStrategy::Aggressive,
+            _ => TrackingOptimizedStrategy::Balanced,
+        }
+    }
+
+    pub fn set_optimized_strategy(&mut self, strategy: TrackingOptimizedStrategy) -> Result<()> {
+        check_code(
+            unsafe { ruckig_tracking_set_optimized_strategy(self.raw.as_ptr(), strategy as i32) },
+            "ruckig_tracking_set_optimized_strategy",
+        )?;
+        Ok(())
+    }
+
     pub fn last_calculation_status(&self) -> TrackingCalculationStatus {
         match unsafe { ruckig_tracking_get_last_calculation_status(self.raw.as_ptr()) } {
             1 => TrackingCalculationStatus::Fast,
@@ -1817,11 +1846,23 @@ mod tests {
         assert_eq!(tracking.look_ahead_cycles(), 1);
         assert_eq!(tracking.max_optimized_candidates(), 16);
         assert_eq!(
+            tracking.optimized_strategy(),
+            TrackingOptimizedStrategy::Balanced
+        );
+        assert_eq!(
             tracking.last_calculation_status(),
             TrackingCalculationStatus::None
         );
         assert_eq!(tracking.last_candidate_count(), 0);
         assert!((tracking.reactiveness() - 1.0).abs() < f64::EPSILON);
+        for strategy in [
+            TrackingOptimizedStrategy::Stable,
+            TrackingOptimizedStrategy::Balanced,
+            TrackingOptimizedStrategy::Aggressive,
+        ] {
+            tracking.set_optimized_strategy(strategy)?;
+            assert_eq!(tracking.optimized_strategy(), strategy);
+        }
 
         for step in 0..200 {
             let t = step as f64 * tracking.delta_time();
@@ -1945,6 +1986,15 @@ mod tests {
             tracking.set_max_optimized_candidates(129).unwrap_err().code,
             -100
         );
+        assert_eq!(
+            check_code(
+                unsafe { ruckig_tracking_set_optimized_strategy(tracking.raw.as_ptr(), 99) },
+                "ruckig_tracking_set_optimized_strategy"
+            )
+            .unwrap_err()
+            .code,
+            -100
+        );
         Ok(())
     }
 
@@ -1968,6 +2018,11 @@ mod tests {
         tracking.set_mode(TrackingMode::Optimized)?;
         tracking.set_look_ahead_cycles(4)?;
         tracking.set_max_optimized_candidates(16)?;
+        tracking.set_optimized_strategy(TrackingOptimizedStrategy::Aggressive)?;
+        assert_eq!(
+            tracking.optimized_strategy(),
+            TrackingOptimizedStrategy::Aggressive
+        );
         let result = tracking.update(&target, &input, &mut output)?;
         assert!(result == RuckigResult::Working || result == RuckigResult::Finished);
         assert!(

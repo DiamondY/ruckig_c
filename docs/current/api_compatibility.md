@@ -486,3 +486,41 @@ Compatibility rules for the `v0.6.0` tracking line:
 ```text
 out/build/<preset>/artifacts/abi/0.6.0/
 ```
+
+## 0.7.0-alpha Optimized Tracking Strategy API Baseline
+
+`0.7.0-alpha` is an evidence line on `main`, not a stable release. It adds
+high-level Optimized tracking strategy presets on top of the stable `v0.6.0`
+Optimized tracking ABI. Existing `v0.6.0` public functions, function
+signatures, enum numeric values, and result-code numeric values remain
+unchanged.
+
+Compatibility rules for the `0.7.0-alpha` strategy line:
+
+- Existing `v0.6.0` public symbols must remain exported.
+- New public symbols are limited to the accepted strategy preset controls in
+  `docs/design/tracking_optimized_mode.md`:
+  `ruckig_tracking_set_optimized_strategy` and
+  `ruckig_tracking_get_optimized_strategy`.
+- `docs/abi/public-symbols.txt` contains 171 approved public symbols: the
+  `v0.6.0` 169-symbol set plus 2 intentional Optimized tracking strategy
+  symbols.
+- `docs/abi/public-symbol-exceptions.txt` records the intentional
+  `0.7.0-alpha` additions as `allow-add` entries.
+- `ruckig_tracking_optimized_strategy_t` is additive. Existing enum numeric
+  values and result-code numeric values are unchanged.
+- The default strategy is `RUCKIG_TRACKING_OPTIMIZED_BALANCED`; invalid
+  strategy values return `RUCKIG_ERROR_INVALID_INPUT`.
+- Strategy presets are local quality controls. They are not a formal global
+  optimality guarantee and not a Pro/cloud equivalence claim.
+- Tracking internals, strategy config tables, candidate generation helpers,
+  scoring helpers, and workspace structures must not be exported.
+- `original/ruckig-main` remains frozen as the Ruckig Community `0.17.3`
+  reference baseline.
+
+`0.7.0-alpha` ABI artifact output paths use the design-line evidence
+directory:
+
+```text
+out/build/<preset>/artifacts/abi/0.7.0-alpha/
+```

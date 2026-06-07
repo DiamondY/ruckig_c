@@ -145,6 +145,7 @@ struct ruckig_tracking {
     double reactiveness;
     size_t look_ahead_cycles;
     size_t max_optimized_candidates;
+    ruckig_tracking_optimized_strategy_t optimized_strategy;
     ruckig_tracking_calculation_status_t last_calculation_status;
     size_t last_candidate_count;
     double* optimized_candidate_position;

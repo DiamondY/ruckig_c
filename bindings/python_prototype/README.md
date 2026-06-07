@@ -2,7 +2,7 @@
 
 This directory is an experimental prototype over the public `ruckig_c` C ABI.
 It covers the `0.4.x` waypoint ABI, the stable `v0.5.0` Fast tracking ABI, and
-the `0.6.0-design` Optimized tracking alpha additions. It is not a released
+the `0.7.0-alpha` Optimized tracking strategy additions. It is not a released
 binding API, not installed by CMake, and not part of the public C ABI.
 
 The prototype loads an already-built shared `ruckig_c` library with `cffi`
@@ -21,8 +21,8 @@ ABI mode and validates the minimum wrapper model:
   per-section constraints, intermediate duration queries, position extrema,
   first-time-at-position, and local intermediate-position filtering.
 - tracking handles, online Fast tracking, offline target sequences,
-  `0.6.0-design` Optimized lookahead update, candidate-budget diagnostics, and
-  tracking lifecycle checks.
+  Optimized lookahead update, candidate-budget diagnostics, strategy presets,
+  and tracking lifecycle checks.
 
 ## Prerequisites
 

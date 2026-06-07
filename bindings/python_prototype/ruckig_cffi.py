@@ -211,6 +211,8 @@ ffi.cdef(
     size_t ruckig_tracking_get_look_ahead_cycles(const ruckig_tracking_t* tracking);
     ruckig_result_t ruckig_tracking_set_max_optimized_candidates(ruckig_tracking_t* tracking, size_t max_candidates);
     size_t ruckig_tracking_get_max_optimized_candidates(const ruckig_tracking_t* tracking);
+    ruckig_result_t ruckig_tracking_set_optimized_strategy(ruckig_tracking_t* tracking, int strategy);
+    int ruckig_tracking_get_optimized_strategy(const ruckig_tracking_t* tracking);
     int ruckig_tracking_get_last_calculation_status(const ruckig_tracking_t* tracking);
     size_t ruckig_tracking_get_last_candidate_count(const ruckig_tracking_t* tracking);
     ruckig_result_t ruckig_tracking_update(
@@ -314,6 +316,12 @@ class TrackingCalculationStatus(enum.IntEnum):
     OPTIMIZED = 2
     FAST_FALLBACK = 3
     ERROR = 4
+
+
+class TrackingOptimizedStrategy(enum.IntEnum):
+    STABLE = 0
+    BALANCED = 1
+    AGGRESSIVE = 2
 
 
 @dataclass(frozen=True)
@@ -776,6 +784,16 @@ class Tracking(_Handle):
         _result(
             _library().ruckig_tracking_set_max_optimized_candidates(self.ptr, int(max_candidates)),
             "ruckig_tracking_set_max_optimized_candidates",
+        )
+
+    @property
+    def optimized_strategy(self) -> TrackingOptimizedStrategy:
+        return TrackingOptimizedStrategy(int(_library().ruckig_tracking_get_optimized_strategy(self.ptr)))
+
+    def set_optimized_strategy(self, strategy: TrackingOptimizedStrategy) -> None:
+        _result(
+            _library().ruckig_tracking_set_optimized_strategy(self.ptr, int(strategy)),
+            "ruckig_tracking_set_optimized_strategy",
         )
 
     @property

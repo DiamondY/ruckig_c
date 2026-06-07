@@ -27,6 +27,7 @@ int main(void) {
     ruckig_input_max_jerk_data(input)[0] = 12.0;
 
     if (ruckig_tracking_set_mode(tracking, RUCKIG_TRACKING_OPTIMIZED) != RUCKIG_WORKING
+        || ruckig_tracking_set_optimized_strategy(tracking, RUCKIG_TRACKING_OPTIMIZED_AGGRESSIVE) != RUCKIG_WORKING
         || ruckig_tracking_set_look_ahead_cycles(tracking, 6) != RUCKIG_WORKING
         || ruckig_target_state_sequence_set_count(targets, sample_count) != RUCKIG_WORKING) {
         return 2;
@@ -48,11 +49,12 @@ int main(void) {
     }
     output_position = ruckig_tracking_output_sequence_new_position_const_data(outputs);
     printf(
-        "offline optimized tracking samples: %zu final position: %.6f status: %d candidates: %zu\n",
+        "offline optimized tracking samples: %zu final position: %.6f status: %d candidates: %zu strategy: %d\n",
         ruckig_tracking_output_sequence_get_count(outputs),
         output_position[sample_count - 1],
         (int)ruckig_tracking_get_last_calculation_status(tracking),
-        ruckig_tracking_get_last_candidate_count(tracking)
+        ruckig_tracking_get_last_candidate_count(tracking),
+        (int)ruckig_tracking_get_optimized_strategy(tracking)
     );
 
     ruckig_input_destroy(input);

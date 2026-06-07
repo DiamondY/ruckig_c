@@ -3,6 +3,7 @@
 #include "ruckig_c/alloc.h"
 #include "ruckig_c/roots.h"
 
+#include <stdlib.h>
 #include <string.h>
 
 int ruckig_c_test_failures = 0;
@@ -107,8 +108,15 @@ void run_tracking_optimized_tests(void);
 void run_tracking_quality_tests(void);
 void run_tracking_no_allocation_tests(void);
 void run_tracking_tests(void);
+void run_tracking_random_tests(size_t samples, unsigned seed);
 
 int main(int argc, char** argv) {
+    if (argc == 5 && strcmp(argv[1], "--tracking-random") == 0 && strcmp(argv[3], "--seed") == 0) {
+        const unsigned long samples = strtoul(argv[2], NULL, 10);
+        const unsigned long seed = strtoul(argv[4], NULL, 10);
+        run_tracking_random_tests((size_t)samples, (unsigned)seed);
+        return ruckig_c_test_failures == 0 ? 0 : 1;
+    }
     if (argc == 2) {
         if (strcmp(argv[1], "--waypoint") == 0) {
             run_waypoint_tests();
@@ -162,7 +170,7 @@ int main(int argc, char** argv) {
         return 2;
     }
     if (argc > 2) {
-        fprintf(stderr, "usage: ruckig_c_tests [--waypoint|--per-section|--waypoint-quality|--tracking|--tracking-api|--tracking-validation|--tracking-online|--tracking-fixed-corpus|--tracking-offline|--tracking-optimized|--tracking-quality|--tracking-no-allocation]\n");
+        fprintf(stderr, "usage: ruckig_c_tests [--waypoint|--per-section|--waypoint-quality|--tracking|--tracking-api|--tracking-validation|--tracking-online|--tracking-fixed-corpus|--tracking-offline|--tracking-optimized|--tracking-quality|--tracking-no-allocation|--tracking-random N --seed S]\n");
         return 2;
     }
 

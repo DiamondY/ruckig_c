@@ -7,6 +7,30 @@ priority is Optimized tracking quality and stability deepening: broader fixed
 corpus coverage, stronger trend metrics, deterministic stress, and release
 evidence strategy. `0.6.1` remains reserved for emergency patch work only.
 
+`0.7.0-alpha` evidence in progress:
+
+- Added high-level Optimized tracking strategy presets:
+  `RUCKIG_TRACKING_OPTIMIZED_STABLE`,
+  `RUCKIG_TRACKING_OPTIMIZED_BALANCED`, and
+  `RUCKIG_TRACKING_OPTIMIZED_AGGRESSIVE`.
+- Added public C strategy controls:
+  `ruckig_tracking_set_optimized_strategy` and
+  `ruckig_tracking_get_optimized_strategy`. Existing `v0.6.0` public symbols,
+  signatures, enum numeric values, and result-code numeric values are
+  unchanged.
+- Reworked the bounded Optimized candidate evaluator around deterministic
+  strategy configs, strategy-specific scoring weights, explicit candidate
+  families, fixed tie-break behavior, and preserved Fast fallback semantics.
+- Extended C quality evidence so Balanced must not be worse than Fast on the
+  fixed corpus and Aggressive must improve over Balanced on fixed sinus and
+  half-sinus cases.
+- Added deterministic tracking random stress through
+  `ruckig_c_tests --tracking-random N --seed S` and routine CTest coverage for
+  `--tracking-random 10000 --seed 1`.
+- Extended Python `cffi` prototype and Rust alpha wrapper smoke with strategy
+  preset controls. No wheel, crate, tag, or GitHub Release is produced for this
+  alpha evidence line.
+
 Deferred unless separately accepted:
 
 - Soft interruption implementation, formal Python/Rust publication,

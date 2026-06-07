@@ -8,12 +8,82 @@
 #define RUCKIG_TRACKING_MAX_OPTIMIZED_CANDIDATES 128u
 #define RUCKIG_TRACKING_SCORE_EPSILON 1e-12
 
+typedef struct tracking_strategy_config {
+    ruckig_tracking_optimized_strategy_t strategy;
+    double position_weight;
+    double velocity_weight;
+    double acceleration_weight;
+    double jerk_weight;
+    double terminal_weight;
+    double horizon_weight_step;
+    double acceptance_ratio;
+    bool use_terminal_blends;
+    bool use_derivative_damping;
+    bool use_lead_lag_horizons;
+} tracking_strategy_config_t;
+
+static const tracking_strategy_config_t tracking_strategy_configs[] = {
+    {
+        RUCKIG_TRACKING_OPTIMIZED_STABLE,
+        1.0,
+        0.05,
+        0.005,
+        0.0001,
+        4.0,
+        1.0,
+        1.0,
+        true,
+        true,
+        false
+    },
+    {
+        RUCKIG_TRACKING_OPTIMIZED_BALANCED,
+        1.25,
+        0.08,
+        0.006,
+        0.00008,
+        5.0,
+        1.25,
+        0.0,
+        false,
+        false,
+        false
+    },
+    {
+        RUCKIG_TRACKING_OPTIMIZED_AGGRESSIVE,
+        2.0,
+        0.10,
+        0.004,
+        0.00002,
+        8.0,
+        1.5,
+        0.70,
+        true,
+        true,
+        true
+    }
+};
+
 static double* allocate_double_vector(size_t count) {
     return (double*)ruckig_calloc(count, sizeof(double));
 }
 
 static size_t min_size(size_t lhs, size_t rhs) {
     return lhs < rhs ? lhs : rhs;
+}
+
+static const tracking_strategy_config_t* tracking_strategy_config(ruckig_tracking_optimized_strategy_t strategy) {
+    size_t i;
+    for (i = 0; i < sizeof(tracking_strategy_configs) / sizeof(tracking_strategy_configs[0]); ++i) {
+        if (tracking_strategy_configs[i].strategy == strategy) {
+            return &tracking_strategy_configs[i];
+        }
+    }
+    return NULL;
+}
+
+static bool valid_tracking_strategy(ruckig_tracking_optimized_strategy_t strategy) {
+    return tracking_strategy_config(strategy) != NULL;
 }
 
 static size_t* allocate_size_vector(size_t count) {
@@ -305,6 +375,7 @@ RUCKIG_C_API ruckig_result_t ruckig_tracking_create(ruckig_tracking_t** tracking
     value->reactiveness = 1.0;
     value->look_ahead_cycles = 1;
     value->max_optimized_candidates = RUCKIG_TRACKING_DEFAULT_OPTIMIZED_CANDIDATES;
+    value->optimized_strategy = RUCKIG_TRACKING_OPTIMIZED_BALANCED;
     value->last_calculation_status = RUCKIG_TRACKING_CALCULATION_NONE;
     if (ruckig_create(&value->otg, dofs, delta_time) != RUCKIG_WORKING
         || ruckig_input_create(&value->work_input, dofs) != RUCKIG_WORKING
@@ -407,6 +478,24 @@ RUCKIG_C_API ruckig_result_t ruckig_tracking_set_max_optimized_candidates(
 
 RUCKIG_C_API size_t ruckig_tracking_get_max_optimized_candidates(const ruckig_tracking_t* tracking) {
     return tracking ? tracking->max_optimized_candidates : 0;
+}
+
+RUCKIG_C_API ruckig_result_t ruckig_tracking_set_optimized_strategy(
+    ruckig_tracking_t* tracking,
+    ruckig_tracking_optimized_strategy_t strategy
+) {
+    if (!tracking || !valid_tracking_strategy(strategy)) {
+        return RUCKIG_ERROR_INVALID_INPUT;
+    }
+    tracking->optimized_strategy = strategy;
+    ruckig_reset(tracking->otg);
+    return RUCKIG_WORKING;
+}
+
+RUCKIG_C_API ruckig_tracking_optimized_strategy_t ruckig_tracking_get_optimized_strategy(
+    const ruckig_tracking_t* tracking
+) {
+    return tracking ? tracking->optimized_strategy : RUCKIG_TRACKING_OPTIMIZED_BALANCED;
 }
 
 RUCKIG_C_API ruckig_tracking_calculation_status_t ruckig_tracking_get_last_calculation_status(
@@ -534,6 +623,7 @@ static ruckig_result_t run_prepared_tracking_update(
 
 static ruckig_result_t score_current_tracking_candidate(
     ruckig_tracking_t* tracking,
+    const tracking_strategy_config_t* config,
     const double* target_position,
     const double* target_velocity,
     const double* target_acceleration,
@@ -555,7 +645,7 @@ static ruckig_result_t score_current_tracking_candidate(
         size_t section = 0;
         const size_t offset = sample * tracking->dofs;
         const double time = (double)(sample + 1) * tracking->delta_time;
-        double weight = 1.0 + (double)sample;
+        double weight = 1.0 + config->horizon_weight_step * (double)sample;
         result = ruckig_trajectory_at_time(
             tracking->work_output->trajectory,
             time,
@@ -570,7 +660,7 @@ static ruckig_result_t score_current_tracking_candidate(
             return result;
         }
         if (sample + 1 == target_count) {
-            weight *= 4.0;
+            weight *= config->terminal_weight;
         }
         for (dof = 0; dof < tracking->dofs; ++dof) {
             const double position_error = tracking->optimized_candidate_position[dof] - target_position[offset + dof];
@@ -582,11 +672,11 @@ static ruckig_result_t score_current_tracking_candidate(
             }
             if (tracking->work_input->enabled[dof]) {
                 value += weight * (
-                    position_error * position_error
-                    + 0.05 * velocity_error * velocity_error
-                    + 0.005 * acceleration_error * acceleration_error
+                    config->position_weight * position_error * position_error
+                    + config->velocity_weight * velocity_error * velocity_error
+                    + config->acceleration_weight * acceleration_error * acceleration_error
                 );
-                value += 0.0001 * jerk * jerk;
+                value += weight * config->jerk_weight * jerk * jerk;
             }
         }
     }
@@ -596,6 +686,7 @@ static ruckig_result_t score_current_tracking_candidate(
 
 static ruckig_result_t try_tracking_candidate(
     ruckig_tracking_t* tracking,
+    const tracking_strategy_config_t* config,
     const double* target_position,
     const double* target_velocity,
     const double* target_acceleration,
@@ -612,6 +703,7 @@ static ruckig_result_t try_tracking_candidate(
     copy_candidate_to_work_input(tracking);
     result = score_current_tracking_candidate(
         tracking,
+        config,
         target_position,
         target_velocity,
         target_acceleration,
@@ -621,12 +713,56 @@ static ruckig_result_t try_tracking_candidate(
     if (result != RUCKIG_WORKING) {
         return RUCKIG_WORKING;
     }
-    if (score + RUCKIG_TRACKING_SCORE_EPSILON < *best_score) {
+    if (score + RUCKIG_TRACKING_SCORE_EPSILON < *best_score * config->acceptance_ratio) {
         *best_score = score;
         *improved = true;
         copy_work_input_target_to_best(tracking);
     }
     return RUCKIG_WORKING;
+}
+
+static bool tracking_candidate_budget_available(const ruckig_tracking_t* tracking) {
+    return tracking->last_candidate_count < tracking->max_optimized_candidates;
+}
+
+static ruckig_result_t try_tracking_prediction_candidate(
+    ruckig_tracking_t* tracking,
+    const tracking_strategy_config_t* config,
+    const double* candidate_position,
+    const double* candidate_velocity,
+    const double* candidate_acceleration,
+    double horizon,
+    const double* target_position,
+    const double* target_velocity,
+    const double* target_acceleration,
+    size_t target_count,
+    double* best_score,
+    bool* improved
+) {
+    ruckig_result_t result;
+    if (!tracking_candidate_budget_available(tracking)) {
+        return RUCKIG_WORKING;
+    }
+    result = set_tracking_candidate_prediction(
+        tracking,
+        candidate_position,
+        candidate_velocity,
+        candidate_acceleration,
+        horizon
+    );
+    if (result != RUCKIG_WORKING) {
+        return result;
+    }
+    return try_tracking_candidate(
+        tracking,
+        config,
+        target_position,
+        target_velocity,
+        target_acceleration,
+        target_count,
+        best_score,
+        improved
+    );
 }
 
 static ruckig_result_t evaluate_optimized_tracking(
@@ -641,10 +777,11 @@ static ruckig_result_t evaluate_optimized_tracking(
     size_t sample;
     double fast_score = DBL_MAX;
     double best_score = DBL_MAX;
+    const tracking_strategy_config_t* config = tracking_strategy_config(tracking->optimized_strategy);
     bool improved = false;
     ruckig_result_t result;
     const size_t window_count = min_size(target_count, tracking->look_ahead_cycles);
-    if (target_count == 0 || window_count == 0
+    if (!config || target_count == 0 || window_count == 0
         || !finite_vector(target_position, target_count * tracking->dofs)
         || !finite_vector(target_velocity, target_count * tracking->dofs)
         || !finite_vector(target_acceleration, target_count * tracking->dofs)) {
@@ -660,7 +797,7 @@ static ruckig_result_t evaluate_optimized_tracking(
         target_position,
         target_velocity,
         target_acceleration,
-        (double)tracking->look_ahead_cycles * tracking->delta_time * tracking->reactiveness
+        (double)window_count * tracking->delta_time * tracking->reactiveness
     );
     if (result != RUCKIG_WORKING) {
         return result;
@@ -669,6 +806,7 @@ static ruckig_result_t evaluate_optimized_tracking(
     tracking->last_candidate_count = 1;
     result = score_current_tracking_candidate(
         tracking,
+        config,
         target_position,
         target_velocity,
         target_acceleration,
@@ -684,18 +822,13 @@ static ruckig_result_t evaluate_optimized_tracking(
 
     for (sample = 0; sample < window_count; ++sample) {
         const size_t offset = sample * tracking->dofs;
-        result = set_tracking_candidate_prediction(
+        result = try_tracking_prediction_candidate(
             tracking,
+            config,
             &target_position[offset],
             &target_velocity[offset],
             &target_acceleration[offset],
-            0.0
-        );
-        if (result != RUCKIG_WORKING) {
-            return result;
-        }
-        result = try_tracking_candidate(
-            tracking,
+            0.0,
             target_position,
             target_velocity,
             target_acceleration,
@@ -709,18 +842,13 @@ static ruckig_result_t evaluate_optimized_tracking(
     }
 
     for (sample = 0; sample < window_count; ++sample) {
-        result = set_tracking_candidate_prediction(
+        result = try_tracking_prediction_candidate(
             tracking,
+            config,
             target_position,
             target_velocity,
             target_acceleration,
-            (double)(sample + 1) * tracking->delta_time * tracking->reactiveness
-        );
-        if (result != RUCKIG_WORKING) {
-            return result;
-        }
-        result = try_tracking_candidate(
-            tracking,
+            (double)(sample + 1) * tracking->delta_time * tracking->reactiveness,
             target_position,
             target_velocity,
             target_acceleration,
@@ -735,9 +863,9 @@ static ruckig_result_t evaluate_optimized_tracking(
 
     {
         const size_t terminal_offset = (window_count - 1) * tracking->dofs;
-        const double blend_values[3] = {0.25, 0.5, 0.75};
+        const double blend_values[4] = {0.25, 0.5, 0.75, 1.0};
         size_t blend_index;
-        for (blend_index = 0; blend_index < 3; ++blend_index) {
+        for (blend_index = 0; config->use_terminal_blends && blend_index < 4; ++blend_index) {
             size_t dof;
             const double blend = blend_values[blend_index];
             result = set_tracking_candidate_prediction(
@@ -763,6 +891,7 @@ static ruckig_result_t evaluate_optimized_tracking(
             }
             result = try_tracking_candidate(
                 tracking,
+                config,
                 target_position,
                 target_velocity,
                 target_acceleration,
@@ -775,9 +904,9 @@ static ruckig_result_t evaluate_optimized_tracking(
             }
         }
 
-        for (blend_index = 0; blend_index < 2; ++blend_index) {
+        for (blend_index = 0; config->use_derivative_damping && blend_index < 3; ++blend_index) {
             size_t dof;
-            const double scale = blend_index == 0 ? 0.5 : 0.0;
+            const double scale = blend_index == 0 ? 0.75 : (blend_index == 1 ? 0.5 : 0.0);
             result = set_tracking_candidate_prediction(
                 tracking,
                 &target_position[terminal_offset],
@@ -794,6 +923,7 @@ static ruckig_result_t evaluate_optimized_tracking(
             }
             result = try_tracking_candidate(
                 tracking,
+                config,
                 target_position,
                 target_velocity,
                 target_acceleration,
@@ -803,6 +933,34 @@ static ruckig_result_t evaluate_optimized_tracking(
             );
             if (result != RUCKIG_WORKING) {
                 return result;
+            }
+        }
+
+        if (config->use_lead_lag_horizons) {
+            const double horizon_values[4] = {
+                0.5 * tracking->delta_time * tracking->reactiveness,
+                ((double)window_count + 0.5) * tracking->delta_time * tracking->reactiveness,
+                ((double)window_count + 1.0) * tracking->delta_time * tracking->reactiveness,
+                ((double)window_count + 2.0) * tracking->delta_time * tracking->reactiveness
+            };
+            for (blend_index = 0; blend_index < 4; ++blend_index) {
+                result = try_tracking_prediction_candidate(
+                    tracking,
+                    config,
+                    target_position,
+                    target_velocity,
+                    target_acceleration,
+                    horizon_values[blend_index],
+                    target_position,
+                    target_velocity,
+                    target_acceleration,
+                    window_count,
+                    &best_score,
+                    &improved
+                );
+                if (result != RUCKIG_WORKING) {
+                    return result;
+                }
             }
         }
     }

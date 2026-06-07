@@ -90,3 +90,19 @@ recorded in `CHANGELOG.md`, tracked in `docs/abi/public-symbols.txt`, and
 listed as `allow-add` entries in `docs/abi/public-symbol-exceptions.txt`.
 Existing `v0.5.0` public symbols, signatures, enum values, and result-code
 numeric values remain frozen.
+
+## 0.7.0-alpha Optimized Tracking Strategy Expansion
+
+`0.7.0-alpha` adds high-level Optimized tracking strategy controls without
+exposing internal objective weights or candidate-family masks:
+
+- `ruckig_tracking_set_optimized_strategy`
+- `ruckig_tracking_get_optimized_strategy`
+
+The approved strategy enum values are `STABLE = 0`, `BALANCED = 1`, and
+`AGGRESSIVE = 2`; `BALANCED` is the constructor default. These additions are
+approved by `docs/design/tracking_optimized_mode.md`, recorded in
+`CHANGELOG.md`, tracked in `docs/abi/public-symbols.txt`, and listed as
+`allow-add` entries in `docs/abi/public-symbol-exceptions.txt`. Existing
+`v0.6.0` public symbols, signatures, enum values, and result-code numeric
+values remain frozen.

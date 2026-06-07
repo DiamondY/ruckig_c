@@ -22,6 +22,7 @@ from ruckig_cffi import (
     Tracking,
     TrackingCalculationStatus,
     TrackingMode,
+    TrackingOptimizedStrategy,
     TrackingOutputSequence,
     configure_library,
 )
@@ -324,6 +325,7 @@ class PrototypeTests(unittest.TestCase):
             self.assertEqual(tracking.mode, TrackingMode.FAST)
             self.assertEqual(tracking.look_ahead_cycles, 1)
             self.assertEqual(tracking.max_optimized_candidates, 16)
+            self.assertEqual(tracking.optimized_strategy, TrackingOptimizedStrategy.BALANCED)
             self.assertEqual(tracking.last_calculation_status, TrackingCalculationStatus.NONE)
             self.assertEqual(tracking.last_candidate_count, 0)
             self.assertAlmostEqual(tracking.reactiveness, 1.0)
@@ -331,6 +333,13 @@ class PrototypeTests(unittest.TestCase):
             tracking.set_look_ahead_cycles(1)
             tracking.set_max_optimized_candidates(8)
             self.assertEqual(tracking.max_optimized_candidates, 8)
+            for strategy in (
+                TrackingOptimizedStrategy.STABLE,
+                TrackingOptimizedStrategy.BALANCED,
+                TrackingOptimizedStrategy.AGGRESSIVE,
+            ):
+                tracking.set_optimized_strategy(strategy)
+                self.assertEqual(tracking.optimized_strategy, strategy)
 
             for step in range(200):
                 t = step * tracking.delta_time
@@ -422,6 +431,8 @@ class PrototypeTests(unittest.TestCase):
                 tracking.set_max_optimized_candidates(0)
             with self.assertRaises(RuckigInvalidInputError):
                 tracking.set_max_optimized_candidates(129)
+            with self.assertRaises(RuckigInvalidInputError):
+                tracking.set_optimized_strategy(99)  # type: ignore[arg-type]
 
     def test_tracking_optimized_smoke(self) -> None:
         with (
@@ -443,6 +454,8 @@ class PrototypeTests(unittest.TestCase):
             tracking.set_mode(TrackingMode.OPTIMIZED)
             tracking.set_look_ahead_cycles(4)
             tracking.set_max_optimized_candidates(16)
+            tracking.set_optimized_strategy(TrackingOptimizedStrategy.AGGRESSIVE)
+            self.assertEqual(tracking.optimized_strategy, TrackingOptimizedStrategy.AGGRESSIVE)
 
             self.assertIn(tracking.update(target, input_, output), (Result.WORKING, Result.FINISHED))
             self.assertIn(

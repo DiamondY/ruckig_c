@@ -74,6 +74,12 @@ typedef enum ruckig_tracking_calculation_status {
     RUCKIG_TRACKING_CALCULATION_ERROR = 4
 } ruckig_tracking_calculation_status_t;
 
+typedef enum ruckig_tracking_optimized_strategy {
+    RUCKIG_TRACKING_OPTIMIZED_STABLE = 0,
+    RUCKIG_TRACKING_OPTIMIZED_BALANCED = 1,
+    RUCKIG_TRACKING_OPTIMIZED_AGGRESSIVE = 2
+} ruckig_tracking_optimized_strategy_t;
+
 typedef struct ruckig_position_extrema {
     double min_position;
     double max_position;
@@ -102,11 +108,12 @@ typedef struct ruckig_tracking_output_sequence ruckig_tracking_output_sequence_t
 #endif
 
 /*
- * 0.6.0 scope:
+ * 0.7.0-design scope:
  * - Intermediate waypoints and per-section constraints are exposed through the
  *   C ABI and solved locally by the waypoint optimizer.
  * - Tracking exposes local Fast mode and a bounded local Optimized mode with
- *   deterministic candidate search and Fast fallback diagnostics.
+ *   deterministic candidate search, strategy presets, and Fast fallback
+ *   diagnostics.
  * - No cloud API, remote fallback, or Pro/cloud equivalence claim is provided.
  * - Python and Rust bindings remain separate layers over this C ABI.
  */
@@ -473,6 +480,13 @@ RUCKIG_C_API ruckig_result_t ruckig_tracking_set_max_optimized_candidates(
     size_t max_candidates
 );
 RUCKIG_C_API size_t ruckig_tracking_get_max_optimized_candidates(const ruckig_tracking_t* tracking);
+RUCKIG_C_API ruckig_result_t ruckig_tracking_set_optimized_strategy(
+    ruckig_tracking_t* tracking,
+    ruckig_tracking_optimized_strategy_t strategy
+);
+RUCKIG_C_API ruckig_tracking_optimized_strategy_t ruckig_tracking_get_optimized_strategy(
+    const ruckig_tracking_t* tracking
+);
 RUCKIG_C_API ruckig_tracking_calculation_status_t ruckig_tracking_get_last_calculation_status(
     const ruckig_tracking_t* tracking
 );
