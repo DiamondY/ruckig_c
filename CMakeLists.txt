@@ -174,6 +174,7 @@ if(BUILD_RUCKIG_C_TESTS)
     test/c/test_brake.c
     test/c/test_profile.c
     test/c/test_roots.c
+    test/c/test_solver_branch_coverage.c
     test/c/test_utils.c
     ${RUCKIG_C_SOURCES}
   )
@@ -196,6 +197,7 @@ if(BUILD_RUCKIG_C_TESTS)
   add_test(NAME ruckig_c_waypoint_optimizer COMMAND ruckig_c_tests --waypoint)
   add_test(NAME ruckig_c_per_section_constraints COMMAND ruckig_c_tests --per-section)
   add_test(NAME ruckig_c_waypoint_quality COMMAND ruckig_c_tests --waypoint-quality)
+  add_test(NAME ruckig_c_solver_branch_coverage COMMAND ruckig_c_tests --solver-branch-coverage)
   add_test(NAME ruckig_c_tracking_api COMMAND ruckig_c_tests --tracking-api)
   add_test(NAME ruckig_c_tracking_validation COMMAND ruckig_c_tests --tracking-validation)
   add_test(NAME ruckig_c_tracking_online COMMAND ruckig_c_tests --tracking-online)

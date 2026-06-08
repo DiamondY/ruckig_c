@@ -20,13 +20,13 @@ source-level parity.
 | Waypoint and per-section behavior versus full Pro/cloud behavior | 60-70% | Local optimizer exists, but no Pro/cloud equivalence claim or proof of global optimality. |
 | Waypoint and per-section behavior versus declared local optimizer scope | 75-80% | Local invariants, section oracle, fixed corpus, and benchmark trend are in place. |
 | Bindings and ecosystem | 38-48% | Python and Rust remain prototype/alpha only, now with Fast, Optimized tracking, `0.7.0-alpha` strategy preset smoke, and `0.7.0-alpha.2` diagnostics snapshot coverage; package-manager recipes are deferred. |
-| Full original repository/product parity | 72-77% | Core runtime is strong; bounded Optimized tracking is stable and being deepened on `0.7.0-alpha.2`; `0.7.0-alpha.3` adds local coverage audit evidence while formal bindings, package distribution, Pro/cloud equivalence, and C++ ergonomics remain gaps. |
+| Full original repository/product parity | 72-77% | Core runtime is strong; bounded Optimized tracking is stable and being deepened on `0.7.0-alpha.2`; `0.7.0-alpha.3` adds local coverage audit evidence and `0.7.0-alpha.4` hardens targeted solver branch coverage while formal bindings, package distribution, Pro/cloud equivalence, and C++ ergonomics remain gaps. |
 
 ## Coverage Matrix
 
 | Area | Original source | Current `ruckig_c` status | Estimate | Evidence | Remaining gap | Next action |
 | --- | --- | --- | ---: | --- | --- | --- |
-| No-waypoint target solver | `include/ruckig/ruckig.hpp`, `calculator_target.hpp`, position/velocity/profile headers | Pure C target solver covers first-, second-, and third-order position/velocity cases, synchronization modes, min limits, disabled DoFs, discrete duration, minimum duration, offline, and online update. | 93-96% | Fixed oracle count 76; ordinary random 100000 seeds 1/2/41; per-DoF random 100000 seed 1; release random 1M seed 1; `docs/current/test_coverage_audit.md` maps original target tests to current oracle/C coverage. | Long-tail numerical cases, upstream random-history scale, Pro scaling and diagnostics are not reproduced. | Keep oracle gates and retain every new mismatch case as a regression or tolerance exception. |
+| No-waypoint target solver | `include/ruckig/ruckig.hpp`, `calculator_target.hpp`, position/velocity/profile headers | Pure C target solver covers first-, second-, and third-order position/velocity cases, synchronization modes, min limits, disabled DoFs, discrete duration, minimum duration, offline, and online update. | 93-96% | Fixed oracle count 82; ordinary random 100000 seeds 1/2/41; per-DoF random 100000 seed 1; release random 1M seed 1; `docs/current/test_coverage_audit.md` maps original target tests to current oracle/C coverage and records `0.7.0-alpha.4` targeted branch coverage deltas. | Long-tail numerical cases, upstream random-history scale, Pro scaling and diagnostics are not reproduced. | Keep oracle gates and retain every new mismatch case as a regression or tolerance exception. |
 | Waypoints, per-section constraints, and global position bounds | Original waypoint examples and input/trajectory surface; Pro/cloud behavior is not in the frozen Community source. | Public C ABI and local coupled waypoint optimizer are implemented; per-section constraints, intermediate durations, extrema, first-time, and filtering are covered. | 60-70% versus full Pro/cloud; 75-80% versus local scope | `docs/design/0.4.0_original_parity.md`; `0.4.1` waypoint fixed corpus; section-oracle comparisons; waypoint benchmark trend. | No formal global optimality proof, no cloud fallback, no Pro/cloud output equivalence claim, limited black-box evidence. | Keep local evidence as the routine gate; use optional Pro/cloud samples only as non-blocking evidence if available. |
 | Trajectory query semantics | `include/ruckig/trajectory.hpp` | Duration, independent minimum durations, sampling, section count, intermediate durations, extrema, and first-time-at-position are exposed through C. | 80-88% | C tests, waypoint invariant tests, and release checklist evidence. | Internal profile visibility, exact C++ object ergonomics, and some diagnostic details are not exposed. | Maintain C-level trajectory query tests; do not expose internals without a separate API decision. |
 | Validation and diagnostics | `input_parameter.hpp`, `output_parameter.hpp`, `result.hpp` | Public validation, result codes, output state, calculation duration, and interruption storage are exposed. | 75-85% | C API diagnostics tests and API compatibility policy. | C++ exception style, detailed diagnostics, and true waypoint optimizer interruption behavior are not implemented. | Follow `docs/design/interrupt_calculation_duration.md` before adding timeout behavior. |
@@ -46,8 +46,10 @@ motion-generation surface and very high no-waypoint target-solver coverage.
 bounded local Optimized tracking evidence. `0.7.0-alpha.2` improves local
 tracking quality evidence with strategy presets, diagnostics snapshots, and
 deterministic stress. `0.7.0-alpha.3` adds local LLVM coverage evidence and an
-original Community test/example behavior mapping, but it is not a stable
-release and does not create formal Pro/cloud equivalence.
+original Community test/example behavior mapping. `0.7.0-alpha.4` adds targeted
+solver branch coverage for the five lowest files from that audit, raising the
+local implementation line coverage evidence from `85.33%` to `87.71%`; it is
+still not a stable release and does not create formal Pro/cloud equivalence.
 The project still must not claim complete original product parity because
 formal bindings, package publication, cloud/Pro equivalence, formal global
 optimality proof, and C++-specific ergonomics remain incomplete or

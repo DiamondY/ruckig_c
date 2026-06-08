@@ -291,6 +291,10 @@ After `v0.6.0`, `main` tracks `0.7.0-design - Unreleased`.
   corpus records implementation line/function/branch coverage under
   `docs/current/test_coverage_audit.md`, but coverage is not a CI job and not
   a hard release gate.
+- `0.7.0-alpha.4` evidence adds targeted solver branch coverage hardening for
+  the five lowest files from the alpha.3 audit. It adds a lightweight
+  `ruckig_c_solver_branch_coverage` CTest gate and fixed frozen-oracle cases,
+  but still does not start stable `v0.7.0` closeout.
 - This alpha line may add the approved strategy preset and diagnostics C
   symbols, but it does not create a stable tag or GitHub Release.
 - Soft interruption, formal Python/Rust publication, package-manager recipes,

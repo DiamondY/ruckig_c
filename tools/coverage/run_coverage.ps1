@@ -1,6 +1,6 @@
 param(
     [string]$Preset = "windows-clang-ninja-coverage",
-    [string]$CoverageLabel = "0.7.0-alpha.3",
+    [string]$CoverageLabel = "0.7.0-alpha.4",
     [string]$LlvmCov = "llvm-cov",
     [string]$LlvmProfdata = "llvm-profdata"
 )

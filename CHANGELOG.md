@@ -7,6 +7,26 @@ priority is Optimized tracking quality and stability deepening: broader fixed
 corpus coverage, stronger trend metrics, deterministic stress, and release
 evidence strategy. `0.6.1` remains reserved for emergency patch work only.
 
+`0.7.0-alpha.4` solver branch coverage evidence:
+
+- Added targeted solver branch coverage for the five lowest implementation
+  files from the `0.7.0-alpha.3` audit:
+  `position_second_step2.c`, `velocity_third_step2.c`, `block.c`,
+  `velocity_third_step1.c`, and `position_second_step1.c`.
+- Added `ruckig_c_tests --solver-branch-coverage` and the
+  `ruckig_c_solver_branch_coverage` CTest gate. The test uses internal
+  white-box probes only for branch coverage hardening; original parity behavior
+  remains backed by frozen C++ oracle comparisons.
+- Added six fixed oracle comparison cases for second-order position and
+  third-order velocity branch families. The fixed oracle corpus now records 82
+  comparisons plus the existing waypoint section oracle comparisons.
+- Regenerated local coverage under `out/coverage/0.7.0-alpha.4/`. The broad
+  routine corpus records line `87.71%`, function `91.86%`, branch `69.26%`,
+  and region `87.44%`.
+- Coverage remains local-only evidence and is not a CI coverage job or a hard
+  release gate. No public C API, public symbol, enum numeric value, or
+  result-code value is changed.
+
 `0.7.0-alpha.3` coverage audit evidence:
 
 - Added a local LLVM coverage build option and
