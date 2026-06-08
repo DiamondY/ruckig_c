@@ -54,11 +54,13 @@ Release-readiness evidence is tracked under `docs/release/`; see
 stable release. It stabilizes the 172-symbol public C ABI reviewed during
 `0.7.0-readiness`: bounded local Optimized tracking from `v0.6.0`, high-level
 Optimized strategy presets, and public diagnostics snapshots. `0.7.1` is
-reserved for emergency patch work only. Algorithm visualization and trajectory
-gallery generation have been evaluated against the original Ruckig `doc/`
-images and `examples/*_trajectory.pdf` assets, but implementation is deferred
-until after `v0.7.0` so the stable closeout does not gain new plotting
-dependencies, image artifacts, or release gates.
+reserved for emergency patch work only. The `main` branch now tracks
+`0.8.0-design - Unreleased`, focused first on local algorithm visualization and
+trajectory gallery evidence. Algorithm visualization and trajectory gallery
+generation have been evaluated against the original Ruckig `doc/` images and
+`examples/*_trajectory.pdf` assets, but they remain outside the `v0.7.0`
+stable release so that release does not gain plotting dependencies, image
+artifacts, or release gates.
 `v0.4.0` added waypoint-aware C ABI entry points, per-section constraints,
 global position bounds, and a local coupled waypoint optimizer; `v0.4.1`
 deepened waypoint optimizer evidence; `v0.4.2` keeps that public C surface
@@ -81,10 +83,10 @@ Current stable release scope intentionally excludes:
   duration field remains storage/API-surface parity only.
 - Python/Rust binding publication. The Python `cffi` prototype and Rust alpha
   wrapper remain prototype-only and are not installed or published packages.
-- Algorithm visualization and trajectory gallery generation. Future
-  `ruckig_c`-owned plots should be generated locally after `v0.7.0`; no
-  original images are copied as primary project evidence and no Matplotlib or
-  NumPy dependency is added to the stable closeout.
+- Algorithm visualization and trajectory gallery generation. `0.8.0-design`
+  is expected to generate `ruckig_c`-owned plots locally; no original images
+  are copied as primary project evidence and no Matplotlib or NumPy dependency
+  is added to the `v0.7.0` stable release.
 - Package-manager recipes and new package-manager prototypes are outside the
   active roadmap. Existing CMake install, pkg-config, static/DLL, and shared
   install-tree consumption paths remain the supported integration surface.

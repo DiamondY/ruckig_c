@@ -314,3 +314,23 @@ diagnostics snapshot getter.
 - Soft interruption, formal Python/Rust publication, package-manager recipes,
   cloud/remote calculation, formal Pro/cloud equivalence claims, and upstream
   baseline upgrades remain deferred unless separately accepted.
+
+## 0.8.0 Design Entry
+
+After `v0.7.0`, `main` tracks `0.8.0-design - Unreleased`.
+
+- First priority: local algorithm visualization and trajectory gallery
+  evidence.
+- Generate `ruckig_c`-owned plots from local C/Python prototype data rather
+  than copying original Ruckig images as primary project evidence.
+- Initial gallery scope should cover no-waypoint trajectories, velocity/stop
+  and minimum-duration cases, local waypoint sections, and Fast/Optimized
+  tracking comparison.
+- Visualization remains documentation/evidence work, not public C API work.
+- Do not add visualization as a default CI or stable-release gate until a
+  separate dependency and artifact policy is accepted.
+- `0.7.1` remains reserved for emergency patches only.
+- Formal Python/Rust publication, package-manager recipes, soft interruption,
+  cloud/remote calculation, formal Pro/cloud equivalence claims, formal global
+  optimality proof, and upstream baseline upgrades remain deferred unless
+  separately accepted.

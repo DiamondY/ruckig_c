@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.8.0-design - Unreleased
+
+`0.8.0-design` is the post-`v0.7.0` design line on `main`. The first priority
+is local algorithm visualization and trajectory gallery evidence: generate
+`ruckig_c`-owned trajectory, waypoint, and Fast/Optimized tracking plots from
+local data without copying original Ruckig images as primary evidence.
+`0.7.1` remains reserved for emergency patch work only.
+
+Deferred unless separately accepted:
+
+- Python wheel publication, Rust crate publication, package-manager recipes,
+  soft interruption checkpoints, cloud/remote calculation, formal Pro/cloud
+  equivalence claims, formal global optimality proof, and upstream baseline
+  upgrade remain outside the default `0.8.0-design` entry scope.
+
 ## 0.7.0 - 2026-06-08
 
 `0.7.0` is the stable Optimized tracking quality and diagnostics release. It
