@@ -530,3 +530,38 @@ directory:
 ```text
 out/build/<preset>/artifacts/abi/0.7.0-alpha.2/
 ```
+
+## 0.7.0 Release Readiness ABI Review
+
+`0.7.0-readiness` is a release-readiness evidence audit on `main`, not a
+stable release and not a release candidate. It reviews the current
+`0.7.0-alpha.2` strategy and diagnostics ABI as the intended future `v0.7.0`
+stable baseline.
+
+Compatibility rules for the readiness audit:
+
+- Existing `v0.6.0` public symbols remain exported.
+- The only public symbols intended for future `v0.7.0` stabilization beyond
+  `v0.6.0` are the already-approved strategy preset controls and diagnostics
+  getter:
+  `ruckig_tracking_set_optimized_strategy`,
+  `ruckig_tracking_get_optimized_strategy`, and
+  `ruckig_tracking_get_last_diagnostics`.
+- `docs/abi/public-symbols.txt` remains at 172 approved public symbols.
+- No public C function, function signature, enum numeric value, or result-code
+  numeric value changes in readiness.
+- `CMakeLists.txt` project version and `RUCKIG_C_VERSION_*` macros remain
+  `0.6.0`; a future stable closeout must update them to `0.7.0`.
+- ABI artifact output paths remain on the design-line evidence directory until
+  stable closeout:
+
+```text
+out/build/<preset>/artifacts/abi/0.7.0-alpha.2/
+```
+
+If stable `v0.7.0` closeout is accepted later, the closeout must move ABI
+artifact output paths to:
+
+```text
+out/build/<preset>/artifacts/abi/0.7.0/
+```

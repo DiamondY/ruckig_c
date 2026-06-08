@@ -295,8 +295,19 @@ After `v0.6.0`, `main` tracks `0.7.0-design - Unreleased`.
   the five lowest files from the alpha.3 audit. It adds a lightweight
   `ruckig_c_solver_branch_coverage` CTest gate and fixed frozen-oracle cases,
   but still does not start stable `v0.7.0` closeout.
+- `0.7.0-readiness` evidence reruns the full local release-readiness gate set
+  against the current strategy preset and diagnostics API candidate. It treats
+  the 172-symbol public C ABI as ready for stable review, records coverage,
+  performance, ABI/export, wrapper, oracle, and 1M release-random readiness
+  evidence, and still does not bump versions, create a tag, or create a GitHub
+  Release.
 - This alpha line may add the approved strategy preset and diagnostics C
   symbols, but it does not create a stable tag or GitHub Release.
+- If `v0.7.0` stable closeout is accepted later, the closeout must update
+  `CMakeLists.txt`, `include/ruckig_c/ruckig.h` version macros,
+  `CHANGELOG.md`, release notes/checklists, and ABI artifact paths from the
+  design-line `artifacts/abi/0.7.0-alpha.2` directory to
+  `artifacts/abi/0.7.0`.
 - Soft interruption, formal Python/Rust publication, package-manager recipes,
   cloud/remote calculation, formal Pro/cloud equivalence claims, and upstream
   baseline upgrades remain deferred unless separately accepted.

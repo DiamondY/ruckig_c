@@ -43,6 +43,10 @@ Implemented and covered by fixed C/oracle tests plus deterministic random oracle
 - `0.7.0-alpha.4` targeted solver branch coverage evidence on `main`, adding
   fixed oracle cases and a lightweight solver branch CTest gate for the lowest
   coverage target-solver files from the alpha.3 audit.
+- `0.7.0-readiness` audit evidence on `main`, rerunning the full local
+  release-readiness gate set against the current 172-symbol strategy preset
+  and diagnostics ABI candidate without creating a stable tag, GitHub Release,
+  or version bump.
 - C examples for position, offline position, online update, per-DoF overrides,
   velocity, stop, minimum duration, waypoints, per-section minimum duration,
   tracking Fast-mode scenarios, and Optimized tracking scenarios.
@@ -57,7 +61,10 @@ stability deepening. The alpha.2 work adds high-level strategy presets and
 public diagnostics snapshots for Optimized tracking. The alpha.3 work adds a
 local coverage audit and behavior mapping against the frozen original tests,
 and alpha.4 hardens targeted solver branch coverage from that audit; both are
-evidence-only and do not create a tag or GitHub Release.
+evidence-only and do not create a tag or GitHub Release. The readiness audit
+keeps the same release boundary: `v0.6.0` remains the stable release, the
+project version macros remain `0.6.0`, and a separate stable closeout decision
+is required before `v0.7.0` can be tagged.
 `v0.4.0` added waypoint-aware C ABI entry points, per-section constraints,
 global position bounds, and a local coupled waypoint optimizer; `v0.4.1`
 deepened waypoint optimizer evidence; `v0.4.2` keeps that public C surface

@@ -36,6 +36,9 @@ Historical rewrite plans and release evidence are retained for traceability.
   `release/checklists/0.7.0-alpha.4.md` retain the tracking strategy,
   diagnostics hardening, coverage audit, and targeted solver branch coverage
   evidence on the `0.7.0-design` line.
+  `release/checklists/0.7.0-readiness.md` records the full local stable-review
+  evidence audit for the 172-symbol `v0.7.0` ABI candidate without creating a
+  tag or GitHub Release.
 - `release/evidence/verification_report.md` - local and CI verification
   history.
 - `release/evidence/performance_report.md` - performance procedure and release

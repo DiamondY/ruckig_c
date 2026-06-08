@@ -214,6 +214,16 @@ Optional Pro/cloud black-box samples may be recorded manually as comparison
 notes, but they remain non-blocking and cannot be used to claim formal
 equivalence.
 
+`0.7.0-readiness` reruns the full local stable-review gate set against the
+current strategy preset and diagnostics snapshot API candidate. The readiness
+audit records static/shared/performance/oracle builds, static/shared CTest,
+tracking and solver-branch gates, fixed and random frozen-oracle comparisons,
+local 1M release-random readiness, no-waypoint and waypoint performance,
+coverage, ABI/export checks, and Python/Rust smoke. It treats the current
+172-symbol public C ABI as ready for a later `v0.7.0` stable closeout review,
+but it does not bump versions, move ABI artifact paths, tag a release, or
+publish a GitHub Release.
+
 ## Deferred
 
 - Formal proof of global optimality.

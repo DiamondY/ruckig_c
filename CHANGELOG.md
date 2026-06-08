@@ -7,6 +7,30 @@ priority is Optimized tracking quality and stability deepening: broader fixed
 corpus coverage, stronger trend metrics, deterministic stress, and release
 evidence strategy. `0.6.1` remains reserved for emergency patch work only.
 
+`0.7.0-readiness` evidence audit:
+
+- Recorded full local release-readiness evidence for a future `v0.7.0` stable
+  closeout without creating a tag, GitHub Release, release-candidate branch, or
+  version bump.
+- Treated the current 172-symbol public C ABI as the intended future `v0.7.0`
+  stable baseline: the `0.7.0-alpha` strategy preset controls and
+  `0.7.0-alpha.2` diagnostics snapshot are ready for stable review.
+- Re-ran static/shared/performance/oracle builds, static and shared CTest,
+  tracking and solver-branch gates, fixed oracle comparisons, random oracle
+  seeds `1`, `2`, and `41`, per-DoF random seed `1`, local 1M release-random
+  readiness gates, performance benchmarks, coverage, ABI/export checks, and
+  Python/Rust wrapper smoke.
+- Regenerated local readiness coverage under `out/coverage/0.7.0-readiness/`.
+  The broad routine corpus records line `87.71%`, function `91.86%`, branch
+  `69.26%`, and region `87.44%`.
+- Kept ABI artifact paths on the design-line `artifacts/abi/0.7.0-alpha.2`
+  location. A future stable closeout must move those paths to
+  `artifacts/abi/0.7.0` together with the version macro and CMake version
+  bump.
+- No public C API, public symbol, enum numeric value, result-code value,
+  `original/ruckig-main` content, package publication, tag, or GitHub Release
+  is changed by this readiness evidence.
+
 `0.7.0-alpha.4` solver branch coverage evidence:
 
 - Added targeted solver branch coverage for the five lowest implementation
