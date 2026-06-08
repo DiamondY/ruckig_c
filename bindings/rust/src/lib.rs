@@ -52,6 +52,32 @@ struct CBound {
     time_max: f64,
 }
 
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Default)]
+struct TrackingDiagnosticsRaw {
+    calculation_status: i32,
+    mode: i32,
+    optimized_strategy: i32,
+    candidate_count: usize,
+    valid_candidate_count: usize,
+    rejected_candidate_count: usize,
+    fallback_step_count: usize,
+    optimized_step_count: usize,
+    error_step_count: usize,
+    budget_exhausted_count: usize,
+    fast_candidate_count: usize,
+    instantaneous_candidate_count: usize,
+    horizon_candidate_count: usize,
+    terminal_blend_candidate_count: usize,
+    derivative_damped_candidate_count: usize,
+    lead_lag_candidate_count: usize,
+    fast_score: f64,
+    best_score: f64,
+    improvement_ratio: f64,
+    reserved_size: [usize; 4],
+    reserved_value: [f64; 4],
+}
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 #[repr(i32)]
 pub enum RuckigResult {
@@ -89,6 +115,15 @@ pub enum TrackingMode {
     Optimized = 1,
 }
 
+impl TrackingMode {
+    fn from_raw(value: i32) -> Self {
+        match value {
+            1 => TrackingMode::Optimized,
+            _ => TrackingMode::Fast,
+        }
+    }
+}
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 #[repr(i32)]
 pub enum TrackingCalculationStatus {
@@ -99,12 +134,98 @@ pub enum TrackingCalculationStatus {
     Error = 4,
 }
 
+impl TrackingCalculationStatus {
+    fn from_raw(value: i32) -> Self {
+        match value {
+            1 => TrackingCalculationStatus::Fast,
+            2 => TrackingCalculationStatus::Optimized,
+            3 => TrackingCalculationStatus::FastFallback,
+            4 => TrackingCalculationStatus::Error,
+            _ => TrackingCalculationStatus::None,
+        }
+    }
+}
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 #[repr(i32)]
 pub enum TrackingOptimizedStrategy {
     Stable = 0,
     Balanced = 1,
     Aggressive = 2,
+}
+
+impl TrackingOptimizedStrategy {
+    fn from_raw(value: i32) -> Self {
+        match value {
+            0 => TrackingOptimizedStrategy::Stable,
+            2 => TrackingOptimizedStrategy::Aggressive,
+            _ => TrackingOptimizedStrategy::Balanced,
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct TrackingDiagnostics {
+    pub calculation_status: TrackingCalculationStatus,
+    pub mode: TrackingMode,
+    pub optimized_strategy: TrackingOptimizedStrategy,
+    pub candidate_count: usize,
+    pub valid_candidate_count: usize,
+    pub rejected_candidate_count: usize,
+    pub fallback_step_count: usize,
+    pub optimized_step_count: usize,
+    pub error_step_count: usize,
+    pub budget_exhausted_count: usize,
+    pub fast_candidate_count: usize,
+    pub instantaneous_candidate_count: usize,
+    pub horizon_candidate_count: usize,
+    pub terminal_blend_candidate_count: usize,
+    pub derivative_damped_candidate_count: usize,
+    pub lead_lag_candidate_count: usize,
+    pub fast_score: f64,
+    pub best_score: f64,
+    pub improvement_ratio: f64,
+    pub reserved_size: [usize; 4],
+    pub reserved_value: [f64; 4],
+}
+
+impl TrackingDiagnostics {
+    pub fn family_candidate_count(&self) -> usize {
+        self.fast_candidate_count
+            + self.instantaneous_candidate_count
+            + self.horizon_candidate_count
+            + self.terminal_blend_candidate_count
+            + self.derivative_damped_candidate_count
+            + self.lead_lag_candidate_count
+    }
+}
+
+impl From<TrackingDiagnosticsRaw> for TrackingDiagnostics {
+    fn from(raw: TrackingDiagnosticsRaw) -> Self {
+        Self {
+            calculation_status: TrackingCalculationStatus::from_raw(raw.calculation_status),
+            mode: TrackingMode::from_raw(raw.mode),
+            optimized_strategy: TrackingOptimizedStrategy::from_raw(raw.optimized_strategy),
+            candidate_count: raw.candidate_count,
+            valid_candidate_count: raw.valid_candidate_count,
+            rejected_candidate_count: raw.rejected_candidate_count,
+            fallback_step_count: raw.fallback_step_count,
+            optimized_step_count: raw.optimized_step_count,
+            error_step_count: raw.error_step_count,
+            budget_exhausted_count: raw.budget_exhausted_count,
+            fast_candidate_count: raw.fast_candidate_count,
+            instantaneous_candidate_count: raw.instantaneous_candidate_count,
+            horizon_candidate_count: raw.horizon_candidate_count,
+            terminal_blend_candidate_count: raw.terminal_blend_candidate_count,
+            derivative_damped_candidate_count: raw.derivative_damped_candidate_count,
+            lead_lag_candidate_count: raw.lead_lag_candidate_count,
+            fast_score: raw.fast_score,
+            best_score: raw.best_score,
+            improvement_ratio: raw.improvement_ratio,
+            reserved_size: raw.reserved_size,
+            reserved_value: raw.reserved_value,
+        }
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -349,13 +470,14 @@ unsafe extern "C" {
         max_candidates: usize,
     ) -> i32;
     fn ruckig_tracking_get_max_optimized_candidates(tracking: *const TrackingRaw) -> usize;
-    fn ruckig_tracking_set_optimized_strategy(
-        tracking: *mut TrackingRaw,
-        strategy: i32,
-    ) -> i32;
+    fn ruckig_tracking_set_optimized_strategy(tracking: *mut TrackingRaw, strategy: i32) -> i32;
     fn ruckig_tracking_get_optimized_strategy(tracking: *const TrackingRaw) -> i32;
     fn ruckig_tracking_get_last_calculation_status(tracking: *const TrackingRaw) -> i32;
     fn ruckig_tracking_get_last_candidate_count(tracking: *const TrackingRaw) -> usize;
+    fn ruckig_tracking_get_last_diagnostics(
+        tracking: *const TrackingRaw,
+        diagnostics: *mut TrackingDiagnosticsRaw,
+    ) -> i32;
     fn ruckig_tracking_update(
         tracking: *mut TrackingRaw,
         target_state: *const TargetStateRaw,
@@ -1490,10 +1612,7 @@ impl Tracking {
     }
 
     pub fn mode(&self) -> TrackingMode {
-        match unsafe { ruckig_tracking_get_mode(self.raw.as_ptr()) } {
-            1 => TrackingMode::Optimized,
-            _ => TrackingMode::Fast,
-        }
+        TrackingMode::from_raw(unsafe { ruckig_tracking_get_mode(self.raw.as_ptr()) })
     }
 
     pub fn set_mode(&mut self, mode: TrackingMode) -> Result<()> {
@@ -1543,11 +1662,9 @@ impl Tracking {
     }
 
     pub fn optimized_strategy(&self) -> TrackingOptimizedStrategy {
-        match unsafe { ruckig_tracking_get_optimized_strategy(self.raw.as_ptr()) } {
-            0 => TrackingOptimizedStrategy::Stable,
-            2 => TrackingOptimizedStrategy::Aggressive,
-            _ => TrackingOptimizedStrategy::Balanced,
-        }
+        TrackingOptimizedStrategy::from_raw(unsafe {
+            ruckig_tracking_get_optimized_strategy(self.raw.as_ptr())
+        })
     }
 
     pub fn set_optimized_strategy(&mut self, strategy: TrackingOptimizedStrategy) -> Result<()> {
@@ -1559,17 +1676,22 @@ impl Tracking {
     }
 
     pub fn last_calculation_status(&self) -> TrackingCalculationStatus {
-        match unsafe { ruckig_tracking_get_last_calculation_status(self.raw.as_ptr()) } {
-            1 => TrackingCalculationStatus::Fast,
-            2 => TrackingCalculationStatus::Optimized,
-            3 => TrackingCalculationStatus::FastFallback,
-            4 => TrackingCalculationStatus::Error,
-            _ => TrackingCalculationStatus::None,
-        }
+        TrackingCalculationStatus::from_raw(unsafe {
+            ruckig_tracking_get_last_calculation_status(self.raw.as_ptr())
+        })
     }
 
     pub fn last_candidate_count(&self) -> usize {
         unsafe { ruckig_tracking_get_last_candidate_count(self.raw.as_ptr()) }
+    }
+
+    pub fn last_diagnostics(&self) -> Result<TrackingDiagnostics> {
+        let mut raw = TrackingDiagnosticsRaw::default();
+        check_code(
+            unsafe { ruckig_tracking_get_last_diagnostics(self.raw.as_ptr(), &mut raw) },
+            "ruckig_tracking_get_last_diagnostics",
+        )?;
+        Ok(raw.into())
     }
 
     pub fn update(
@@ -1854,6 +1976,20 @@ mod tests {
             TrackingCalculationStatus::None
         );
         assert_eq!(tracking.last_candidate_count(), 0);
+        let diagnostics = tracking.last_diagnostics()?;
+        assert_eq!(
+            diagnostics.calculation_status,
+            TrackingCalculationStatus::None
+        );
+        assert_eq!(diagnostics.mode, TrackingMode::Fast);
+        assert_eq!(
+            diagnostics.optimized_strategy,
+            TrackingOptimizedStrategy::Balanced
+        );
+        assert_eq!(diagnostics.candidate_count, 0);
+        assert_eq!(diagnostics.family_candidate_count(), 0);
+        assert_eq!(diagnostics.reserved_size, [0; 4]);
+        assert_eq!(diagnostics.reserved_value, [0.0; 4]);
         assert!((tracking.reactiveness() - 1.0).abs() < f64::EPSILON);
         for strategy in [
             TrackingOptimizedStrategy::Stable,
@@ -1999,6 +2135,144 @@ mod tests {
     }
 
     #[test]
+    fn tracking_diagnostics_snapshot() -> Result<()> {
+        let count = 6;
+        let mut tracking = Tracking::new(1, 0.01)?;
+        let mut target = TargetState::new(1)?;
+        let mut targets = TargetStateSequence::new(1, count)?;
+        let mut outputs = TrackingOutputSequence::new(1, count)?;
+        let mut input = InputParameter::new(1)?;
+        let mut output = OutputParameter::new(1)?;
+
+        configure_tracking_input(&mut input)?;
+        target.set_position(&[0.0])?;
+        target.set_velocity(&[0.5])?;
+        target.set_acceleration(&[0.0])?;
+        assert_eq!(
+            tracking.update(&target, &input, &mut output)?,
+            RuckigResult::Working
+        );
+        let diagnostics = tracking.last_diagnostics()?;
+        assert_eq!(
+            diagnostics.calculation_status,
+            TrackingCalculationStatus::Fast
+        );
+        assert_eq!(diagnostics.mode, TrackingMode::Fast);
+        assert_eq!(diagnostics.candidate_count, 1);
+        assert_eq!(diagnostics.fast_candidate_count, 1);
+        assert_eq!(diagnostics.valid_candidate_count, 1);
+        assert_eq!(
+            diagnostics.family_candidate_count(),
+            diagnostics.candidate_count
+        );
+        assert_eq!(diagnostics.fast_score, 0.0);
+        assert_eq!(diagnostics.best_score, 0.0);
+
+        configure_tracking_input(&mut input)?;
+        targets.set_count(3)?;
+        for step in 0..3 {
+            let t = step as f64 * tracking.delta_time();
+            targets.set_state(step, &[0.5 * t], &[0.5], &[0.0])?;
+        }
+        assert_eq!(
+            tracking.calculate_sequence(&targets, &input, &mut outputs)?,
+            RuckigResult::Working
+        );
+        let diagnostics = tracking.last_diagnostics()?;
+        assert_eq!(
+            diagnostics.calculation_status,
+            TrackingCalculationStatus::Fast
+        );
+        assert_eq!(diagnostics.candidate_count, 3);
+        assert_eq!(diagnostics.fast_candidate_count, 3);
+        assert_eq!(
+            diagnostics.family_candidate_count(),
+            diagnostics.candidate_count
+        );
+
+        configure_tracking_input(&mut input)?;
+        tracking.set_mode(TrackingMode::Optimized)?;
+        tracking.set_optimized_strategy(TrackingOptimizedStrategy::Aggressive)?;
+        tracking.set_look_ahead_cycles(count)?;
+        tracking.set_max_optimized_candidates(16)?;
+        targets.set_count(count)?;
+        for step in 0..count {
+            let t = step as f64 * tracking.delta_time();
+            targets.set_state(
+                step,
+                &[0.2 * (0.45 * t).sin()],
+                &[0.09 * (0.45 * t).cos()],
+                &[-0.0405 * (0.45 * t).sin()],
+            )?;
+        }
+        let result = tracking.update_with_lookahead(&targets, &input, &mut output)?;
+        assert!(result == RuckigResult::Working || result == RuckigResult::Finished);
+        let diagnostics = tracking.last_diagnostics()?;
+        assert!(
+            diagnostics.calculation_status == TrackingCalculationStatus::Optimized
+                || diagnostics.calculation_status == TrackingCalculationStatus::FastFallback
+        );
+        assert_eq!(diagnostics.mode, TrackingMode::Optimized);
+        assert_eq!(
+            diagnostics.optimized_strategy,
+            TrackingOptimizedStrategy::Aggressive
+        );
+        assert_eq!(diagnostics.fast_candidate_count, 1);
+        assert!(diagnostics.candidate_count >= 1);
+        assert!(diagnostics.candidate_count <= tracking.max_optimized_candidates());
+        assert_eq!(
+            diagnostics.family_candidate_count(),
+            diagnostics.candidate_count
+        );
+        assert_eq!(tracking.last_candidate_count(), diagnostics.candidate_count);
+        assert_eq!(
+            tracking.last_calculation_status(),
+            diagnostics.calculation_status
+        );
+        assert!(diagnostics.fast_score.is_finite());
+        assert!(diagnostics.best_score.is_finite());
+        assert!(diagnostics.improvement_ratio.is_finite());
+        assert!(diagnostics.fast_score + 1e-12 >= diagnostics.best_score);
+        assert_eq!(diagnostics.error_step_count, 0);
+        assert_eq!(
+            diagnostics.fallback_step_count + diagnostics.optimized_step_count,
+            1
+        );
+
+        configure_tracking_input(&mut input)?;
+        tracking.set_max_optimized_candidates(2)?;
+        let result = tracking.update_with_lookahead(&targets, &input, &mut output)?;
+        assert!(result == RuckigResult::Working || result == RuckigResult::Finished);
+        let diagnostics = tracking.last_diagnostics()?;
+        assert_eq!(diagnostics.candidate_count, 2);
+        assert!(diagnostics.budget_exhausted_count > 0);
+        assert_eq!(
+            diagnostics.family_candidate_count(),
+            diagnostics.candidate_count
+        );
+
+        configure_tracking_input(&mut input)?;
+        tracking.set_max_optimized_candidates(8)?;
+        assert_eq!(
+            tracking.calculate_sequence(&targets, &input, &mut outputs)?,
+            RuckigResult::Working
+        );
+        let diagnostics = tracking.last_diagnostics()?;
+        assert!(diagnostics.candidate_count >= count);
+        assert!(diagnostics.candidate_count <= count * tracking.max_optimized_candidates());
+        assert_eq!(
+            diagnostics.family_candidate_count(),
+            diagnostics.candidate_count
+        );
+        assert_eq!(
+            diagnostics.fallback_step_count + diagnostics.optimized_step_count,
+            count
+        );
+        assert_eq!(diagnostics.error_step_count, 0);
+        Ok(())
+    }
+
+    #[test]
     fn tracking_optimized_smoke() -> Result<()> {
         let mut tracking = Tracking::new(1, 0.01)?;
         let mut target = TargetState::new(1)?;
@@ -2050,6 +2324,13 @@ mod tests {
                 || tracking.last_calculation_status() == TrackingCalculationStatus::FastFallback
         );
         assert!(tracking.last_candidate_count() >= 4);
+        let diagnostics = tracking.last_diagnostics()?;
+        assert_eq!(
+            diagnostics.family_candidate_count(),
+            diagnostics.candidate_count
+        );
+        assert!(diagnostics.candidate_count >= 4);
+        assert_eq!(diagnostics.error_step_count, 0);
         Ok(())
     }
 }

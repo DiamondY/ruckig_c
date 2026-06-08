@@ -106,3 +106,20 @@ approved by `docs/design/tracking_optimized_mode.md`, recorded in
 `allow-add` entries in `docs/abi/public-symbol-exceptions.txt`. Existing
 `v0.6.0` public symbols, signatures, enum values, and result-code numeric
 values remain frozen.
+
+## 0.7.0-alpha.2 Tracking Diagnostics Snapshot Expansion
+
+`0.7.0-alpha.2` adds a single diagnostics snapshot getter for the existing
+tracking handle:
+
+- `ruckig_tracking_get_last_diagnostics`
+
+The getter copies the last Fast or Optimized tracking calculation summary into
+the public `ruckig_tracking_diagnostics_t` struct. It exposes aggregate score
+fields and named candidate-family counters, but does not expose raw optimizer
+weights, candidate-family masks, or tuning knobs. This addition is approved by
+`docs/design/tracking_optimized_mode.md`, recorded in `CHANGELOG.md`, tracked
+in `docs/abi/public-symbols.txt`, and listed as an `allow-add` entry in
+`docs/abi/public-symbol-exceptions.txt`. Existing `v0.6.0` and
+`0.7.0-alpha` public symbols, signatures, enum values, and result-code numeric
+values remain frozen.

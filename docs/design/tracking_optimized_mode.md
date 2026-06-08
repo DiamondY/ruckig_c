@@ -1,11 +1,12 @@
 # Tracking Optimized Mode Design
 
 `v0.6.0` stabilizes a bounded local `RUCKIG_TRACKING_OPTIMIZED` MVP. The
-`0.7.0-alpha` line deepens that implementation with high-level strategy
-presets and stronger deterministic evidence. This remains a local bounded
-candidate evaluator. It does not claim source-level oracle parity, formal
-global optimality, or Pro/cloud numerical equivalence. The frozen Community
-baseline still has no local tracking optimizer source to use as an oracle.
+`0.7.0-alpha.2` line deepens that implementation with high-level strategy
+presets, public diagnostics snapshots, stricter deterministic quality gates,
+and stronger stress evidence. This remains a local bounded candidate evaluator.
+It does not claim source-level oracle parity, formal global optimality, or
+Pro/cloud numerical equivalence. The frozen Community baseline still has no
+local tracking optimizer source to use as an oracle.
 
 ## Public C ABI
 
@@ -41,12 +42,51 @@ The default strategy after `ruckig_tracking_create` is
 `RUCKIG_TRACKING_OPTIMIZED_BALANCED`. Invalid strategy values return
 `RUCKIG_ERROR_INVALID_INPUT`. Existing `v0.6.0` public symbols, function
 signatures, enum numeric values, and result-code numeric values remain
-unchanged. Public symbol count for the `0.7.0-alpha` evidence line is `171`.
+unchanged.
+
+`0.7.0-alpha.2` adds the diagnostics snapshot getter:
+
+- `ruckig_tracking_get_last_diagnostics`
+
+The getter copies the last tracking calculation summary into
+`ruckig_tracking_diagnostics_t`. The public symbol count for the
+`0.7.0-alpha.2` evidence line is `172`.
 
 The default Optimized candidate budget remains `16`. The public budget setter
 accepts `1..128`. The budget is deterministic and bounds candidate trajectory
 evaluations per online step. Invalid budget values return
 `RUCKIG_ERROR_INVALID_INPUT`.
+
+## Diagnostics Snapshot
+
+`ruckig_tracking_get_last_diagnostics` covers Fast mode, Optimized mode,
+online updates, lookahead updates, and offline sequence calculation.
+
+Before the first calculation, the snapshot reports
+`RUCKIG_TRACKING_CALCULATION_NONE`, current mode and strategy, zero counters,
+zero scores, and zeroed reserved fields.
+
+Fast online calls report `FAST`, one candidate, one Fast-family candidate, and
+zero scores. Fast offline calls aggregate one Fast-family candidate per target
+sample.
+
+Optimized calls report:
+
+- `candidate_count`, `valid_candidate_count`, and `rejected_candidate_count`.
+- `fallback_step_count`, `optimized_step_count`, and `error_step_count`; online
+  calls use `0` or `1`, while offline calls aggregate steps.
+- `budget_exhausted_count`, incremented when the configured candidate budget
+  stops evaluation before all enabled families are attempted.
+- Named family counters for Fast baseline, instantaneous samples,
+  horizon-predicted samples, terminal blends, derivative-damped terminal
+  candidates, and lead/lag horizon variants.
+- `fast_score`, `best_score`, and
+  `improvement_ratio = (fast_score - best_score) / fast_score` when
+  `fast_score > 0`.
+
+The existing `ruckig_tracking_get_last_calculation_status` and
+`ruckig_tracking_get_last_candidate_count` getters read from the same finalized
+diagnostics state.
 
 ## Strategy Presets
 
@@ -99,9 +139,13 @@ The candidate families are bounded and generated in deterministic order:
 - Fast baseline.
 - Instantaneous window samples.
 - Horizon-predicted samples.
+- Strategy-specific lead/lag horizon variants.
 - Terminal blends.
 - Derivative-damped terminal candidates.
-- Strategy-specific lead/lag horizon variants.
+
+`Stable` and `Balanced` do not enable lead/lag variants by default. `Aggressive`
+does enable lead/lag variants and evaluates them before terminal/damped
+families so they fit within the default `16`-candidate budget.
 
 For offline sequence calculation, `last_calculation_status` is aggregate:
 if any successful step used Fast fallback, the aggregate status is
@@ -132,7 +176,7 @@ default Optimized workspace. Candidate-budget and strategy setters run outside
 the online/offline calculation path. Prepared online and offline calculation
 paths must not allocate.
 
-`0.7.0-alpha` does not implement timeout checkpoints. The
+`0.7.0-alpha.2` does not implement timeout checkpoints. The
 `interrupt_calculation_duration` field does not create hard or soft real-time
 interruption behavior for tracking.
 
@@ -146,20 +190,25 @@ Routine evidence is local and deterministic:
   strategies.
 - Offline Optimized sliding-window sequence tests across all three strategies.
 - Fallback and error diagnostic tests.
+- Diagnostics snapshot tests for default state, Fast online/offline,
+  Optimized online/offline, score fields, family counters, budget exhaustion,
+  and legacy getter consistency.
 - Quality gates: Balanced must be no worse than Fast baseline on fixed ramp,
-  constant-acceleration, sinus, and half-sinus cases; Aggressive must improve
-  over Balanced by at least `1%` on fixed sinus and half-sinus cases.
+  constant-acceleration, sinus, and half-sinus cases; Balanced must improve by
+  at least `0.5%` on selected smooth lookahead cases; Aggressive must improve
+  over Balanced by at least `2%` on fixed oscillatory cases.
 - Trend metrics print average, max, final error, improvement ratio, candidate
   count, fallback count, and strategy.
 - Routine deterministic stress uses
-  `ruckig_c_tests --tracking-random 10000 --seed 1`.
+  `ruckig_c_tests --tracking-random 100000 --seed 1`,
+  `--seed 2`, and `--seed 41`.
 - Manual/release deterministic stress uses
-  `ruckig_c_tests --tracking-random 100000 --seed 1`.
+  `ruckig_c_tests --tracking-random 1000000 --seed 1`.
 - No-allocation tests for prepared Optimized online and offline paths.
 - Python `cffi` prototype smoke.
 - Rust alpha wrapper smoke and examples.
 - ABI allowlist and exported-symbol checks. Approved public symbol count is
-  `171`.
+  `172`.
 
 Optional Pro/cloud black-box samples may be recorded manually as comparison
 notes, but they remain non-blocking and cannot be used to claim formal

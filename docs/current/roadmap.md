@@ -275,17 +275,19 @@ After `v0.6.0`, `main` tracks `0.7.0-design - Unreleased`.
 - First priority: deepen Optimized tracking quality and stability evidence.
 - Expand tracking fixed corpus, quality trend metrics, deterministic stress,
   and release evidence strategy before considering broader ecosystem work.
-- `0.7.0-alpha` evidence adds high-level Optimized strategy presets
-  (`Stable`, `Balanced`, `Aggressive`) with Balanced as the default. It keeps
-  the bounded target-solver-per-candidate evaluator, default candidate budget
-  `16`, and Fast fallback diagnostics.
-- The alpha hard gates are local and deterministic: Balanced must not be worse
-  than Fast on the fixed tracking corpus, Aggressive must improve over Balanced
-  on fixed sinus and half-sinus cases, routine tracking random stress runs
-  `--tracking-random 10000 --seed 1`, and manual/release stress uses
-  `--tracking-random 100000 --seed 1`.
-- This alpha line may add the approved strategy preset C symbols, but it does
-  not create a stable tag or GitHub Release.
+- `0.7.0-alpha.2` evidence adds high-level Optimized strategy presets
+  (`Stable`, `Balanced`, `Aggressive`) with Balanced as the default plus the
+  public `ruckig_tracking_get_last_diagnostics` snapshot API. It keeps the
+  bounded target-solver-per-candidate evaluator, default candidate budget `16`,
+  and Fast fallback semantics.
+- The alpha.2 hard gates are local and deterministic: Balanced must not be
+  worse than Fast on the fixed tracking corpus, Balanced must improve by at
+  least `0.5%` on selected smooth lookahead cases, Aggressive must improve over
+  Balanced by at least `2%` on fixed oscillatory cases, routine tracking random
+  stress runs `--tracking-random 100000 --seed 1/2/41`, and manual stress uses
+  `--tracking-random 1000000 --seed 1`.
+- This alpha line may add the approved strategy preset and diagnostics C
+  symbols, but it does not create a stable tag or GitHub Release.
 - Soft interruption, formal Python/Rust publication, package-manager recipes,
   cloud/remote calculation, formal Pro/cloud equivalence claims, and upstream
   baseline upgrades remain deferred unless separately accepted.

@@ -31,6 +31,30 @@ ffi.cdef(
         double time_max;
     } ruckig_position_extrema_t;
 
+    typedef struct ruckig_tracking_diagnostics {
+        int calculation_status;
+        int mode;
+        int optimized_strategy;
+        size_t candidate_count;
+        size_t valid_candidate_count;
+        size_t rejected_candidate_count;
+        size_t fallback_step_count;
+        size_t optimized_step_count;
+        size_t error_step_count;
+        size_t budget_exhausted_count;
+        size_t fast_candidate_count;
+        size_t instantaneous_candidate_count;
+        size_t horizon_candidate_count;
+        size_t terminal_blend_candidate_count;
+        size_t derivative_damped_candidate_count;
+        size_t lead_lag_candidate_count;
+        double fast_score;
+        double best_score;
+        double improvement_ratio;
+        size_t reserved_size[4];
+        double reserved_value[4];
+    } ruckig_tracking_diagnostics_t;
+
     ruckig_result_t ruckig_create(ruckig_t** otg, size_t dofs, double delta_time);
     ruckig_result_t ruckig_create_with_waypoints(
         ruckig_t** otg,
@@ -215,6 +239,10 @@ ffi.cdef(
     int ruckig_tracking_get_optimized_strategy(const ruckig_tracking_t* tracking);
     int ruckig_tracking_get_last_calculation_status(const ruckig_tracking_t* tracking);
     size_t ruckig_tracking_get_last_candidate_count(const ruckig_tracking_t* tracking);
+    ruckig_result_t ruckig_tracking_get_last_diagnostics(
+        const ruckig_tracking_t* tracking,
+        ruckig_tracking_diagnostics_t* diagnostics
+    );
     ruckig_result_t ruckig_tracking_update(
         ruckig_tracking_t* tracking,
         const ruckig_target_state_t* target_state,
@@ -322,6 +350,42 @@ class TrackingOptimizedStrategy(enum.IntEnum):
     STABLE = 0
     BALANCED = 1
     AGGRESSIVE = 2
+
+
+@dataclass(frozen=True)
+class TrackingDiagnostics:
+    calculation_status: TrackingCalculationStatus
+    mode: TrackingMode
+    optimized_strategy: TrackingOptimizedStrategy
+    candidate_count: int
+    valid_candidate_count: int
+    rejected_candidate_count: int
+    fallback_step_count: int
+    optimized_step_count: int
+    error_step_count: int
+    budget_exhausted_count: int
+    fast_candidate_count: int
+    instantaneous_candidate_count: int
+    horizon_candidate_count: int
+    terminal_blend_candidate_count: int
+    derivative_damped_candidate_count: int
+    lead_lag_candidate_count: int
+    fast_score: float
+    best_score: float
+    improvement_ratio: float
+    reserved_size: tuple[int, int, int, int]
+    reserved_value: tuple[float, float, float, float]
+
+    @property
+    def family_candidate_count(self) -> int:
+        return (
+            self.fast_candidate_count
+            + self.instantaneous_candidate_count
+            + self.horizon_candidate_count
+            + self.terminal_blend_candidate_count
+            + self.derivative_damped_candidate_count
+            + self.lead_lag_candidate_count
+        )
 
 
 @dataclass(frozen=True)
@@ -803,6 +867,37 @@ class Tracking(_Handle):
     @property
     def last_candidate_count(self) -> int:
         return int(_library().ruckig_tracking_get_last_candidate_count(self.ptr))
+
+    @property
+    def last_diagnostics(self) -> TrackingDiagnostics:
+        diagnostics = ffi.new("ruckig_tracking_diagnostics_t*")
+        _result(
+            _library().ruckig_tracking_get_last_diagnostics(self.ptr, diagnostics),
+            "ruckig_tracking_get_last_diagnostics",
+        )
+        return TrackingDiagnostics(
+            calculation_status=TrackingCalculationStatus(int(diagnostics.calculation_status)),
+            mode=TrackingMode(int(diagnostics.mode)),
+            optimized_strategy=TrackingOptimizedStrategy(int(diagnostics.optimized_strategy)),
+            candidate_count=int(diagnostics.candidate_count),
+            valid_candidate_count=int(diagnostics.valid_candidate_count),
+            rejected_candidate_count=int(diagnostics.rejected_candidate_count),
+            fallback_step_count=int(diagnostics.fallback_step_count),
+            optimized_step_count=int(diagnostics.optimized_step_count),
+            error_step_count=int(diagnostics.error_step_count),
+            budget_exhausted_count=int(diagnostics.budget_exhausted_count),
+            fast_candidate_count=int(diagnostics.fast_candidate_count),
+            instantaneous_candidate_count=int(diagnostics.instantaneous_candidate_count),
+            horizon_candidate_count=int(diagnostics.horizon_candidate_count),
+            terminal_blend_candidate_count=int(diagnostics.terminal_blend_candidate_count),
+            derivative_damped_candidate_count=int(diagnostics.derivative_damped_candidate_count),
+            lead_lag_candidate_count=int(diagnostics.lead_lag_candidate_count),
+            fast_score=float(diagnostics.fast_score),
+            best_score=float(diagnostics.best_score),
+            improvement_ratio=float(diagnostics.improvement_ratio),
+            reserved_size=tuple(int(diagnostics.reserved_size[index]) for index in range(4)),  # type: ignore[arg-type]
+            reserved_value=tuple(float(diagnostics.reserved_value[index]) for index in range(4)),  # type: ignore[arg-type]
+        )
 
     def update(self, target_state: TargetState, input_: "Input", output: "Output") -> Result:
         return _result(

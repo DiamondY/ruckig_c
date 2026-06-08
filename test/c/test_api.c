@@ -2442,11 +2442,48 @@ static bool tracking_optimized_status_is_success(ruckig_tracking_calculation_sta
         || status == RUCKIG_TRACKING_CALCULATION_FAST_FALLBACK;
 }
 
+static size_t tracking_diagnostics_family_count(const ruckig_tracking_diagnostics_t* diagnostics) {
+    return diagnostics->fast_candidate_count
+        + diagnostics->instantaneous_candidate_count
+        + diagnostics->horizon_candidate_count
+        + diagnostics->terminal_blend_candidate_count
+        + diagnostics->derivative_damped_candidate_count
+        + diagnostics->lead_lag_candidate_count;
+}
+
+static void check_tracking_diagnostics_common(
+    const ruckig_tracking_t* tracking,
+    const ruckig_tracking_diagnostics_t* diagnostics
+) {
+    size_t i;
+    CHECK_EQ_INT(ruckig_tracking_get_last_calculation_status(tracking), diagnostics->calculation_status);
+    CHECK_EQ_INT(ruckig_tracking_get_last_candidate_count(tracking), diagnostics->candidate_count);
+    CHECK_EQ_INT(tracking_diagnostics_family_count(diagnostics), diagnostics->candidate_count);
+    CHECK_TRUE(diagnostics->valid_candidate_count + diagnostics->rejected_candidate_count <= diagnostics->candidate_count);
+    CHECK_TRUE(isfinite(diagnostics->fast_score));
+    CHECK_TRUE(isfinite(diagnostics->best_score));
+    CHECK_TRUE(isfinite(diagnostics->improvement_ratio));
+    for (i = 0; i < 4; ++i) {
+        CHECK_EQ_INT(diagnostics->reserved_size[i], 0);
+        CHECK_NEAR(diagnostics->reserved_value[i], 0.0, 0.0);
+    }
+    if (diagnostics->fast_score > 0.0) {
+        CHECK_NEAR(
+            diagnostics->improvement_ratio,
+            (diagnostics->fast_score - diagnostics->best_score) / diagnostics->fast_score,
+            1e-12
+        );
+    } else {
+        CHECK_NEAR(diagnostics->improvement_ratio, 0.0, 0.0);
+    }
+}
+
 static void test_tracking_api_lifecycle_and_accessors(void) {
     ruckig_tracking_t* tracking = NULL;
     ruckig_target_state_t* target = NULL;
     ruckig_target_state_sequence_t* target_sequence = NULL;
     ruckig_tracking_output_sequence_t* output_sequence = NULL;
+    ruckig_tracking_diagnostics_t diagnostics;
 
     CHECK_EQ_INT(ruckig_tracking_create(NULL, 1, 0.01), RUCKIG_ERROR_INVALID_INPUT);
     CHECK_EQ_INT(ruckig_tracking_create(&tracking, 0, 0.01), RUCKIG_ERROR_INVALID_INPUT);
@@ -2460,6 +2497,16 @@ static void test_tracking_api_lifecycle_and_accessors(void) {
     CHECK_EQ_INT(ruckig_tracking_get_optimized_strategy(tracking), RUCKIG_TRACKING_OPTIMIZED_BALANCED);
     CHECK_EQ_INT(ruckig_tracking_get_last_calculation_status(tracking), RUCKIG_TRACKING_CALCULATION_NONE);
     CHECK_EQ_INT(ruckig_tracking_get_last_candidate_count(tracking), 0);
+    CHECK_EQ_INT(ruckig_tracking_get_last_diagnostics(NULL, &diagnostics), RUCKIG_ERROR_INVALID_INPUT);
+    CHECK_EQ_INT(ruckig_tracking_get_last_diagnostics(tracking, NULL), RUCKIG_ERROR_INVALID_INPUT);
+    CHECK_EQ_INT(ruckig_tracking_get_last_diagnostics(tracking, &diagnostics), RUCKIG_WORKING);
+    CHECK_EQ_INT(diagnostics.calculation_status, RUCKIG_TRACKING_CALCULATION_NONE);
+    CHECK_EQ_INT(diagnostics.mode, RUCKIG_TRACKING_FAST);
+    CHECK_EQ_INT(diagnostics.optimized_strategy, RUCKIG_TRACKING_OPTIMIZED_BALANCED);
+    CHECK_EQ_INT(diagnostics.candidate_count, 0);
+    CHECK_NEAR(diagnostics.fast_score, 0.0, 0.0);
+    CHECK_NEAR(diagnostics.best_score, 0.0, 0.0);
+    check_tracking_diagnostics_common(tracking, &diagnostics);
     CHECK_EQ_INT(ruckig_tracking_set_mode(tracking, RUCKIG_TRACKING_FAST), RUCKIG_WORKING);
     CHECK_EQ_INT(ruckig_tracking_set_reactiveness(tracking, 0.25), RUCKIG_WORKING);
     CHECK_NEAR(ruckig_tracking_get_reactiveness(tracking), 0.25, 0.0);
@@ -2518,6 +2565,108 @@ static void test_tracking_api_lifecycle_and_accessors(void) {
     ruckig_target_state_sequence_destroy(NULL);
     ruckig_target_state_destroy(NULL);
     ruckig_tracking_destroy(NULL);
+}
+
+static void test_tracking_diagnostics_snapshots(void) {
+    ruckig_tracking_t* tracking = NULL;
+    ruckig_target_state_t* target = NULL;
+    ruckig_target_state_sequence_t* targets = NULL;
+    ruckig_tracking_output_sequence_t* outputs = NULL;
+    ruckig_input_t* input = NULL;
+    ruckig_output_t* output = NULL;
+    ruckig_tracking_diagnostics_t diagnostics;
+    const size_t count = 6;
+
+    CHECK_EQ_INT(ruckig_tracking_create(&tracking, 1, 0.01), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_target_state_create(&target, 1), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_target_state_sequence_create(&targets, 1, count), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_tracking_output_sequence_create(&outputs, 1, count), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_input_create(&input, 1), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_output_create(&output, 1), RUCKIG_WORKING);
+
+    fill_tracking_input_1d(input);
+    fill_tracking_target_ramp(target, 0.0);
+    CHECK_EQ_INT(ruckig_tracking_update(tracking, target, input, output), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_tracking_get_last_diagnostics(tracking, &diagnostics), RUCKIG_WORKING);
+    CHECK_EQ_INT(diagnostics.calculation_status, RUCKIG_TRACKING_CALCULATION_FAST);
+    CHECK_EQ_INT(diagnostics.mode, RUCKIG_TRACKING_FAST);
+    CHECK_EQ_INT(diagnostics.candidate_count, 1);
+    CHECK_EQ_INT(diagnostics.valid_candidate_count, 1);
+    CHECK_EQ_INT(diagnostics.fast_candidate_count, 1);
+    CHECK_EQ_INT(diagnostics.fallback_step_count, 0);
+    CHECK_EQ_INT(diagnostics.optimized_step_count, 0);
+    CHECK_EQ_INT(diagnostics.error_step_count, 0);
+    CHECK_NEAR(diagnostics.fast_score, 0.0, 0.0);
+    CHECK_NEAR(diagnostics.best_score, 0.0, 0.0);
+    check_tracking_diagnostics_common(tracking, &diagnostics);
+
+    fill_tracking_input_1d(input);
+    CHECK_EQ_INT(ruckig_target_state_sequence_set_count(targets, 3), RUCKIG_WORKING);
+    set_tracking_sequence_signal(targets, 0, 1, 3, 0.01);
+    CHECK_EQ_INT(ruckig_tracking_calculate_sequence(tracking, targets, input, outputs), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_tracking_get_last_diagnostics(tracking, &diagnostics), RUCKIG_WORKING);
+    CHECK_EQ_INT(diagnostics.calculation_status, RUCKIG_TRACKING_CALCULATION_FAST);
+    CHECK_EQ_INT(diagnostics.mode, RUCKIG_TRACKING_FAST);
+    CHECK_EQ_INT(diagnostics.candidate_count, 3);
+    CHECK_EQ_INT(diagnostics.valid_candidate_count, 3);
+    CHECK_EQ_INT(diagnostics.fast_candidate_count, 3);
+    CHECK_NEAR(diagnostics.fast_score, 0.0, 0.0);
+    CHECK_NEAR(diagnostics.best_score, 0.0, 0.0);
+    check_tracking_diagnostics_common(tracking, &diagnostics);
+
+    fill_tracking_input_1d(input);
+    CHECK_EQ_INT(ruckig_tracking_set_mode(tracking, RUCKIG_TRACKING_OPTIMIZED), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_tracking_set_optimized_strategy(tracking, RUCKIG_TRACKING_OPTIMIZED_AGGRESSIVE), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_tracking_set_look_ahead_cycles(tracking, count), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_tracking_set_max_optimized_candidates(tracking, 16), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_target_state_sequence_set_count(targets, count), RUCKIG_WORKING);
+    set_tracking_sequence_signal(targets, 2, 1, count, 0.01);
+    {
+        const ruckig_result_t result = ruckig_tracking_update_with_lookahead(tracking, targets, input, output);
+        CHECK_TRUE(result == RUCKIG_WORKING || result == RUCKIG_FINISHED);
+    }
+    CHECK_EQ_INT(ruckig_tracking_get_last_diagnostics(tracking, &diagnostics), RUCKIG_WORKING);
+    CHECK_TRUE(tracking_optimized_status_is_success(diagnostics.calculation_status));
+    CHECK_EQ_INT(diagnostics.mode, RUCKIG_TRACKING_OPTIMIZED);
+    CHECK_EQ_INT(diagnostics.optimized_strategy, RUCKIG_TRACKING_OPTIMIZED_AGGRESSIVE);
+    CHECK_TRUE(diagnostics.candidate_count >= 1);
+    CHECK_TRUE(diagnostics.candidate_count <= 16);
+    CHECK_EQ_INT(diagnostics.fast_candidate_count, 1);
+    CHECK_TRUE(diagnostics.fast_score >= diagnostics.best_score - 1e-12);
+    CHECK_TRUE(diagnostics.fallback_step_count + diagnostics.optimized_step_count == 1);
+    CHECK_EQ_INT(diagnostics.error_step_count, 0);
+    check_tracking_diagnostics_common(tracking, &diagnostics);
+
+    fill_tracking_input_1d(input);
+    CHECK_EQ_INT(ruckig_tracking_set_max_optimized_candidates(tracking, 2), RUCKIG_WORKING);
+    {
+        const ruckig_result_t result = ruckig_tracking_update_with_lookahead(tracking, targets, input, output);
+        CHECK_TRUE(result == RUCKIG_WORKING || result == RUCKIG_FINISHED);
+    }
+    CHECK_EQ_INT(ruckig_tracking_get_last_diagnostics(tracking, &diagnostics), RUCKIG_WORKING);
+    CHECK_EQ_INT(diagnostics.candidate_count, 2);
+    CHECK_TRUE(diagnostics.budget_exhausted_count > 0);
+    check_tracking_diagnostics_common(tracking, &diagnostics);
+
+    fill_tracking_input_1d(input);
+    CHECK_EQ_INT(ruckig_tracking_set_max_optimized_candidates(tracking, 8), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_tracking_calculate_sequence(tracking, targets, input, outputs), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_tracking_get_last_diagnostics(tracking, &diagnostics), RUCKIG_WORKING);
+    CHECK_TRUE(tracking_optimized_status_is_success(diagnostics.calculation_status));
+    CHECK_EQ_INT(diagnostics.mode, RUCKIG_TRACKING_OPTIMIZED);
+    CHECK_TRUE(diagnostics.candidate_count >= count);
+    CHECK_TRUE(diagnostics.candidate_count <= count * 8);
+    CHECK_TRUE(diagnostics.fallback_step_count + diagnostics.optimized_step_count == count);
+    CHECK_EQ_INT(diagnostics.error_step_count, 0);
+    CHECK_TRUE(diagnostics.fast_score >= diagnostics.best_score - 1e-12);
+    check_tracking_diagnostics_common(tracking, &diagnostics);
+
+    ruckig_output_destroy(output);
+    ruckig_input_destroy(input);
+    ruckig_tracking_output_sequence_destroy(outputs);
+    ruckig_target_state_sequence_destroy(targets);
+    ruckig_target_state_destroy(target);
+    ruckig_tracking_destroy(tracking);
 }
 
 static void test_tracking_validation(void) {
@@ -3172,6 +3321,7 @@ static void check_tracking_strategy_quality_case(
     const char* name,
     size_t lookahead_count,
     size_t steps,
+    bool require_balanced_improvement,
     bool require_aggressive_improvement
 ) {
     size_t fast_candidates = 0;
@@ -3203,14 +3353,18 @@ static void check_tracking_strategy_quality_case(
         &balanced_fallbacks
     );
     printf(
-        "tracking strategy quality %s balanced_metric: balanced %.9g fast %.9g candidates %zu fallbacks %zu\n",
+        "tracking strategy quality %s balanced_metric: balanced %.9g fast %.9g candidates %zu fallbacks %zu improvement %.6f\n",
         name,
         balanced_score,
         fast_score,
         balanced_candidates,
-        balanced_fallbacks
+        balanced_fallbacks,
+        fast_score > 0.0 ? (fast_score - balanced_score) / fast_score : 0.0
     );
     CHECK_TRUE(balanced_score <= fast_score + 1e-9);
+    if (require_balanced_improvement) {
+        CHECK_TRUE(balanced_score <= 0.995 * fast_score);
+    }
 
     if (require_aggressive_improvement) {
         const double balanced_aggressive_metric_score = run_tracking_strategy_quality_case(
@@ -3244,15 +3398,15 @@ static void check_tracking_strategy_quality_case(
             aggressive_fallbacks,
             balanced_aggressive_metric_score > 0.0 ? (balanced_aggressive_metric_score - aggressive_score) / balanced_aggressive_metric_score : 0.0
         );
-        CHECK_TRUE(aggressive_score <= 0.99 * balanced_aggressive_metric_score);
+        CHECK_TRUE(aggressive_score <= 0.98 * balanced_aggressive_metric_score);
     }
 }
 
 static void test_tracking_optimized_strategy_quality_corpus(void) {
-    check_tracking_strategy_quality_case(0, "ramp", 5, 120, false);
-    check_tracking_strategy_quality_case(1, "constant_acceleration", 5, 120, false);
-    check_tracking_strategy_quality_case(2, "sinus", 8, 160, true);
-    check_tracking_strategy_quality_case(3, "half_sinus", 5, 120, true);
+    check_tracking_strategy_quality_case(0, "ramp", 5, 120, true, false);
+    check_tracking_strategy_quality_case(1, "constant_acceleration", 5, 120, true, false);
+    check_tracking_strategy_quality_case(2, "sinus", 8, 160, false, true);
+    check_tracking_strategy_quality_case(3, "half_sinus", 5, 120, false, true);
 }
 
 static void measure_tracking_quality_case(
@@ -3581,6 +3735,7 @@ void run_waypoint_quality_tests(void) {
 
 void run_tracking_api_tests(void) {
     test_tracking_api_lifecycle_and_accessors();
+    test_tracking_diagnostics_snapshots();
 }
 
 void run_tracking_validation_tests(void) {

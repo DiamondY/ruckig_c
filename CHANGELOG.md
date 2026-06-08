@@ -7,7 +7,7 @@ priority is Optimized tracking quality and stability deepening: broader fixed
 corpus coverage, stronger trend metrics, deterministic stress, and release
 evidence strategy. `0.6.1` remains reserved for emergency patch work only.
 
-`0.7.0-alpha` evidence in progress:
+`0.7.0-alpha.2` hardening evidence in progress:
 
 - Added high-level Optimized tracking strategy presets:
   `RUCKIG_TRACKING_OPTIMIZED_STABLE`,
@@ -18,18 +18,24 @@ evidence strategy. `0.6.1` remains reserved for emergency patch work only.
   `ruckig_tracking_get_optimized_strategy`. Existing `v0.6.0` public symbols,
   signatures, enum numeric values, and result-code numeric values are
   unchanged.
+- Added a public tracking diagnostics snapshot:
+  `ruckig_tracking_diagnostics_t` and
+  `ruckig_tracking_get_last_diagnostics`. The snapshot covers Fast and
+  Optimized online/offline calls, aggregate score fields, candidate-family
+  counters, fallback/optimized/error step counts, and budget exhaustion.
 - Reworked the bounded Optimized candidate evaluator around deterministic
   strategy configs, strategy-specific scoring weights, explicit candidate
   families, fixed tie-break behavior, and preserved Fast fallback semantics.
 - Extended C quality evidence so Balanced must not be worse than Fast on the
-  fixed corpus and Aggressive must improve over Balanced on fixed sinus and
-  half-sinus cases.
+  fixed corpus, Balanced must improve by at least `0.5%` on selected smooth
+  lookahead cases, and Aggressive must improve over Balanced by at least `2%`
+  on fixed oscillatory cases.
 - Added deterministic tracking random stress through
   `ruckig_c_tests --tracking-random N --seed S` and routine CTest coverage for
-  `--tracking-random 10000 --seed 1`.
+  `--tracking-random 100000 --seed 1`, `--seed 2`, and `--seed 41`.
 - Extended Python `cffi` prototype and Rust alpha wrapper smoke with strategy
-  preset controls. No wheel, crate, tag, or GitHub Release is produced for this
-  alpha evidence line.
+  preset controls and diagnostics snapshots. No wheel, crate, tag, or GitHub
+  Release is produced for this alpha evidence line.
 
 Deferred unless separately accepted:
 

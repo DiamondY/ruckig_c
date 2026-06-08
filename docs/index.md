@@ -28,7 +28,9 @@ Historical rewrite plans and release evidence are retained for traceability.
   `release/checklists/0.5.0-alpha.2.md` retain the tracking alpha evidence.
   `release/checklists/0.6.0-alpha.md` retains the Optimized tracking alpha
   evidence, and `release/checklists/0.6.0.md` records the stable Optimized
-  tracking release closeout.
+  tracking release closeout. `release/checklists/0.7.0-alpha.md` and
+  `release/checklists/0.7.0-alpha.2.md` retain the tracking strategy and
+  diagnostics hardening evidence on the `0.7.0-design` line.
 - `release/evidence/verification_report.md` - local and CI verification
   history.
 - `release/evidence/performance_report.md` - performance procedure and release

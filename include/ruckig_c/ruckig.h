@@ -87,6 +87,34 @@ typedef struct ruckig_position_extrema {
     double time_max;
 } ruckig_position_extrema_t;
 
+typedef struct ruckig_tracking_diagnostics {
+    ruckig_tracking_calculation_status_t calculation_status;
+    ruckig_tracking_mode_t mode;
+    ruckig_tracking_optimized_strategy_t optimized_strategy;
+
+    size_t candidate_count;
+    size_t valid_candidate_count;
+    size_t rejected_candidate_count;
+    size_t fallback_step_count;
+    size_t optimized_step_count;
+    size_t error_step_count;
+    size_t budget_exhausted_count;
+
+    size_t fast_candidate_count;
+    size_t instantaneous_candidate_count;
+    size_t horizon_candidate_count;
+    size_t terminal_blend_candidate_count;
+    size_t derivative_damped_candidate_count;
+    size_t lead_lag_candidate_count;
+
+    double fast_score;
+    double best_score;
+    double improvement_ratio;
+
+    size_t reserved_size[4];
+    double reserved_value[4];
+} ruckig_tracking_diagnostics_t;
+
 #ifdef __cplusplus
 typedef struct ruckig_c_input_handle ruckig_input_t;
 typedef struct ruckig_c_output_handle ruckig_output_t;
@@ -491,6 +519,10 @@ RUCKIG_C_API ruckig_tracking_calculation_status_t ruckig_tracking_get_last_calcu
     const ruckig_tracking_t* tracking
 );
 RUCKIG_C_API size_t ruckig_tracking_get_last_candidate_count(const ruckig_tracking_t* tracking);
+RUCKIG_C_API ruckig_result_t ruckig_tracking_get_last_diagnostics(
+    const ruckig_tracking_t* tracking,
+    ruckig_tracking_diagnostics_t* diagnostics
+);
 RUCKIG_C_API ruckig_result_t ruckig_tracking_update(
     ruckig_tracking_t* tracking,
     const ruckig_target_state_t* target_state,

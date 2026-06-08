@@ -33,11 +33,13 @@ fn main() -> ruckig_c_alpha::Result<()> {
         output.pass_to_input(&mut input);
     }
 
+    let diagnostics = tracking.last_diagnostics()?;
     println!(
-        "optimized tracking final position: {:.6}, status: {:?}, candidates: {}",
+        "optimized tracking final position: {:.6}, status: {:?}, candidates: {}, improvement: {:.6}",
         output.new_position()[0],
-        tracking.last_calculation_status(),
-        tracking.last_candidate_count()
+        diagnostics.calculation_status,
+        diagnostics.candidate_count,
+        diagnostics.improvement_ratio
     );
     Ok(())
 }

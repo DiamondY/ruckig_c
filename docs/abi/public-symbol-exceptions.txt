@@ -115,3 +115,6 @@ allow-add ruckig_tracking_update_with_lookahead
 # 0.7.0-alpha Optimized tracking strategy public API additions.
 allow-add ruckig_tracking_get_optimized_strategy
 allow-add ruckig_tracking_set_optimized_strategy
+
+# 0.7.0-alpha.2 tracking diagnostics public API addition.
+allow-add ruckig_tracking_get_last_diagnostics

@@ -148,6 +148,7 @@ struct ruckig_tracking {
     ruckig_tracking_optimized_strategy_t optimized_strategy;
     ruckig_tracking_calculation_status_t last_calculation_status;
     size_t last_candidate_count;
+    ruckig_tracking_diagnostics_t diagnostics;
     double* optimized_candidate_position;
     double* optimized_candidate_velocity;
     double* optimized_candidate_acceleration;

@@ -34,9 +34,10 @@ Implemented and covered by fixed C/oracle tests plus deterministic random oracle
   candidate search, online lookahead update, offline sliding-window sequence
   calculation, Fast fallback diagnostics, and Python/Rust prototype smoke
   coverage.
-- `0.7.0-alpha` Optimized tracking strategy preset work on `main`, adding
-  Stable/Balanced/Aggressive controls, deeper deterministic quality gates, and
-  tracking random stress evidence without changing the current stable release.
+- `0.7.0-alpha.2` Optimized tracking hardening work on `main`, adding
+  Stable/Balanced/Aggressive controls, public diagnostics snapshots, stricter
+  deterministic quality gates, and 100k-seed tracking random stress evidence
+  without changing the current stable release.
 - C examples for position, offline position, online update, per-DoF overrides,
   velocity, stop, minimum duration, waypoints, per-section minimum duration,
   tracking Fast-mode scenarios, and Optimized tracking scenarios.
@@ -47,9 +48,9 @@ stable release. It stabilizes bounded local `Optimized` tracking on top of the
 tracking C ABI and local Fast-mode tracking implementation. `0.6.1` is
 reserved for emergency patch work only. The `main` branch now tracks
 `0.7.0-design - Unreleased`, focused first on Optimized tracking quality and
-stability deepening. The current alpha work adds high-level strategy presets
-for Optimized tracking; it is evidence-only and does not create a tag or GitHub
-Release.
+stability deepening. The current alpha.2 work adds high-level strategy presets
+and public diagnostics snapshots for Optimized tracking; it is evidence-only
+and does not create a tag or GitHub Release.
 `v0.4.0` added waypoint-aware C ABI entry points, per-section constraints,
 global position bounds, and a local coupled waypoint optimizer; `v0.4.1`
 deepened waypoint optimizer evidence; `v0.4.2` keeps that public C surface
@@ -66,8 +67,8 @@ Current stable release scope intentionally excludes:
 - Hard real-time guarantees for waypoint optimization.
 - Formal global optimality guarantees for `Optimized` tracking. The `v0.6.0`
   implementation is a bounded deterministic local MVP with Fast fallback
-  diagnostics; the `0.7.0-alpha` strategy presets are local quality controls,
-  not a global optimality claim.
+  diagnostics; the `0.7.0-alpha.2` strategy presets and diagnostics snapshots
+  are local quality controls, not a global optimality claim.
 - Soft interruption checkpoints for waypoint optimization; the interrupt
   duration field remains storage/API-surface parity only.
 - Python/Rust binding publication. The Python `cffi` prototype and Rust alpha
@@ -279,8 +280,10 @@ state or target sequence handles. `Fast` mode performs local
 constant-acceleration lookahead and calls the existing update path. `v0.6.0`
 also includes bounded local `Optimized` mode with candidate search, online
 lookahead sequences, offline sliding-window sequence calculation, and fallback
-diagnostics. On `main`, `0.7.0-alpha` adds high-level Optimized strategy
-presets: Stable, Balanced, and Aggressive. Balanced is the default. See
+diagnostics. On `main`, `0.7.0-alpha.2` adds high-level Optimized strategy
+presets plus `ruckig_tracking_get_last_diagnostics` snapshots covering score
+summary, candidate-family counters, and aggregate step counts. Balanced is the
+default strategy. See
 `docs/design/tracking_interface.md` for the tracking ABI semantics and
 `docs/design/tracking_optimized_mode.md` for the Optimized tracking design.
 

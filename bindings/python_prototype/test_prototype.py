@@ -328,6 +328,14 @@ class PrototypeTests(unittest.TestCase):
             self.assertEqual(tracking.optimized_strategy, TrackingOptimizedStrategy.BALANCED)
             self.assertEqual(tracking.last_calculation_status, TrackingCalculationStatus.NONE)
             self.assertEqual(tracking.last_candidate_count, 0)
+            diagnostics = tracking.last_diagnostics
+            self.assertEqual(diagnostics.calculation_status, TrackingCalculationStatus.NONE)
+            self.assertEqual(diagnostics.mode, TrackingMode.FAST)
+            self.assertEqual(diagnostics.optimized_strategy, TrackingOptimizedStrategy.BALANCED)
+            self.assertEqual(diagnostics.candidate_count, 0)
+            self.assertEqual(diagnostics.family_candidate_count, 0)
+            self.assertEqual(diagnostics.reserved_size, (0, 0, 0, 0))
+            self.assertEqual(diagnostics.reserved_value, (0.0, 0.0, 0.0, 0.0))
             self.assertAlmostEqual(tracking.reactiveness, 1.0)
             tracking.set_reactiveness(1.0)
             tracking.set_look_ahead_cycles(1)
@@ -434,6 +442,91 @@ class PrototypeTests(unittest.TestCase):
             with self.assertRaises(RuckigInvalidInputError):
                 tracking.set_optimized_strategy(99)  # type: ignore[arg-type]
 
+    def test_tracking_diagnostics_snapshot(self) -> None:
+        count = 6
+        with (
+            Tracking(1, 0.01) as tracking,
+            TargetState(1) as target,
+            TargetStateSequence(1, count) as targets,
+            TrackingOutputSequence(1, count) as outputs,
+            Input(1) as input_,
+            Output(1) as output,
+        ):
+            configure_tracking_input(input_)
+            target.set_position([0.0])
+            target.set_velocity([0.5])
+            target.set_acceleration([0.0])
+            self.assertEqual(tracking.update(target, input_, output), Result.WORKING)
+            diagnostics = tracking.last_diagnostics
+            self.assertEqual(diagnostics.calculation_status, TrackingCalculationStatus.FAST)
+            self.assertEqual(diagnostics.mode, TrackingMode.FAST)
+            self.assertEqual(diagnostics.candidate_count, 1)
+            self.assertEqual(diagnostics.fast_candidate_count, 1)
+            self.assertEqual(diagnostics.valid_candidate_count, 1)
+            self.assertEqual(diagnostics.family_candidate_count, diagnostics.candidate_count)
+            self.assertEqual(diagnostics.fast_score, 0.0)
+            self.assertEqual(diagnostics.best_score, 0.0)
+
+            configure_tracking_input(input_)
+            targets.set_count(3)
+            for step in range(3):
+                t = step * tracking.delta_time
+                targets.set_state(step, [0.5 * t], [0.5], [0.0])
+            self.assertEqual(tracking.calculate_sequence(targets, input_, outputs), Result.WORKING)
+            diagnostics = tracking.last_diagnostics
+            self.assertEqual(diagnostics.calculation_status, TrackingCalculationStatus.FAST)
+            self.assertEqual(diagnostics.candidate_count, 3)
+            self.assertEqual(diagnostics.fast_candidate_count, 3)
+            self.assertEqual(diagnostics.family_candidate_count, diagnostics.candidate_count)
+
+            configure_tracking_input(input_)
+            tracking.set_mode(TrackingMode.OPTIMIZED)
+            tracking.set_optimized_strategy(TrackingOptimizedStrategy.AGGRESSIVE)
+            tracking.set_look_ahead_cycles(count)
+            tracking.set_max_optimized_candidates(16)
+            targets.set_count(count)
+            for step in range(count):
+                t = step * tracking.delta_time
+                targets.set_state(step, [0.2 * math.sin(0.45 * t)], [0.09 * math.cos(0.45 * t)], [-0.0405 * math.sin(0.45 * t)])
+            self.assertIn(tracking.update_with_lookahead(targets, input_, output), (Result.WORKING, Result.FINISHED))
+            diagnostics = tracking.last_diagnostics
+            self.assertIn(
+                diagnostics.calculation_status,
+                (TrackingCalculationStatus.OPTIMIZED, TrackingCalculationStatus.FAST_FALLBACK),
+            )
+            self.assertEqual(diagnostics.mode, TrackingMode.OPTIMIZED)
+            self.assertEqual(diagnostics.optimized_strategy, TrackingOptimizedStrategy.AGGRESSIVE)
+            self.assertEqual(diagnostics.fast_candidate_count, 1)
+            self.assertGreaterEqual(diagnostics.candidate_count, 1)
+            self.assertLessEqual(diagnostics.candidate_count, tracking.max_optimized_candidates)
+            self.assertEqual(diagnostics.family_candidate_count, diagnostics.candidate_count)
+            self.assertEqual(tracking.last_candidate_count, diagnostics.candidate_count)
+            self.assertEqual(tracking.last_calculation_status, diagnostics.calculation_status)
+            self.assertTrue(math.isfinite(diagnostics.fast_score))
+            self.assertTrue(math.isfinite(diagnostics.best_score))
+            self.assertTrue(math.isfinite(diagnostics.improvement_ratio))
+            self.assertGreaterEqual(diagnostics.fast_score + 1e-12, diagnostics.best_score)
+            self.assertEqual(diagnostics.error_step_count, 0)
+            self.assertEqual(diagnostics.fallback_step_count + diagnostics.optimized_step_count, 1)
+
+            configure_tracking_input(input_)
+            tracking.set_max_optimized_candidates(2)
+            self.assertIn(tracking.update_with_lookahead(targets, input_, output), (Result.WORKING, Result.FINISHED))
+            diagnostics = tracking.last_diagnostics
+            self.assertEqual(diagnostics.candidate_count, 2)
+            self.assertGreater(diagnostics.budget_exhausted_count, 0)
+            self.assertEqual(diagnostics.family_candidate_count, diagnostics.candidate_count)
+
+            configure_tracking_input(input_)
+            tracking.set_max_optimized_candidates(8)
+            self.assertEqual(tracking.calculate_sequence(targets, input_, outputs), Result.WORKING)
+            diagnostics = tracking.last_diagnostics
+            self.assertGreaterEqual(diagnostics.candidate_count, count)
+            self.assertLessEqual(diagnostics.candidate_count, count * tracking.max_optimized_candidates)
+            self.assertEqual(diagnostics.family_candidate_count, diagnostics.candidate_count)
+            self.assertEqual(diagnostics.fallback_step_count + diagnostics.optimized_step_count, count)
+            self.assertEqual(diagnostics.error_step_count, 0)
+
     def test_tracking_optimized_smoke(self) -> None:
         with (
             Tracking(1, 0.01) as tracking,
@@ -478,6 +571,10 @@ class PrototypeTests(unittest.TestCase):
                 tracking.last_calculation_status,
                 (TrackingCalculationStatus.OPTIMIZED, TrackingCalculationStatus.FAST_FALLBACK),
             )
+            diagnostics = tracking.last_diagnostics
+            self.assertEqual(diagnostics.family_candidate_count, diagnostics.candidate_count)
+            self.assertGreaterEqual(diagnostics.candidate_count, 4)
+            self.assertEqual(diagnostics.error_step_count, 0)
             self.assertGreaterEqual(tracking.last_candidate_count, 4)
 
     def test_tuple_copy_in_and_list_copy_out(self) -> None:
@@ -526,6 +623,8 @@ class PrototypeTests(unittest.TestCase):
         tracking.close()
         with self.assertRaises(RuckigLifecycleError):
             _ = tracking.delta_time
+        with self.assertRaises(RuckigLifecycleError):
+            _ = tracking.last_diagnostics
 
         target = TargetState(1)
         target.close()
