@@ -23,6 +23,24 @@ local data without copying original Ruckig images as primary evidence.
   no Python/Rust publication, no copied original images, and no Pro/cloud
   equivalence claim.
 
+`0.8.0-alpha.2` Matplotlib visualization gallery evidence:
+
+- Replaced the first Pillow-only six-image gallery with a NumPy and Matplotlib
+  `Agg` renderer.
+- Expanded the generated PNG gallery to local C ABI equivalents of original
+  examples `01-10` and `14-16`, excluding `11-13` because they are C++ Eigen
+  and custom-vector ergonomics examples rather than C ABI visualization
+  behavior.
+- Added `tools/visualization/requirements.txt` for the optional local plotting
+  environment and kept `_local/visualization-venv` outside tracked files.
+- Updated `docs/current/visualization.md` and added
+  `docs/release/checklists/0.8.0-alpha.2.md` to record the generation command,
+  original example mapping, asset manifest, local dependency boundary, ABI
+  unchanged evidence, and deferred items.
+- Kept the gallery PNG-only and local-only: no CI workflow, no tag, no GitHub
+  Release, no public C API or symbol change, no package publication, no copied
+  original image/PDF assets, and no Pro/cloud equivalence claim.
+
 Deferred unless separately accepted:
 
 - Python wheel publication, Rust crate publication, package-manager recipes,

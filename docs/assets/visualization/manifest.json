@@ -1,94 +1,254 @@
 {
   "dependencies": {
+    "data": "NumPy arrays sampled from public C ABI calls",
     "data_source": "bindings/python_prototype/ruckig_cffi.py",
-    "renderer": "Pillow",
+    "renderer": "Matplotlib Agg",
     "shared_library": "RUCKIG_C_SHARED_LIBRARY or local shared build"
+  },
+  "excluded_original_examples": {
+    "11_eigen_vector_type": "C++ vector ergonomics, not C ABI visualization surface",
+    "12_custom_vector_type": "C++ vector ergonomics, not C ABI visualization surface",
+    "13_custom_vector_type_dynamic_dofs": "C++ vector ergonomics, not C ABI visualization surface"
   },
   "generated_by": "tools/visualization/generate_gallery.py",
   "images": [
     {
-      "bytes": 25402,
-      "description": "Position, velocity, acceleration, and jerk sampled from a 1-DoF offline trajectory.",
-      "file": "no_waypoint_position.png",
+      "bytes": 71968,
+      "description": "Online 3-DoF position trajectory equivalent to original example 01.",
+      "file": "01_position.png",
       "metrics": {
-        "duration": 4.0,
-        "samples": 240
+        "dofs": 3,
+        "duration": 3.43,
+        "online_result": "FINISHED",
+        "position_extent": 8.50257765,
+        "sampled_online": true,
+        "samples": 344
       },
-      "sha256": "16a972be0f51e64bf4a3ad319eb508341b6329be42e1b08df433716076c6175d",
-      "source": "public C trajectory API via Python cffi prototype",
-      "title": "No-waypoint position trajectory"
+      "original_examples": [
+        "01_position"
+      ],
+      "sha256": "5903f68e53fbc527363be975649d6fa0f63f6f481a8bd254a7ebe3a535e0b6e0",
+      "title": "01 Position"
     },
     {
-      "bytes": 25257,
-      "description": "Velocity-control mode trajectory generated through the public C ABI.",
-      "file": "velocity_control.png",
+      "bytes": 75771,
+      "description": "Offline 3-DoF trajectory with directional min velocity and acceleration limits.",
+      "file": "02_position_offline.png",
       "metrics": {
-        "duration": 2.0,
-        "samples": 240
+        "directional_limits": true,
+        "dofs": 3,
+        "duration": 3.841467602,
+        "position_extent": 8.5,
+        "samples": 360
       },
-      "sha256": "6443e7ebb3d0c4c79143dc7b35059f96a38ed985f28d1537c0ecd74e1f9b3c49",
-      "source": "public C trajectory API via Python cffi prototype",
-      "title": "Velocity-control trajectory"
+      "original_examples": [
+        "02_position_offline"
+      ],
+      "sha256": "ee0cce9224d0d84868129684b53bc505565168066acea2f3df36e468f4df7f20",
+      "title": "02 Position Offline"
     },
     {
-      "bytes": 22048,
-      "description": "Velocity-control stop profile generated from a non-zero current velocity.",
-      "file": "stop_trajectory.png",
+      "bytes": 114134,
+      "description": "Local C ABI waypoint trajectory equivalent for original Pro/cloud waypoint example 03.",
+      "file": "03_waypoints_local.png",
       "metrics": {
-        "duration": 2.0,
-        "samples": 240
+        "dofs": 3,
+        "duration": 8.324899735,
+        "position_extent": 3.746596404,
+        "pro_cloud_equivalence_claim": false,
+        "samples": 360,
+        "waypoint_count": 4
       },
-      "sha256": "1e1fdc3aee4cc9e93daaadbfa4297fd09f562d06d9c9cf83dc1b56378b2eae1c",
-      "source": "public C trajectory API via Python cffi prototype",
-      "title": "Stop trajectory"
+      "original_examples": [
+        "03_waypoints"
+      ],
+      "sha256": "1ebb80a54ea0ede04cba1d310582edaaa037436965c4cfcaa4fbeb7572e7cc0d",
+      "title": "03 Local Waypoints"
     },
     {
-      "bytes": 24076,
-      "description": "Position trajectory constrained by ruckig_input_set_minimum_duration.",
-      "file": "minimum_duration.png",
+      "bytes": 116644,
+      "description": "Online local waypoint update path equivalent for original waypoint online example 04.",
+      "file": "04_waypoints_online_local.png",
       "metrics": {
+        "dofs": 3,
+        "duration": 8.32,
+        "interrupt_duration_storage_only": true,
+        "online_result": "FINISHED",
+        "position_extent": 3.746663382,
+        "pro_cloud_equivalence_claim": false,
+        "samples": 833,
+        "section_change_count": 5
+      },
+      "original_examples": [
+        "04_waypoints_online"
+      ],
+      "sha256": "6b5f139cea5c1c030de23a8e15db0c99266c5765089d2c75e0f4658d4753e142",
+      "title": "04 Local Waypoints Online"
+    },
+    {
+      "bytes": 61190,
+      "description": "Online 3-DoF velocity-control trajectory equivalent to original example 05.",
+      "file": "05_velocity.png",
+      "metrics": {
+        "control_interface": "velocity",
+        "dofs": 3,
+        "duration": 1.49,
+        "online_result": "FINISHED",
+        "position_extent": 4.095416222,
+        "samples": 150
+      },
+      "original_examples": [
+        "05_velocity"
+      ],
+      "sha256": "a4b0f4fb68257d3bba832530735a6e5a1988c42fa6c07db25e2aa7528120caa5",
+      "title": "05 Velocity Control"
+    },
+    {
+      "bytes": 74536,
+      "description": "Online stop trajectory equivalent with a velocity-mode stop command after 1 second.",
+      "file": "06_stop.png",
+      "metrics": {
+        "dofs": 3,
+        "duration": 2.24,
+        "online_result": "FINISHED",
+        "position_extent": 3.547163047,
+        "samples": 225,
+        "stop_time": 1.0
+      },
+      "original_examples": [
+        "06_stop"
+      ],
+      "sha256": "9c2a20c18acc29cc1eb59a69304ce8fa47f096131cfcbcc0fdfb5114ae791c26",
+      "title": "06 Stop"
+    },
+    {
+      "bytes": 79041,
+      "description": "Trajectory constrained by a 5-second minimum duration.",
+      "file": "07_minimum_duration.png",
+      "metrics": {
+        "dofs": 3,
         "duration": 5.0,
         "minimum_duration": 5.0,
-        "samples": 240
+        "position_extent": 5.5,
+        "samples": 360
       },
-      "sha256": "9440b6fd49ed50810ca6de97e40009b35101fd1c85b4479e143e492d8e922140",
-      "source": "public C trajectory API via Python cffi prototype",
-      "title": "Minimum-duration constrained trajectory"
+      "original_examples": [
+        "07_minimum_duration"
+      ],
+      "sha256": "590fea862ad98736539f6f1ae7bfb3285bad53627717be864f4b8612501d2c15",
+      "title": "07 Minimum Duration"
     },
     {
-      "bytes": 22673,
-      "description": "Two-DoF local waypoint trajectory with intermediate section timing.",
-      "file": "waypoint_sections.png",
+      "bytes": 116887,
+      "description": "Local waypoint trajectory with per-section minimum duration constraints.",
+      "file": "08_per_section_minimum_duration.png",
       "metrics": {
-        "duration": 3.0,
-        "intermediate_duration": 1.5,
-        "samples": 240
+        "dofs": 3,
+        "duration": 8.697840251,
+        "per_section_minimum_duration": true,
+        "position_extent": 3.89876231,
+        "samples": 360,
+        "waypoint_count": 6
       },
-      "sha256": "d56f3a6ac830e546a219dd0ef2c779b83e03509b53f4dc338535bb4c8c191f2a",
-      "source": "public C waypoint trajectory API via Python cffi prototype",
-      "title": "Local waypoint trajectory"
+      "original_examples": [
+        "08_per_section_minimum_duration"
+      ],
+      "sha256": "d2d4997b466bc367278ba745d15e5af33e651fad9b171a71a58a8e7eac8d7de9",
+      "title": "08 Per-section Minimum Duration"
     },
     {
-      "bytes": 33219,
-      "description": "Local Fast and bounded Optimized tracking outputs plotted against a sinus target.",
-      "file": "tracking_fast_vs_optimized.png",
+      "bytes": 75266,
+      "description": "C ABI dynamic-DoF handle trajectory equivalent to original DynamicDOFs example 09.",
+      "file": "09_dynamic_dofs.png",
+      "metrics": {
+        "dofs": 3,
+        "duration": 3.43,
+        "dynamic_dof_c_abi": true,
+        "online_result": "FINISHED",
+        "position_extent": 8.50257765,
+        "samples": 344
+      },
+      "original_examples": [
+        "09_dynamic_dofs"
+      ],
+      "sha256": "35957635790e5ed7d5b1f976c41e67f424678c6f97f7b50b5d446a450c025d8e",
+      "title": "09 Dynamic DoFs"
+    },
+    {
+      "bytes": 115941,
+      "description": "C ABI dynamic-DoF local waypoint equivalent to original DynamicDOFs waypoint example 10.",
+      "file": "10_dynamic_dofs_waypoints_local.png",
+      "metrics": {
+        "dofs": 3,
+        "duration": 8.324899735,
+        "dynamic_dof_c_abi": true,
+        "position_extent": 3.746596404,
+        "pro_cloud_equivalence_claim": false,
+        "samples": 360,
+        "waypoint_count": 4
+      },
+      "original_examples": [
+        "10_dynamic_dofs_waypoints"
+      ],
+      "sha256": "6b08e4c3ddb8d20f4ba8a1ff67bec36fd680c6bc13cfcdf7bd7df1a521aedd00",
+      "title": "10 Dynamic DoFs Local Waypoints"
+    },
+    {
+      "bytes": 64130,
+      "description": "Local bounded Optimized online tracking over the original ramp target model.",
+      "file": "14_tracking_online_local.png",
       "metrics": {
         "candidate_count": 16,
-        "delta_time": 0.01,
-        "fallback_step_count": 0,
-        "fast_mean_absolute_error": 0.242082964,
-        "improvement_ratio": 0.021559915,
-        "lookahead": 8,
-        "optimized_mean_absolute_error": 0.220796108,
-        "optimized_step_count": 1,
-        "status": "OPTIMIZED",
-        "steps": 320,
+        "fallback_step_count": 1,
+        "mean_absolute_error": 0.105714927,
+        "optimized_step_count": 0,
+        "status": "FAST_FALLBACK",
+        "steps": 500,
         "strategy": "BALANCED"
       },
-      "sha256": "11f845bc730192c18fa8f02eeb64e7c1fbd98e0f00d76a332261954d64cc4304",
-      "source": "public C tracking API via Python cffi prototype",
-      "title": "Fast vs Optimized tracking"
+      "original_examples": [
+        "14_tracking"
+      ],
+      "sha256": "7f601c79a7e7519a7697cacc03c39b1cdc5dc91feb6f1be9ad2f1e4a1e2672a2",
+      "title": "14 Online Tracking Local"
+    },
+    {
+      "bytes": 76812,
+      "description": "Offline Optimized tracking over the original half-sinus target model.",
+      "file": "15_tracking_offline_local.png",
+      "metrics": {
+        "candidate_count": 6388,
+        "fallback_step_count": 166,
+        "look_ahead_cycles": 32,
+        "mean_absolute_error": 0.078811107,
+        "optimized_step_count": 234,
+        "status": "FAST_FALLBACK",
+        "steps": 400,
+        "strategy": "BALANCED"
+      },
+      "original_examples": [
+        "15_tracking_offline"
+      ],
+      "sha256": "e526cdfc069f7a6571f1a53c4a8483cb41ace4f00222c9960e7ef5d7557c6753",
+      "title": "15 Offline Tracking Local"
+    },
+    {
+      "bytes": 87921,
+      "description": "Local C ABI trajectory sampling visualizing the original speed-control phase concept.",
+      "file": "16_speed_brake_phases.png",
+      "metrics": {
+        "base_duration": 3.438710967,
+        "local_external_retiming": true,
+        "loop_duration": 4.93,
+        "samples": 494,
+        "speed_control_abi_claim": false
+      },
+      "original_examples": [
+        "16_speed"
+      ],
+      "sha256": "ff137d28b6295ec78d5993932865919a94ca8c40b26665c3f213cb227c1cf747",
+      "title": "16 Speed Brake Phases"
     }
   ],
-  "label": "0.8.0-design visualization evidence"
+  "label": "0.8.0-alpha.2 matplotlib visualization evidence"
 }

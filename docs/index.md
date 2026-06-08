@@ -42,7 +42,9 @@ Historical rewrite plans and release evidence are retained for traceability.
   evidence audit for the 172-symbol `v0.7.0` ABI candidate without creating a
   tag or GitHub Release.
   `release/checklists/0.8.0-alpha.md` records the first post-`v0.7.0`
-  visualization/gallery evidence slice.
+  visualization/gallery evidence slice, and
+  `release/checklists/0.8.0-alpha.2.md` records the Matplotlib gallery
+  expansion.
 - `release/evidence/verification_report.md` - local and CI verification
   history.
 - `release/evidence/performance_report.md` - performance procedure and release

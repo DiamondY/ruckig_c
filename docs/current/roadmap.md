@@ -321,15 +321,17 @@ After `v0.7.0`, `main` tracks `0.8.0-design - Unreleased`.
 
 - First priority: local algorithm visualization and trajectory gallery
   evidence.
-- `0.8.0-alpha` adds the first local visualization evidence slice:
+- `0.8.0-alpha` added the first local visualization evidence slice:
   `tools/visualization/generate_gallery.py`,
   `docs/current/visualization.md`, generated PNG assets under
   `docs/assets/visualization/`, and a deterministic manifest.
+- `0.8.0-alpha.2` replaces the Pillow-only gallery with a NumPy and
+  Matplotlib `Agg` renderer and expands the committed PNG gallery to local C
+  ABI equivalents of original examples `01-10` and `14-16`.
 - Generate `ruckig_c`-owned plots from local C/Python prototype data rather
   than copying original Ruckig images as primary project evidence.
-- Initial gallery scope should cover no-waypoint trajectories, velocity/stop
-  and minimum-duration cases, local waypoint sections, and Fast/Optimized
-  tracking comparison.
+- Original examples `11-13` remain excluded because they demonstrate C++ Eigen
+  and custom-vector ergonomics rather than behavior exposed through the C ABI.
 - Visualization remains documentation/evidence work, not public C API work.
 - Do not add visualization as a default CI or stable-release gate until a
   separate dependency and artifact policy is accepted.
