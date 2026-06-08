@@ -41,6 +41,23 @@ local data without copying original Ruckig images as primary evidence.
   Release, no public C API or symbol change, no package publication, no copied
   original image/PDF assets, and no Pro/cloud equivalence claim.
 
+`0.8.0-alpha.3` visualization verifier evidence:
+
+- Added `tools/visualization/verify_gallery.py`, a local-only verifier for the
+  committed Matplotlib PNG gallery and manifest.
+- The default verifier checks the canonical 13 PNG list, PNG header dimensions,
+  manifest byte counts and SHA-256 hashes, original example mappings,
+  `11-13` exclusions, boundary flags, and absence of local paths or timestamp
+  fields.
+- Added optional `--strict-regenerate` mode to regenerate the gallery into an
+  ignored `out/` directory and compare the regenerated PNGs and manifest with
+  committed assets.
+- Kept alpha.2 gallery assets and `manifest.json` unchanged: alpha.3 verifies
+  them rather than relabeling or replacing them.
+- Kept verification local-only: no CI workflow, no CMake/CTest change, no tag,
+  no GitHub Release, no manual release-random workflow, no public C API or ABI
+  change, and no `original/ruckig-main` change.
+
 Deferred unless separately accepted:
 
 - Python wheel publication, Rust crate publication, package-manager recipes,

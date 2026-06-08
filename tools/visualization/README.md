@@ -36,6 +36,31 @@ manifest records file names, scenario titles, original example mapping, metrics,
 byte counts, and SHA-256 hashes. It intentionally avoids local absolute paths,
 virtualenv paths, timestamps, and other machine-specific fields.
 
+## Verify
+
+Default verification checks the committed gallery without regenerating it:
+
+```powershell
+.\_local\visualization-venv\Scripts\python.exe tools\visualization\verify_gallery.py --output docs\assets\visualization
+```
+
+The verifier uses Python stdlib PNG header parsing, so the committed-asset check
+does not need Pillow. It validates the canonical 13-file inventory, `1100x720`
+PNG dimensions, manifest byte counts, SHA-256 hashes, original example mapping,
+`11-13` exclusions, boundary flags, and absence of local paths or timestamp
+fields.
+
+Strict regeneration uses the current interpreter to run `generate_gallery.py`
+into an ignored `out/` directory and compares the regenerated assets against
+the committed PNGs and manifest:
+
+```powershell
+$env:RUCKIG_C_SHARED_LIBRARY=(Resolve-Path out\build\windows-clang-ninja-shared\ruckig_c.dll).Path
+.\_local\visualization-venv\Scripts\python.exe tools\visualization\verify_gallery.py --output docs\assets\visualization --strict-regenerate
+```
+
+Strict regeneration requires `RUCKIG_C_SHARED_LIBRARY` or `--library`.
+
 ## Scope
 
 The gallery covers:

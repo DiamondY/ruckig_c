@@ -46,7 +46,8 @@ Historical rewrite plans and release evidence are retained for traceability.
   `release/checklists/0.8.0-alpha.md` records the first post-`v0.7.0`
   visualization/gallery evidence slice, and
   `release/checklists/0.8.0-alpha.2.md` records the Matplotlib gallery
-  expansion.
+  expansion. `release/checklists/0.8.0-alpha.3.md` records the local gallery
+  verifier hardening evidence.
 - `release/evidence/verification_report.md` - local and CI verification
   history.
 - `release/evidence/performance_report.md` - performance procedure and release

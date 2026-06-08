@@ -9,7 +9,8 @@ scripts as primary project evidence.
 
 `0.8.0-alpha.2` replaces the first Pillow-only gallery with a Matplotlib
 `Agg` gallery backed by NumPy arrays sampled from local public C ABI calls.
-The gallery is PNG-only and local-only.
+`0.8.0-alpha.3` adds a local verifier for the committed PNG/manifest assets.
+The gallery remains PNG-only and local-only.
 
 ```powershell
 cmake --build --preset windows-clang-ninja-shared
@@ -39,6 +40,30 @@ The generator writes:
 `manifest.json` records deterministic file names, original example mapping,
 scenario metrics, byte counts, and SHA-256 hashes. It does not record local
 absolute paths, virtualenv paths, timestamps, or generated raw sample data.
+
+## Verify
+
+Default verification checks the committed assets without requiring a shared
+library:
+
+```powershell
+.\_local\visualization-venv\Scripts\python.exe tools\visualization\verify_gallery.py --output docs\assets\visualization
+```
+
+The verifier checks the canonical 13 PNG filenames, PNG header dimensions,
+manifest byte counts and SHA-256 hashes, original example mapping, `11-13`
+exclusions, boundary flags, and absence of local paths or timestamp fields.
+
+Strict verification regenerates the gallery into an ignored `out/` directory
+and compares the regenerated PNGs and manifest with committed assets:
+
+```powershell
+$env:RUCKIG_C_SHARED_LIBRARY=(Resolve-Path out\build\windows-clang-ninja-shared\ruckig_c.dll).Path
+.\_local\visualization-venv\Scripts\python.exe tools\visualization\verify_gallery.py --output docs\assets\visualization --strict-regenerate
+```
+
+The verifier is a local evidence tool. It is not wired into default GitHub
+Actions, CMake, or CTest.
 
 ## Original Example Mapping
 

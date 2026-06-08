@@ -328,6 +328,9 @@ After `v0.7.0`, `main` tracks `0.8.0-design - Unreleased`.
 - `0.8.0-alpha.2` replaces the Pillow-only gallery with a NumPy and
   Matplotlib `Agg` renderer and expands the committed PNG gallery to local C
   ABI equivalents of original examples `01-10` and `14-16`.
+- `0.8.0-alpha.3` adds local visualization verifier evidence for the committed
+  PNG/manifest assets, including optional strict regeneration into ignored
+  `out/` artifacts. It is hardening evidence, not a stable closeout.
 - Generate `ruckig_c`-owned plots from local C/Python prototype data rather
   than copying original Ruckig images as primary project evidence.
 - Original examples `11-13` remain excluded because they demonstrate C++ Eigen
