@@ -321,6 +321,10 @@ After `v0.7.0`, `main` tracks `0.8.0-design - Unreleased`.
 
 - First priority: local algorithm visualization and trajectory gallery
   evidence.
+- `0.8.0-alpha` adds the first local visualization evidence slice:
+  `tools/visualization/generate_gallery.py`,
+  `docs/current/visualization.md`, generated PNG assets under
+  `docs/assets/visualization/`, and a deterministic manifest.
 - Generate `ruckig_c`-owned plots from local C/Python prototype data rather
   than copying original Ruckig images as primary project evidence.
 - Initial gallery scope should cover no-waypoint trajectories, velocity/stop

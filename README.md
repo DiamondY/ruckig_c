@@ -45,6 +45,9 @@ Implemented and covered by fixed C/oracle tests plus deterministic random oracle
 - `0.7.0-readiness` audit evidence, rerunning the full local
   release-readiness gate set against the current 172-symbol strategy preset
   and diagnostics ABI candidate before stable closeout.
+- `0.8.0-alpha` local algorithm visualization evidence, adding a
+  project-owned PNG gallery generated from public C ABI data through the
+  Python `cffi` prototype.
 - C examples for position, offline position, online update, per-DoF overrides,
   velocity, stop, minimum duration, waypoints, per-section minimum duration,
   tracking Fast-mode scenarios, and Optimized tracking scenarios.
@@ -56,11 +59,11 @@ stable release. It stabilizes the 172-symbol public C ABI reviewed during
 Optimized strategy presets, and public diagnostics snapshots. `0.7.1` is
 reserved for emergency patch work only. The `main` branch now tracks
 `0.8.0-design - Unreleased`, focused first on local algorithm visualization and
-trajectory gallery evidence. Algorithm visualization and trajectory gallery
-generation have been evaluated against the original Ruckig `doc/` images and
-`examples/*_trajectory.pdf` assets, but they remain outside the `v0.7.0`
-stable release so that release does not gain plotting dependencies, image
-artifacts, or release gates.
+trajectory gallery evidence. The first `0.8.0-alpha` slice adds
+`tools/visualization/generate_gallery.py`, `docs/current/visualization.md`,
+and generated PNG assets under `docs/assets/visualization/`. These assets are
+local documentation evidence, not a `v0.7.0` release gate and not a Python
+package publication.
 `v0.4.0` added waypoint-aware C ABI entry points, per-section constraints,
 global position bounds, and a local coupled waypoint optimizer; `v0.4.1`
 deepened waypoint optimizer evidence; `v0.4.2` keeps that public C surface
@@ -83,10 +86,9 @@ Current stable release scope intentionally excludes:
   duration field remains storage/API-surface parity only.
 - Python/Rust binding publication. The Python `cffi` prototype and Rust alpha
   wrapper remain prototype-only and are not installed or published packages.
-- Algorithm visualization and trajectory gallery generation. `0.8.0-design`
-  is expected to generate `ruckig_c`-owned plots locally; no original images
-  are copied as primary project evidence and no Matplotlib or NumPy dependency
-  is added to the `v0.7.0` stable release.
+- Algorithm visualization as a release gate. `0.8.0-alpha` adds local
+  `ruckig_c`-owned PNG gallery evidence, but no original images are copied as
+  primary project evidence and no plotting job is added to default CI.
 - Package-manager recipes and new package-manager prototypes are outside the
   active roadmap. Existing CMake install, pkg-config, static/DLL, and shared
   install-tree consumption paths remain the supported integration surface.

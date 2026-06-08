@@ -8,6 +8,21 @@ is local algorithm visualization and trajectory gallery evidence: generate
 local data without copying original Ruckig images as primary evidence.
 `0.7.1` remains reserved for emergency patch work only.
 
+`0.8.0-alpha` visualization evidence:
+
+- Added `tools/visualization/generate_gallery.py`, a local PNG gallery
+  generator that uses the Python `cffi` prototype to sample public C ABI data.
+- Added generated `ruckig_c`-owned gallery assets under
+  `docs/assets/visualization/` with a deterministic `manifest.json`.
+- Covered no-waypoint position, velocity-control, stop, minimum-duration,
+  local waypoint section, and Fast vs bounded Optimized tracking scenarios.
+- Added `docs/current/visualization.md` and
+  `docs/release/checklists/0.8.0-alpha.md` to record the local generation
+  command, asset inventory, dependency boundary, and deferred follow-up work.
+- Kept visualization local-only: no CI gate, no public C API or symbol change,
+  no Python/Rust publication, no copied original images, and no Pro/cloud
+  equivalence claim.
+
 Deferred unless separately accepted:
 
 - Python wheel publication, Rust crate publication, package-manager recipes,

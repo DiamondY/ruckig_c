@@ -15,6 +15,8 @@ Historical rewrite plans and release evidence are retained for traceability.
   against the frozen original reference and original product surface.
 - `current/test_coverage_audit.md` - local LLVM coverage summary and original
   test/example behavior mapping.
+- `current/visualization.md` - locally generated algorithm visualization
+  gallery evidence and generation policy.
 - `current/packaging.md` - installed CMake, pkg-config, static, DLL, and shared
   install-tree consumer notes.
 - `current/upstream_baseline_policy.md` - frozen upstream oracle baseline
@@ -39,6 +41,8 @@ Historical rewrite plans and release evidence are retained for traceability.
   `release/checklists/0.7.0-readiness.md` records the full local stable-review
   evidence audit for the 172-symbol `v0.7.0` ABI candidate without creating a
   tag or GitHub Release.
+  `release/checklists/0.8.0-alpha.md` records the first post-`v0.7.0`
+  visualization/gallery evidence slice.
 - `release/evidence/verification_report.md` - local and CI verification
   history.
 - `release/evidence/performance_report.md` - performance procedure and release

@@ -1,0 +1,94 @@
+{
+  "dependencies": {
+    "data_source": "bindings/python_prototype/ruckig_cffi.py",
+    "renderer": "Pillow",
+    "shared_library": "RUCKIG_C_SHARED_LIBRARY or local shared build"
+  },
+  "generated_by": "tools/visualization/generate_gallery.py",
+  "images": [
+    {
+      "bytes": 25402,
+      "description": "Position, velocity, acceleration, and jerk sampled from a 1-DoF offline trajectory.",
+      "file": "no_waypoint_position.png",
+      "metrics": {
+        "duration": 4.0,
+        "samples": 240
+      },
+      "sha256": "16a972be0f51e64bf4a3ad319eb508341b6329be42e1b08df433716076c6175d",
+      "source": "public C trajectory API via Python cffi prototype",
+      "title": "No-waypoint position trajectory"
+    },
+    {
+      "bytes": 25257,
+      "description": "Velocity-control mode trajectory generated through the public C ABI.",
+      "file": "velocity_control.png",
+      "metrics": {
+        "duration": 2.0,
+        "samples": 240
+      },
+      "sha256": "6443e7ebb3d0c4c79143dc7b35059f96a38ed985f28d1537c0ecd74e1f9b3c49",
+      "source": "public C trajectory API via Python cffi prototype",
+      "title": "Velocity-control trajectory"
+    },
+    {
+      "bytes": 22048,
+      "description": "Velocity-control stop profile generated from a non-zero current velocity.",
+      "file": "stop_trajectory.png",
+      "metrics": {
+        "duration": 2.0,
+        "samples": 240
+      },
+      "sha256": "1e1fdc3aee4cc9e93daaadbfa4297fd09f562d06d9c9cf83dc1b56378b2eae1c",
+      "source": "public C trajectory API via Python cffi prototype",
+      "title": "Stop trajectory"
+    },
+    {
+      "bytes": 24076,
+      "description": "Position trajectory constrained by ruckig_input_set_minimum_duration.",
+      "file": "minimum_duration.png",
+      "metrics": {
+        "duration": 5.0,
+        "minimum_duration": 5.0,
+        "samples": 240
+      },
+      "sha256": "9440b6fd49ed50810ca6de97e40009b35101fd1c85b4479e143e492d8e922140",
+      "source": "public C trajectory API via Python cffi prototype",
+      "title": "Minimum-duration constrained trajectory"
+    },
+    {
+      "bytes": 22673,
+      "description": "Two-DoF local waypoint trajectory with intermediate section timing.",
+      "file": "waypoint_sections.png",
+      "metrics": {
+        "duration": 3.0,
+        "intermediate_duration": 1.5,
+        "samples": 240
+      },
+      "sha256": "d56f3a6ac830e546a219dd0ef2c779b83e03509b53f4dc338535bb4c8c191f2a",
+      "source": "public C waypoint trajectory API via Python cffi prototype",
+      "title": "Local waypoint trajectory"
+    },
+    {
+      "bytes": 33219,
+      "description": "Local Fast and bounded Optimized tracking outputs plotted against a sinus target.",
+      "file": "tracking_fast_vs_optimized.png",
+      "metrics": {
+        "candidate_count": 16,
+        "delta_time": 0.01,
+        "fallback_step_count": 0,
+        "fast_mean_absolute_error": 0.242082964,
+        "improvement_ratio": 0.021559915,
+        "lookahead": 8,
+        "optimized_mean_absolute_error": 0.220796108,
+        "optimized_step_count": 1,
+        "status": "OPTIMIZED",
+        "steps": 320,
+        "strategy": "BALANCED"
+      },
+      "sha256": "11f845bc730192c18fa8f02eeb64e7c1fbd98e0f00d76a332261954d64cc4304",
+      "source": "public C tracking API via Python cffi prototype",
+      "title": "Fast vs Optimized tracking"
+    }
+  ],
+  "label": "0.8.0-design visualization evidence"
+}
