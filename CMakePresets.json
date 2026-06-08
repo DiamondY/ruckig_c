@@ -93,6 +93,25 @@
       }
     },
     {
+      "name": "windows-clang-ninja-coverage",
+      "displayName": "Windows LLVM clang + Ninja local coverage",
+      "description": "Windows local LLVM source coverage build under out/build/windows-clang-ninja-coverage. This preset is local evidence only and is not a CI gate.",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/out/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_MAKE_PROGRAM": "C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe",
+        "CMAKE_C_COMPILER": "D:/Program Files/LLVM/bin/clang.exe",
+        "CMAKE_CXX_COMPILER": "D:/Program Files/LLVM/bin/clang++.exe",
+        "BUILD_RUCKIG_C": "ON",
+        "BUILD_RUCKIG_C_TESTS": "ON",
+        "BUILD_RUCKIG_C_EXAMPLES": "ON",
+        "BUILD_RUCKIG_C_ORACLE_TESTS": "ON",
+        "BUILD_RUCKIG_C_PERFORMANCE_TESTS": "OFF",
+        "RUCKIG_C_ENABLE_COVERAGE": "ON"
+      }
+    },
+    {
       "name": "release",
       "displayName": "Release",
       "description": "Release build under out/build/release.",
@@ -162,6 +181,11 @@
       "configuration": "Release"
     },
     {
+      "name": "windows-clang-ninja-coverage",
+      "configurePreset": "windows-clang-ninja-coverage",
+      "configuration": "Debug"
+    },
+    {
       "name": "release",
       "configurePreset": "release",
       "configuration": "Release"
@@ -218,6 +242,19 @@
       "name": "windows-clang-ninja-performance",
       "configurePreset": "windows-clang-ninja-performance",
       "configuration": "Release",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "windows-clang-ninja-coverage",
+      "configurePreset": "windows-clang-ninja-coverage",
+      "configuration": "Debug",
+      "filter": {
+        "exclude": {
+          "name": "ruckig_c_oracle_random_release|ruckig_c_oracle_random_development|ruckig_c_tracking_random_seed_.*"
+        }
+      },
       "output": {
         "outputOnFailure": true
       }

@@ -286,6 +286,11 @@ After `v0.6.0`, `main` tracks `0.7.0-design - Unreleased`.
   Balanced by at least `2%` on fixed oscillatory cases, routine tracking random
   stress runs `--tracking-random 100000 --seed 1/2/41`, and manual stress uses
   `--tracking-random 1000000 --seed 1`.
+- `0.7.0-alpha.3` evidence adds a local-only LLVM coverage audit and original
+  Community test/example behavior mapping. The local broad routine coverage
+  corpus records implementation line/function/branch coverage under
+  `docs/current/test_coverage_audit.md`, but coverage is not a CI job and not
+  a hard release gate.
 - This alpha line may add the approved strategy preset and diagnostics C
   symbols, but it does not create a stable tag or GitHub Release.
 - Soft interruption, formal Python/Rust publication, package-manager recipes,

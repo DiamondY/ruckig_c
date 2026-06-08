@@ -13,6 +13,8 @@ Historical rewrite plans and release evidence are retained for traceability.
 - `current/api_diagnostics.md` - C API validation and diagnostics behavior.
 - `current/original_parity_coverage.md` - current coverage estimates and gaps
   against the frozen original reference and original product surface.
+- `current/test_coverage_audit.md` - local LLVM coverage summary and original
+  test/example behavior mapping.
 - `current/packaging.md` - installed CMake, pkg-config, static, DLL, and shared
   install-tree consumer notes.
 - `current/upstream_baseline_policy.md` - frozen upstream oracle baseline
@@ -28,9 +30,11 @@ Historical rewrite plans and release evidence are retained for traceability.
   `release/checklists/0.5.0-alpha.2.md` retain the tracking alpha evidence.
   `release/checklists/0.6.0-alpha.md` retains the Optimized tracking alpha
   evidence, and `release/checklists/0.6.0.md` records the stable Optimized
-  tracking release closeout. `release/checklists/0.7.0-alpha.md` and
-  `release/checklists/0.7.0-alpha.2.md` retain the tracking strategy and
-  diagnostics hardening evidence on the `0.7.0-design` line.
+  tracking release closeout. `release/checklists/0.7.0-alpha.md`,
+  `release/checklists/0.7.0-alpha.2.md`, and
+  `release/checklists/0.7.0-alpha.3.md` retain the tracking strategy,
+  diagnostics hardening, and coverage audit evidence on the `0.7.0-design`
+  line.
 - `release/evidence/verification_report.md` - local and CI verification
   history.
 - `release/evidence/performance_report.md` - performance procedure and release

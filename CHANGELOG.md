@@ -7,7 +7,25 @@ priority is Optimized tracking quality and stability deepening: broader fixed
 corpus coverage, stronger trend metrics, deterministic stress, and release
 evidence strategy. `0.6.1` remains reserved for emergency patch work only.
 
-`0.7.0-alpha.2` hardening evidence in progress:
+`0.7.0-alpha.3` coverage audit evidence:
+
+- Added a local LLVM coverage build option and
+  `windows-clang-ninja-coverage` preset for evidence-only source coverage.
+- Added `tools/coverage/run_coverage.ps1`, which configures the coverage
+  preset, runs the broad routine C/oracle/example corpus plus 10k random
+  supplements, and writes raw LLVM artifacts under
+  `out/coverage/0.7.0-alpha.3/`.
+- Added `docs/current/test_coverage_audit.md`, mapping the original Community
+  `test_target.cpp` cases and examples to current C tests, frozen C++ oracle
+  gates, examples, Python prototype smoke, and Rust alpha smoke.
+- Recorded local implementation coverage summary for the broad routine corpus:
+  line `85.33%`, function `90.33%`, branch `67.03%`, and region `84.89%`.
+- Coverage is local-only evidence, not a CI job and not a hard release gate.
+  Raw HTML/profile artifacts remain untracked under `out/coverage/`.
+- No public C API, public symbol, enum numeric value, or result-code value is
+  changed by this alpha evidence.
+
+`0.7.0-alpha.2` hardening evidence:
 
 - Added high-level Optimized tracking strategy presets:
   `RUCKIG_TRACKING_OPTIMIZED_STABLE`,

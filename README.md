@@ -38,6 +38,8 @@ Implemented and covered by fixed C/oracle tests plus deterministic random oracle
   Stable/Balanced/Aggressive controls, public diagnostics snapshots, stricter
   deterministic quality gates, and 100k-seed tracking random stress evidence
   without changing the current stable release.
+- `0.7.0-alpha.3` test coverage audit evidence on `main`, adding a local
+  LLVM coverage runner and original Community test/example coverage matrix.
 - C examples for position, offline position, online update, per-DoF overrides,
   velocity, stop, minimum duration, waypoints, per-section minimum duration,
   tracking Fast-mode scenarios, and Optimized tracking scenarios.
@@ -48,9 +50,10 @@ stable release. It stabilizes bounded local `Optimized` tracking on top of the
 tracking C ABI and local Fast-mode tracking implementation. `0.6.1` is
 reserved for emergency patch work only. The `main` branch now tracks
 `0.7.0-design - Unreleased`, focused first on Optimized tracking quality and
-stability deepening. The current alpha.2 work adds high-level strategy presets
-and public diagnostics snapshots for Optimized tracking; it is evidence-only
-and does not create a tag or GitHub Release.
+stability deepening. The alpha.2 work adds high-level strategy presets and
+public diagnostics snapshots for Optimized tracking. The alpha.3 work adds a
+local coverage audit and behavior mapping against the frozen original tests; it
+is evidence-only and does not create a tag or GitHub Release.
 `v0.4.0` added waypoint-aware C ABI entry points, per-section constraints,
 global position bounds, and a local coupled waypoint optimizer; `v0.4.1`
 deepened waypoint optimizer evidence; `v0.4.2` keeps that public C surface
@@ -114,6 +117,9 @@ Useful presets:
 - `windows-clang-ninja-shared` builds the same Windows LLVM/Ninja target set as
   a shared library under `out/build/windows-clang-ninja-shared`; it is intended
   for ABI/export hygiene checks and Python prototype smoke tests.
+- `windows-clang-ninja-coverage` builds the local LLVM coverage target set
+  under `out/build/windows-clang-ninja-coverage`; it is intended for
+  `tools/coverage/run_coverage.ps1` and is not a CI gate.
 - `dev` builds the C library, C tests, and examples under `out/build/dev`.
   It is intentionally generic and requires the current shell or CMake generator
   selection to find a working C/C++ compiler.
@@ -422,3 +428,8 @@ Current CMake/Ninja and direct-clang verification evidence is recorded in `docs/
 GitHub Actions CI covers Windows, Linux, and macOS routine checks. The
 `ruckig_c_oracle_random_release` test is intentionally excluded from routine
 CI and is available as a manual release gate.
+
+Local test coverage evidence for the `0.7.0-design` line is recorded in
+`docs/current/test_coverage_audit.md`. The coverage runner writes raw LLVM
+artifacts under `out/coverage/0.7.0-alpha.3/`; those raw artifacts are local
+evidence only and are not committed.
