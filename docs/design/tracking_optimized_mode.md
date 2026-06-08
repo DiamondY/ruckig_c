@@ -1,9 +1,9 @@
 # Tracking Optimized Mode Design
 
-`v0.6.0` stabilizes a bounded local `RUCKIG_TRACKING_OPTIMIZED` MVP. The
-`0.7.0-alpha.2` line deepens that implementation with high-level strategy
-presets, public diagnostics snapshots, stricter deterministic quality gates,
-and stronger stress evidence. This remains a local bounded candidate evaluator.
+`v0.6.0` stabilizes a bounded local `RUCKIG_TRACKING_OPTIMIZED` MVP. `v0.7.0`
+stabilizes the high-level strategy presets, public diagnostics snapshot,
+stricter deterministic quality gates, and stronger stress evidence developed
+on the `0.7.0-design` line. This remains a local bounded candidate evaluator.
 It does not claim source-level oracle parity, formal global optimality, or
 Pro/cloud numerical equivalence. The frozen Community baseline still has no
 local tracking optimizer source to use as an oracle.
@@ -27,7 +27,7 @@ The diagnostic enum remains:
 - `RUCKIG_TRACKING_CALCULATION_FAST_FALLBACK = 3`
 - `RUCKIG_TRACKING_CALCULATION_ERROR = 4`
 
-`0.7.0-alpha` adds the approved high-level strategy enum:
+`v0.7.0` adds the approved high-level strategy enum:
 
 - `RUCKIG_TRACKING_OPTIMIZED_STABLE = 0`
 - `RUCKIG_TRACKING_OPTIMIZED_BALANCED = 1`
@@ -44,13 +44,13 @@ The default strategy after `ruckig_tracking_create` is
 signatures, enum numeric values, and result-code numeric values remain
 unchanged.
 
-`0.7.0-alpha.2` adds the diagnostics snapshot getter:
+`v0.7.0` adds the diagnostics snapshot getter:
 
 - `ruckig_tracking_get_last_diagnostics`
 
 The getter copies the last tracking calculation summary into
-`ruckig_tracking_diagnostics_t`. The public symbol count for the
-`0.7.0-alpha.2` evidence line is `172`.
+`ruckig_tracking_diagnostics_t`. The public symbol count for the `v0.7.0`
+stable line is `172`.
 
 The default Optimized candidate budget remains `16`. The public budget setter
 accepts `1..128`. The budget is deterministic and bounds candidate trajectory
@@ -176,7 +176,7 @@ default Optimized workspace. Candidate-budget and strategy setters run outside
 the online/offline calculation path. Prepared online and offline calculation
 paths must not allocate.
 
-`0.7.0-alpha.2` does not implement timeout checkpoints. The
+`v0.7.0` does not implement timeout checkpoints. The
 `interrupt_calculation_duration` field does not create hard or soft real-time
 interruption behavior for tracking.
 
@@ -214,15 +214,13 @@ Optional Pro/cloud black-box samples may be recorded manually as comparison
 notes, but they remain non-blocking and cannot be used to claim formal
 equivalence.
 
-`0.7.0-readiness` reruns the full local stable-review gate set against the
-current strategy preset and diagnostics snapshot API candidate. The readiness
-audit records static/shared/performance/oracle builds, static/shared CTest,
-tracking and solver-branch gates, fixed and random frozen-oracle comparisons,
-local 1M release-random readiness, no-waypoint and waypoint performance,
-coverage, ABI/export checks, and Python/Rust smoke. It treats the current
-172-symbol public C ABI as ready for a later `v0.7.0` stable closeout review,
-but it does not bump versions, move ABI artifact paths, tag a release, or
-publish a GitHub Release.
+`0.7.0-readiness` reran the full local stable-review gate set against the
+strategy preset and diagnostics snapshot API candidate. The readiness audit
+records static/shared/performance/oracle builds, static/shared CTest, tracking
+and solver-branch gates, fixed and random frozen-oracle comparisons, local 1M
+release-random readiness, no-waypoint and waypoint performance, coverage,
+ABI/export checks, and Python/Rust smoke. `v0.7.0` promotes that 172-symbol
+public C ABI to the stable release baseline.
 
 ## Deferred
 

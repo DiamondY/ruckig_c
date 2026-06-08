@@ -34,40 +34,30 @@ Implemented and covered by fixed C/oracle tests plus deterministic random oracle
   candidate search, online lookahead update, offline sliding-window sequence
   calculation, Fast fallback diagnostics, and Python/Rust prototype smoke
   coverage.
-- `0.7.0-alpha.2` Optimized tracking hardening work on `main`, adding
+- `v0.7.0` Optimized tracking strategy and diagnostics stabilization, adding
   Stable/Balanced/Aggressive controls, public diagnostics snapshots, stricter
-  deterministic quality gates, and 100k-seed tracking random stress evidence
-  without changing the current stable release.
-- `0.7.0-alpha.3` test coverage audit evidence on `main`, adding a local
+  deterministic quality gates, and 100k-seed tracking random stress evidence.
+- `0.7.0-alpha.3` test coverage audit evidence, adding a local
   LLVM coverage runner and original Community test/example coverage matrix.
-- `0.7.0-alpha.4` targeted solver branch coverage evidence on `main`, adding
+- `0.7.0-alpha.4` targeted solver branch coverage evidence, adding
   fixed oracle cases and a lightweight solver branch CTest gate for the lowest
   coverage target-solver files from the alpha.3 audit.
-- `0.7.0-readiness` audit evidence on `main`, rerunning the full local
+- `0.7.0-readiness` audit evidence, rerunning the full local
   release-readiness gate set against the current 172-symbol strategy preset
-  and diagnostics ABI candidate without creating a stable tag, GitHub Release,
-  or version bump.
+  and diagnostics ABI candidate before stable closeout.
 - C examples for position, offline position, online update, per-DoF overrides,
   velocity, stop, minimum duration, waypoints, per-section minimum duration,
   tracking Fast-mode scenarios, and Optimized tracking scenarios.
 
 Release-readiness evidence is tracked under `docs/release/`; see
-`docs/index.md` for the organized documentation map. `v0.6.0` is the current
-stable release. It stabilizes bounded local `Optimized` tracking on top of the
-tracking C ABI and local Fast-mode tracking implementation. `0.6.1` is
-reserved for emergency patch work only. The `main` branch now tracks
-`0.7.0-design - Unreleased`, focused first on Optimized tracking quality and
-stability deepening. The alpha.2 work adds high-level strategy presets and
-public diagnostics snapshots for Optimized tracking. The alpha.3 work adds a
-local coverage audit and behavior mapping against the frozen original tests,
-and alpha.4 hardens targeted solver branch coverage from that audit; both are
-evidence-only and do not create a tag or GitHub Release. The readiness audit
-keeps the same release boundary: `v0.6.0` remains the stable release, the
-project version macros remain `0.6.0`, and a separate stable closeout decision
-is required before `v0.7.0` can be tagged. Algorithm visualization and
-trajectory gallery generation have been evaluated against the original Ruckig
-`doc/` images and `examples/*_trajectory.pdf` assets, but implementation is
-deferred until after `v0.7.0` so the stable closeout does not gain new plotting
+`docs/index.md` for the organized documentation map. `v0.7.0` is the current
+stable release. It stabilizes the 172-symbol public C ABI reviewed during
+`0.7.0-readiness`: bounded local Optimized tracking from `v0.6.0`, high-level
+Optimized strategy presets, and public diagnostics snapshots. `0.7.1` is
+reserved for emergency patch work only. Algorithm visualization and trajectory
+gallery generation have been evaluated against the original Ruckig `doc/`
+images and `examples/*_trajectory.pdf` assets, but implementation is deferred
+until after `v0.7.0` so the stable closeout does not gain new plotting
 dependencies, image artifacts, or release gates.
 `v0.4.0` added waypoint-aware C ABI entry points, per-section constraints,
 global position bounds, and a local coupled waypoint optimizer; `v0.4.1`
@@ -83,10 +73,10 @@ Current stable release scope intentionally excludes:
 - Cloud and remote calculation; local optimizer and tracking work only.
 - Formal Ruckig Pro/cloud global numerical equivalence claims.
 - Hard real-time guarantees for waypoint optimization.
-- Formal global optimality guarantees for `Optimized` tracking. The `v0.6.0`
-  implementation is a bounded deterministic local MVP with Fast fallback
-  diagnostics; the `0.7.0-alpha.2` strategy presets and diagnostics snapshots
-  are local quality controls, not a global optimality claim.
+- Formal global optimality guarantees for `Optimized` tracking. The `v0.7.0`
+  implementation is a bounded deterministic local evaluator with Fast fallback
+  diagnostics, strategy presets, and diagnostics snapshots; these are local
+  quality controls, not a global optimality claim.
 - Soft interruption checkpoints for waypoint optimization; the interrupt
   duration field remains storage/API-surface parity only.
 - Python/Rust binding publication. The Python `cffi` prototype and Rust alpha
@@ -305,10 +295,10 @@ state or target sequence handles. `Fast` mode performs local
 constant-acceleration lookahead and calls the existing update path. `v0.6.0`
 also includes bounded local `Optimized` mode with candidate search, online
 lookahead sequences, offline sliding-window sequence calculation, and fallback
-diagnostics. On `main`, `0.7.0-alpha.2` adds high-level Optimized strategy
-presets plus `ruckig_tracking_get_last_diagnostics` snapshots covering score
-summary, candidate-family counters, and aggregate step counts. Balanced is the
-default strategy. See
+diagnostics. `v0.7.0` stabilizes high-level Optimized strategy presets plus
+`ruckig_tracking_get_last_diagnostics` snapshots covering score summary,
+candidate-family counters, and aggregate step counts. Balanced is the default
+strategy. See
 `docs/design/tracking_interface.md` for the tracking ABI semantics and
 `docs/design/tracking_optimized_mode.md` for the Optimized tracking design.
 
@@ -448,7 +438,7 @@ GitHub Actions CI covers Windows, Linux, and macOS routine checks. The
 `ruckig_c_oracle_random_release` test is intentionally excluded from routine
 CI and is available as a manual release gate.
 
-Local test coverage evidence for the `0.7.0-design` line is recorded in
-`docs/current/test_coverage_audit.md`. The coverage runner writes raw LLVM
-artifacts under `out/coverage/0.7.0-alpha.4/`; those raw artifacts are local
+Local test coverage evidence for the `v0.7.0` line is recorded in
+`docs/current/test_coverage_audit.md`. The release coverage runner writes raw
+LLVM artifacts under `out/coverage/0.7.0/`; those raw artifacts are local
 evidence only and are not committed.

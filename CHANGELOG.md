@@ -1,11 +1,41 @@
 # Changelog
 
-## 0.7.0-design - Unreleased
+## 0.7.0 - 2026-06-08
 
-`0.7.0-design` is the post-`v0.6.0` design line on `main`. The first
-priority is Optimized tracking quality and stability deepening: broader fixed
-corpus coverage, stronger trend metrics, deterministic stress, and release
-evidence strategy. `0.6.1` remains reserved for emergency patch work only.
+`0.7.0` is the stable Optimized tracking quality and diagnostics release. It
+stabilizes the 172-symbol public C ABI reviewed during `0.7.0-readiness`:
+the `v0.6.0` bounded local Optimized tracking surface plus high-level
+Stable/Balanced/Aggressive strategy presets and the public diagnostics
+snapshot getter. `0.7.1` is reserved for emergency patch work only.
+
+Added:
+
+- Stabilized public Optimized tracking strategy presets:
+  `RUCKIG_TRACKING_OPTIMIZED_STABLE`,
+  `RUCKIG_TRACKING_OPTIMIZED_BALANCED`, and
+  `RUCKIG_TRACKING_OPTIMIZED_AGGRESSIVE`.
+- Stabilized public strategy controls:
+  `ruckig_tracking_set_optimized_strategy` and
+  `ruckig_tracking_get_optimized_strategy`.
+- Stabilized the public diagnostics snapshot:
+  `ruckig_tracking_diagnostics_t` and
+  `ruckig_tracking_get_last_diagnostics`.
+- Kept bounded local Optimized tracking semantics, Fast fallback diagnostics,
+  deterministic candidate budgets, local quality gates, and Python/Rust
+  prototype smoke evidence.
+- ABI artifact paths now use `artifacts/abi/0.7.0` for stable release
+  evidence.
+
+Compatibility:
+
+- Existing `v0.6.0` public symbols, function signatures, enum numeric values,
+  and result-code numeric values are unchanged.
+- Public symbol allowlist: `172` approved public symbols.
+- `RUCKIG_TRACKING_OPTIMIZED` remains a bounded deterministic local evaluator,
+  not a formal global optimizer and not a Pro/cloud equivalence claim.
+- `interrupt_calculation_duration` does not create tracking timeout,
+  soft-interruption, or hard real-time guarantees.
+- `original/ruckig-main` remains frozen as Ruckig Community `0.17.3`.
 
 Algorithm visualization planning decision:
 
@@ -13,16 +43,15 @@ Algorithm visualization planning decision:
   assets: `original/ruckig-main/doc/*.png`,
   `original/ruckig-main/examples/*_trajectory.pdf`, and the original
   `examples/plotter.py` helper.
-- Decided not to implement trajectory/gallery generation before the stable
-  `v0.7.0` closeout. The closeout should remain limited to the existing
-  readiness-approved 172-symbol ABI, version/tag/release flow, and evidence
-  gates.
+- Decided not to implement trajectory/gallery generation in the stable
+  `v0.7.0` closeout. The release remains limited to the readiness-approved
+  172-symbol ABI, version/tag/release flow, and evidence gates.
 - Deferred `ruckig_c`-generated trajectory/tracking/waypoint plots to a
   post-`v0.7.0` visualization evidence project. That later project should
   generate `ruckig_c`-owned images from local C/Python prototype data rather
   than copying original images as primary project evidence.
 - No plotting dependency, image/PDF artifact, CI job, public C API, public
-  symbol, version macro, or release gate is added by this planning decision.
+  symbol, or release gate is added by this release.
 
 `0.7.0-readiness` evidence audit:
 
@@ -40,10 +69,9 @@ Algorithm visualization planning decision:
 - Regenerated local readiness coverage under `out/coverage/0.7.0-readiness/`.
   The broad routine corpus records line `87.71%`, function `91.86%`, branch
   `69.26%`, and region `87.44%`.
-- Kept ABI artifact paths on the design-line `artifacts/abi/0.7.0-alpha.2`
-  location. A future stable closeout must move those paths to
-  `artifacts/abi/0.7.0` together with the version macro and CMake version
-  bump.
+- Promoted ABI artifact paths from the design-line
+  `artifacts/abi/0.7.0-alpha.2` location to `artifacts/abi/0.7.0` during
+  stable closeout.
 - No public C API, public symbol, enum numeric value, result-code value,
   `original/ruckig-main` content, package publication, tag, or GitHub Release
   is changed by this readiness evidence.

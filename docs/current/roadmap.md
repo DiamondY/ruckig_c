@@ -268,13 +268,13 @@ tracking release from `v0.5.0`.
   equivalence claims, and upstream baseline upgrades remain separate projects
   unless explicitly accepted.
 
-## 0.7.0 Design Entry
+## 0.7.0 Strategy And Diagnostics Release
 
-After `v0.6.0`, `main` tracks `0.7.0-design - Unreleased`.
+Published as `v0.7.0`. This release stabilizes the 172-symbol public C ABI
+reviewed during `0.7.0-readiness`: the stable `v0.6.0` bounded local
+Optimized tracking API plus high-level strategy preset controls and the public
+diagnostics snapshot getter.
 
-- First priority: deepen Optimized tracking quality and stability evidence.
-- Expand tracking fixed corpus, quality trend metrics, deterministic stress,
-  and release evidence strategy before considering broader ecosystem work.
 - `0.7.0-alpha.2` evidence adds high-level Optimized strategy presets
   (`Stable`, `Balanced`, `Aggressive`) with Balanced as the default plus the
   public `ruckig_tracking_get_last_diagnostics` snapshot API. It keeps the
@@ -299,15 +299,11 @@ After `v0.6.0`, `main` tracks `0.7.0-design - Unreleased`.
   against the current strategy preset and diagnostics API candidate. It treats
   the 172-symbol public C ABI as ready for stable review, records coverage,
   performance, ABI/export, wrapper, oracle, and 1M release-random readiness
-  evidence, and still does not bump versions, create a tag, or create a GitHub
-  Release.
-- This alpha line may add the approved strategy preset and diagnostics C
-  symbols, but it does not create a stable tag or GitHub Release.
-- If `v0.7.0` stable closeout is accepted later, the closeout must update
-  `CMakeLists.txt`, `include/ruckig_c/ruckig.h` version macros,
-  `CHANGELOG.md`, release notes/checklists, and ABI artifact paths from the
-  design-line `artifacts/abi/0.7.0-alpha.2` directory to
-  `artifacts/abi/0.7.0`.
+  evidence.
+- Stable closeout updates `CMakeLists.txt`, `include/ruckig_c/ruckig.h`
+  version macros, `CHANGELOG.md`, release notes/checklists, and ABI artifact
+  paths to `artifacts/abi/0.7.0`.
+- `0.7.1` is reserved for emergency patches only.
 - Algorithm visualization and trajectory gallery generation are deferred until
   after `v0.7.0`. The original Ruckig `doc/` images, example trajectory PDFs,
   and `examples/plotter.py` are useful references, but `v0.7.0` closeout must
