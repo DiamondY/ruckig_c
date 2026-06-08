@@ -556,3 +556,29 @@ Compatibility rules for the `v0.7.0` tracking line:
 ```text
 out/build/<preset>/artifacts/abi/0.7.0/
 ```
+
+## v0.8.0 Visualization Evidence Release ABI Baseline
+
+`v0.8.0` is a stable visualization/gallery evidence release. It keeps the
+`v0.7.0` tracking strategy and diagnostics public C ABI unchanged while
+stabilizing the local Matplotlib PNG gallery and verifier evidence reviewed
+during `0.8.0-readiness`.
+
+Compatibility rules for the `v0.8.0` line:
+
+- Public C symbol count remains 172.
+- Public additions in `v0.8.0`: 0.
+- Public removals in `v0.8.0`: 0.
+- Existing public function signatures, enum numeric values, and result-code
+  numeric values are unchanged.
+- `docs/abi/public-symbols.txt`, `docs/abi/public-symbol-exceptions.txt`, and
+  `docs/abi/exceptions.md` are unchanged from the `v0.7.0` stable baseline.
+- Visualization tooling is local documentation/evidence work. It does not add
+  visualization-specific public C functions or exported symbols.
+- `CMakeLists.txt` project version and `RUCKIG_C_VERSION_*` macros are
+  `0.8.0`.
+- ABI artifact output paths use the stable release evidence directory:
+
+```text
+out/build/<preset>/artifacts/abi/0.8.0/
+```

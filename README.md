@@ -45,32 +45,30 @@ Implemented and covered by fixed C/oracle tests plus deterministic random oracle
 - `0.7.0-readiness` audit evidence, rerunning the full local
   release-readiness gate set against the current 172-symbol strategy preset
   and diagnostics ABI candidate before stable closeout.
-- `0.8.0-readiness` audit evidence, confirming the current local algorithm
-  visualization gallery and verifier are ready for a later `v0.8.0` stable
-  closeout decision if ordinary push CI is green.
+- `v0.8.0` visualization/gallery evidence stabilization, adopting the local
+  Matplotlib PNG gallery and verifier while keeping the `v0.7.0` 172-symbol
+  public C ABI unchanged.
 - C examples for position, offline position, online update, per-DoF overrides,
   velocity, stop, minimum duration, waypoints, per-section minimum duration,
   tracking Fast-mode scenarios, and Optimized tracking scenarios.
 
 Release-readiness evidence is tracked under `docs/release/`; see
-`docs/index.md` for the organized documentation map. `v0.7.0` is the current
-stable release. It stabilizes the 172-symbol public C ABI reviewed during
-`0.7.0-readiness`: bounded local Optimized tracking from `v0.6.0`, high-level
-Optimized strategy presets, and public diagnostics snapshots. `0.7.1` is
-reserved for emergency patch work only. The `main` branch now tracks
-`0.8.0-design - Unreleased`, focused first on local algorithm visualization and
-trajectory gallery evidence. `0.8.0-alpha.2` uses
-`tools/visualization/generate_gallery.py` with Matplotlib `Agg`, NumPy, and the
-Python `cffi` prototype to generate project-owned PNG assets under
-`docs/assets/visualization/`. The gallery covers local C ABI equivalents of
-original examples `01-10` and `14-16`; examples `11-13` remain excluded because
-they demonstrate C++ Eigen/custom-vector ergonomics rather than C ABI behavior.
-`0.8.0-alpha.3` adds `tools/visualization/verify_gallery.py` so maintainers can
-verify the committed PNG/manifest assets locally, including an optional strict
-regeneration check. `0.8.0-readiness` reruns focused local gates around that
-gallery/verifier evidence. These assets are local documentation evidence; the
-readiness audit is not a stable release, version bump, tag, GitHub Release, CI
-plotting gate, or Python package publication.
+`docs/index.md` for the organized documentation map. `v0.8.0` is the current
+stable release. It keeps the `v0.7.0` 172-symbol public C ABI unchanged and
+stabilizes the local algorithm visualization/gallery evidence reviewed during
+`0.8.0-readiness`. `tools/visualization/generate_gallery.py` uses Matplotlib
+`Agg`, NumPy, and the Python `cffi` prototype to generate project-owned PNG
+assets under `docs/assets/visualization/`. The gallery covers local C ABI
+equivalents of original examples `01-10` and `14-16`; examples `11-13` remain
+excluded because they demonstrate C++ Eigen/custom-vector ergonomics rather
+than C ABI behavior. `tools/visualization/verify_gallery.py` verifies the
+committed PNG/manifest assets locally, including an optional strict
+regeneration check. The existing 13 PNG assets and manifest retain their
+`0.8.0-alpha.2` provenance label and hashes; `v0.8.0` adopts them without
+relabeling or regenerating tracked files. The `main` branch moves to
+`0.9.0-design - Unreleased` after the release, focused first on tracking
+quality and stability hardening. `0.8.1` is reserved for emergency patch work
+only.
 `v0.4.0` added waypoint-aware C ABI entry points, per-section constraints,
 global position bounds, and a local coupled waypoint optimizer; `v0.4.1`
 deepened waypoint optimizer evidence; `v0.4.2` keeps that public C surface
@@ -93,10 +91,10 @@ Current stable release scope intentionally excludes:
   duration field remains storage/API-surface parity only.
 - Python/Rust binding publication. The Python `cffi` prototype and Rust alpha
   wrapper remain prototype-only and are not installed or published packages.
-- Algorithm visualization as a release gate. `0.8.0-readiness` confirms the
-  local `ruckig_c`-owned Matplotlib PNG gallery and verifier evidence is ready
-  for stable review, but no original images or PDFs are copied as primary
-  project evidence and no plotting job is added to default CI.
+- Algorithm visualization as a default CI release gate. `v0.8.0` stabilizes the
+  local `ruckig_c`-owned Matplotlib PNG gallery and verifier evidence, but no
+  original images or PDFs are copied as primary project evidence and no
+  plotting job is added to default CI.
 - Package-manager recipes and new package-manager prototypes are outside the
   active roadmap. Existing CMake install, pkg-config, static/DLL, and shared
   install-tree consumption paths remain the supported integration surface.
@@ -456,9 +454,9 @@ can report an invalid token if it cannot read the user keyring; confirm from a
 keyring-aware command environment before treating the result as a permissions
 problem.
 
-Local test coverage evidence for the `v0.7.0` line is recorded in
+Local test coverage evidence for the `v0.8.0` stable release is recorded in
 `docs/current/test_coverage_audit.md`. The release coverage runner writes raw
-LLVM artifacts under `out/coverage/0.7.0/`; those raw artifacts are local
+LLVM artifacts under `out/coverage/0.8.0/`; those raw artifacts are local
 evidence only and are not committed.
 
 Visualization gallery evidence is local-only. To verify committed gallery
@@ -476,7 +474,6 @@ $env:RUCKIG_C_SHARED_LIBRARY=(Resolve-Path out\build\windows-clang-ninja-shared\
 .\_local\visualization-venv\Scripts\python.exe tools\visualization\verify_gallery.py --output docs\assets\visualization --strict-regenerate
 ```
 
-`docs/release/checklists/0.8.0-readiness.md` records the focused readiness
-audit for the visualization gallery and verifier. If its local gates and
-ordinary push CI are green, the next separate decision can be `v0.8.0` stable
-closeout.
+`docs/release/checklists/0.8.0.md` records the stable release closeout for the
+visualization gallery and verifier. The verifier remains a local evidence tool;
+it is not wired into default GitHub Actions, CMake, or CTest.

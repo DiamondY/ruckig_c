@@ -1,12 +1,13 @@
 # Changelog
 
-## 0.8.0-design - Unreleased
+## 0.8.0 - 2026-06-09
 
-`0.8.0-design` is the post-`v0.7.0` design line on `main`. The first priority
-is local algorithm visualization and trajectory gallery evidence: generate
-`ruckig_c`-owned trajectory, waypoint, and Fast/Optimized tracking plots from
-local data without copying original Ruckig images as primary evidence.
-`0.7.1` remains reserved for emergency patch work only.
+`0.8.0` is the stable visualization/gallery evidence release. It keeps the
+`v0.7.0` 172-symbol public C ABI unchanged while adopting the local
+Matplotlib/NumPy PNG gallery and verifier evidence reviewed during
+`0.8.0-readiness`. The release does not add solver public API, does not
+relabel or regenerate the committed gallery assets, and does not add a default
+CI plotting gate. `0.8.1` is reserved for emergency patch work only.
 
 `0.8.0-alpha` visualization evidence:
 
@@ -74,6 +75,24 @@ local data without copying original Ruckig images as primary evidence.
   commit is green, the next separate decision can be `v0.8.0` stable closeout.
 - No tag, GitHub Release, manual release-random workflow, version bump,
   package publication, or CI plotting gate is created by this readiness audit.
+
+Stable closeout:
+
+- Stabilizes the 13 committed Matplotlib PNG gallery assets and
+  `docs/assets/visualization/manifest.json` as `v0.8.0` documentation evidence
+  while retaining their original `0.8.0-alpha.2` provenance label and hashes.
+- Stabilizes `tools/visualization/generate_gallery.py`,
+  `tools/visualization/verify_gallery.py`, and the optional
+  `tools/visualization/requirements.txt` local plotting environment as
+  maintainership evidence tools.
+- Keeps visualization local-only: no default GitHub Actions plotting or
+  verifier job, no CMake/CTest gate, no copied original image/PDF assets, and
+  no network, cloud, Pro license, or Pro/cloud equivalence claim.
+- Keeps public C ABI unchanged from `v0.7.0`: 172 approved public symbols,
+  public additions `0`, public removals `0`, and unchanged enum/result-code
+  numeric values.
+- ABI artifact paths now use `artifacts/abi/0.8.0` for stable release
+  evidence.
 
 Deferred unless separately accepted:
 

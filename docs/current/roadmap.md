@@ -315,9 +315,11 @@ diagnostics snapshot getter.
   cloud/remote calculation, formal Pro/cloud equivalence claims, and upstream
   baseline upgrades remain deferred unless separately accepted.
 
-## 0.8.0 Design Entry
+## 0.8.0 Visualization Evidence Release
 
-After `v0.7.0`, `main` tracks `0.8.0-design - Unreleased`.
+Published as `v0.8.0`. The release stabilizes the local algorithm
+visualization/gallery evidence line without changing the `v0.7.0` 172-symbol
+public C ABI.
 
 - First priority: local algorithm visualization and trajectory gallery
   evidence.
@@ -332,8 +334,12 @@ After `v0.7.0`, `main` tracks `0.8.0-design - Unreleased`.
   PNG/manifest assets, including optional strict regeneration into ignored
   `out/` artifacts. It is hardening evidence, not a stable closeout.
 - `0.8.0-readiness` records focused local readiness evidence for the current
-  visualization gallery and verifier. If ordinary push CI is green for that
-  evidence commit, the next separate decision can be `v0.8.0` stable closeout.
+  visualization gallery and verifier.
+- Stable closeout adopts the existing 13 PNG assets and
+  `docs/assets/visualization/manifest.json` without relabeling or regenerating
+  tracked gallery files.
+- ABI artifact paths use `artifacts/abi/0.8.0`; public symbol count remains
+  `172`, with public additions `0` and public removals `0`.
 - Generate `ruckig_c`-owned plots from local C/Python prototype data rather
   than copying original Ruckig images as primary project evidence.
 - Original examples `11-13` remain excluded because they demonstrate C++ Eigen
@@ -341,8 +347,23 @@ After `v0.7.0`, `main` tracks `0.8.0-design - Unreleased`.
 - Visualization remains documentation/evidence work, not public C API work.
 - Do not add visualization as a default CI or stable-release gate until a
   separate dependency and artifact policy is accepted.
-- `0.7.1` remains reserved for emergency patches only.
+- `0.8.1` remains reserved for emergency patches only.
 - Formal Python/Rust publication, package-manager recipes, soft interruption,
   cloud/remote calculation, formal Pro/cloud equivalence claims, formal global
   optimality proof, and upstream baseline upgrades remain deferred unless
   separately accepted.
+
+## 0.9.0 Design Entry
+
+After `v0.8.0`, `main` tracks `0.9.0-design - Unreleased`.
+
+- First priority: tracking quality and stability hardening.
+- Default stance: deepen fixed quality cases, deterministic stress, fallback
+  diagnostics, performance evidence, and no-allocation coverage without
+  expanding public C ABI unless a separate API decision is accepted.
+- `0.8.1` is reserved for emergency patch work only; it is not the default
+  post-release route.
+- Visualization v2, optional CI artifacts, package-manager recipes, formal
+  Python/Rust publication, soft interruption, cloud/remote calculation, formal
+  Pro/cloud equivalence claims, formal global optimality proof, and upstream
+  baseline upgrades remain deferred unless separately accepted.

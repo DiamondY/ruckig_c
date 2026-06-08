@@ -49,12 +49,14 @@ Historical rewrite plans and release evidence are retained for traceability.
   expansion. `release/checklists/0.8.0-alpha.3.md` records the local gallery
   verifier hardening evidence. `release/checklists/0.8.0-readiness.md` records
   the focused stable-review readiness audit for the current gallery/verifier
-  evidence.
+  evidence. `release/checklists/0.8.0.md` records the stable visualization
+  evidence release closeout.
 - `release/evidence/verification_report.md` - local and CI verification
   history.
 - `release/evidence/performance_report.md` - performance procedure and release
   benchmark records.
-- `release/notes/` - release notes source material.
+- `release/notes/` - release notes source material, including the stable
+  `0.8.0` visualization/gallery evidence release notes.
 
 ## Design Documents
 

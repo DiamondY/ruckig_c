@@ -1,9 +1,9 @@
 # Algorithm Visualization
 
-This document records the `0.8.0-design` local visualization evidence. The
-gallery is generated from `ruckig_c` public C ABI data through the Python
-`cffi` prototype; it does not copy original Ruckig images, PDFs, or plotter
-scripts as primary project evidence.
+This document records the `v0.8.0` local visualization evidence. The gallery
+is generated from `ruckig_c` public C ABI data through the Python `cffi`
+prototype; it does not copy original Ruckig images, PDFs, or plotter scripts as
+primary project evidence.
 
 ## Status
 
@@ -11,7 +11,9 @@ scripts as primary project evidence.
 `Agg` gallery backed by NumPy arrays sampled from local public C ABI calls.
 `0.8.0-alpha.3` adds a local verifier for the committed PNG/manifest assets.
 `0.8.0-readiness` records focused local readiness evidence for the current
-gallery and verifier. The gallery remains PNG-only and local-only.
+gallery and verifier. `v0.8.0` stabilizes those existing committed assets and
+tools as documentation evidence without relabeling or regenerating the tracked
+PNG files or manifest. The gallery remains PNG-only and local-only.
 
 ```powershell
 cmake --build --preset windows-clang-ninja-shared
@@ -66,10 +68,10 @@ $env:RUCKIG_C_SHARED_LIBRARY=(Resolve-Path out\build\windows-clang-ninja-shared\
 The verifier is a local evidence tool. It is not wired into default GitHub
 Actions, CMake, or CTest.
 
-`docs/release/checklists/0.8.0-readiness.md` records the focused readiness
-audit. If the local focused gates and ordinary push CI are green, the current
-gallery/verifier evidence is ready for a later `v0.8.0` stable closeout
-decision.
+`docs/release/checklists/0.8.0.md` records the stable release closeout. The
+current gallery/verifier evidence is adopted by `v0.8.0`; future visualization
+scope such as optional CI artifacts or additional plot families remains a
+separate decision.
 
 ## Original Example Mapping
 
@@ -133,9 +135,9 @@ decision.
   Matplotlib caches, virtualenv files, PDF, and SVG outputs are not committed.
 - Python `cffi` remains a prototype path used to drive the C ABI; this does
   not publish or stabilize a Python package.
-- No public C API, public symbol, enum value, result code, ABI artifact path,
-  version macro, or release gate changes are introduced by this visualization
-  work.
+- No public C API, public symbol, enum value, result code, or release gate
+  changes are introduced by this visualization work. The `v0.8.0` closeout only
+  updates version metadata and ABI artifact evidence paths.
 - No cloud, Pro license, network image fetching, remote calculation, formal
   Pro/cloud equivalence claim, or formal global optimality claim is used.
 
