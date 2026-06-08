@@ -446,6 +446,12 @@ GitHub Actions CI covers Windows, Linux, and macOS routine checks. The
 `ruckig_c_oracle_random_release` test is intentionally excluded from routine
 CI and is available as a manual release gate.
 
+GitHub CLI release/workflow operation notes are recorded in
+`docs/current/github_operations.md`. On Windows, a sandboxed `gh auth status`
+can report an invalid token if it cannot read the user keyring; confirm from a
+keyring-aware command environment before treating the result as a permissions
+problem.
+
 Local test coverage evidence for the `v0.7.0` line is recorded in
 `docs/current/test_coverage_audit.md`. The release coverage runner writes raw
 LLVM artifacts under `out/coverage/0.7.0/`; those raw artifacts are local

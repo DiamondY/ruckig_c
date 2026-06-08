@@ -19,6 +19,8 @@ Historical rewrite plans and release evidence are retained for traceability.
   gallery evidence and generation policy.
 - `current/packaging.md` - installed CMake, pkg-config, static, DLL, and shared
   install-tree consumer notes.
+- `current/github_operations.md` - GitHub CLI authentication, keyring, workflow,
+  release, and CI evidence operation notes.
 - `current/upstream_baseline_policy.md` - frozen upstream oracle baseline
   policy.
 
