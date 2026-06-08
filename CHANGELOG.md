@@ -7,6 +7,23 @@ priority is Optimized tracking quality and stability deepening: broader fixed
 corpus coverage, stronger trend metrics, deterministic stress, and release
 evidence strategy. `0.6.1` remains reserved for emergency patch work only.
 
+Algorithm visualization planning decision:
+
+- Reviewed the frozen original Ruckig documentation and example visualization
+  assets: `original/ruckig-main/doc/*.png`,
+  `original/ruckig-main/examples/*_trajectory.pdf`, and the original
+  `examples/plotter.py` helper.
+- Decided not to implement trajectory/gallery generation before the stable
+  `v0.7.0` closeout. The closeout should remain limited to the existing
+  readiness-approved 172-symbol ABI, version/tag/release flow, and evidence
+  gates.
+- Deferred `ruckig_c`-generated trajectory/tracking/waypoint plots to a
+  post-`v0.7.0` visualization evidence project. That later project should
+  generate `ruckig_c`-owned images from local C/Python prototype data rather
+  than copying original images as primary project evidence.
+- No plotting dependency, image/PDF artifact, CI job, public C API, public
+  symbol, version macro, or release gate is added by this planning decision.
+
 `0.7.0-readiness` evidence audit:
 
 - Recorded full local release-readiness evidence for a future `v0.7.0` stable

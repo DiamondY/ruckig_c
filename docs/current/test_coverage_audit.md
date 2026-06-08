@@ -184,6 +184,12 @@ Original source: `original/ruckig-main/examples`.
 | `15_tracking_offline` | `examples/c/17_tracking_offline_sequence.c` and `20_tracking_offline_optimized_sequence.c`. | Local tracking evidence |
 | `16_speed` | `ruckig_c_performance_benchmark` and release performance evidence. | Covered |
 
+Original example trajectory PDFs and `examples/plotter.py` are visualization
+assets rather than solver behavior tests. `ruckig_c` does not yet generate
+equivalent project-owned trajectory gallery images. That work is deferred until
+after `v0.7.0` so the stable closeout does not add plotting dependencies,
+generated image/PDF artifacts, or new release gates.
+
 ## Interpretation
 
 The strongest coverage area remains the no-waypoint target solver: fixed oracle

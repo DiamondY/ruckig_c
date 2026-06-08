@@ -308,6 +308,13 @@ After `v0.6.0`, `main` tracks `0.7.0-design - Unreleased`.
   `CHANGELOG.md`, release notes/checklists, and ABI artifact paths from the
   design-line `artifacts/abi/0.7.0-alpha.2` directory to
   `artifacts/abi/0.7.0`.
+- Algorithm visualization and trajectory gallery generation are deferred until
+  after `v0.7.0`. The original Ruckig `doc/` images, example trajectory PDFs,
+  and `examples/plotter.py` are useful references, but `v0.7.0` closeout must
+  not add plotting dependencies, generated images/PDFs, CI jobs, or new release
+  gates. A later visualization evidence project can generate `ruckig_c`-owned
+  plots for no-waypoint trajectories, velocity/stop/minimum-duration cases,
+  local waypoint sections, and Fast/Optimized tracking comparison.
 - Soft interruption, formal Python/Rust publication, package-manager recipes,
   cloud/remote calculation, formal Pro/cloud equivalence claims, and upstream
   baseline upgrades remain deferred unless separately accepted.

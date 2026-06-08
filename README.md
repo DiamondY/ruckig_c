@@ -64,7 +64,11 @@ and alpha.4 hardens targeted solver branch coverage from that audit; both are
 evidence-only and do not create a tag or GitHub Release. The readiness audit
 keeps the same release boundary: `v0.6.0` remains the stable release, the
 project version macros remain `0.6.0`, and a separate stable closeout decision
-is required before `v0.7.0` can be tagged.
+is required before `v0.7.0` can be tagged. Algorithm visualization and
+trajectory gallery generation have been evaluated against the original Ruckig
+`doc/` images and `examples/*_trajectory.pdf` assets, but implementation is
+deferred until after `v0.7.0` so the stable closeout does not gain new plotting
+dependencies, image artifacts, or release gates.
 `v0.4.0` added waypoint-aware C ABI entry points, per-section constraints,
 global position bounds, and a local coupled waypoint optimizer; `v0.4.1`
 deepened waypoint optimizer evidence; `v0.4.2` keeps that public C surface
@@ -87,6 +91,10 @@ Current stable release scope intentionally excludes:
   duration field remains storage/API-surface parity only.
 - Python/Rust binding publication. The Python `cffi` prototype and Rust alpha
   wrapper remain prototype-only and are not installed or published packages.
+- Algorithm visualization and trajectory gallery generation. Future
+  `ruckig_c`-owned plots should be generated locally after `v0.7.0`; no
+  original images are copied as primary project evidence and no Matplotlib or
+  NumPy dependency is added to the stable closeout.
 - Package-manager recipes and new package-manager prototypes are outside the
   active roadmap. Existing CMake install, pkg-config, static/DLL, and shared
   install-tree consumption paths remain the supported integration surface.
