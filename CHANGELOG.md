@@ -58,6 +58,23 @@ local data without copying original Ruckig images as primary evidence.
   no GitHub Release, no manual release-random workflow, no public C API or ABI
   change, and no `original/ruckig-main` change.
 
+`0.8.0-readiness` evidence audit:
+
+- Recorded focused local release-readiness evidence for deciding whether the
+  current visualization gallery and verifier work can enter a later `v0.8.0`
+  stable closeout.
+- Re-ran static/shared builds, static and shared routine CTest, tracking and
+  solver-branch CTest subsets, visualization verifier default and strict
+  regeneration, ABI/export checks, Python prototype smoke, and Rust alpha
+  wrapper smoke.
+- Confirmed `0.8.0-readiness` does not change public C API, public symbols,
+  enum values, result codes, CMake/CTest/CI workflow configuration, gallery
+  assets, ABI artifact path, version macros, or `original/ruckig-main`.
+- Readiness conclusion: if the ordinary push CI for the readiness evidence
+  commit is green, the next separate decision can be `v0.8.0` stable closeout.
+- No tag, GitHub Release, manual release-random workflow, version bump,
+  package publication, or CI plotting gate is created by this readiness audit.
+
 Deferred unless separately accepted:
 
 - Python wheel publication, Rust crate publication, package-manager recipes,

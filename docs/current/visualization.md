@@ -10,7 +10,8 @@ scripts as primary project evidence.
 `0.8.0-alpha.2` replaces the first Pillow-only gallery with a Matplotlib
 `Agg` gallery backed by NumPy arrays sampled from local public C ABI calls.
 `0.8.0-alpha.3` adds a local verifier for the committed PNG/manifest assets.
-The gallery remains PNG-only and local-only.
+`0.8.0-readiness` records focused local readiness evidence for the current
+gallery and verifier. The gallery remains PNG-only and local-only.
 
 ```powershell
 cmake --build --preset windows-clang-ninja-shared
@@ -64,6 +65,11 @@ $env:RUCKIG_C_SHARED_LIBRARY=(Resolve-Path out\build\windows-clang-ninja-shared\
 
 The verifier is a local evidence tool. It is not wired into default GitHub
 Actions, CMake, or CTest.
+
+`docs/release/checklists/0.8.0-readiness.md` records the focused readiness
+audit. If the local focused gates and ordinary push CI are green, the current
+gallery/verifier evidence is ready for a later `v0.8.0` stable closeout
+decision.
 
 ## Original Example Mapping
 

@@ -45,10 +45,9 @@ Implemented and covered by fixed C/oracle tests plus deterministic random oracle
 - `0.7.0-readiness` audit evidence, rerunning the full local
   release-readiness gate set against the current 172-symbol strategy preset
   and diagnostics ABI candidate before stable closeout.
-- `0.8.0-alpha.3` local algorithm visualization evidence, replacing the first
-  Pillow gallery with a Matplotlib/NumPy PNG gallery generated from public C
-  ABI data through the Python `cffi` prototype and adding a local gallery
-  verifier.
+- `0.8.0-readiness` audit evidence, confirming the current local algorithm
+  visualization gallery and verifier are ready for a later `v0.8.0` stable
+  closeout decision if ordinary push CI is green.
 - C examples for position, offline position, online update, per-DoF overrides,
   velocity, stop, minimum duration, waypoints, per-section minimum duration,
   tracking Fast-mode scenarios, and Optimized tracking scenarios.
@@ -68,8 +67,10 @@ original examples `01-10` and `14-16`; examples `11-13` remain excluded because
 they demonstrate C++ Eigen/custom-vector ergonomics rather than C ABI behavior.
 `0.8.0-alpha.3` adds `tools/visualization/verify_gallery.py` so maintainers can
 verify the committed PNG/manifest assets locally, including an optional strict
-regeneration check. These assets are local documentation evidence, not a stable
-release gate and not a Python package publication.
+regeneration check. `0.8.0-readiness` reruns focused local gates around that
+gallery/verifier evidence. These assets are local documentation evidence; the
+readiness audit is not a stable release, version bump, tag, GitHub Release, CI
+plotting gate, or Python package publication.
 `v0.4.0` added waypoint-aware C ABI entry points, per-section constraints,
 global position bounds, and a local coupled waypoint optimizer; `v0.4.1`
 deepened waypoint optimizer evidence; `v0.4.2` keeps that public C surface
@@ -92,10 +93,10 @@ Current stable release scope intentionally excludes:
   duration field remains storage/API-surface parity only.
 - Python/Rust binding publication. The Python `cffi` prototype and Rust alpha
   wrapper remain prototype-only and are not installed or published packages.
-- Algorithm visualization as a release gate. `0.8.0-alpha.3` adds local
-  `ruckig_c`-owned Matplotlib PNG gallery evidence and a local verifier, but no
-  original images or PDFs are copied as primary project evidence and no
-  plotting job is added to default CI.
+- Algorithm visualization as a release gate. `0.8.0-readiness` confirms the
+  local `ruckig_c`-owned Matplotlib PNG gallery and verifier evidence is ready
+  for stable review, but no original images or PDFs are copied as primary
+  project evidence and no plotting job is added to default CI.
 - Package-manager recipes and new package-manager prototypes are outside the
   active roadmap. Existing CMake install, pkg-config, static/DLL, and shared
   install-tree consumption paths remain the supported integration surface.
@@ -474,3 +475,8 @@ committed assets:
 $env:RUCKIG_C_SHARED_LIBRARY=(Resolve-Path out\build\windows-clang-ninja-shared\ruckig_c.dll).Path
 .\_local\visualization-venv\Scripts\python.exe tools\visualization\verify_gallery.py --output docs\assets\visualization --strict-regenerate
 ```
+
+`docs/release/checklists/0.8.0-readiness.md` records the focused readiness
+audit for the visualization gallery and verifier. If its local gates and
+ordinary push CI are green, the next separate decision can be `v0.8.0` stable
+closeout.

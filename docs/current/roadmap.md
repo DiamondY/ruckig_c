@@ -331,6 +331,9 @@ After `v0.7.0`, `main` tracks `0.8.0-design - Unreleased`.
 - `0.8.0-alpha.3` adds local visualization verifier evidence for the committed
   PNG/manifest assets, including optional strict regeneration into ignored
   `out/` artifacts. It is hardening evidence, not a stable closeout.
+- `0.8.0-readiness` records focused local readiness evidence for the current
+  visualization gallery and verifier. If ordinary push CI is green for that
+  evidence commit, the next separate decision can be `v0.8.0` stable closeout.
 - Generate `ruckig_c`-owned plots from local C/Python prototype data rather
   than copying original Ruckig images as primary project evidence.
 - Original examples `11-13` remain excluded because they demonstrate C++ Eigen
