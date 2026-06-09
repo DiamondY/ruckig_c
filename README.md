@@ -67,6 +67,9 @@ Implemented and covered by fixed C/oracle tests plus deterministic random oracle
 - `0.10.0-design - Unreleased` is the current `main` line after `v0.9.0`;
   first priority is visualization v2, optional CI visualization artifacts, and
   richer local plots without default public C ABI expansion.
+- `0.10.0-alpha` visualization v2 local gallery evidence, replacing the
+  current `main` gallery with 30 project-owned `1400x900` PNGs and a strict
+  local verifier while keeping the `v0.9.0` stable C ABI unchanged.
 - C examples for position, offline position, online update, per-DoF overrides,
   velocity, stop, minimum duration, waypoints, per-section minimum duration,
   tracking Fast-mode scenarios, and Optimized tracking scenarios.
@@ -77,17 +80,17 @@ stable release. It keeps the `v0.8.0` 172-symbol public C ABI unchanged and
 stabilizes the tracking quality/stability evidence reviewed during
 `0.9.0-readiness`. Current `main` is `0.10.0-design - Unreleased`, with
 visualization v2, optional CI visualization artifacts, and richer local plots
-as the first priority. `v0.8.0` remains the visualization/gallery evidence release:
-`tools/visualization/generate_gallery.py` uses Matplotlib
-`Agg`, NumPy, and the Python `cffi` prototype to generate project-owned PNG
-assets under `docs/assets/visualization/`. The gallery covers local C ABI
-equivalents of original examples `01-10` and `14-16`; examples `11-13` remain
-excluded because they demonstrate C++ Eigen/custom-vector ergonomics rather
-than C ABI behavior. `tools/visualization/verify_gallery.py` verifies the
-committed PNG/manifest assets locally, including an optional strict
-regeneration check. The existing 13 PNG assets and manifest retain their
-`0.8.0-alpha.2` provenance label and hashes; `v0.8.0` adopts them without
-relabeling or regenerating tracked files. The `0.9.0` tracking evidence line
+as the first priority. `0.10.0-alpha` replaces the current `main`
+visualization gallery with a 30-PNG Matplotlib `Agg` and NumPy v2 gallery under
+`docs/assets/visualization/`. The gallery covers local C ABI equivalents of
+original examples `01-10` and `14-16`, plus tracking diagnostics, waypoint
+diagnostics, trajectory anatomy, and cross-topic summary plots; examples
+`11-13` remain excluded because they demonstrate C++ Eigen/custom-vector
+ergonomics rather than C ABI behavior. `tools/visualization/verify_gallery.py`
+verifies the committed `1400x900` PNG/manifest assets locally, including an
+optional strict regeneration check. The previous v1 gallery provenance remains
+available through the `v0.9.0` tag rather than being duplicated on `main`.
+The `0.9.0` tracking evidence line
 starts with `docs/current/tracking_quality_audit.md` and a deterministic
 `--tracking-random-audit` C test-runner selector so fallback-heavy Optimized
 tracking behavior can be classified before evaluator tuning. `0.9.0-alpha.2`

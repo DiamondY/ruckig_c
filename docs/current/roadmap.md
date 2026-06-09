@@ -10,6 +10,11 @@ tracking quality/stability evidence release.
 
 - First priority: visualization v2, optional CI visualization artifacts, and
   richer local plots.
+- `0.10.0-alpha` adds the first Visualization v2 evidence slice: a local-only
+  30-PNG Matplotlib `Agg` gallery, `1400x900` PNG assets, deterministic
+  manifest, and hybrid verifier with optional strict regeneration.
+- The alpha replaces the current `main` gallery assets; the previous v1
+  provenance remains available through the `v0.9.0` tag.
 - Keep `v0.9.0` as the current stable release.
 - Keep the `v0.8.0` 172-symbol public C ABI baseline unless a separate public
   API decision is accepted.

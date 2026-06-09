@@ -13,6 +13,24 @@ First priority:
 - Richer local plots and gallery evidence built from the public C ABI and
   prototype tooling.
 
+`0.10.0-alpha` visualization v2 gallery evidence:
+
+- Replaces the current `main` visualization gallery with a 30-PNG Matplotlib
+  `Agg` and NumPy gallery under `docs/assets/visualization/`.
+- Expands the gallery from the original example mapping set to tracking
+  diagnostics, waypoint diagnostics, trajectory anatomy, and cross-topic
+  summary plots.
+- Updates the manifest label to `0.10.0-alpha visualization v2 evidence`,
+  records deterministic categories, metrics, byte counts, and SHA-256 hashes,
+  and keeps local paths/timestamps out of committed evidence.
+- Updates the local verifier for the canonical 30 PNG files, `1400x900`
+  dimensions, boundary flags, and optional strict regeneration.
+- Keeps the work local-only and PNG-only: no public C ABI expansion, no default
+  CI plotting gate, no CI artifact upload, no package publication, and no
+  Pro/cloud equivalence claim.
+- The previous v1 gallery provenance remains available through the `v0.9.0`
+  tag rather than being duplicated on `main`.
+
 Release boundary:
 
 - `v0.9.0` remains the current stable release.

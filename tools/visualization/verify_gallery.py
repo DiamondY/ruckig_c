@@ -17,8 +17,8 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_OUTPUT = REPO_ROOT / "docs" / "assets" / "visualization"
 GENERATOR = REPO_ROOT / "tools" / "visualization" / "generate_gallery.py"
 
-EXPECTED_SIZE = (1100, 720)
-EXPECTED_LABEL = "0.8.0-alpha.2 matplotlib visualization evidence"
+EXPECTED_SIZE = (1400, 900)
+EXPECTED_LABEL = "0.10.0-alpha visualization v2 evidence"
 EXPECTED_RENDERER = "Matplotlib Agg"
 PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
 
@@ -36,6 +36,23 @@ EXPECTED_IMAGES = [
     "14_tracking_online_local.png",
     "15_tracking_offline_local.png",
     "16_speed_brake_phases.png",
+    "17_tracking_strategy_quality.png",
+    "18_tracking_candidate_families.png",
+    "19_tracking_fallback_diagnostics.png",
+    "20_tracking_near_tie_acceptance.png",
+    "21_tracking_signal_response.png",
+    "22_waypoint_sections_timeline.png",
+    "23_waypoint_per_section_duration.png",
+    "24_waypoint_constraint_profiles.png",
+    "25_waypoint_position_bounds.png",
+    "26_waypoint_online_section_changes.png",
+    "27_trajectory_jerk_profile.png",
+    "28_trajectory_extrema.png",
+    "29_trajectory_phase_spans.png",
+    "30_trajectory_synchronization.png",
+    "31_gallery_coverage_matrix.png",
+    "32_gallery_metrics_summary.png",
+    "33_gallery_boundary_summary.png",
 ]
 
 EXPECTED_MAPPING = {
@@ -52,6 +69,31 @@ EXPECTED_MAPPING = {
     "14_tracking_online_local.png": ["14_tracking"],
     "15_tracking_offline_local.png": ["15_tracking_offline"],
     "16_speed_brake_phases.png": ["16_speed"],
+    "17_tracking_strategy_quality.png": [],
+    "18_tracking_candidate_families.png": [],
+    "19_tracking_fallback_diagnostics.png": [],
+    "20_tracking_near_tie_acceptance.png": [],
+    "21_tracking_signal_response.png": [],
+    "22_waypoint_sections_timeline.png": [],
+    "23_waypoint_per_section_duration.png": [],
+    "24_waypoint_constraint_profiles.png": [],
+    "25_waypoint_position_bounds.png": [],
+    "26_waypoint_online_section_changes.png": [],
+    "27_trajectory_jerk_profile.png": ["01_position"],
+    "28_trajectory_extrema.png": ["01_position"],
+    "29_trajectory_phase_spans.png": ["01_position"],
+    "30_trajectory_synchronization.png": ["01_position"],
+    "31_gallery_coverage_matrix.png": [],
+    "32_gallery_metrics_summary.png": [],
+    "33_gallery_boundary_summary.png": [],
+}
+
+EXPECTED_CATEGORIES = {
+    **{file_name: "original_mapping" for file_name in EXPECTED_IMAGES[:13]},
+    **{file_name: "tracking" for file_name in EXPECTED_IMAGES[13:18]},
+    **{file_name: "waypoint" for file_name in EXPECTED_IMAGES[18:23]},
+    **{file_name: "trajectory" for file_name in EXPECTED_IMAGES[23:27]},
+    **{file_name: "summary" for file_name in EXPECTED_IMAGES[27:30]},
 }
 
 EXPECTED_EXCLUSIONS = {
@@ -216,10 +258,17 @@ def validate_image_entry(output: Path, image: dict[str, Any]) -> None:
 
     if image.get("original_examples") != EXPECTED_MAPPING[file_name]:
         fail(f"{file_name} original_examples mismatch: {image.get('original_examples')!r}")
+    if image.get("category") != EXPECTED_CATEGORIES[file_name]:
+        fail(f"{file_name} category mismatch: {image.get('category')!r}")
 
     metrics = require_dict(image.get("metrics"), f"{file_name}.metrics")
     dofs = metrics.get("dofs")
-    if file_name != "16_speed_brake_phases.png" and file_name not in TRACKING_IMAGES and dofs != 3:
+    if (
+        file_name in EXPECTED_IMAGES[:13]
+        and file_name != "16_speed_brake_phases.png"
+        and file_name not in TRACKING_IMAGES
+        and dofs != 3
+    ):
         fail(f"{file_name} expected dofs metric 3, got {dofs!r}")
 
     if file_name in PRO_CLOUD_BOUNDARY_IMAGES and metrics.get("pro_cloud_equivalence_claim") is not False:
@@ -237,6 +286,24 @@ def validate_image_entry(output: Path, image: dict[str, Any]) -> None:
         for key in ["candidate_count", "fallback_step_count", "optimized_step_count", "status", "strategy"]:
             if key not in metrics:
                 fail(f"{file_name} missing tracking metric {key}")
+
+    category = EXPECTED_CATEGORIES[file_name]
+    if category == "tracking" and metrics.get("uses_public_tracking_diagnostics") is not True and file_name != "20_tracking_near_tie_acceptance.png":
+        fail(f"{file_name} must record public tracking diagnostics usage")
+    if category == "waypoint" and metrics.get("pro_cloud_equivalence_claim") is True:
+        fail(f"{file_name} must not claim Pro/cloud equivalence")
+    if category == "summary":
+        if file_name == "31_gallery_coverage_matrix.png" and metrics.get("public_c_abi_only") is not True:
+            fail("31_gallery_coverage_matrix.png must record public_c_abi_only=true")
+        if file_name == "32_gallery_metrics_summary.png" and metrics.get("png_count") != len(EXPECTED_IMAGES):
+            fail("32_gallery_metrics_summary.png must record png_count=30")
+        if file_name == "33_gallery_boundary_summary.png":
+            if metrics.get("public_c_abi_unchanged") is not True:
+                fail("33_gallery_boundary_summary.png must record public_c_abi_unchanged=true")
+            if metrics.get("default_ci_gate") is not False:
+                fail("33_gallery_boundary_summary.png must record default_ci_gate=false")
+            if metrics.get("v1_provenance_tag") != "v0.9.0":
+                fail("33_gallery_boundary_summary.png must record v1_provenance_tag=v0.9.0")
 
 
 def validate_committed_gallery(output: Path) -> dict[str, Any]:
