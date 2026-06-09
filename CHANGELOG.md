@@ -1,5 +1,28 @@
 # Changelog
 
+## 0.10.0-design - Unreleased
+
+Current `main` is open for `0.10.0-design` work after the published `v0.9.0`
+stable tracking quality/stability evidence release.
+
+First priority:
+
+- Visualization v2 planning and implementation.
+- Optional CI visualization artifacts, without making plotting/verifier jobs a
+  default release gate unless separately accepted.
+- Richer local plots and gallery evidence built from the public C ABI and
+  prototype tooling.
+
+Release boundary:
+
+- `v0.9.0` remains the current stable release.
+- Public C ABI expansion is not the default goal for `0.10.0-design`.
+- `0.9.1` remains reserved for emergency patch fixes only.
+- Package-manager recipes, formal Python/Rust publication, cloud/remote
+  calculation, Pro/cloud equivalence claims, formal global optimality proof,
+  soft interruption checkpoints, and upstream baseline upgrades remain deferred
+  unless separately accepted.
+
 ## 0.9.0 - 2026-06-09
 
 `0.9.0` is the stable tracking quality and stability evidence release. It

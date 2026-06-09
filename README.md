@@ -64,6 +64,9 @@ Implemented and covered by fixed C/oracle tests plus deterministic random oracle
   deterministic tracking audit, tuned evaluator hardening, and fixed stability
   regression evidence while keeping the `v0.8.0` 172-symbol public C ABI
   unchanged.
+- `0.10.0-design - Unreleased` is the current `main` line after `v0.9.0`;
+  first priority is visualization v2, optional CI visualization artifacts, and
+  richer local plots without default public C ABI expansion.
 - C examples for position, offline position, online update, per-DoF overrides,
   velocity, stop, minimum duration, waypoints, per-section minimum duration,
   tracking Fast-mode scenarios, and Optimized tracking scenarios.
@@ -72,7 +75,9 @@ Release-readiness evidence is tracked under `docs/release/`; see
 `docs/index.md` for the organized documentation map. `v0.9.0` is the current
 stable release. It keeps the `v0.8.0` 172-symbol public C ABI unchanged and
 stabilizes the tracking quality/stability evidence reviewed during
-`0.9.0-readiness`. `v0.8.0` remains the visualization/gallery evidence release:
+`0.9.0-readiness`. Current `main` is `0.10.0-design - Unreleased`, with
+visualization v2, optional CI visualization artifacts, and richer local plots
+as the first priority. `v0.8.0` remains the visualization/gallery evidence release:
 `tools/visualization/generate_gallery.py` uses Matplotlib
 `Agg`, NumPy, and the Python `cffi` prototype to generate project-owned PNG
 assets under `docs/assets/visualization/`. The gallery covers local C ABI

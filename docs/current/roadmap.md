@@ -3,6 +3,24 @@
 This roadmap keeps shipped release scope locked while preserving concrete
 follow-up work for stability and future feature planning.
 
+## 0.10.0 Design Line
+
+Current `main` is `0.10.0-design - Unreleased` after the published `v0.9.0`
+tracking quality/stability evidence release.
+
+- First priority: visualization v2, optional CI visualization artifacts, and
+  richer local plots.
+- Keep `v0.9.0` as the current stable release.
+- Keep the `v0.8.0` 172-symbol public C ABI baseline unless a separate public
+  API decision is accepted.
+- Do not promote plotting or verifier work into a default release/CI gate
+  without a separate dependency and artifact policy decision.
+- `0.9.1` remains reserved for emergency patch fixes only.
+- Package-manager recipes, formal Python/Rust publication, soft interruption,
+  cloud/remote calculation, formal Pro/cloud equivalence claims, formal global
+  optimality proof, and upstream baseline upgrades remain deferred unless
+  separately accepted.
+
 ## 0.1.x Stability Queue
 
 - Done for `0.1.1`: fixed regression cases for 3 DoF high-frequency online

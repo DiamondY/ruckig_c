@@ -7,7 +7,8 @@ Historical rewrite plans and release evidence are retained for traceability.
 ## Current Maintainer Entry Points
 
 - `current/roadmap.md` - shipped scope, maintenance queues, current stable
-  release scope, and future design boundaries.
+  release scope, the current `0.10.0-design` line, and future design
+  boundaries.
 - `current/api_compatibility.md` - patch-release API/ABI policy and
   exported-symbol review.
 - `current/api_diagnostics.md` - C API validation and diagnostics behavior.
@@ -72,6 +73,10 @@ Historical rewrite plans and release evidence are retained for traceability.
 - `release/notes/` - release notes source material, including the stable
   `0.8.0` visualization/gallery evidence release notes and the stable `0.9.0`
   tracking quality/stability evidence release notes.
+
+Current `main` is `0.10.0-design - Unreleased`; the first priority is
+visualization v2, optional CI visualization artifacts, and richer local plots.
+`v0.9.0` remains the current stable release.
 
 ## Design Documents
 
