@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.9.0-design - Unreleased
+
+`main` now tracks `0.9.0-design - Unreleased` after the published `v0.8.0`
+visualization/gallery evidence release.
+
+Planned first priority:
+
+- Tracking quality and stability hardening without default public C ABI
+  expansion.
+- Deeper fixed quality cases, deterministic stress evidence, fallback
+  diagnostics review, performance evidence, and no-allocation coverage for the
+  existing tracking surface.
+
+Deferred unless separately accepted:
+
+- Visualization v2, optional CI gallery artifacts, Python wheel publication,
+  Rust crate publication, package-manager recipes, soft interruption
+  checkpoints, cloud/remote calculation, formal Pro/cloud equivalence claims,
+  formal global optimality proof, and upstream baseline upgrade.
+- `0.8.1` remains reserved for emergency patch work only.
+
 ## 0.8.0 - 2026-06-09
 
 `0.8.0` is the stable visualization/gallery evidence release. It keeps the

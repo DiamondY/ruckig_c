@@ -65,8 +65,8 @@ than C ABI behavior. `tools/visualization/verify_gallery.py` verifies the
 committed PNG/manifest assets locally, including an optional strict
 regeneration check. The existing 13 PNG assets and manifest retain their
 `0.8.0-alpha.2` provenance label and hashes; `v0.8.0` adopts them without
-relabeling or regenerating tracked files. The `main` branch moves to
-`0.9.0-design - Unreleased` after the release, focused first on tracking
+relabeling or regenerating tracked files. The `main` branch now tracks
+`0.9.0-design - Unreleased`, focused first on tracking
 quality and stability hardening. `0.8.1` is reserved for emergency patch work
 only.
 `v0.4.0` added waypoint-aware C ABI entry points, per-section constraints,

@@ -6,8 +6,8 @@ Historical rewrite plans and release evidence are retained for traceability.
 
 ## Current Maintainer Entry Points
 
-- `current/roadmap.md` - shipped scope, maintenance queues, and future design
-  boundaries.
+- `current/roadmap.md` - shipped scope, maintenance queues, current
+  `0.9.0-design` priorities, and future design boundaries.
 - `current/api_compatibility.md` - patch-release API/ABI policy and
   exported-symbol review.
 - `current/api_diagnostics.md` - C API validation and diagnostics behavior.

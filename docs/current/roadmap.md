@@ -355,7 +355,7 @@ public C ABI.
 
 ## 0.9.0 Design Entry
 
-After `v0.8.0`, `main` tracks `0.9.0-design - Unreleased`.
+After `v0.8.0`, `main` now tracks `0.9.0-design - Unreleased`.
 
 - First priority: tracking quality and stability hardening.
 - Default stance: deepen fixed quality cases, deterministic stress, fallback
