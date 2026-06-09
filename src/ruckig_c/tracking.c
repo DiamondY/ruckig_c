@@ -7,6 +7,8 @@
 #define RUCKIG_TRACKING_DEFAULT_OPTIMIZED_CANDIDATES 16u
 #define RUCKIG_TRACKING_MAX_OPTIMIZED_CANDIDATES 128u
 #define RUCKIG_TRACKING_SCORE_EPSILON 1e-12
+#define RUCKIG_TRACKING_FAMILY_SCORE_RATIO 0.998
+#define RUCKIG_TRACKING_AGGRESSIVE_NEAR_TIE_RATIO 1.01
 
 typedef struct tracking_strategy_config {
     ruckig_tracking_optimized_strategy_t strategy;
@@ -17,6 +19,8 @@ typedef struct tracking_strategy_config {
     double terminal_weight;
     double horizon_weight_step;
     double acceptance_ratio;
+    double candidate_family_score_ratio;
+    double near_tie_ratio;
     bool use_terminal_blends;
     bool use_derivative_damping;
     bool use_lead_lag_horizons;
@@ -41,6 +45,8 @@ static const tracking_strategy_config_t tracking_strategy_configs[] = {
         4.0,
         1.0,
         1.0,
+        RUCKIG_TRACKING_FAMILY_SCORE_RATIO,
+        1.0,
         true,
         true,
         false
@@ -53,6 +59,8 @@ static const tracking_strategy_config_t tracking_strategy_configs[] = {
         0.00008,
         5.0,
         1.25,
+        1.0,
+        RUCKIG_TRACKING_FAMILY_SCORE_RATIO,
         1.0,
         true,
         true,
@@ -67,6 +75,8 @@ static const tracking_strategy_config_t tracking_strategy_configs[] = {
         8.0,
         1.5,
         1.0,
+        0.9975,
+        RUCKIG_TRACKING_AGGRESSIVE_NEAR_TIE_RATIO,
         true,
         true,
         true
@@ -100,11 +110,21 @@ static void tracking_reset_diagnostics(ruckig_tracking_t* tracking) {
         return;
     }
     memset(&tracking->diagnostics, 0, sizeof(tracking->diagnostics));
+    memset(tracking->audit_family_attempted, 0, sizeof(tracking->audit_family_attempted));
+    memset(tracking->audit_family_valid, 0, sizeof(tracking->audit_family_valid));
+    memset(tracking->audit_family_strict_improved, 0, sizeof(tracking->audit_family_strict_improved));
+    memset(tracking->audit_family_near_tie_accepted, 0, sizeof(tracking->audit_family_near_tie_accepted));
+    memset(tracking->audit_family_selected, 0, sizeof(tracking->audit_family_selected));
     tracking->diagnostics.calculation_status = RUCKIG_TRACKING_CALCULATION_NONE;
     tracking->diagnostics.mode = tracking->mode;
     tracking->diagnostics.optimized_strategy = tracking->optimized_strategy;
     tracking->last_calculation_status = RUCKIG_TRACKING_CALCULATION_NONE;
     tracking->last_candidate_count = 0;
+    tracking->audit_last_candidate_family = (size_t)TRACKING_CANDIDATE_FAST;
+    tracking->audit_best_candidate_family = (size_t)TRACKING_CANDIDATE_FAST;
+    tracking->audit_best_candidate_near_tie = false;
+    tracking->audit_strict_improved_count = 0;
+    tracking->audit_near_tie_accepted_count = 0;
 }
 
 static void tracking_sync_legacy_diagnostics(ruckig_tracking_t* tracking) {
@@ -165,6 +185,10 @@ static void tracking_note_candidate_family(
         return;
     }
     ++tracking->diagnostics.candidate_count;
+    tracking->audit_last_candidate_family = (size_t)family;
+    if ((size_t)family < RUCKIG_TRACKING_AUDIT_FAMILY_COUNT) {
+        ++tracking->audit_family_attempted[(size_t)family];
+    }
     switch (family) {
     case TRACKING_CANDIDATE_FAST:
         ++tracking->diagnostics.fast_candidate_count;
@@ -191,6 +215,9 @@ static void tracking_note_candidate_family(
 static void tracking_note_valid_candidate(ruckig_tracking_t* tracking) {
     if (tracking) {
         ++tracking->diagnostics.valid_candidate_count;
+        if (tracking->audit_last_candidate_family < RUCKIG_TRACKING_AUDIT_FAMILY_COUNT) {
+            ++tracking->audit_family_valid[tracking->audit_last_candidate_family];
+        }
     }
 }
 
@@ -793,14 +820,16 @@ static ruckig_result_t score_current_tracking_candidate(
     const double* target_velocity,
     const double* target_acceleration,
     size_t target_count,
-    double* score
+    double* score,
+    double* terminal_position_error
 ) {
     size_t sample;
     ruckig_result_t result;
     double value = 0.0;
-    if (!score || target_count == 0) {
+    if (!score || !terminal_position_error || target_count == 0) {
         return RUCKIG_ERROR_INVALID_INPUT;
     }
+    *terminal_position_error = 0.0;
     result = ruckig_calculate(tracking->otg, tracking->work_input, tracking->work_output->trajectory);
     if (result != RUCKIG_WORKING) {
         return result;
@@ -842,6 +871,9 @@ static ruckig_result_t score_current_tracking_candidate(
                     + config->acceleration_weight * acceleration_error * acceleration_error
                 );
                 value += weight * config->jerk_weight * jerk * jerk;
+                if (sample + 1 == target_count) {
+                    *terminal_position_error += position_error * position_error;
+                }
             }
         }
     }
@@ -857,10 +889,14 @@ static ruckig_result_t try_tracking_candidate(
     const double* target_velocity,
     const double* target_acceleration,
     size_t target_count,
+    double fast_score,
+    double fast_terminal_position_error,
     double* best_score,
     bool* improved
 ) {
+    double raw_score = DBL_MAX;
     double score = DBL_MAX;
+    double terminal_position_error = DBL_MAX;
     ruckig_result_t result;
     if (tracking->last_candidate_count >= tracking->max_optimized_candidates) {
         tracking_note_budget_exhausted(tracking);
@@ -875,16 +911,37 @@ static ruckig_result_t try_tracking_candidate(
         target_velocity,
         target_acceleration,
         target_count,
-        &score
+        &raw_score,
+        &terminal_position_error
     );
     if (result != RUCKIG_WORKING) {
         tracking_note_rejected_candidate(tracking);
         return RUCKIG_WORKING;
     }
     tracking_note_valid_candidate(tracking);
+    score = raw_score * (family == TRACKING_CANDIDATE_FAST ? 1.0 : config->candidate_family_score_ratio);
     if (score + RUCKIG_TRACKING_SCORE_EPSILON < *best_score * config->acceptance_ratio) {
         *best_score = score;
         *improved = true;
+        if ((size_t)family < RUCKIG_TRACKING_AUDIT_FAMILY_COUNT) {
+            ++tracking->audit_family_strict_improved[(size_t)family];
+        }
+        ++tracking->audit_strict_improved_count;
+        tracking->audit_best_candidate_family = (size_t)family;
+        tracking->audit_best_candidate_near_tie = false;
+        copy_work_input_target_to_best(tracking);
+    } else if (family != TRACKING_CANDIDATE_FAST
+        && config->near_tie_ratio > 1.0
+        && raw_score <= fast_score * config->near_tie_ratio
+        && terminal_position_error <= 0.5 * fast_terminal_position_error) {
+        *best_score = score;
+        *improved = true;
+        if ((size_t)family < RUCKIG_TRACKING_AUDIT_FAMILY_COUNT) {
+            ++tracking->audit_family_near_tie_accepted[(size_t)family];
+        }
+        ++tracking->audit_near_tie_accepted_count;
+        tracking->audit_best_candidate_family = (size_t)family;
+        tracking->audit_best_candidate_near_tie = true;
         copy_work_input_target_to_best(tracking);
     }
     return RUCKIG_WORKING;
@@ -906,6 +963,8 @@ static ruckig_result_t try_tracking_prediction_candidate(
     const double* target_velocity,
     const double* target_acceleration,
     size_t target_count,
+    double fast_score,
+    double fast_terminal_position_error,
     double* best_score,
     bool* improved
 ) {
@@ -932,6 +991,8 @@ static ruckig_result_t try_tracking_prediction_candidate(
         target_velocity,
         target_acceleration,
         target_count,
+        fast_score,
+        fast_terminal_position_error,
         best_score,
         improved
     );
@@ -948,6 +1009,7 @@ static ruckig_result_t evaluate_optimized_tracking(
 ) {
     size_t sample;
     double fast_score = DBL_MAX;
+    double fast_terminal_position_error = DBL_MAX;
     double best_score = DBL_MAX;
     const tracking_strategy_config_t* config = tracking_strategy_config(tracking->optimized_strategy);
     bool improved = false;
@@ -987,7 +1049,8 @@ static ruckig_result_t evaluate_optimized_tracking(
         target_velocity,
         target_acceleration,
         window_count,
-        &fast_score
+        &fast_score,
+        &fast_terminal_position_error
     );
     if (result != RUCKIG_WORKING) {
         tracking_note_rejected_candidate(tracking);
@@ -1014,6 +1077,8 @@ static ruckig_result_t evaluate_optimized_tracking(
             target_velocity,
             target_acceleration,
             window_count,
+            fast_score,
+            fast_terminal_position_error,
             &best_score,
             &improved
         );
@@ -1035,6 +1100,8 @@ static ruckig_result_t evaluate_optimized_tracking(
             target_velocity,
             target_acceleration,
             window_count,
+            fast_score,
+            fast_terminal_position_error,
             &best_score,
             &improved
         );
@@ -1064,6 +1131,8 @@ static ruckig_result_t evaluate_optimized_tracking(
                 target_velocity,
                 target_acceleration,
                 window_count,
+                fast_score,
+                fast_terminal_position_error,
                 &best_score,
                 &improved
             );
@@ -1109,6 +1178,8 @@ static ruckig_result_t evaluate_optimized_tracking(
                 target_velocity,
                 target_acceleration,
                 window_count,
+                fast_score,
+                fast_terminal_position_error,
                 &best_score,
                 &improved
             );
@@ -1142,6 +1213,8 @@ static ruckig_result_t evaluate_optimized_tracking(
                 target_velocity,
                 target_acceleration,
                 window_count,
+                fast_score,
+                fast_terminal_position_error,
                 &best_score,
                 &improved
             );
@@ -1152,6 +1225,9 @@ static ruckig_result_t evaluate_optimized_tracking(
     }
 
     copy_best_to_work_input(tracking);
+    if (tracking->audit_best_candidate_family < RUCKIG_TRACKING_AUDIT_FAMILY_COUNT) {
+        ++tracking->audit_family_selected[tracking->audit_best_candidate_family];
+    }
     tracking->diagnostics.best_score = best_score;
     tracking_finalize_score_diagnostics(tracking);
     return run_prepared_tracking_update(

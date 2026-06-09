@@ -10,6 +10,8 @@
 #include "ruckig_c/block.h"
 #include "ruckig_c/profile.h"
 
+#define RUCKIG_TRACKING_AUDIT_FAMILY_COUNT 6u
+
 struct ruckig_trajectory {
     size_t dofs;
     size_t max_number_of_waypoints;
@@ -149,6 +151,16 @@ struct ruckig_tracking {
     ruckig_tracking_calculation_status_t last_calculation_status;
     size_t last_candidate_count;
     ruckig_tracking_diagnostics_t diagnostics;
+    size_t audit_family_attempted[RUCKIG_TRACKING_AUDIT_FAMILY_COUNT];
+    size_t audit_family_valid[RUCKIG_TRACKING_AUDIT_FAMILY_COUNT];
+    size_t audit_family_strict_improved[RUCKIG_TRACKING_AUDIT_FAMILY_COUNT];
+    size_t audit_family_near_tie_accepted[RUCKIG_TRACKING_AUDIT_FAMILY_COUNT];
+    size_t audit_family_selected[RUCKIG_TRACKING_AUDIT_FAMILY_COUNT];
+    size_t audit_last_candidate_family;
+    size_t audit_best_candidate_family;
+    bool audit_best_candidate_near_tie;
+    size_t audit_strict_improved_count;
+    size_t audit_near_tie_accepted_count;
     double* optimized_candidate_position;
     double* optimized_candidate_velocity;
     double* optimized_candidate_acceleration;

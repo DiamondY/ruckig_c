@@ -17,6 +17,8 @@ Historical rewrite plans and release evidence are retained for traceability.
   test/example behavior mapping.
 - `current/tracking_quality_audit.md` - deterministic Optimized tracking
   fallback, diagnostics, and random-audit baseline evidence.
+- `current/tracking_quality_hardening.md` - tuned Optimized tracking evaluator
+  quality thresholds, private attribution, and alpha.2 hardening evidence.
 - `current/visualization.md` - locally generated algorithm visualization
   gallery evidence and generation policy.
 - `current/packaging.md` - installed CMake, pkg-config, static, DLL, and shared
@@ -53,7 +55,9 @@ Historical rewrite plans and release evidence are retained for traceability.
   the focused stable-review readiness audit for the current gallery/verifier
   evidence. `release/checklists/0.8.0.md` records the stable visualization
   evidence release closeout. `release/checklists/0.9.0-alpha.md` records the
-  first `0.9.0-design` tracking quality baseline evidence.
+  first `0.9.0-design` tracking quality baseline evidence, and
+  `release/checklists/0.9.0-alpha.2.md` records the tuned evaluator hardening
+  evidence.
 - `release/evidence/verification_report.md` - local and CI verification
   history.
 - `release/evidence/performance_report.md` - performance procedure and release

@@ -1,8 +1,10 @@
 # Tracking Quality Audit
 
 This document records the `0.9.0-alpha` tracking quality baseline evidence on
-`0.9.0-design - Unreleased`. The goal is to make Optimized tracking fallback
-and diagnostics behavior auditable before any later evaluator tuning.
+`0.9.0-design - Unreleased`. The goal was to make Optimized tracking fallback
+and diagnostics behavior auditable before later evaluator tuning. The tuning
+follow-up is recorded separately in
+`docs/current/tracking_quality_hardening.md`.
 
 ## Status
 
@@ -87,9 +89,9 @@ counts. They intentionally do not require a quality improvement over Fast.
 
 ## Deferred
 
-- Optimized evaluator tuning, scoring changes, candidate-family changes, and
-  acceptance-policy changes are deferred to a later `0.9.0-alpha.2` or another
-  accepted follow-up.
+- Optimized evaluator tuning, scoring changes, candidate-family attribution,
+  and acceptance-policy changes are handled by `0.9.0-alpha.2` in
+  `docs/current/tracking_quality_hardening.md`.
 - No public C API or ABI change is part of this baseline.
 - No Pro/cloud equivalence, package publication, visualization v2, or upstream
   baseline upgrade is part of this evidence.

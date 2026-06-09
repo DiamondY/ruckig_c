@@ -33,6 +33,25 @@ Planned first priority:
   evidence in `docs/current/tracking_quality_audit.md` and
   `docs/release/checklists/0.9.0-alpha.md`.
 
+`0.9.0-alpha.2` tracking Optimized evaluator quality hardening evidence:
+
+- Tuned the bounded local Optimized tracking evaluator after the alpha baseline
+  audit, without adding public C API, public symbols, enum values, or
+  result-code values.
+- Added private candidate-family attribution counters on the opaque tracking
+  handle for internal evidence only; these counters are not exported and do not
+  enter the public diagnostics struct.
+- Kept Stable and Balanced on strict tuned-evaluator-score improvement
+  semantics, and added a stricter Aggressive near-tie path that requires the
+  candidate to be within `1%` of the Fast score and to reduce terminal position
+  error by at least half.
+- Replaced the alpha audit table with threshold evidence that prints alpha.1
+  baseline, required threshold, current value, and pass/fail per strategy.
+- Added `ruckig_c_tests --tracking-quality-hardening` and the routine CTest
+  `ruckig_c_tracking_quality_hardening`.
+- Passed the hard per-strategy 10k, 100k seed `1/2/41`, and 1M seed `1`
+  optimized-count and average-improvement thresholds.
+
 Deferred unless separately accepted:
 
 - Visualization v2, optional CI gallery artifacts, Python wheel publication,

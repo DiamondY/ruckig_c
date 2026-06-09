@@ -1,6 +1,7 @@
 #include "test_common.h"
 
 #include "ruckig_c/alloc.h"
+#include "ruckig_c/internal.h"
 
 #include <float.h>
 #include <math.h>
@@ -3649,6 +3650,15 @@ typedef struct tracking_audit_case_result {
     ruckig_result_t result;
     ruckig_tracking_calculation_status_t status;
     ruckig_tracking_diagnostics_t diagnostics;
+    size_t family_attempted[RUCKIG_TRACKING_AUDIT_FAMILY_COUNT];
+    size_t family_valid[RUCKIG_TRACKING_AUDIT_FAMILY_COUNT];
+    size_t family_strict_improved[RUCKIG_TRACKING_AUDIT_FAMILY_COUNT];
+    size_t family_near_tie_accepted[RUCKIG_TRACKING_AUDIT_FAMILY_COUNT];
+    size_t family_selected[RUCKIG_TRACKING_AUDIT_FAMILY_COUNT];
+    size_t selected_family;
+    bool selected_near_tie;
+    size_t strict_improved_count;
+    size_t near_tie_accepted_count;
 } tracking_audit_case_result_t;
 
 typedef struct tracking_audit_bucket {
@@ -3659,6 +3669,13 @@ typedef struct tracking_audit_bucket {
     size_t valid;
     size_t rejected;
     size_t budget_exhausted;
+    size_t family_attempted[RUCKIG_TRACKING_AUDIT_FAMILY_COUNT];
+    size_t family_valid[RUCKIG_TRACKING_AUDIT_FAMILY_COUNT];
+    size_t family_strict_improved[RUCKIG_TRACKING_AUDIT_FAMILY_COUNT];
+    size_t family_near_tie_accepted[RUCKIG_TRACKING_AUDIT_FAMILY_COUNT];
+    size_t family_selected[RUCKIG_TRACKING_AUDIT_FAMILY_COUNT];
+    size_t strict_improved_count;
+    size_t near_tie_accepted_count;
     double improvement_sum;
 } tracking_audit_bucket_t;
 
@@ -3682,6 +3699,77 @@ typedef struct tracking_audit_representatives {
     bool tight_seen;
     bool budget_seen;
 } tracking_audit_representatives_t;
+
+typedef struct tracking_audit_threshold {
+    size_t samples;
+    unsigned seed;
+    size_t baseline_optimized[3];
+    size_t required_optimized[3];
+    double baseline_average_improvement[3];
+    double required_average_improvement[3];
+} tracking_audit_threshold_t;
+
+static const char* tracking_audit_family_names[RUCKIG_TRACKING_AUDIT_FAMILY_COUNT] = {
+    "fast",
+    "instantaneous",
+    "horizon",
+    "terminal_blend",
+    "derivative_damped",
+    "lead_lag"
+};
+
+static const tracking_audit_threshold_t tracking_audit_thresholds[] = {
+    {
+        10000,
+        1u,
+        {268, 254, 262},
+        {335, 318, 328},
+        {0.00696885785, 0.00573055088, 0.00735498978},
+        {0.007665743635, 0.006303605968, 0.008090488758}
+    },
+    {
+        100000,
+        1u,
+        {2628, 2601, 2573},
+        {3285, 3252, 3217},
+        {0.00654911563, 0.00679519282, 0.00721271345},
+        {0.007204027193, 0.007474712102, 0.007933984795}
+    },
+    {
+        100000,
+        2u,
+        {2648, 2702, 2526},
+        {3310, 3378, 3158},
+        {0.00587577617, 0.00614356450, 0.00642797412},
+        {0.006463353787, 0.006757920950, 0.007070771532}
+    },
+    {
+        100000,
+        41u,
+        {2638, 2711, 2499},
+        {3298, 3389, 3124},
+        {0.00792016481, 0.00763398601, 0.00693869317},
+        {0.008712181291, 0.008397384611, 0.007632562487}
+    },
+    {
+        1000000,
+        1u,
+        {26631, 26171, 25308},
+        {33289, 32714, 31635},
+        {0.00679055094, 0.00672526897, 0.00712030876},
+        {0.007469606034, 0.007397795867, 0.007832339636}
+    }
+};
+
+static const tracking_audit_threshold_t* tracking_audit_find_threshold(size_t samples, unsigned seed) {
+    size_t i;
+    for (i = 0; i < sizeof(tracking_audit_thresholds) / sizeof(tracking_audit_thresholds[0]); ++i) {
+        if (tracking_audit_thresholds[i].samples == samples && tracking_audit_thresholds[i].seed == seed) {
+            return &tracking_audit_thresholds[i];
+        }
+    }
+    return NULL;
+}
 
 static const char* tracking_strategy_name(ruckig_tracking_optimized_strategy_t strategy) {
     switch (strategy) {
@@ -3858,6 +3946,35 @@ static void run_tracking_audit_case(
     CHECK_EQ_INT(case_result->diagnostics.optimized_strategy, config->strategy);
     CHECK_TRUE(case_result->diagnostics.fallback_step_count + case_result->diagnostics.optimized_step_count == 1);
     CHECK_EQ_INT(case_result->diagnostics.error_step_count, 0);
+    memcpy(case_result->family_attempted, tracking->audit_family_attempted, sizeof(case_result->family_attempted));
+    memcpy(case_result->family_valid, tracking->audit_family_valid, sizeof(case_result->family_valid));
+    memcpy(case_result->family_strict_improved, tracking->audit_family_strict_improved, sizeof(case_result->family_strict_improved));
+    memcpy(case_result->family_near_tie_accepted, tracking->audit_family_near_tie_accepted, sizeof(case_result->family_near_tie_accepted));
+    memcpy(case_result->family_selected, tracking->audit_family_selected, sizeof(case_result->family_selected));
+    case_result->selected_family = tracking->audit_best_candidate_family;
+    case_result->selected_near_tie = tracking->audit_best_candidate_near_tie;
+    case_result->strict_improved_count = tracking->audit_strict_improved_count;
+    case_result->near_tie_accepted_count = tracking->audit_near_tie_accepted_count;
+    {
+        size_t family;
+        size_t attempted = 0;
+        size_t valid = 0;
+        size_t selected = 0;
+        size_t strict_improved = 0;
+        size_t near_tie = 0;
+        for (family = 0; family < RUCKIG_TRACKING_AUDIT_FAMILY_COUNT; ++family) {
+            attempted += case_result->family_attempted[family];
+            valid += case_result->family_valid[family];
+            selected += case_result->family_selected[family];
+            strict_improved += case_result->family_strict_improved[family];
+            near_tie += case_result->family_near_tie_accepted[family];
+        }
+        CHECK_EQ_INT(attempted, case_result->diagnostics.candidate_count);
+        CHECK_EQ_INT(valid, case_result->diagnostics.valid_candidate_count);
+        CHECK_EQ_INT(selected, 1);
+        CHECK_EQ_INT(strict_improved, case_result->strict_improved_count);
+        CHECK_EQ_INT(near_tie, case_result->near_tie_accepted_count);
+    }
 
     ruckig_output_destroy(output);
     ruckig_input_destroy(input);
@@ -3869,6 +3986,7 @@ static void tracking_audit_add_bucket(
     tracking_audit_bucket_t* bucket,
     const tracking_audit_case_result_t* case_result
 ) {
+    size_t family;
     ++bucket->samples;
     if (case_result->status == RUCKIG_TRACKING_CALCULATION_OPTIMIZED) {
         ++bucket->optimized;
@@ -3879,6 +3997,15 @@ static void tracking_audit_add_bucket(
     bucket->valid += case_result->diagnostics.valid_candidate_count;
     bucket->rejected += case_result->diagnostics.rejected_candidate_count;
     bucket->budget_exhausted += case_result->diagnostics.budget_exhausted_count;
+    bucket->strict_improved_count += case_result->strict_improved_count;
+    bucket->near_tie_accepted_count += case_result->near_tie_accepted_count;
+    for (family = 0; family < RUCKIG_TRACKING_AUDIT_FAMILY_COUNT; ++family) {
+        bucket->family_attempted[family] += case_result->family_attempted[family];
+        bucket->family_valid[family] += case_result->family_valid[family];
+        bucket->family_strict_improved[family] += case_result->family_strict_improved[family];
+        bucket->family_near_tie_accepted[family] += case_result->family_near_tie_accepted[family];
+        bucket->family_selected[family] += case_result->family_selected[family];
+    }
     bucket->improvement_sum += case_result->diagnostics.improvement_ratio;
 }
 
@@ -3900,7 +4027,7 @@ static void tracking_audit_add_stats(
 static void tracking_audit_print_bucket(const char* group, const char* name, const tracking_audit_bucket_t* bucket) {
     const double average_improvement = bucket->samples > 0 ? bucket->improvement_sum / (double)bucket->samples : 0.0;
     printf(
-        "tracking random audit %s %s: samples %zu optimized %zu fallback %zu candidates %zu valid %zu rejected %zu budget_exhausted %zu average_improvement %.9g\n",
+        "tracking random audit %s %s: samples %zu optimized %zu fallback %zu candidates %zu valid %zu rejected %zu budget_exhausted %zu strict_improved %zu near_tie_accepted %zu average_improvement %.9g\n",
         group,
         name,
         bucket->samples,
@@ -3910,6 +4037,8 @@ static void tracking_audit_print_bucket(const char* group, const char* name, con
         bucket->valid,
         bucket->rejected,
         bucket->budget_exhausted,
+        bucket->strict_improved_count,
+        bucket->near_tie_accepted_count,
         average_improvement
     );
 }
@@ -3977,8 +4106,11 @@ static void tracking_audit_print_case(
 ) {
     const tracking_audit_case_config_t* config = &case_result->config;
     const ruckig_tracking_diagnostics_t* diagnostics = &case_result->diagnostics;
+    const char* selected_family = case_result->selected_family < RUCKIG_TRACKING_AUDIT_FAMILY_COUNT
+        ? tracking_audit_family_names[case_result->selected_family]
+        : "unknown";
     printf(
-        "tracking random audit fallback_case reason=%s sample=%zu strategy=%s dofs=%zu signal=%s lookahead=%zu reactiveness=%.2f disabled=%s disabled_dof=%s constraints=%s status=%s candidates=%zu fast=%zu instantaneous=%zu horizon=%zu terminal_blend=%zu derivative_damped=%zu lead_lag=%zu budget_exhausted=%zu fast_score=%.9g best_score=%.9g improvement=%.9g\n",
+        "tracking random audit fallback_case reason=%s sample=%zu strategy=%s dofs=%zu signal=%s lookahead=%zu reactiveness=%.2f disabled=%s disabled_dof=%s constraints=%s status=%s selected_family=%s selected_near_tie=%s strict_improved=%zu near_tie_accepted=%zu candidates=%zu fast=%zu instantaneous=%zu horizon=%zu terminal_blend=%zu derivative_damped=%zu lead_lag=%zu budget_exhausted=%zu fast_score=%.9g best_score=%.9g improvement=%.9g\n",
         reason,
         config->sample_index,
         tracking_strategy_name(config->strategy),
@@ -3990,6 +4122,10 @@ static void tracking_audit_print_case(
         config->has_disabled_dof ? tracking_dof_number_name(config->disabled_dof) : "none",
         config->tight_constraints ? "tight_valid" : "default",
         tracking_status_name(case_result->status),
+        selected_family,
+        case_result->selected_near_tie ? "yes" : "no",
+        case_result->strict_improved_count,
+        case_result->near_tie_accepted_count,
         diagnostics->candidate_count,
         diagnostics->fast_candidate_count,
         diagnostics->instantaneous_candidate_count,
@@ -4004,11 +4140,62 @@ static void tracking_audit_print_case(
     );
 }
 
+static double tracking_audit_average_improvement(const tracking_audit_bucket_t* bucket) {
+    return bucket->samples > 0 ? bucket->improvement_sum / (double)bucket->samples : 0.0;
+}
+
+static void tracking_audit_print_family_summary(const tracking_audit_bucket_t* bucket) {
+    size_t family;
+    for (family = 0; family < RUCKIG_TRACKING_AUDIT_FAMILY_COUNT; ++family) {
+        printf(
+            "tracking random audit by_family %s: attempted %zu valid %zu strict_improved %zu near_tie_accepted %zu selected %zu\n",
+            tracking_audit_family_names[family],
+            bucket->family_attempted[family],
+            bucket->family_valid[family],
+            bucket->family_strict_improved[family],
+            bucket->family_near_tie_accepted[family],
+            bucket->family_selected[family]
+        );
+    }
+}
+
+static void tracking_audit_check_thresholds(
+    const tracking_audit_stats_t* stats,
+    const tracking_audit_threshold_t* threshold
+) {
+    static const char* strategy_names[3] = {"stable", "balanced", "aggressive"};
+    size_t i;
+    if (!threshold) {
+        printf("tracking random audit threshold: samples unregistered result SKIP\n");
+        return;
+    }
+    for (i = 0; i < 3; ++i) {
+        const tracking_audit_bucket_t* bucket = &stats->by_strategy[i];
+        const double average_improvement = tracking_audit_average_improvement(bucket);
+        const bool optimized_pass = bucket->optimized >= threshold->required_optimized[i];
+        const bool average_pass = average_improvement + 1e-12 >= threshold->required_average_improvement[i];
+        printf(
+            "tracking random audit threshold strategy %s: baseline_optimized %zu optimized %zu required_optimized %zu baseline_average_improvement %.12g average_improvement %.12g required_average_improvement %.12g result %s\n",
+            strategy_names[i],
+            threshold->baseline_optimized[i],
+            bucket->optimized,
+            threshold->required_optimized[i],
+            threshold->baseline_average_improvement[i],
+            average_improvement,
+            threshold->required_average_improvement[i],
+            optimized_pass && average_pass ? "PASS" : "FAIL"
+        );
+        CHECK_TRUE(optimized_pass);
+        CHECK_TRUE(average_pass);
+    }
+}
+
 static void tracking_audit_print_stats(
     const tracking_audit_stats_t* stats,
     const tracking_audit_representatives_t* representatives,
     size_t samples,
-    unsigned seed
+    unsigned seed,
+    const tracking_audit_threshold_t* threshold
 ) {
     static const char* strategy_names[3] = {"stable", "balanced", "aggressive"};
     static const char* dof_names[4] = {"1", "2", "4", "8"};
@@ -4042,6 +4229,8 @@ static void tracking_audit_print_stats(
     for (i = 0; i < 2; ++i) {
         tracking_audit_print_bucket("by_constraints", constraint_names[i], &stats->by_constraints[i]);
     }
+    tracking_audit_print_family_summary(&stats->overall);
+    tracking_audit_check_thresholds(stats, threshold);
     for (i = 0; i < representatives->count; ++i) {
         tracking_audit_print_case(representatives->reasons[i], &representatives->cases[i]);
     }
@@ -4176,25 +4365,55 @@ void run_tracking_random_audit_tests(size_t samples, unsigned seed) {
         tracking_audit_maybe_record_fallback(&representatives, &case_result);
     }
 
-    tracking_audit_print_stats(&stats, &representatives, samples, seed);
+    tracking_audit_print_stats(
+        &stats,
+        &representatives,
+        samples,
+        seed,
+        tracking_audit_find_threshold(samples, seed)
+    );
 }
 
 static void test_tracking_random_audit_fixed_cases(void) {
     const tracking_audit_case_config_t cases[] = {
         {6, 2, 1, 1, 0.25, RUCKIG_TRACKING_OPTIMIZED_STABLE, true, 0, true, 0.06},
         {12, 2, 5, 1, 0.0, RUCKIG_TRACKING_OPTIMIZED_BALANCED, true, 1, true, 0.12},
-        {22, 8, 5, 0, 0.25, RUCKIG_TRACKING_OPTIMIZED_AGGRESSIVE, true, 7, true, 0.22}
+        {22, 8, 5, 0, 0.25, RUCKIG_TRACKING_OPTIMIZED_AGGRESSIVE, true, 7, true, 0.22},
+        {2600, 2, 10, 2, 1.0, RUCKIG_TRACKING_OPTIMIZED_STABLE, false, 0, false, 0.0},
+        {8011, 4, 10, 3, 0.25, RUCKIG_TRACKING_OPTIMIZED_STABLE, true, 3, true, 0.11},
+        {9800, 2, 10, 2, 1.0, RUCKIG_TRACKING_OPTIMIZED_BALANCED, false, 0, false, 0.0},
+        {1614, 8, 10, 0, 1.0, RUCKIG_TRACKING_OPTIMIZED_AGGRESSIVE, false, 0, false, 0.14},
+        {0, 8, 5, 0, 0.5, RUCKIG_TRACKING_OPTIMIZED_AGGRESSIVE, true, 6, true, 0.0},
+        {4, 4, 2, 1, 0.0, RUCKIG_TRACKING_OPTIMIZED_BALANCED, false, 0, true, 0.04},
+        {8, 1, 10, 0, 1.0, RUCKIG_TRACKING_OPTIMIZED_STABLE, false, 0, true, 0.08},
+        {10, 1, 10, 1, 0.5, RUCKIG_TRACKING_OPTIMIZED_AGGRESSIVE, false, 0, true, 0.10},
+        {16, 1, 5, 3, 0.25, RUCKIG_TRACKING_OPTIMIZED_BALANCED, false, 0, false, 0.16}
     };
     size_t i;
     for (i = 0; i < sizeof(cases) / sizeof(cases[0]); ++i) {
         tracking_audit_case_result_t case_result;
+        size_t selected = 0;
+        size_t family;
         run_tracking_audit_case(&cases[i], &case_result);
         CHECK_TRUE(tracking_optimized_status_is_success(case_result.status));
         CHECK_EQ_INT(case_result.diagnostics.fallback_step_count + case_result.diagnostics.optimized_step_count, 1);
         CHECK_EQ_INT(case_result.diagnostics.error_step_count, 0);
         CHECK_TRUE(case_result.diagnostics.candidate_count >= 1);
-        CHECK_TRUE(case_result.diagnostics.fast_score >= case_result.diagnostics.best_score - 1e-12);
+        CHECK_TRUE(case_result.selected_family < RUCKIG_TRACKING_AUDIT_FAMILY_COUNT);
+        for (family = 0; family < RUCKIG_TRACKING_AUDIT_FAMILY_COUNT; ++family) {
+            selected += case_result.family_selected[family];
+        }
+        CHECK_EQ_INT(selected, 1);
+        if (case_result.selected_near_tie) {
+            CHECK_EQ_INT(case_result.config.strategy, RUCKIG_TRACKING_OPTIMIZED_AGGRESSIVE);
+            CHECK_TRUE(case_result.near_tie_accepted_count > 0);
+        }
     }
+}
+
+void run_tracking_quality_hardening_tests(void) {
+    test_tracking_random_audit_fixed_cases();
+    run_tracking_random_audit_tests(10000, 1u);
 }
 
 void run_waypoint_tests(void) {

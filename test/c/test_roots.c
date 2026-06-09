@@ -107,6 +107,7 @@ void run_tracking_fixed_corpus_tests(void);
 void run_tracking_offline_tests(void);
 void run_tracking_optimized_tests(void);
 void run_tracking_quality_tests(void);
+void run_tracking_quality_hardening_tests(void);
 void run_tracking_no_allocation_tests(void);
 void run_tracking_tests(void);
 void run_tracking_random_tests(size_t samples, unsigned seed);
@@ -174,6 +175,10 @@ int main(int argc, char** argv) {
             run_tracking_quality_tests();
             return ruckig_c_test_failures == 0 ? 0 : 1;
         }
+        if (strcmp(argv[1], "--tracking-quality-hardening") == 0) {
+            run_tracking_quality_hardening_tests();
+            return ruckig_c_test_failures == 0 ? 0 : 1;
+        }
         if (strcmp(argv[1], "--tracking-no-allocation") == 0) {
             run_tracking_no_allocation_tests();
             return ruckig_c_test_failures == 0 ? 0 : 1;
@@ -182,7 +187,7 @@ int main(int argc, char** argv) {
         return 2;
     }
     if (argc > 2) {
-        fprintf(stderr, "usage: ruckig_c_tests [--waypoint|--per-section|--waypoint-quality|--solver-branch-coverage|--tracking|--tracking-api|--tracking-validation|--tracking-online|--tracking-fixed-corpus|--tracking-offline|--tracking-optimized|--tracking-quality|--tracking-no-allocation|--tracking-random N --seed S|--tracking-random-audit N --seed S]\n");
+        fprintf(stderr, "usage: ruckig_c_tests [--waypoint|--per-section|--waypoint-quality|--solver-branch-coverage|--tracking|--tracking-api|--tracking-validation|--tracking-online|--tracking-fixed-corpus|--tracking-offline|--tracking-optimized|--tracking-quality|--tracking-quality-hardening|--tracking-no-allocation|--tracking-random N --seed S|--tracking-random-audit N --seed S]\n");
         return 2;
     }
 
