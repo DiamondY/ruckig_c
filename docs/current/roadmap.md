@@ -17,6 +17,10 @@ tracking quality/stability evidence release.
   a manual-only `visualization_artifacts=true` workflow path that regenerates
   the gallery, verifies it, strict-regenerates it, and uploads the regenerated
   PNGs, manifest, and logs as review artifacts.
+- `0.10.0-readiness` records the full local release-readiness audit for the
+  Visualization v2 gallery, verifier, and manual-only artifact path. If the
+  ordinary push CI for the evidence commit is green, the next step can be
+  `v0.10.0 stable closeout`.
 - The alpha replaces the current `main` gallery assets; the previous v1
   provenance remains available through the `v0.9.0` tag.
 - Keep `v0.9.0` as the current stable release.
@@ -24,7 +28,9 @@ tracking quality/stability evidence release.
   API decision is accepted.
 - Do not promote plotting or verifier work into a default release/CI gate
   without a separate dependency and artifact policy decision; the alpha.2 CI
-  artifact path remains manual-only.
+  artifact path remains manual-only. Stable closeout, not readiness, is where
+  version bump, tag, GitHub Release, and manual release-random workflow steps
+  occur.
 - `0.9.1` remains reserved for emergency patch fixes only.
 - Package-manager recipes, formal Python/Rust publication, soft interruption,
   cloud/remote calculation, formal Pro/cloud equivalence claims, formal global

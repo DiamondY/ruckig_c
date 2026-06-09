@@ -46,6 +46,23 @@ First priority:
 - Does not add public C API, public symbols, CMake/CTest visualization gates,
   package publication, release tags, or GitHub Releases.
 
+`0.10.0-readiness` release readiness audit evidence:
+
+- Records full local readiness evidence for deciding whether the current
+  Visualization v2 gallery, verifier, and manual-only CI artifact path can
+  enter a later `v0.10.0` stable closeout.
+- Reruns local build, visualization verifier, strict regeneration, routine
+  CTest, performance, ABI/export, Python smoke, Rust smoke, wrapper examples,
+  optional manual visualization artifact workflow, and boundary diff gates.
+- Confirms the committed 30-PNG gallery and `manifest.json` remain unchanged;
+  the existing manifest label remains `0.10.0-alpha visualization v2 evidence`
+  because readiness does not relabel or regenerate tracked assets.
+- Keeps readiness evidence-only: no version bump, tag, GitHub Release, manual
+  release-random workflow, public C API, public symbol, CMake gate, or default
+  visualization CI gate is added.
+- Readiness conclusion: if ordinary push CI succeeds for the evidence commit,
+  the next step can be `v0.10.0 stable closeout`.
+
 Release boundary:
 
 - `v0.9.0` remains the current stable release.

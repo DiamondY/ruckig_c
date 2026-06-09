@@ -69,6 +69,9 @@ Historical rewrite plans and release evidence are retained for traceability.
   first `0.10.0-design` Visualization v2 local gallery evidence slice, and
   `release/checklists/0.10.0-alpha.2.md` records the optional manual CI
   artifact evidence for regenerated Visualization v2 review assets.
+  `release/checklists/0.10.0-readiness.md` records the full local
+  stable-review readiness audit for the Visualization v2 gallery, verifier,
+  and manual artifact path without creating a tag or GitHub Release.
 - `release/evidence/verification_report.md` - local and CI verification
   history.
 - `release/evidence/performance_report.md` - performance procedure and release
@@ -82,7 +85,9 @@ visualization v2, optional CI visualization artifacts, and richer local plots.
 `0.10.0-alpha` replaces the current `main` gallery with 30 local `1400x900`
 PNG assets and a strict local verifier. `0.10.0-alpha.2` adds a manual-only CI
 artifact path for regenerated Visualization v2 PNGs, manifest, and logs without
-making visualization a default push/PR gate. `v0.9.0` remains the current
+making visualization a default push/PR gate. `0.10.0-readiness` records the
+full local readiness audit for that evidence line; if ordinary push CI is green,
+the next step can be `v0.10.0 stable closeout`. `v0.9.0` remains the current
 stable release.
 
 ## Design Documents

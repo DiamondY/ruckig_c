@@ -7,7 +7,9 @@ tool, not a release gate and not a stable Python API.
 The current `0.10.0-alpha` generator writes a 30-PNG Visualization v2 gallery
 with NumPy and Matplotlib `Agg`. It replaces the `main` v1 gallery under
 `docs/assets/visualization/`; the previous v1 assets remain traceable through
-the `v0.9.0` tag.
+the `v0.9.0` tag. `0.10.0-readiness` keeps the committed gallery unchanged and
+uses the local verifier, strict regeneration, and manual artifact workflow as
+stable-review evidence.
 
 ## Setup
 
@@ -75,6 +77,9 @@ The CI job builds a shared library on Ubuntu, installs these requirements,
 regenerates the gallery under `out/visualization-artifacts/gallery`, runs the
 default verifier, runs strict regeneration, and uploads `visualization-v2-gallery`
 with the regenerated PNGs, `manifest.json`, and logs.
+
+`0.10.0-readiness` records this workflow as manual-only review evidence. It is
+not a default push or pull-request gate and is not the stable release closeout.
 
 ## Scope
 

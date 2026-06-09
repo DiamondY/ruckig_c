@@ -74,6 +74,11 @@ Implemented and covered by fixed C/oracle tests plus deterministic random oracle
   manual-only `visualization_artifacts=true` workflow path that regenerates the
   gallery, verifies it, strict-regenerates it, and uploads the regenerated PNGs,
   manifest, and logs without changing default push/PR CI.
+- `0.10.0-readiness` release readiness audit evidence, rerunning local build,
+  visualization verifier, strict regeneration, routine CTest, performance,
+  ABI/export, wrapper smoke, optional manual visualization artifact, and
+  boundary gates to decide whether the Visualization v2 line can enter
+  `v0.10.0` stable closeout.
 - C examples for position, offline position, online update, per-DoF overrides,
   velocity, stop, minimum duration, waypoints, per-section minimum duration,
   tracking Fast-mode scenarios, and Optimized tracking scenarios.
@@ -96,7 +101,11 @@ optional strict regeneration check. `0.10.0-alpha.2` adds an optional manual CI
 artifact path for regenerated Visualization v2 PNGs, manifest, and logs; it is
 not a default push/PR gate and does not replace committed assets. The previous
 v1 gallery provenance remains available through the `v0.9.0` tag rather than
-being duplicated on `main`.
+being duplicated on `main`. `0.10.0-readiness` records the full local
+readiness audit for this gallery/verifier/manual-artifact evidence and, if
+ordinary push CI is green, recommends `v0.10.0 stable closeout` as the next
+step. Stable closeout is still where version bump, tag, GitHub Release, and
+manual release-random workflow decisions happen.
 The `0.9.0` tracking evidence line
 starts with `docs/current/tracking_quality_audit.md` and a deterministic
 `--tracking-random-audit` C test-runner selector so fallback-heavy Optimized

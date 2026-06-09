@@ -1,7 +1,7 @@
 # Algorithm Visualization
 
-This document records the current `0.10.0-alpha` Visualization v2 local
-gallery evidence. The gallery is generated from `ruckig_c` public C ABI data
+This document records the current `0.10.0` Visualization v2 local gallery
+evidence on `main`. The gallery is generated from `ruckig_c` public C ABI data
 through the Python `cffi` prototype, NumPy, and Matplotlib `Agg`. It does not
 copy original Ruckig images, PDFs, or plotter scripts as primary project
 evidence.
@@ -17,7 +17,10 @@ default GitHub Actions plotting job, CMake/CTest gate, public C API, public
 symbol, enum value, result-code value, Python package, Rust crate, package
 recipe, cloud path, or Pro/cloud equivalence claim. `0.10.0-alpha.2` adds an
 optional manual GitHub Actions artifact path for review copies of the gallery;
-it remains off for push and pull-request CI.
+it remains off for push and pull-request CI. `0.10.0-readiness` reruns the
+local verifier, strict regeneration, optional manual artifact workflow, and
+release-readiness boundary checks. If ordinary push CI is green, the
+Visualization v2 evidence is ready for `v0.10.0 stable closeout`.
 
 ```powershell
 cmake --build --preset windows-clang-ninja-shared
@@ -75,7 +78,8 @@ verification, runs strict regeneration, and uploads one artifact named
 
 The artifact is a review aid. It does not replace the committed gallery, does
 not run on ordinary push or pull-request CI, and does not promote plotting into
-a release gate.
+a release gate. The readiness audit treats this manual artifact workflow as
+optional review evidence only; stable closeout is still a separate step.
 
 ## V2 Inventory
 
