@@ -69,6 +69,11 @@ The registered hard gates are 10k seed `1`, 100k seeds `1`, `2`, `41`, and 1M
 seed `1`. The 10k gate is also run by the routine CTest
 `ruckig_c_tracking_quality_hardening`.
 
+`0.9.0-alpha.3` builds on this tuned baseline with
+`docs/current/tracking_stability.md`, freezing representative selected-family,
+near-tie, fallback, and budget-exhaustion behavior as regression evidence
+without changing the evaluator policy again.
+
 ## Local Results
 
 Current 10k seed `1` threshold evidence:

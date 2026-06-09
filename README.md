@@ -56,6 +56,10 @@ Implemented and covered by fixed C/oracle tests plus deterministic random oracle
   tuning the bounded local evaluator, adding private candidate-family
   attribution, adding `--tracking-quality-hardening`, and passing hard 10k,
   100k, and 1M per-strategy quality thresholds without changing public C ABI.
+- `0.9.0-alpha.3` tracking stability regression evidence, adding
+  `--tracking-stability` and routine CTest coverage for representative tuned
+  Optimized tracking behavior without further evaluator tuning or public C ABI
+  changes.
 - C examples for position, offline position, online update, per-DoF overrides,
   velocity, stop, minimum duration, waypoints, per-section minimum duration,
   tracking Fast-mode scenarios, and Optimized tracking scenarios.
@@ -82,6 +86,9 @@ tracking behavior can be classified before evaluator tuning. `0.9.0-alpha.2`
 adds `docs/current/tracking_quality_hardening.md`, private evaluator
 attribution, and the `--tracking-quality-hardening` selector to record tuned
 Optimized tracking quality thresholds while keeping the public C ABI unchanged.
+`0.9.0-alpha.3` adds `docs/current/tracking_stability.md` and the
+`--tracking-stability` selector to freeze representative alpha.2 tuned behavior
+as regression evidence before readiness.
 `0.8.1` is reserved for emergency patch work only.
 `v0.4.0` added waypoint-aware C ABI entry points, per-section constraints,
 global position bounds, and a local coupled waypoint optimizer; `v0.4.1`

@@ -368,8 +368,10 @@ After `v0.8.0`, `main` now tracks `0.9.0-design - Unreleased`.
   Optimized evaluator, adds private candidate-family attribution, adds
   `--tracking-quality-hardening`, and hard-gates 10k, 100k seed `1/2/41`, and
   1M seed `1` per-strategy optimized-count and average-improvement thresholds.
-- The alpha.2 hardening does not change public C API, public symbols, public
-  diagnostics structs, CMake workflow configuration, tags, or release scope.
+- `0.9.0-alpha.3` freezes representative alpha.2 tuned behavior as regression
+  evidence with `--tracking-stability` and routine CTest coverage. It does not
+  retune evaluator scoring, candidate generation, strategy weights, near-tie
+  policy, public diagnostics structs, public ABI, tags, or release scope.
 - `0.8.1` is reserved for emergency patch work only; it is not the default
   post-release route.
 - Visualization v2, optional CI artifacts, package-manager recipes, formal

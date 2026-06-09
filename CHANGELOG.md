@@ -52,6 +52,18 @@ Planned first priority:
 - Passed the hard per-strategy 10k, 100k seed `1/2/41`, and 1M seed `1`
   optimized-count and average-improvement thresholds.
 
+`0.9.0-alpha.3` tracking stability regression evidence:
+
+- Added `ruckig_c_tests --tracking-stability`, a fixed regression selector that
+  freezes representative `0.9.0-alpha.2` tuned Optimized tracking behavior.
+- Added routine CTest `ruckig_c_tracking_stability`.
+- Locked fixed cases for optimized strict selection, Aggressive near-tie
+  selection, Fast fallback, budget exhaustion, disabled DoF, `tight_valid`
+  constraints, all strategies, all signals, all lookahead buckets, and all
+  selected candidate families exposed by the alpha.2 audit.
+- Kept evaluator scoring, candidate family generation, strategy weights,
+  near-tie policy, public diagnostics structs, and public C ABI unchanged.
+
 Deferred unless separately accepted:
 
 - Visualization v2, optional CI gallery artifacts, Python wheel publication,

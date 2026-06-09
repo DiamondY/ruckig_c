@@ -19,6 +19,8 @@ Historical rewrite plans and release evidence are retained for traceability.
   fallback, diagnostics, and random-audit baseline evidence.
 - `current/tracking_quality_hardening.md` - tuned Optimized tracking evaluator
   quality thresholds, private attribution, and alpha.2 hardening evidence.
+- `current/tracking_stability.md` - fixed regression evidence for alpha.2
+  tuned Optimized tracking behavior and private attribution invariants.
 - `current/visualization.md` - locally generated algorithm visualization
   gallery evidence and generation policy.
 - `current/packaging.md` - installed CMake, pkg-config, static, DLL, and shared
@@ -57,7 +59,8 @@ Historical rewrite plans and release evidence are retained for traceability.
   evidence release closeout. `release/checklists/0.9.0-alpha.md` records the
   first `0.9.0-design` tracking quality baseline evidence, and
   `release/checklists/0.9.0-alpha.2.md` records the tuned evaluator hardening
-  evidence.
+  evidence. `release/checklists/0.9.0-alpha.3.md` records the tracking
+  stability regression evidence.
 - `release/evidence/verification_report.md` - local and CI verification
   history.
 - `release/evidence/performance_report.md` - performance procedure and release
