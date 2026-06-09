@@ -76,7 +76,9 @@ without changing the evaluator policy again.
 
 `0.9.0-readiness` reruns the alpha.2 10k, 100k seed `1/2/41`, and 1M seed `1`
 threshold gates as full local stable-review evidence. The readiness audit does
-not retune the evaluator and does not expand the public C ABI.
+not retune the evaluator and does not expand the public C ABI. `v0.9.0`
+stabilizes these tuned-evaluator quality gates as release evidence while
+keeping the public C ABI unchanged.
 
 ## Local Results
 

@@ -6,8 +6,8 @@ Historical rewrite plans and release evidence are retained for traceability.
 
 ## Current Maintainer Entry Points
 
-- `current/roadmap.md` - shipped scope, maintenance queues, current
-  `0.9.0-design` priorities, and future design boundaries.
+- `current/roadmap.md` - shipped scope, maintenance queues, current stable
+  release scope, and future design boundaries.
 - `current/api_compatibility.md` - patch-release API/ABI policy and
   exported-symbol review.
 - `current/api_diagnostics.md` - C API validation and diagnostics behavior.
@@ -63,12 +63,15 @@ Historical rewrite plans and release evidence are retained for traceability.
   stability regression evidence. `release/checklists/0.9.0-readiness.md`
   records the full local stable-review readiness audit for the tracking
   quality/stability line without creating a tag or GitHub Release.
+  `release/checklists/0.9.0.md` records the stable tracking quality/stability
+  evidence release closeout.
 - `release/evidence/verification_report.md` - local and CI verification
   history.
 - `release/evidence/performance_report.md` - performance procedure and release
   benchmark records.
 - `release/notes/` - release notes source material, including the stable
-  `0.8.0` visualization/gallery evidence release notes.
+  `0.8.0` visualization/gallery evidence release notes and the stable `0.9.0`
+  tracking quality/stability evidence release notes.
 
 ## Design Documents
 

@@ -25,8 +25,8 @@ The audit is local evidence and routine light coverage. CTest runs
 evidence.
 
 `0.9.0-readiness` reruns the audit as part of full local stable-review evidence
-after the alpha.2 tuning and alpha.3 stability work. The readiness audit does
-not change this baseline selector and does not add public C API.
+after the alpha.2 tuning and alpha.3 stability work. `v0.9.0` stabilizes that
+evidence without changing this baseline selector or adding public C API.
 
 ## Corpus
 
@@ -99,5 +99,5 @@ counts. They intentionally do not require a quality improvement over Fast.
 - No public C API or ABI change is part of this baseline.
 - No Pro/cloud equivalence, package publication, visualization v2, or upstream
   baseline upgrade is part of this evidence.
-- Stable `v0.9.0` closeout remains a later decision recorded separately from
-  `0.9.0-readiness`.
+- Visualization v2, optional CI artifacts, and richer plots move to the next
+  design line after `v0.9.0`.

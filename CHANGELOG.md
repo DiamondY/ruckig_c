@@ -1,11 +1,13 @@
 # Changelog
 
-## 0.9.0-design - Unreleased
+## 0.9.0 - 2026-06-09
 
-`main` now tracks `0.9.0-design - Unreleased` after the published `v0.8.0`
-visualization/gallery evidence release.
+`0.9.0` is the stable tracking quality and stability evidence release. It
+keeps the `v0.8.0` 172-symbol public C ABI unchanged while stabilizing the
+tracking random audit, tuned evaluator hardening, and fixed stability
+regression evidence reviewed during `0.9.0-readiness`.
 
-Planned first priority:
+Release focus:
 
 - Tracking quality and stability hardening without default public C ABI
   expansion.
@@ -64,7 +66,7 @@ Planned first priority:
 - Kept evaluator scoring, candidate family generation, strategy weights,
   near-tie policy, public diagnostics structs, and public C ABI unchanged.
 
-`0.9.0-readiness` evidence audit:
+`0.9.0-readiness` evidence audit and stable closeout:
 
 - Recorded full local release-readiness evidence for deciding whether the
   `0.9.0-design` tracking quality/stability line can enter a later `v0.9.0`
@@ -82,6 +84,10 @@ Planned first priority:
 - No version bump, tag, GitHub Release, manual release-random workflow, CI
   workflow change, or `original/ruckig-main` change is made by this readiness
   audit.
+- Stable closeout promotes project version and version macros to `0.9.0`,
+  moves ABI artifact output paths to `artifacts/abi/0.9.0`, creates stable
+  release notes and checklist evidence, and keeps public additions/removals at
+  `0`.
 
 Deferred unless separately accepted:
 
@@ -89,7 +95,7 @@ Deferred unless separately accepted:
   Rust crate publication, package-manager recipes, soft interruption
   checkpoints, cloud/remote calculation, formal Pro/cloud equivalence claims,
   formal global optimality proof, and upstream baseline upgrade.
-- `0.8.1` remains reserved for emergency patch work only.
+- `0.9.1` remains reserved for emergency patch work only.
 
 ## 0.8.0 - 2026-06-09
 

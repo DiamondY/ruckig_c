@@ -582,3 +582,32 @@ Compatibility rules for the `v0.8.0` line:
 ```text
 out/build/<preset>/artifacts/abi/0.8.0/
 ```
+
+## v0.9.0 Tracking Quality And Stability Evidence ABI Baseline
+
+`v0.9.0` is a stable tracking quality/stability evidence release. It keeps the
+`v0.8.0` 172-symbol public C ABI unchanged while stabilizing the tracking audit,
+tuned evaluator hardening, and fixed stability regression evidence reviewed
+during `0.9.0-readiness`.
+
+Compatibility rules for the `v0.9.0` line:
+
+- Public C symbol count remains 172.
+- Public additions in `v0.9.0`: 0.
+- Public removals in `v0.9.0`: 0.
+- Existing public function signatures, enum numeric values, and result-code
+  numeric values are unchanged.
+- `docs/abi/public-symbols.txt`, `docs/abi/public-symbol-exceptions.txt`, and
+  `docs/abi/exceptions.md` are unchanged from the `v0.8.0` stable baseline.
+- Tracking quality and stability evidence is local C test-runner and release
+  evidence work. It does not add tracking-specific public C functions,
+  exported symbols, or public diagnostics fields.
+- `RUCKIG_TRACKING_OPTIMIZED` remains a bounded deterministic local evaluator,
+  not a formal global optimizer and not a Pro/cloud equivalence surface.
+- `CMakeLists.txt` project version and `RUCKIG_C_VERSION_*` macros are
+  `0.9.0`.
+- ABI artifact output paths use the stable release evidence directory:
+
+```text
+out/build/<preset>/artifacts/abi/0.9.0/
+```

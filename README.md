@@ -60,18 +60,20 @@ Implemented and covered by fixed C/oracle tests plus deterministic random oracle
   `--tracking-stability` and routine CTest coverage for representative tuned
   Optimized tracking behavior without further evaluator tuning or public C ABI
   changes.
-- `0.9.0-readiness` audit evidence, rerunning the full local release-readiness
-  gate set against the current tracking quality/stability evidence before any
-  later `v0.9.0` stable closeout decision.
+- `v0.9.0` tracking quality/stability evidence stabilization, adopting the
+  deterministic tracking audit, tuned evaluator hardening, and fixed stability
+  regression evidence while keeping the `v0.8.0` 172-symbol public C ABI
+  unchanged.
 - C examples for position, offline position, online update, per-DoF overrides,
   velocity, stop, minimum duration, waypoints, per-section minimum duration,
   tracking Fast-mode scenarios, and Optimized tracking scenarios.
 
 Release-readiness evidence is tracked under `docs/release/`; see
-`docs/index.md` for the organized documentation map. `v0.8.0` is the current
-stable release. It keeps the `v0.7.0` 172-symbol public C ABI unchanged and
-stabilizes the local algorithm visualization/gallery evidence reviewed during
-`0.8.0-readiness`. `tools/visualization/generate_gallery.py` uses Matplotlib
+`docs/index.md` for the organized documentation map. `v0.9.0` is the current
+stable release. It keeps the `v0.8.0` 172-symbol public C ABI unchanged and
+stabilizes the tracking quality/stability evidence reviewed during
+`0.9.0-readiness`. `v0.8.0` remains the visualization/gallery evidence release:
+`tools/visualization/generate_gallery.py` uses Matplotlib
 `Agg`, NumPy, and the Python `cffi` prototype to generate project-owned PNG
 assets under `docs/assets/visualization/`. The gallery covers local C ABI
 equivalents of original examples `01-10` and `14-16`; examples `11-13` remain
@@ -80,10 +82,8 @@ than C ABI behavior. `tools/visualization/verify_gallery.py` verifies the
 committed PNG/manifest assets locally, including an optional strict
 regeneration check. The existing 13 PNG assets and manifest retain their
 `0.8.0-alpha.2` provenance label and hashes; `v0.8.0` adopts them without
-relabeling or regenerating tracked files. The `main` branch now tracks
-`0.9.0-design - Unreleased`, focused first on tracking
-quality and stability hardening. The first alpha evidence slice adds
-`docs/current/tracking_quality_audit.md` and a deterministic
+relabeling or regenerating tracked files. The `0.9.0` tracking evidence line
+starts with `docs/current/tracking_quality_audit.md` and a deterministic
 `--tracking-random-audit` C test-runner selector so fallback-heavy Optimized
 tracking behavior can be classified before evaluator tuning. `0.9.0-alpha.2`
 adds `docs/current/tracking_quality_hardening.md`, private evaluator
@@ -92,11 +92,9 @@ Optimized tracking quality thresholds while keeping the public C ABI unchanged.
 `0.9.0-alpha.3` adds `docs/current/tracking_stability.md` and the
 `--tracking-stability` selector to freeze representative alpha.2 tuned behavior
 as regression evidence before readiness. `0.9.0-readiness` records full local
-readiness evidence for the tracking quality/stability line and treats the
-existing 172-symbol public C ABI as unchanged; only a later stable closeout
-would bump versions, create a tag, publish a GitHub Release, or dispatch manual
-release-random workflows.
-`0.8.1` is reserved for emergency patch work only.
+readiness evidence for the tracking quality/stability line, and `v0.9.0`
+stabilizes that evidence without changing the 172-symbol public C ABI.
+`0.9.1` is reserved for emergency patch work only.
 `v0.4.0` added waypoint-aware C ABI entry points, per-section constraints,
 global position bounds, and a local coupled waypoint optimizer; `v0.4.1`
 deepened waypoint optimizer evidence; `v0.4.2` keeps that public C surface
@@ -482,9 +480,9 @@ can report an invalid token if it cannot read the user keyring; confirm from a
 keyring-aware command environment before treating the result as a permissions
 problem.
 
-Local test coverage evidence for the `v0.8.0` stable release is recorded in
+Local test coverage evidence for the `v0.9.0` stable release is recorded in
 `docs/current/test_coverage_audit.md`. The release coverage runner writes raw
-LLVM artifacts under `out/coverage/0.8.0/`; those raw artifacts are local
+LLVM artifacts under `out/coverage/0.9.0/`; those raw artifacts are local
 evidence only and are not committed.
 
 Visualization gallery evidence is local-only. To verify committed gallery
@@ -502,6 +500,7 @@ $env:RUCKIG_C_SHARED_LIBRARY=(Resolve-Path out\build\windows-clang-ninja-shared\
 .\_local\visualization-venv\Scripts\python.exe tools\visualization\verify_gallery.py --output docs\assets\visualization --strict-regenerate
 ```
 
-`docs/release/checklists/0.8.0.md` records the stable release closeout for the
-visualization gallery and verifier. The verifier remains a local evidence tool;
-it is not wired into default GitHub Actions, CMake, or CTest.
+`docs/release/checklists/0.9.0.md` records the stable release closeout for the
+tracking quality/stability evidence line. Visualization gallery verification
+remains a local evidence tool; it is not wired into default GitHub Actions,
+CMake, or CTest.

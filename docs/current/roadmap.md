@@ -353,9 +353,10 @@ public C ABI.
   optimality proof, and upstream baseline upgrades remain deferred unless
   separately accepted.
 
-## 0.9.0 Design Entry
+## 0.9.0 Tracking Quality And Stability Evidence Release
 
-After `v0.8.0`, `main` now tracks `0.9.0-design - Unreleased`.
+Published as `v0.9.0`. The release stabilizes tracking quality and stability
+evidence without changing the `v0.8.0` 172-symbol public C ABI.
 
 - First priority: tracking quality and stability hardening.
 - Default stance: deepen fixed quality cases, deterministic stress, fallback
@@ -375,11 +376,15 @@ After `v0.8.0`, `main` now tracks `0.9.0-design - Unreleased`.
 - `0.9.0-readiness` records full local release-readiness evidence for the
   tracking quality/stability line. It reruns full local build, CTest, oracle,
   tracking 10k/100k/1M audit, performance, coverage, ABI/export, and wrapper
-  gates without changing public C ABI or starting stable closeout. If ordinary
-  push CI is green, the next separate decision can be `v0.9.0` stable closeout.
-- `0.8.1` is reserved for emergency patch work only; it is not the default
+  gates without changing public C ABI.
+- Stable closeout promotes versions and ABI artifact paths to `0.9.0`, creates
+  release notes/checklist evidence, and keeps public additions and removals at
+  `0`.
+- `0.9.1` is reserved for emergency patch work only; it is not the default
   post-release route.
-- Visualization v2, optional CI artifacts, package-manager recipes, formal
-  Python/Rust publication, soft interruption, cloud/remote calculation, formal
-  Pro/cloud equivalence claims, formal global optimality proof, and upstream
-  baseline upgrades remain deferred unless separately accepted.
+- `0.10.0-design - Unreleased` starts after `v0.9.0`, with visualization v2,
+  optional CI artifacts, and richer plots as the first priority.
+- Package-manager recipes, formal Python/Rust publication, soft interruption,
+  cloud/remote calculation, formal Pro/cloud equivalence claims, formal global
+  optimality proof, and upstream baseline upgrades remain deferred unless
+  separately accepted.

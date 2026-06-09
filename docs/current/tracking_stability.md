@@ -76,3 +76,6 @@ evidence for the alpha, alpha.2, and alpha.3 tracking work. It treats this
 stability corpus as a candidate stable regression gate while keeping the public
 C ABI unchanged at 172 symbols and leaving version bump, tag, GitHub Release,
 and manual release-random workflow work to a later stable closeout decision.
+
+`v0.9.0` stabilizes this corpus as release evidence. It does not retune the
+evaluator, expand public diagnostics, or claim Pro/cloud equivalence.
