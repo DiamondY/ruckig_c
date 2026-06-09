@@ -48,6 +48,10 @@ Implemented and covered by fixed C/oracle tests plus deterministic random oracle
 - `v0.8.0` visualization/gallery evidence stabilization, adopting the local
   Matplotlib PNG gallery and verifier while keeping the `v0.7.0` 172-symbol
   public C ABI unchanged.
+- `0.9.0-alpha` tracking quality baseline evidence, adding a deterministic
+  `--tracking-random-audit` test-runner selector, routine audit CTest, fixed
+  representative diagnostics cases, and local 10k/100k/1M fallback audit
+  summaries without changing public C ABI.
 - C examples for position, offline position, online update, per-DoF overrides,
   velocity, stop, minimum duration, waypoints, per-section minimum duration,
   tracking Fast-mode scenarios, and Optimized tracking scenarios.
@@ -67,8 +71,11 @@ regeneration check. The existing 13 PNG assets and manifest retain their
 `0.8.0-alpha.2` provenance label and hashes; `v0.8.0` adopts them without
 relabeling or regenerating tracked files. The `main` branch now tracks
 `0.9.0-design - Unreleased`, focused first on tracking
-quality and stability hardening. `0.8.1` is reserved for emergency patch work
-only.
+quality and stability hardening. The first alpha evidence slice adds
+`docs/current/tracking_quality_audit.md` and a deterministic
+`--tracking-random-audit` C test-runner selector so fallback-heavy Optimized
+tracking behavior can be classified before evaluator tuning. `0.8.1` is
+reserved for emergency patch work only.
 `v0.4.0` added waypoint-aware C ABI entry points, per-section constraints,
 global position bounds, and a local coupled waypoint optimizer; `v0.4.1`
 deepened waypoint optimizer evidence; `v0.4.2` keeps that public C surface

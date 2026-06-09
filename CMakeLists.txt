@@ -208,6 +208,7 @@ if(BUILD_RUCKIG_C_TESTS)
   add_test(NAME ruckig_c_tracking_random_seed_1 COMMAND ruckig_c_tests --tracking-random 100000 --seed 1)
   add_test(NAME ruckig_c_tracking_random_seed_2 COMMAND ruckig_c_tests --tracking-random 100000 --seed 2)
   add_test(NAME ruckig_c_tracking_random_seed_41 COMMAND ruckig_c_tests --tracking-random 100000 --seed 41)
+  add_test(NAME ruckig_c_tracking_random_audit COMMAND ruckig_c_tests --tracking-random-audit 10000 --seed 1)
   add_test(NAME ruckig_c_tracking_no_allocation COMMAND ruckig_c_tests --tracking-no-allocation)
   add_test(NAME ruckig_c_allocation_audit
     COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/test/c/audit_allocations.cmake

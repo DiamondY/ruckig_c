@@ -13,6 +13,26 @@ Planned first priority:
   diagnostics review, performance evidence, and no-allocation coverage for the
   existing tracking surface.
 
+`0.9.0-alpha` tracking quality baseline evidence:
+
+- Added `ruckig_c_tests --tracking-random-audit N --seed S`, a deterministic
+  test-runner-only audit selector for Optimized tracking fallback and
+  diagnostics evidence.
+- The audit prints fixed text tables for overall behavior, strategy, DoF,
+  signal, lookahead, reactiveness, disabled-DoF, and constraint-profile
+  buckets, plus representative fallback cases with diagnostics and
+  candidate-family counters.
+- Added a lightweight routine CTest, `ruckig_c_tracking_random_audit`, using
+  `--tracking-random-audit 10000 --seed 1`.
+- Added fixed representative tracking audit C cases selected from
+  `--tracking-random-audit 100000 --seed 1`; they verify diagnostics and
+  constraints consistency without requiring quality improvement over Fast.
+- Kept `--tracking-random` output unchanged and kept public C ABI unchanged at
+  172 symbols.
+- Recorded local 10k, 100k seed `1/2/41`, and manual 1M seed `1` audit
+  evidence in `docs/current/tracking_quality_audit.md` and
+  `docs/release/checklists/0.9.0-alpha.md`.
+
 Deferred unless separately accepted:
 
 - Visualization v2, optional CI gallery artifacts, Python wheel publication,

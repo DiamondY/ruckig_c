@@ -361,6 +361,12 @@ After `v0.8.0`, `main` now tracks `0.9.0-design - Unreleased`.
 - Default stance: deepen fixed quality cases, deterministic stress, fallback
   diagnostics, performance evidence, and no-allocation coverage without
   expanding public C ABI unless a separate API decision is accepted.
+- `0.9.0-alpha` adds the baseline evidence layer for that work: a deterministic
+  `--tracking-random-audit` selector, lightweight routine audit CTest, fixed
+  representative diagnostics cases, and local 10k/100k/1M audit summaries.
+- The alpha baseline intentionally does not tune Optimized strategy weights,
+  candidate families, or acceptance policy. Evaluator changes require a later
+  accepted follow-up after the fallback distribution is understood.
 - `0.8.1` is reserved for emergency patch work only; it is not the default
   post-release route.
 - Visualization v2, optional CI artifacts, package-manager recipes, formal

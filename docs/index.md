@@ -15,6 +15,8 @@ Historical rewrite plans and release evidence are retained for traceability.
   against the frozen original reference and original product surface.
 - `current/test_coverage_audit.md` - local LLVM coverage summary and original
   test/example behavior mapping.
+- `current/tracking_quality_audit.md` - deterministic Optimized tracking
+  fallback, diagnostics, and random-audit baseline evidence.
 - `current/visualization.md` - locally generated algorithm visualization
   gallery evidence and generation policy.
 - `current/packaging.md` - installed CMake, pkg-config, static, DLL, and shared
@@ -50,7 +52,8 @@ Historical rewrite plans and release evidence are retained for traceability.
   verifier hardening evidence. `release/checklists/0.8.0-readiness.md` records
   the focused stable-review readiness audit for the current gallery/verifier
   evidence. `release/checklists/0.8.0.md` records the stable visualization
-  evidence release closeout.
+  evidence release closeout. `release/checklists/0.9.0-alpha.md` records the
+  first `0.9.0-design` tracking quality baseline evidence.
 - `release/evidence/verification_report.md` - local and CI verification
   history.
 - `release/evidence/performance_report.md` - performance procedure and release

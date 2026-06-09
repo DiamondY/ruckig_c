@@ -3623,6 +3623,430 @@ static size_t tracking_random_pick(unsigned* state, size_t count) {
     return (size_t)(tracking_random_next(state) % (unsigned)count);
 }
 
+static size_t tracking_random_audit_pick(unsigned* state, size_t count) {
+    return (size_t)((tracking_random_next(state) >> 8u) % (unsigned)count);
+}
+
+static bool tracking_random_audit_bool(unsigned* state) {
+    return ((tracking_random_next(state) >> 8u) & 1u) != 0u;
+}
+
+typedef struct tracking_audit_case_config {
+    size_t sample_index;
+    size_t dofs;
+    size_t lookahead_count;
+    int signal;
+    double reactiveness;
+    ruckig_tracking_optimized_strategy_t strategy;
+    bool has_disabled_dof;
+    size_t disabled_dof;
+    bool tight_constraints;
+    double start_time;
+} tracking_audit_case_config_t;
+
+typedef struct tracking_audit_case_result {
+    tracking_audit_case_config_t config;
+    ruckig_result_t result;
+    ruckig_tracking_calculation_status_t status;
+    ruckig_tracking_diagnostics_t diagnostics;
+} tracking_audit_case_result_t;
+
+typedef struct tracking_audit_bucket {
+    size_t samples;
+    size_t optimized;
+    size_t fallback;
+    size_t candidates;
+    size_t valid;
+    size_t rejected;
+    size_t budget_exhausted;
+    double improvement_sum;
+} tracking_audit_bucket_t;
+
+typedef struct tracking_audit_stats {
+    tracking_audit_bucket_t overall;
+    tracking_audit_bucket_t by_strategy[3];
+    tracking_audit_bucket_t by_dof[4];
+    tracking_audit_bucket_t by_signal[4];
+    tracking_audit_bucket_t by_lookahead[4];
+    tracking_audit_bucket_t by_reactiveness[4];
+    tracking_audit_bucket_t by_disabled[2];
+    tracking_audit_bucket_t by_constraints[2];
+} tracking_audit_stats_t;
+
+typedef struct tracking_audit_representatives {
+    tracking_audit_case_result_t cases[8];
+    const char* reasons[8];
+    size_t count;
+    bool strategy_seen[3];
+    bool disabled_seen;
+    bool tight_seen;
+    bool budget_seen;
+} tracking_audit_representatives_t;
+
+static const char* tracking_strategy_name(ruckig_tracking_optimized_strategy_t strategy) {
+    switch (strategy) {
+    case RUCKIG_TRACKING_OPTIMIZED_STABLE:
+        return "stable";
+    case RUCKIG_TRACKING_OPTIMIZED_BALANCED:
+        return "balanced";
+    case RUCKIG_TRACKING_OPTIMIZED_AGGRESSIVE:
+        return "aggressive";
+    }
+    return "unknown";
+}
+
+static size_t tracking_strategy_index(ruckig_tracking_optimized_strategy_t strategy) {
+    switch (strategy) {
+    case RUCKIG_TRACKING_OPTIMIZED_STABLE:
+        return 0;
+    case RUCKIG_TRACKING_OPTIMIZED_BALANCED:
+        return 1;
+    case RUCKIG_TRACKING_OPTIMIZED_AGGRESSIVE:
+        return 2;
+    }
+    return 0;
+}
+
+static const char* tracking_signal_name(int signal) {
+    switch (signal) {
+    case 0:
+        return "ramp";
+    case 1:
+        return "constant_acceleration";
+    case 2:
+        return "sinus";
+    case 3:
+        return "half_sinus";
+    }
+    return "unknown";
+}
+
+static const char* tracking_status_name(ruckig_tracking_calculation_status_t status) {
+    switch (status) {
+    case RUCKIG_TRACKING_CALCULATION_NONE:
+        return "none";
+    case RUCKIG_TRACKING_CALCULATION_FAST:
+        return "fast";
+    case RUCKIG_TRACKING_CALCULATION_OPTIMIZED:
+        return "optimized";
+    case RUCKIG_TRACKING_CALCULATION_FAST_FALLBACK:
+        return "fast_fallback";
+    case RUCKIG_TRACKING_CALCULATION_ERROR:
+        return "error";
+    }
+    return "unknown";
+}
+
+static const char* tracking_dof_number_name(size_t dof) {
+    static const char* names[8] = {"0", "1", "2", "3", "4", "5", "6", "7"};
+    return dof < 8 ? names[dof] : "unknown";
+}
+
+static size_t tracking_dof_index(size_t dofs) {
+    if (dofs == 1) {
+        return 0;
+    }
+    if (dofs == 2) {
+        return 1;
+    }
+    if (dofs == 4) {
+        return 2;
+    }
+    return 3;
+}
+
+static size_t tracking_lookahead_index(size_t lookahead_count) {
+    if (lookahead_count == 1) {
+        return 0;
+    }
+    if (lookahead_count == 2) {
+        return 1;
+    }
+    if (lookahead_count == 5) {
+        return 2;
+    }
+    return 3;
+}
+
+static size_t tracking_reactiveness_index(double reactiveness) {
+    if (reactiveness < 0.125) {
+        return 0;
+    }
+    if (reactiveness < 0.375) {
+        return 1;
+    }
+    if (reactiveness < 0.75) {
+        return 2;
+    }
+    return 3;
+}
+
+static void apply_tracking_audit_constraints(ruckig_input_t* input, size_t dofs, bool tight_constraints) {
+    size_t dof;
+    if (!tight_constraints) {
+        return;
+    }
+    for (dof = 0; dof < dofs; ++dof) {
+        ruckig_input_max_velocity_data(input)[dof] *= 0.55;
+        ruckig_input_max_acceleration_data(input)[dof] *= 0.65;
+        ruckig_input_max_jerk_data(input)[dof] *= 0.70;
+    }
+}
+
+static void fill_tracking_audit_lookahead(
+    const tracking_audit_case_config_t* config,
+    ruckig_target_state_sequence_t* lookahead
+) {
+    size_t ahead;
+    double* position = ruckig_target_state_sequence_position_data(lookahead);
+    double* velocity = ruckig_target_state_sequence_velocity_data(lookahead);
+    double* acceleration = ruckig_target_state_sequence_acceleration_data(lookahead);
+    CHECK_EQ_INT(ruckig_target_state_sequence_set_count(lookahead, config->lookahead_count), RUCKIG_WORKING);
+    for (ahead = 0; ahead < config->lookahead_count; ++ahead) {
+        size_t dof;
+        const double time = config->start_time + (double)ahead * 0.01;
+        for (dof = 0; dof < config->dofs; ++dof) {
+            tracking_signal_value(
+                config->signal,
+                dof,
+                time,
+                &position[ahead * config->dofs + dof],
+                &velocity[ahead * config->dofs + dof],
+                &acceleration[ahead * config->dofs + dof]
+            );
+        }
+    }
+}
+
+static void run_tracking_audit_case(
+    const tracking_audit_case_config_t* config,
+    tracking_audit_case_result_t* case_result
+) {
+    ruckig_tracking_t* tracking = NULL;
+    ruckig_target_state_sequence_t* lookahead = NULL;
+    ruckig_input_t* input = NULL;
+    ruckig_output_t* output = NULL;
+
+    memset(case_result, 0, sizeof(*case_result));
+    case_result->config = *config;
+
+    CHECK_EQ_INT(ruckig_tracking_create(&tracking, config->dofs, 0.01), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_target_state_sequence_create(&lookahead, config->dofs, config->lookahead_count), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_input_create(&input, config->dofs), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_output_create(&output, config->dofs), RUCKIG_WORKING);
+    fill_tracking_input_nd(input, config->dofs);
+    apply_tracking_audit_constraints(input, config->dofs, config->tight_constraints);
+    if (config->has_disabled_dof) {
+        CHECK_EQ_INT(ruckig_input_set_dof_enabled(input, config->disabled_dof, false), RUCKIG_WORKING);
+    }
+    CHECK_EQ_INT(ruckig_tracking_set_mode(tracking, RUCKIG_TRACKING_OPTIMIZED), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_tracking_set_optimized_strategy(tracking, config->strategy), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_tracking_set_reactiveness(tracking, config->reactiveness), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_tracking_set_look_ahead_cycles(tracking, config->lookahead_count), RUCKIG_WORKING);
+    fill_tracking_audit_lookahead(config, lookahead);
+
+    case_result->result = ruckig_tracking_update_with_lookahead(tracking, lookahead, input, output);
+    CHECK_TRUE(case_result->result == RUCKIG_WORKING || case_result->result == RUCKIG_FINISHED);
+    case_result->status = ruckig_tracking_get_last_calculation_status(tracking);
+    CHECK_TRUE(tracking_optimized_status_is_success(case_result->status));
+    CHECK_TRUE(ruckig_tracking_get_last_candidate_count(tracking) >= 1);
+    CHECK_TRUE(ruckig_tracking_get_last_candidate_count(tracking) <= ruckig_tracking_get_max_optimized_candidates(tracking));
+    check_tracking_output_constraints(output, input, config->dofs);
+    CHECK_EQ_INT(ruckig_tracking_get_last_diagnostics(tracking, &case_result->diagnostics), RUCKIG_WORKING);
+    check_tracking_diagnostics_common(tracking, &case_result->diagnostics);
+    CHECK_EQ_INT(case_result->diagnostics.mode, RUCKIG_TRACKING_OPTIMIZED);
+    CHECK_EQ_INT(case_result->diagnostics.optimized_strategy, config->strategy);
+    CHECK_TRUE(case_result->diagnostics.fallback_step_count + case_result->diagnostics.optimized_step_count == 1);
+    CHECK_EQ_INT(case_result->diagnostics.error_step_count, 0);
+
+    ruckig_output_destroy(output);
+    ruckig_input_destroy(input);
+    ruckig_target_state_sequence_destroy(lookahead);
+    ruckig_tracking_destroy(tracking);
+}
+
+static void tracking_audit_add_bucket(
+    tracking_audit_bucket_t* bucket,
+    const tracking_audit_case_result_t* case_result
+) {
+    ++bucket->samples;
+    if (case_result->status == RUCKIG_TRACKING_CALCULATION_OPTIMIZED) {
+        ++bucket->optimized;
+    } else if (case_result->status == RUCKIG_TRACKING_CALCULATION_FAST_FALLBACK) {
+        ++bucket->fallback;
+    }
+    bucket->candidates += case_result->diagnostics.candidate_count;
+    bucket->valid += case_result->diagnostics.valid_candidate_count;
+    bucket->rejected += case_result->diagnostics.rejected_candidate_count;
+    bucket->budget_exhausted += case_result->diagnostics.budget_exhausted_count;
+    bucket->improvement_sum += case_result->diagnostics.improvement_ratio;
+}
+
+static void tracking_audit_add_stats(
+    tracking_audit_stats_t* stats,
+    const tracking_audit_case_result_t* case_result
+) {
+    const tracking_audit_case_config_t* config = &case_result->config;
+    tracking_audit_add_bucket(&stats->overall, case_result);
+    tracking_audit_add_bucket(&stats->by_strategy[tracking_strategy_index(config->strategy)], case_result);
+    tracking_audit_add_bucket(&stats->by_dof[tracking_dof_index(config->dofs)], case_result);
+    tracking_audit_add_bucket(&stats->by_signal[(size_t)config->signal], case_result);
+    tracking_audit_add_bucket(&stats->by_lookahead[tracking_lookahead_index(config->lookahead_count)], case_result);
+    tracking_audit_add_bucket(&stats->by_reactiveness[tracking_reactiveness_index(config->reactiveness)], case_result);
+    tracking_audit_add_bucket(&stats->by_disabled[config->has_disabled_dof ? 1 : 0], case_result);
+    tracking_audit_add_bucket(&stats->by_constraints[config->tight_constraints ? 1 : 0], case_result);
+}
+
+static void tracking_audit_print_bucket(const char* group, const char* name, const tracking_audit_bucket_t* bucket) {
+    const double average_improvement = bucket->samples > 0 ? bucket->improvement_sum / (double)bucket->samples : 0.0;
+    printf(
+        "tracking random audit %s %s: samples %zu optimized %zu fallback %zu candidates %zu valid %zu rejected %zu budget_exhausted %zu average_improvement %.9g\n",
+        group,
+        name,
+        bucket->samples,
+        bucket->optimized,
+        bucket->fallback,
+        bucket->candidates,
+        bucket->valid,
+        bucket->rejected,
+        bucket->budget_exhausted,
+        average_improvement
+    );
+}
+
+static bool tracking_audit_case_recorded(
+    const tracking_audit_representatives_t* representatives,
+    const tracking_audit_case_result_t* case_result
+) {
+    size_t i;
+    for (i = 0; i < representatives->count; ++i) {
+        if (representatives->cases[i].config.sample_index == case_result->config.sample_index) {
+            return true;
+        }
+    }
+    return false;
+}
+
+static void tracking_audit_record_representative(
+    tracking_audit_representatives_t* representatives,
+    const tracking_audit_case_result_t* case_result,
+    const char* reason
+) {
+    if (representatives->count >= sizeof(representatives->cases) / sizeof(representatives->cases[0])
+        || tracking_audit_case_recorded(representatives, case_result)) {
+        return;
+    }
+    representatives->cases[representatives->count] = *case_result;
+    representatives->reasons[representatives->count] = reason;
+    ++representatives->count;
+}
+
+static void tracking_audit_maybe_record_fallback(
+    tracking_audit_representatives_t* representatives,
+    const tracking_audit_case_result_t* case_result
+) {
+    const size_t strategy_index = tracking_strategy_index(case_result->config.strategy);
+    if (case_result->status != RUCKIG_TRACKING_CALCULATION_FAST_FALLBACK) {
+        return;
+    }
+    if (!representatives->strategy_seen[strategy_index]) {
+        representatives->strategy_seen[strategy_index] = true;
+        tracking_audit_record_representative(
+            representatives,
+            case_result,
+            strategy_index == 0 ? "stable_fallback" : (strategy_index == 1 ? "balanced_fallback" : "aggressive_fallback")
+        );
+    }
+    if (case_result->config.has_disabled_dof && !representatives->disabled_seen) {
+        representatives->disabled_seen = true;
+        tracking_audit_record_representative(representatives, case_result, "disabled_fallback");
+    }
+    if (case_result->config.tight_constraints && !representatives->tight_seen) {
+        representatives->tight_seen = true;
+        tracking_audit_record_representative(representatives, case_result, "tight_valid_fallback");
+    }
+    if (case_result->diagnostics.budget_exhausted_count > 0 && !representatives->budget_seen) {
+        representatives->budget_seen = true;
+        tracking_audit_record_representative(representatives, case_result, "budget_exhausted_fallback");
+    }
+}
+
+static void tracking_audit_print_case(
+    const char* reason,
+    const tracking_audit_case_result_t* case_result
+) {
+    const tracking_audit_case_config_t* config = &case_result->config;
+    const ruckig_tracking_diagnostics_t* diagnostics = &case_result->diagnostics;
+    printf(
+        "tracking random audit fallback_case reason=%s sample=%zu strategy=%s dofs=%zu signal=%s lookahead=%zu reactiveness=%.2f disabled=%s disabled_dof=%s constraints=%s status=%s candidates=%zu fast=%zu instantaneous=%zu horizon=%zu terminal_blend=%zu derivative_damped=%zu lead_lag=%zu budget_exhausted=%zu fast_score=%.9g best_score=%.9g improvement=%.9g\n",
+        reason,
+        config->sample_index,
+        tracking_strategy_name(config->strategy),
+        config->dofs,
+        tracking_signal_name(config->signal),
+        config->lookahead_count,
+        config->reactiveness,
+        config->has_disabled_dof ? "yes" : "no",
+        config->has_disabled_dof ? tracking_dof_number_name(config->disabled_dof) : "none",
+        config->tight_constraints ? "tight_valid" : "default",
+        tracking_status_name(case_result->status),
+        diagnostics->candidate_count,
+        diagnostics->fast_candidate_count,
+        diagnostics->instantaneous_candidate_count,
+        diagnostics->horizon_candidate_count,
+        diagnostics->terminal_blend_candidate_count,
+        diagnostics->derivative_damped_candidate_count,
+        diagnostics->lead_lag_candidate_count,
+        diagnostics->budget_exhausted_count,
+        diagnostics->fast_score,
+        diagnostics->best_score,
+        diagnostics->improvement_ratio
+    );
+}
+
+static void tracking_audit_print_stats(
+    const tracking_audit_stats_t* stats,
+    const tracking_audit_representatives_t* representatives,
+    size_t samples,
+    unsigned seed
+) {
+    static const char* strategy_names[3] = {"stable", "balanced", "aggressive"};
+    static const char* dof_names[4] = {"1", "2", "4", "8"};
+    static const char* signal_names[4] = {"ramp", "constant_acceleration", "sinus", "half_sinus"};
+    static const char* lookahead_names[4] = {"1", "2", "5", "10"};
+    static const char* reactiveness_names[4] = {"0", "0.25", "0.5", "1"};
+    static const char* disabled_names[2] = {"enabled_only", "has_disabled_dof"};
+    static const char* constraint_names[2] = {"default", "tight_valid"};
+    size_t i;
+
+    printf("tracking random audit: samples %zu seed %u\n", samples, seed);
+    tracking_audit_print_bucket("overall", "all", &stats->overall);
+    for (i = 0; i < 3; ++i) {
+        tracking_audit_print_bucket("by_strategy", strategy_names[i], &stats->by_strategy[i]);
+    }
+    for (i = 0; i < 4; ++i) {
+        tracking_audit_print_bucket("by_dof", dof_names[i], &stats->by_dof[i]);
+    }
+    for (i = 0; i < 4; ++i) {
+        tracking_audit_print_bucket("by_signal", signal_names[i], &stats->by_signal[i]);
+    }
+    for (i = 0; i < 4; ++i) {
+        tracking_audit_print_bucket("by_lookahead", lookahead_names[i], &stats->by_lookahead[i]);
+    }
+    for (i = 0; i < 4; ++i) {
+        tracking_audit_print_bucket("by_reactiveness", reactiveness_names[i], &stats->by_reactiveness[i]);
+    }
+    for (i = 0; i < 2; ++i) {
+        tracking_audit_print_bucket("by_disabled", disabled_names[i], &stats->by_disabled[i]);
+    }
+    for (i = 0; i < 2; ++i) {
+        tracking_audit_print_bucket("by_constraints", constraint_names[i], &stats->by_constraints[i]);
+    }
+    for (i = 0; i < representatives->count; ++i) {
+        tracking_audit_print_case(representatives->reasons[i], &representatives->cases[i]);
+    }
+}
+
 void run_tracking_random_tests(size_t samples, unsigned seed) {
     const size_t dof_values[4] = {1, 2, 4, 8};
     const size_t lookahead_values[4] = {1, 2, 5, 10};
@@ -3711,6 +4135,68 @@ void run_tracking_random_tests(size_t samples, unsigned seed) {
     );
 }
 
+void run_tracking_random_audit_tests(size_t samples, unsigned seed) {
+    const size_t dof_values[4] = {1, 2, 4, 8};
+    const size_t lookahead_values[4] = {1, 2, 5, 10};
+    const double reactiveness_values[4] = {0.0, 0.25, 0.5, 1.0};
+    const ruckig_tracking_optimized_strategy_t strategy_values[3] = {
+        RUCKIG_TRACKING_OPTIMIZED_STABLE,
+        RUCKIG_TRACKING_OPTIMIZED_BALANCED,
+        RUCKIG_TRACKING_OPTIMIZED_AGGRESSIVE
+    };
+    tracking_audit_stats_t stats;
+    tracking_audit_representatives_t representatives;
+    size_t sample;
+    unsigned state = seed ? seed : 1u;
+
+    memset(&stats, 0, sizeof(stats));
+    memset(&representatives, 0, sizeof(representatives));
+
+    for (sample = 0; sample < samples; ++sample) {
+        tracking_audit_case_config_t config;
+        tracking_audit_case_result_t case_result;
+        memset(&config, 0, sizeof(config));
+        config.sample_index = sample;
+        config.dofs = dof_values[tracking_random_audit_pick(&state, 4)];
+        config.lookahead_count = lookahead_values[tracking_random_audit_pick(&state, 4)];
+        config.signal = (int)tracking_random_audit_pick(&state, 4);
+        config.reactiveness = reactiveness_values[tracking_random_audit_pick(&state, 4)];
+        config.strategy = strategy_values[tracking_random_audit_pick(&state, 3)];
+        config.start_time = (double)(sample % 200u) * 0.01;
+        config.has_disabled_dof = false;
+        config.disabled_dof = 0;
+        if (config.dofs > 1 && tracking_random_audit_bool(&state)) {
+            config.has_disabled_dof = true;
+            config.disabled_dof = tracking_random_audit_pick(&state, config.dofs);
+        }
+        config.tight_constraints = tracking_random_audit_bool(&state);
+
+        run_tracking_audit_case(&config, &case_result);
+        tracking_audit_add_stats(&stats, &case_result);
+        tracking_audit_maybe_record_fallback(&representatives, &case_result);
+    }
+
+    tracking_audit_print_stats(&stats, &representatives, samples, seed);
+}
+
+static void test_tracking_random_audit_fixed_cases(void) {
+    const tracking_audit_case_config_t cases[] = {
+        {6, 2, 1, 1, 0.25, RUCKIG_TRACKING_OPTIMIZED_STABLE, true, 0, true, 0.06},
+        {12, 2, 5, 1, 0.0, RUCKIG_TRACKING_OPTIMIZED_BALANCED, true, 1, true, 0.12},
+        {22, 8, 5, 0, 0.25, RUCKIG_TRACKING_OPTIMIZED_AGGRESSIVE, true, 7, true, 0.22}
+    };
+    size_t i;
+    for (i = 0; i < sizeof(cases) / sizeof(cases[0]); ++i) {
+        tracking_audit_case_result_t case_result;
+        run_tracking_audit_case(&cases[i], &case_result);
+        CHECK_TRUE(tracking_optimized_status_is_success(case_result.status));
+        CHECK_EQ_INT(case_result.diagnostics.fallback_step_count + case_result.diagnostics.optimized_step_count, 1);
+        CHECK_EQ_INT(case_result.diagnostics.error_step_count, 0);
+        CHECK_TRUE(case_result.diagnostics.candidate_count >= 1);
+        CHECK_TRUE(case_result.diagnostics.fast_score >= case_result.diagnostics.best_score - 1e-12);
+    }
+}
+
 void run_waypoint_tests(void) {
     test_waypoint_constructors_storage_and_optimizer();
     test_waypoint_validation_and_filter();
@@ -3762,6 +4248,7 @@ void run_tracking_optimized_tests(void) {
     test_tracking_optimized_validation_and_diagnostics();
     test_tracking_optimized_quality_against_fast_baseline();
     test_tracking_optimized_strategy_quality_corpus();
+    test_tracking_random_audit_fixed_cases();
 }
 
 void run_tracking_quality_tests(void) {
