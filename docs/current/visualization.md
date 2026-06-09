@@ -1,26 +1,25 @@
 # Algorithm Visualization
 
-This document records the current `0.10.0` Visualization v2 local gallery
-evidence on `main`. The gallery is generated from `ruckig_c` public C ABI data
-through the Python `cffi` prototype, NumPy, and Matplotlib `Agg`. It does not
-copy original Ruckig images, PDFs, or plotter scripts as primary project
-evidence.
+This document records the stable `v0.10.0` Visualization v2 local gallery
+evidence. The gallery is generated from `ruckig_c` public C ABI data through
+the Python `cffi` prototype, NumPy, and Matplotlib `Agg`. It does not copy
+original Ruckig images, PDFs, or plotter scripts as primary project evidence.
 
 ## Status
 
-`0.10.0-alpha` replaces the `main` gallery with a 30-PNG Visualization v2 set.
-The previous stable-adopted v1 gallery remains traceable in the `v0.9.0` tag;
-it is not duplicated in a historical assets directory on `main`.
+`v0.10.0` stable-adopts the 30-PNG Visualization v2 set that was introduced in
+`0.10.0-alpha` and reviewed during `0.10.0-readiness`. The previous
+stable-adopted v1 gallery remains traceable in the `v0.9.0` tag; it is not
+duplicated in a historical assets directory on `main`.
 
 Visualization v2 is local-only, PNG-only, and evidence-only. It does not add a
 default GitHub Actions plotting job, CMake/CTest gate, public C API, public
 symbol, enum value, result-code value, Python package, Rust crate, package
-recipe, cloud path, or Pro/cloud equivalence claim. `0.10.0-alpha.2` adds an
+recipe, cloud path, or Pro/cloud equivalence claim. `0.10.0-alpha.2` added an
 optional manual GitHub Actions artifact path for review copies of the gallery;
-it remains off for push and pull-request CI. `0.10.0-readiness` reruns the
-local verifier, strict regeneration, optional manual artifact workflow, and
-release-readiness boundary checks. If ordinary push CI is green, the
-Visualization v2 evidence is ready for `v0.10.0 stable closeout`.
+it remains off for push and pull-request CI. `v0.10.0` records local verifier,
+strict regeneration, manual artifact workflow, release-random, CI, tag, and
+GitHub Release evidence in `docs/release/checklists/0.10.0.md`.
 
 ```powershell
 cmake --build --preset windows-clang-ninja-shared
@@ -31,11 +30,12 @@ $env:RUCKIG_C_SHARED_LIBRARY=(Resolve-Path out\build\windows-clang-ninja-shared\
 ```
 
 The generator writes `1400x900` PNG assets and `manifest.json` under
-`docs/assets/visualization/`. The manifest label is
-`0.10.0-alpha visualization v2 evidence`. It records deterministic file names,
-categories, original example mapping, scenario metrics, byte counts, and
-SHA-256 hashes. It intentionally avoids local absolute paths, virtualenv paths,
-timestamps, generated dates, and raw sample paths.
+`docs/assets/visualization/`. The stable release adopts the committed PNGs and
+manifest byte-for-byte. The manifest label remains `0.10.0-alpha visualization
+v2 evidence` intentionally as asset provenance. It records deterministic file
+names, categories, original example mapping, scenario metrics, byte counts,
+and SHA-256 hashes. It intentionally avoids local absolute paths, virtualenv
+paths, timestamps, generated dates, and raw sample paths.
 
 ## Verify
 
@@ -78,8 +78,8 @@ verification, runs strict regeneration, and uploads one artifact named
 
 The artifact is a review aid. It does not replace the committed gallery, does
 not run on ordinary push or pull-request CI, and does not promote plotting into
-a release gate. The readiness audit treats this manual artifact workflow as
-optional review evidence only; stable closeout is still a separate step.
+a default CI gate. `v0.10.0` records the manual artifact workflow as stable
+release evidence on the release candidate and tag.
 
 ## V2 Inventory
 
@@ -233,4 +233,5 @@ Cross-topic summaries:
 ## Follow-Up
 
 Optional CI visualization artifacts now exist as manual-only review evidence.
-Making visualization a default CI or release gate remains a separate decision.
+Making visualization a default push or pull-request CI gate remains a separate
+decision.

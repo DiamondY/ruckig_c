@@ -611,3 +611,30 @@ Compatibility rules for the `v0.9.0` line:
 ```text
 out/build/<preset>/artifacts/abi/0.9.0/
 ```
+
+## v0.10.0 Visualization V2 Evidence ABI Baseline
+
+`v0.10.0` is a stable Visualization v2 evidence release. It keeps the
+`v0.9.0` 172-symbol public C ABI unchanged while stabilizing the 30-PNG local
+Visualization v2 gallery, local verifier, strict regeneration evidence, and
+manual-only CI artifact workflow reviewed during `0.10.0-readiness`.
+
+Compatibility rules for the `v0.10.0` line:
+
+- Public C symbol count remains 172.
+- Public additions in `v0.10.0`: 0.
+- Public removals in `v0.10.0`: 0.
+- Existing public function signatures, enum numeric values, and result-code
+  numeric values are unchanged.
+- `docs/abi/public-symbols.txt`, `docs/abi/public-symbol-exceptions.txt`, and
+  `docs/abi/exceptions.md` are unchanged from the `v0.9.0` stable baseline.
+- Visualization v2 tooling is documentation/evidence work. It does not add
+  visualization-specific public C functions, exported symbols, public
+  diagnostics fields, or release package APIs.
+- `CMakeLists.txt` project version and `RUCKIG_C_VERSION_*` macros are
+  `0.10.0`.
+- ABI artifact output paths use the stable release evidence directory:
+
+```text
+out/build/<preset>/artifacts/abi/0.10.0/
+```

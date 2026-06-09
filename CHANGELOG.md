@@ -1,17 +1,41 @@
 # Changelog
 
-## 0.10.0-design - Unreleased
+## 0.11.0-design - Unreleased
 
-Current `main` is open for `0.10.0-design` work after the published `v0.9.0`
-stable tracking quality/stability evidence release.
+Current `main` is open for `0.11.0-design` work after the published `v0.10.0`
+stable Visualization v2 evidence release.
 
 First priority:
 
-- Visualization v2 planning and implementation.
-- Optional CI visualization artifacts, without making plotting/verifier jobs a
-  default release gate unless separately accepted.
-- Richer local plots and gallery evidence built from the public C ABI and
-  prototype tooling.
+- Soft interruption checkpoint design and evidence planning.
+- Keep any timeout/checkpoint semantics behind a dedicated design and
+  compatibility review before changing public behavior.
+- Preserve the stable `v0.10.0` Visualization v2 gallery and the 172-symbol
+  public C ABI unless a separate public API decision is accepted.
+
+Release boundary:
+
+- `v0.10.0` is the current stable release.
+- Public C ABI expansion is not the default goal for `0.11.0-design`.
+- `0.10.1` remains reserved for emergency patch fixes only.
+- Package-manager recipes, formal Python/Rust publication, cloud/remote
+  calculation, Pro/cloud equivalence claims, formal global optimality proof,
+  and upstream baseline upgrades remain deferred unless separately accepted.
+
+## 0.10.0 - 2026-06-09
+
+`0.10.0` is the stable Visualization v2 evidence release. It keeps the
+`v0.9.0` 172-symbol public C ABI unchanged while stabilizing the 30-PNG local
+Visualization v2 gallery, local verifier, strict regeneration evidence, and
+manual-only CI artifact workflow reviewed during `0.10.0-readiness`.
+
+Release focus:
+
+- Visualization v2 gallery stabilization without public C ABI expansion.
+- Local Matplotlib `Agg` and NumPy PNG evidence generated from public C ABI
+  data through the Python `cffi` prototype.
+- Manual-only Visualization v2 CI artifact evidence, without making
+  plotting/verifier jobs default push or pull-request gates.
 
 `0.10.0-alpha` visualization v2 gallery evidence:
 
@@ -50,7 +74,7 @@ First priority:
 
 - Records full local readiness evidence for deciding whether the current
   Visualization v2 gallery, verifier, and manual-only CI artifact path can
-  enter a later `v0.10.0` stable closeout.
+  enter stable closeout.
 - Reruns local build, visualization verifier, strict regeneration, routine
   CTest, performance, ABI/export, Python smoke, Rust smoke, wrapper examples,
   optional manual visualization artifact workflow, and boundary diff gates.
@@ -60,14 +84,26 @@ First priority:
 - Keeps readiness evidence-only: no version bump, tag, GitHub Release, manual
   release-random workflow, public C API, public symbol, CMake gate, or default
   visualization CI gate is added.
-- Readiness conclusion: if ordinary push CI succeeds for the evidence commit,
-  the next step can be `v0.10.0 stable closeout`.
+- Readiness conclusion: ordinary push CI succeeded for the evidence commit, so
+  the line entered `v0.10.0` stable closeout.
+
+`v0.10.0` stable closeout:
+
+- Stabilizes the existing 30 committed `1400x900` PNG files and
+  `docs/assets/visualization/manifest.json` byte-for-byte; the manifest label
+  remains `0.10.0-alpha visualization v2 evidence` as asset provenance.
+- Moves ABI artifact output paths to `artifacts/abi/0.10.0`.
+- Keeps the public C ABI unchanged at 172 symbols, with public additions `0`,
+  public removals `0`, and unapproved exported symbols `0`.
+- Records full local release gates, ordinary CI, manual release-random
+  workflow evidence, manual Visualization v2 artifact workflow evidence,
+  annotated tag publication, and GitHub Release publication.
 
 Release boundary:
 
-- `v0.9.0` remains the current stable release.
-- Public C ABI expansion is not the default goal for `0.10.0-design`.
-- `0.9.1` remains reserved for emergency patch fixes only.
+- `v0.10.0` is the current stable release.
+- Public C ABI expansion was not part of `v0.10.0`.
+- `0.10.1` remains reserved for emergency patch fixes only.
 - Package-manager recipes, formal Python/Rust publication, cloud/remote
   calculation, Pro/cloud equivalence claims, formal global optimality proof,
   soft interruption checkpoints, and upstream baseline upgrades remain deferred

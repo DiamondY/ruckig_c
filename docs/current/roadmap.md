@@ -3,13 +3,34 @@
 This roadmap keeps shipped release scope locked while preserving concrete
 follow-up work for stability and future feature planning.
 
-## 0.10.0 Design Line
+## 0.11.0 Design Line
 
-Current `main` is `0.10.0-design - Unreleased` after the published `v0.9.0`
-tracking quality/stability evidence release.
+Current `main` is `0.11.0-design - Unreleased` after the published `v0.10.0`
+Visualization v2 evidence release.
+
+- First priority: soft interruption checkpoint design and evidence planning.
+- Review `docs/design/interrupt_calculation_duration.md` before changing
+  timeout/checkpoint behavior.
+- Keep soft interruption semantics behind a dedicated compatibility review;
+  do not change public C ABI, enum numeric values, or result-code numeric
+  values by default.
+- Keep `v0.10.0` as the current stable release.
+- Keep the `v0.9.0` 172-symbol public C ABI baseline unless a separate public
+  API decision is accepted.
+- `0.10.1` remains reserved for emergency patch fixes only.
+- Package-manager recipes, formal Python/Rust publication, cloud/remote
+  calculation, Pro/cloud equivalence claims, formal global optimality proof,
+  and upstream baseline upgrades remain deferred unless separately accepted.
+
+## 0.10.0 Visualization V2 Evidence Release
+
+Published as `v0.10.0`. This release keeps the `v0.9.0` 172-symbol public C
+ABI unchanged while stabilizing the Visualization v2 gallery, local verifier,
+strict regeneration evidence, and manual-only CI artifact workflow reviewed
+during `0.10.0-readiness`.
 
 - First priority: visualization v2, optional CI visualization artifacts, and
-  richer local plots.
+  richer local plots. This priority is complete for the stable release.
 - `0.10.0-alpha` adds the first Visualization v2 evidence slice: a local-only
   30-PNG Matplotlib `Agg` gallery, `1400x900` PNG assets, deterministic
   manifest, and hybrid verifier with optional strict regeneration.
@@ -18,20 +39,27 @@ tracking quality/stability evidence release.
   the gallery, verifies it, strict-regenerates it, and uploads the regenerated
   PNGs, manifest, and logs as review artifacts.
 - `0.10.0-readiness` records the full local release-readiness audit for the
-  Visualization v2 gallery, verifier, and manual-only artifact path. If the
-  ordinary push CI for the evidence commit is green, the next step can be
-  `v0.10.0 stable closeout`.
+  Visualization v2 gallery, verifier, and manual-only artifact path. The
+  ordinary push CI for the evidence commit succeeded, and the line entered
+  stable closeout.
+- `v0.10.0` stabilizes the committed 30-PNG gallery and manifest
+  byte-for-byte. The manifest label remains `0.10.0-alpha visualization v2
+  evidence` as asset provenance.
+- Stable release evidence includes local verifier, strict regeneration,
+  ordinary CI, manual release-random, manual Visualization v2 artifact
+  workflows on the release candidate and tag, annotated tag publication, and
+  GitHub Release publication.
 - The alpha replaces the current `main` gallery assets; the previous v1
   provenance remains available through the `v0.9.0` tag.
-- Keep `v0.9.0` as the current stable release.
-- Keep the `v0.8.0` 172-symbol public C ABI baseline unless a separate public
+- Keep `v0.10.0` as the current stable release.
+- Keep the `v0.9.0` 172-symbol public C ABI baseline unless a separate public
   API decision is accepted.
 - Do not promote plotting or verifier work into a default release/CI gate
   without a separate dependency and artifact policy decision; the alpha.2 CI
   artifact path remains manual-only. Stable closeout, not readiness, is where
   version bump, tag, GitHub Release, and manual release-random workflow steps
-  occur.
-- `0.9.1` remains reserved for emergency patch fixes only.
+  occur. For this line, those steps are complete in `v0.10.0`.
+- `0.10.1` remains reserved for emergency patch fixes only.
 - Package-manager recipes, formal Python/Rust publication, soft interruption,
   cloud/remote calculation, formal Pro/cloud equivalence claims, formal global
   optimality proof, and upstream baseline upgrades remain deferred unless

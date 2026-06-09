@@ -4,12 +4,12 @@
 ABI data through the Python `cffi` prototype. It is a documentation/evidence
 tool, not a release gate and not a stable Python API.
 
-The current `0.10.0-alpha` generator writes a 30-PNG Visualization v2 gallery
-with NumPy and Matplotlib `Agg`. It replaces the `main` v1 gallery under
+The `v0.10.0` generator writes a 30-PNG Visualization v2 gallery with NumPy
+and Matplotlib `Agg`. It replaces the v1 gallery under
 `docs/assets/visualization/`; the previous v1 assets remain traceable through
-the `v0.9.0` tag. `0.10.0-readiness` keeps the committed gallery unchanged and
+the `v0.9.0` tag. `v0.10.0` stable-adopts the committed gallery unchanged and
 uses the local verifier, strict regeneration, and manual artifact workflow as
-stable-review evidence.
+release evidence.
 
 ## Setup
 
@@ -66,8 +66,8 @@ Strict regeneration requires `RUCKIG_C_SHARED_LIBRARY` or `--library`.
 
 ## Optional CI Artifact
 
-`0.10.0-alpha.2` adds a manual-only GitHub Actions artifact path. It is not run
-by ordinary push or pull-request CI.
+`0.10.0-alpha.2` added a manual-only GitHub Actions artifact path. It is not
+run by ordinary push or pull-request CI.
 
 ```powershell
 gh workflow run ci.yml --repo DiamondY/ruckig_c --ref main -f release_random=false -f visualization_artifacts=true
@@ -78,8 +78,9 @@ regenerates the gallery under `out/visualization-artifacts/gallery`, runs the
 default verifier, runs strict regeneration, and uploads `visualization-v2-gallery`
 with the regenerated PNGs, `manifest.json`, and logs.
 
-`0.10.0-readiness` records this workflow as manual-only review evidence. It is
-not a default push or pull-request gate and is not the stable release closeout.
+`v0.10.0` records this workflow as manual-only stable release evidence on the
+release candidate and tag. It is not a default push or pull-request gate and
+does not replace committed assets.
 
 ## Scope
 

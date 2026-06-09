@@ -64,9 +64,12 @@ Implemented and covered by fixed C/oracle tests plus deterministic random oracle
   deterministic tracking audit, tuned evaluator hardening, and fixed stability
   regression evidence while keeping the `v0.8.0` 172-symbol public C ABI
   unchanged.
-- `0.10.0-design - Unreleased` is the current `main` line after `v0.9.0`;
-  first priority is visualization v2, optional CI visualization artifacts, and
-  richer local plots without default public C ABI expansion.
+- `v0.10.0` Visualization v2 evidence stabilization, adopting the 30-PNG local
+  gallery, local verifier, strict regeneration evidence, and manual-only CI
+  artifact workflow while keeping the `v0.9.0` stable C ABI unchanged.
+- `0.11.0-design - Unreleased` is the current `main` line after `v0.10.0`;
+  first priority is soft interruption checkpoint design and evidence planning
+  without default public C ABI expansion.
 - `0.10.0-alpha` visualization v2 local gallery evidence, replacing the
   current `main` gallery with 30 project-owned `1400x900` PNGs and a strict
   local verifier while keeping the `v0.9.0` stable C ABI unchanged.
@@ -77,35 +80,33 @@ Implemented and covered by fixed C/oracle tests plus deterministic random oracle
 - `0.10.0-readiness` release readiness audit evidence, rerunning local build,
   visualization verifier, strict regeneration, routine CTest, performance,
   ABI/export, wrapper smoke, optional manual visualization artifact, and
-  boundary gates to decide whether the Visualization v2 line can enter
-  `v0.10.0` stable closeout.
+  boundary gates before the Visualization v2 line entered `v0.10.0` stable
+  closeout.
 - C examples for position, offline position, online update, per-DoF overrides,
   velocity, stop, minimum duration, waypoints, per-section minimum duration,
   tracking Fast-mode scenarios, and Optimized tracking scenarios.
 
 Release-readiness evidence is tracked under `docs/release/`; see
-`docs/index.md` for the organized documentation map. `v0.9.0` is the current
-stable release. It keeps the `v0.8.0` 172-symbol public C ABI unchanged and
-stabilizes the tracking quality/stability evidence reviewed during
-`0.9.0-readiness`. Current `main` is `0.10.0-design - Unreleased`, with
-visualization v2, optional CI visualization artifacts, and richer local plots
-as the first priority. `0.10.0-alpha` replaces the current `main`
-visualization gallery with a 30-PNG Matplotlib `Agg` and NumPy v2 gallery under
-`docs/assets/visualization/`. The gallery covers local C ABI equivalents of
-original examples `01-10` and `14-16`, plus tracking diagnostics, waypoint
-diagnostics, trajectory anatomy, and cross-topic summary plots; examples
-`11-13` remain excluded because they demonstrate C++ Eigen/custom-vector
-ergonomics rather than C ABI behavior. `tools/visualization/verify_gallery.py`
-verifies the committed `1400x900` PNG/manifest assets locally, including an
-optional strict regeneration check. `0.10.0-alpha.2` adds an optional manual CI
-artifact path for regenerated Visualization v2 PNGs, manifest, and logs; it is
-not a default push/PR gate and does not replace committed assets. The previous
-v1 gallery provenance remains available through the `v0.9.0` tag rather than
-being duplicated on `main`. `0.10.0-readiness` records the full local
-readiness audit for this gallery/verifier/manual-artifact evidence and, if
-ordinary push CI is green, recommends `v0.10.0 stable closeout` as the next
-step. Stable closeout is still where version bump, tag, GitHub Release, and
-manual release-random workflow decisions happen.
+`docs/index.md` for the organized documentation map. `v0.10.0` is the current
+stable release. It keeps the `v0.9.0` 172-symbol public C ABI unchanged and
+stabilizes the Visualization v2 gallery, local verifier, strict regeneration
+evidence, and manual-only CI artifact workflow reviewed during
+`0.10.0-readiness`. Current `main` is `0.11.0-design - Unreleased`, with soft
+interruption checkpoint design and evidence planning as the first priority.
+`v0.10.0` adopts the current gallery as 30 `1400x900` Matplotlib `Agg` and
+NumPy PNG assets under `docs/assets/visualization/`. The gallery covers local
+C ABI equivalents of original examples `01-10` and `14-16`, plus tracking
+diagnostics, waypoint diagnostics, trajectory anatomy, and cross-topic summary
+plots; examples `11-13` remain excluded because they demonstrate C++
+Eigen/custom-vector ergonomics rather than C ABI behavior.
+`tools/visualization/verify_gallery.py` verifies the committed PNG/manifest
+assets locally, including an optional strict regeneration check. The optional
+manual CI artifact path can regenerate Visualization v2 PNGs, manifest, and
+logs for review; it is not a default push/PR gate and does not replace
+committed assets. The previous v1 gallery provenance remains available through
+the `v0.9.0` tag rather than being duplicated on `main`. Stable closeout
+evidence, including release-random and Visualization v2 artifact workflow
+runs, is recorded in `docs/release/checklists/0.10.0.md`.
 The `0.9.0` tracking evidence line
 starts with `docs/current/tracking_quality_audit.md` and a deterministic
 `--tracking-random-audit` C test-runner selector so fallback-heavy Optimized
@@ -118,7 +119,7 @@ Optimized tracking quality thresholds while keeping the public C ABI unchanged.
 as regression evidence before readiness. `0.9.0-readiness` records full local
 readiness evidence for the tracking quality/stability line, and `v0.9.0`
 stabilizes that evidence without changing the 172-symbol public C ABI.
-`0.9.1` is reserved for emergency patch work only.
+`0.9.1` and `0.10.1` are reserved for emergency patch work only.
 `v0.4.0` added waypoint-aware C ABI entry points, per-section constraints,
 global position bounds, and a local coupled waypoint optimizer; `v0.4.1`
 deepened waypoint optimizer evidence; `v0.4.2` keeps that public C surface
