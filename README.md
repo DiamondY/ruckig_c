@@ -60,6 +60,9 @@ Implemented and covered by fixed C/oracle tests plus deterministic random oracle
   `--tracking-stability` and routine CTest coverage for representative tuned
   Optimized tracking behavior without further evaluator tuning or public C ABI
   changes.
+- `0.9.0-readiness` audit evidence, rerunning the full local release-readiness
+  gate set against the current tracking quality/stability evidence before any
+  later `v0.9.0` stable closeout decision.
 - C examples for position, offline position, online update, per-DoF overrides,
   velocity, stop, minimum duration, waypoints, per-section minimum duration,
   tracking Fast-mode scenarios, and Optimized tracking scenarios.
@@ -88,7 +91,11 @@ attribution, and the `--tracking-quality-hardening` selector to record tuned
 Optimized tracking quality thresholds while keeping the public C ABI unchanged.
 `0.9.0-alpha.3` adds `docs/current/tracking_stability.md` and the
 `--tracking-stability` selector to freeze representative alpha.2 tuned behavior
-as regression evidence before readiness.
+as regression evidence before readiness. `0.9.0-readiness` records full local
+readiness evidence for the tracking quality/stability line and treats the
+existing 172-symbol public C ABI as unchanged; only a later stable closeout
+would bump versions, create a tag, publish a GitHub Release, or dispatch manual
+release-random workflows.
 `0.8.1` is reserved for emergency patch work only.
 `v0.4.0` added waypoint-aware C ABI entry points, per-section constraints,
 global position bounds, and a local coupled waypoint optimizer; `v0.4.1`

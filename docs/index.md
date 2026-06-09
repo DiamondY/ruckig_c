@@ -60,7 +60,9 @@ Historical rewrite plans and release evidence are retained for traceability.
   first `0.9.0-design` tracking quality baseline evidence, and
   `release/checklists/0.9.0-alpha.2.md` records the tuned evaluator hardening
   evidence. `release/checklists/0.9.0-alpha.3.md` records the tracking
-  stability regression evidence.
+  stability regression evidence. `release/checklists/0.9.0-readiness.md`
+  records the full local stable-review readiness audit for the tracking
+  quality/stability line without creating a tag or GitHub Release.
 - `release/evidence/verification_report.md` - local and CI verification
   history.
 - `release/evidence/performance_report.md` - performance procedure and release

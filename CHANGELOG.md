@@ -64,6 +64,25 @@ Planned first priority:
 - Kept evaluator scoring, candidate family generation, strategy weights,
   near-tie policy, public diagnostics structs, and public C ABI unchanged.
 
+`0.9.0-readiness` evidence audit:
+
+- Recorded full local release-readiness evidence for deciding whether the
+  `0.9.0-design` tracking quality/stability line can enter a later `v0.9.0`
+  stable closeout.
+- Re-ran static/shared/oracle/performance builds, static and shared routine
+  CTest, focused tracking gates, fixed and random oracle gates, local
+  release-random evidence, tracking 10k/100k/1M quality audits, performance,
+  coverage, ABI/export, and Python/Rust wrapper smoke.
+- Confirmed the public C ABI remains unchanged at 172 symbols, with no public
+  C API additions, no public removals, no enum/result-code numeric changes, no
+  ABI allowlist changes, and no `include/ruckig_c/ruckig.h` changes.
+- Readiness conclusion: if the ordinary push CI for the readiness evidence
+  commit is green, the next separate project step can be `v0.9.0` stable
+  closeout.
+- No version bump, tag, GitHub Release, manual release-random workflow, CI
+  workflow change, or `original/ruckig-main` change is made by this readiness
+  audit.
+
 Deferred unless separately accepted:
 
 - Visualization v2, optional CI gallery artifacts, Python wheel publication,

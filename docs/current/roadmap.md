@@ -372,6 +372,11 @@ After `v0.8.0`, `main` now tracks `0.9.0-design - Unreleased`.
   evidence with `--tracking-stability` and routine CTest coverage. It does not
   retune evaluator scoring, candidate generation, strategy weights, near-tie
   policy, public diagnostics structs, public ABI, tags, or release scope.
+- `0.9.0-readiness` records full local release-readiness evidence for the
+  tracking quality/stability line. It reruns full local build, CTest, oracle,
+  tracking 10k/100k/1M audit, performance, coverage, ABI/export, and wrapper
+  gates without changing public C ABI or starting stable closeout. If ordinary
+  push CI is green, the next separate decision can be `v0.9.0` stable closeout.
 - `0.8.1` is reserved for emergency patch work only; it is not the default
   post-release route.
 - Visualization v2, optional CI artifacts, package-manager recipes, formal

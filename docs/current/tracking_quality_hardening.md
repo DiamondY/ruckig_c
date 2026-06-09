@@ -74,6 +74,10 @@ seed `1`. The 10k gate is also run by the routine CTest
 near-tie, fallback, and budget-exhaustion behavior as regression evidence
 without changing the evaluator policy again.
 
+`0.9.0-readiness` reruns the alpha.2 10k, 100k seed `1/2/41`, and 1M seed `1`
+threshold gates as full local stable-review evidence. The readiness audit does
+not retune the evaluator and does not expand the public C ABI.
+
 ## Local Results
 
 Current 10k seed `1` threshold evidence:
