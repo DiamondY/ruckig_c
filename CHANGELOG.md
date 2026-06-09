@@ -31,6 +31,21 @@ First priority:
 - The previous v1 gallery provenance remains available through the `v0.9.0`
   tag rather than being duplicated on `main`.
 
+`0.10.0-alpha.2` optional Visualization v2 CI artifact evidence:
+
+- Adds a manual-only `visualization_artifacts` workflow input to generate and
+  upload the Visualization v2 gallery as a CI artifact.
+- Keeps push and pull-request CI unchanged: the gallery artifact job runs only
+  for `workflow_dispatch` with `visualization_artifacts=true`.
+- The manual artifact job builds a shared library on Ubuntu, installs the
+  existing visualization requirements, regenerates the 30 PNG files and
+  `manifest.json`, runs default verification, runs strict regeneration, and
+  uploads the regenerated gallery plus logs.
+- Keeps the committed gallery assets unchanged. The uploaded artifact is a
+  regenerated review artifact, not a tracked replacement.
+- Does not add public C API, public symbols, CMake/CTest visualization gates,
+  package publication, release tags, or GitHub Releases.
+
 Release boundary:
 
 - `v0.9.0` remains the current stable release.

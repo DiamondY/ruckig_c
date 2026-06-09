@@ -13,6 +13,14 @@ on:
         options:
           - "false"
           - "true"
+      visualization_artifacts:
+        description: "Generate and upload Visualization v2 gallery artifacts"
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
 
 jobs:
   build-test:
@@ -513,6 +521,105 @@ jobs:
         run: cargo test --manifest-path bindings/rust/Cargo.toml --examples
         env:
           RUCKIG_C_LIB_DIR: ${{ github.workspace }}/build-rust
+
+  visualization-artifacts:
+    name: Visualization v2 artifacts
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && inputs.visualization_artifacts == 'true'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install build and plotting tools
+        run: sudo apt-get update && sudo apt-get install -y ninja-build pkg-config
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install visualization dependencies
+        run: python -m pip install -r tools/visualization/requirements.txt
+
+      - name: Configure shared library
+        run: >
+          cmake -S . -B build-visualization-shared -G Ninja
+          -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_C_COMPILER=clang
+          -DCMAKE_CXX_COMPILER=clang++
+          -DBUILD_SHARED_LIBS=ON
+          -DBUILD_RUCKIG_C_TESTS=OFF
+          -DBUILD_RUCKIG_C_EXAMPLES=OFF
+          -DBUILD_RUCKIG_C_ORACLE_TESTS=OFF
+          -DBUILD_RUCKIG_C_PERFORMANCE_TESTS=OFF
+
+      - name: Build shared library
+        run: cmake --build build-visualization-shared --config Release
+
+      - name: Locate shared library
+        run: |
+          python - <<'PY'
+          import os
+          import pathlib
+
+          names = ("libruckig_c.so", "ruckig_c.dll", "libruckig_c.dylib")
+          matches = [path for path in pathlib.Path("build-visualization-shared").rglob("*") if path.name in names]
+          if not matches:
+              raise SystemExit("shared ruckig_c library not found")
+          library = matches[0].resolve()
+          with open(os.environ["GITHUB_ENV"], "a", encoding="utf-8") as env_file:
+              env_file.write(f"RUCKIG_C_SHARED_LIBRARY={library}\n")
+          print(library)
+          PY
+
+      - name: Prepare artifact directories
+        run: mkdir -p out/visualization-artifacts/gallery out/visualization-artifacts/logs
+
+      - name: Compile visualization tools
+        run: >
+          python -m py_compile
+          tools/visualization/generate_gallery.py
+          tools/visualization/verify_gallery.py
+
+      - name: Generate Visualization v2 gallery artifact
+        run: |
+          set -o pipefail
+          python tools/visualization/generate_gallery.py --output out/visualization-artifacts/gallery \
+            2>&1 | tee out/visualization-artifacts/logs/generate.log
+
+      - name: Verify generated Visualization v2 gallery artifact
+        run: |
+          set -o pipefail
+          python tools/visualization/verify_gallery.py --output out/visualization-artifacts/gallery \
+            2>&1 | tee out/visualization-artifacts/logs/verify-default.log
+
+      - name: Strict-regenerate generated Visualization v2 gallery artifact
+        run: |
+          set -o pipefail
+          python tools/visualization/verify_gallery.py --output out/visualization-artifacts/gallery --strict-regenerate \
+            2>&1 | tee out/visualization-artifacts/logs/verify-strict.log
+
+      - name: Summarize Visualization v2 artifact
+        run: |
+          {
+            echo "### Visualization v2 artifact"
+            echo
+            echo "- gallery: out/visualization-artifacts/gallery"
+            echo "- logs: out/visualization-artifacts/logs"
+            echo "- PNG count: $(find out/visualization-artifacts/gallery -maxdepth 1 -name '*.png' | wc -l)"
+            echo
+            echo '```text'
+            cat out/visualization-artifacts/logs/verify-default.log
+            echo
+            cat out/visualization-artifacts/logs/verify-strict.log
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload Visualization v2 gallery artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: visualization-v2-gallery
+          path: |
+            out/visualization-artifacts/gallery
+            out/visualization-artifacts/logs
 
   release-random-oracle:
     name: Manual release random oracle

@@ -66,7 +66,9 @@ Historical rewrite plans and release evidence are retained for traceability.
   quality/stability line without creating a tag or GitHub Release.
   `release/checklists/0.9.0.md` records the stable tracking quality/stability
   evidence release closeout. `release/checklists/0.10.0-alpha.md` records the
-  first `0.10.0-design` Visualization v2 local gallery evidence slice.
+  first `0.10.0-design` Visualization v2 local gallery evidence slice, and
+  `release/checklists/0.10.0-alpha.2.md` records the optional manual CI
+  artifact evidence for regenerated Visualization v2 review assets.
 - `release/evidence/verification_report.md` - local and CI verification
   history.
 - `release/evidence/performance_report.md` - performance procedure and release
@@ -78,8 +80,10 @@ Historical rewrite plans and release evidence are retained for traceability.
 Current `main` is `0.10.0-design - Unreleased`; the first priority is
 visualization v2, optional CI visualization artifacts, and richer local plots.
 `0.10.0-alpha` replaces the current `main` gallery with 30 local `1400x900`
-PNG assets and a strict local verifier. `v0.9.0` remains the current stable
-release.
+PNG assets and a strict local verifier. `0.10.0-alpha.2` adds a manual-only CI
+artifact path for regenerated Visualization v2 PNGs, manifest, and logs without
+making visualization a default push/PR gate. `v0.9.0` remains the current
+stable release.
 
 ## Design Documents
 

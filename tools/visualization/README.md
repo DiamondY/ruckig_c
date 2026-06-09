@@ -62,6 +62,20 @@ $env:RUCKIG_C_SHARED_LIBRARY=(Resolve-Path out\build\windows-clang-ninja-shared\
 
 Strict regeneration requires `RUCKIG_C_SHARED_LIBRARY` or `--library`.
 
+## Optional CI Artifact
+
+`0.10.0-alpha.2` adds a manual-only GitHub Actions artifact path. It is not run
+by ordinary push or pull-request CI.
+
+```powershell
+gh workflow run ci.yml --repo DiamondY/ruckig_c --ref main -f release_random=false -f visualization_artifacts=true
+```
+
+The CI job builds a shared library on Ubuntu, installs these requirements,
+regenerates the gallery under `out/visualization-artifacts/gallery`, runs the
+default verifier, runs strict regeneration, and uploads `visualization-v2-gallery`
+with the regenerated PNGs, `manifest.json`, and logs.
+
 ## Scope
 
 The v2 gallery covers:
@@ -80,6 +94,7 @@ The v2 gallery covers:
 Original examples `11-13` are excluded because they demonstrate C++ Eigen and
 custom vector ergonomics rather than behavior exposed through the C ABI.
 
-The tool is local-only. It does not add a default CI gate, public C API, public
-symbol, package publication, network dependency, cloud calculation path, or
-Pro/cloud numerical equivalence claim.
+The tool is local-first. The optional CI artifact path is manual-only and
+review-oriented. It does not add a default CI gate, public C API, public symbol,
+package publication, network dependency, cloud calculation path, or Pro/cloud
+numerical equivalence claim.

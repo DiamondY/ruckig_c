@@ -15,7 +15,9 @@ it is not duplicated in a historical assets directory on `main`.
 Visualization v2 is local-only, PNG-only, and evidence-only. It does not add a
 default GitHub Actions plotting job, CMake/CTest gate, public C API, public
 symbol, enum value, result-code value, Python package, Rust crate, package
-recipe, cloud path, or Pro/cloud equivalence claim.
+recipe, cloud path, or Pro/cloud equivalence claim. `0.10.0-alpha.2` adds an
+optional manual GitHub Actions artifact path for review copies of the gallery;
+it remains off for push and pull-request CI.
 
 ```powershell
 cmake --build --preset windows-clang-ninja-shared
@@ -55,6 +57,25 @@ $env:RUCKIG_C_SHARED_LIBRARY=(Resolve-Path out\build\windows-clang-ninja-shared\
 ```
 
 Strict regeneration requires `RUCKIG_C_SHARED_LIBRARY` or `--library`.
+
+## Optional CI Artifact
+
+`0.10.0-alpha.2` adds a manual-only CI artifact path. It is triggered only by
+workflow dispatch with `visualization_artifacts=true`:
+
+```powershell
+gh workflow run ci.yml --repo DiamondY/ruckig_c --ref main -f release_random=false -f visualization_artifacts=true
+```
+
+The job runs on Ubuntu, builds a shared `ruckig_c` library, installs the
+existing visualization requirements, regenerates the 30 PNG files and
+`manifest.json` under `out/visualization-artifacts/gallery`, runs default
+verification, runs strict regeneration, and uploads one artifact named
+`visualization-v2-gallery` containing the regenerated gallery and logs.
+
+The artifact is a review aid. It does not replace the committed gallery, does
+not run on ordinary push or pull-request CI, and does not promote plotting into
+a release gate.
 
 ## V2 Inventory
 
@@ -193,8 +214,9 @@ Cross-topic summaries:
 - Original Ruckig `doc/*.png`, `examples/*_trajectory.pdf`, and
   `examples/plotter.py` remain references only; they are not copied as primary
   evidence.
-- The generator uses NumPy and Matplotlib `Agg` locally. It is not a default
-  GitHub Actions gate and does not add a workflow.
+- The generator uses NumPy and Matplotlib `Agg` locally. The optional CI
+  artifact workflow can regenerate review copies manually, but it is not a
+  default GitHub Actions gate.
 - PNG is the only committed output format. Raw sampled data, `.profraw`,
   Matplotlib caches, virtualenv files, PDF, and SVG outputs are not committed.
 - Python `cffi` remains a prototype path used to drive the C ABI; this does
@@ -206,6 +228,5 @@ Cross-topic summaries:
 
 ## Follow-Up
 
-Optional CI visualization artifacts remain a separate decision. The current
-alpha intentionally keeps Visualization v2 as local committed evidence rather
-than a default CI or release gate.
+Optional CI visualization artifacts now exist as manual-only review evidence.
+Making visualization a default CI or release gate remains a separate decision.

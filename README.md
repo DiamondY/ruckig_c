@@ -70,6 +70,10 @@ Implemented and covered by fixed C/oracle tests plus deterministic random oracle
 - `0.10.0-alpha` visualization v2 local gallery evidence, replacing the
   current `main` gallery with 30 project-owned `1400x900` PNGs and a strict
   local verifier while keeping the `v0.9.0` stable C ABI unchanged.
+- `0.10.0-alpha.2` optional Visualization v2 CI artifact evidence, adding a
+  manual-only `visualization_artifacts=true` workflow path that regenerates the
+  gallery, verifies it, strict-regenerates it, and uploads the regenerated PNGs,
+  manifest, and logs without changing default push/PR CI.
 - C examples for position, offline position, online update, per-DoF overrides,
   velocity, stop, minimum duration, waypoints, per-section minimum duration,
   tracking Fast-mode scenarios, and Optimized tracking scenarios.
@@ -88,8 +92,11 @@ diagnostics, trajectory anatomy, and cross-topic summary plots; examples
 `11-13` remain excluded because they demonstrate C++ Eigen/custom-vector
 ergonomics rather than C ABI behavior. `tools/visualization/verify_gallery.py`
 verifies the committed `1400x900` PNG/manifest assets locally, including an
-optional strict regeneration check. The previous v1 gallery provenance remains
-available through the `v0.9.0` tag rather than being duplicated on `main`.
+optional strict regeneration check. `0.10.0-alpha.2` adds an optional manual CI
+artifact path for regenerated Visualization v2 PNGs, manifest, and logs; it is
+not a default push/PR gate and does not replace committed assets. The previous
+v1 gallery provenance remains available through the `v0.9.0` tag rather than
+being duplicated on `main`.
 The `0.9.0` tracking evidence line
 starts with `docs/current/tracking_quality_audit.md` and a deterministic
 `--tracking-random-audit` C test-runner selector so fallback-heavy Optimized

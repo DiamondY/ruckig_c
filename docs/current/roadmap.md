@@ -13,13 +13,18 @@ tracking quality/stability evidence release.
 - `0.10.0-alpha` adds the first Visualization v2 evidence slice: a local-only
   30-PNG Matplotlib `Agg` gallery, `1400x900` PNG assets, deterministic
   manifest, and hybrid verifier with optional strict regeneration.
+- `0.10.0-alpha.2` adds optional CI artifact evidence for Visualization v2:
+  a manual-only `visualization_artifacts=true` workflow path that regenerates
+  the gallery, verifies it, strict-regenerates it, and uploads the regenerated
+  PNGs, manifest, and logs as review artifacts.
 - The alpha replaces the current `main` gallery assets; the previous v1
   provenance remains available through the `v0.9.0` tag.
 - Keep `v0.9.0` as the current stable release.
 - Keep the `v0.8.0` 172-symbol public C ABI baseline unless a separate public
   API decision is accepted.
 - Do not promote plotting or verifier work into a default release/CI gate
-  without a separate dependency and artifact policy decision.
+  without a separate dependency and artifact policy decision; the alpha.2 CI
+  artifact path remains manual-only.
 - `0.9.1` remains reserved for emergency patch fixes only.
 - Package-manager recipes, formal Python/Rust publication, soft interruption,
   cloud/remote calculation, formal Pro/cloud equivalence claims, formal global
