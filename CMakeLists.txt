@@ -227,6 +227,15 @@ if(BUILD_RUCKIG_C_TESTS)
   ruckig_c_apply_sanitizers(ruckig_c_header_cpp)
   add_test(NAME ruckig_c_header_cpp COMMAND ruckig_c_header_cpp)
 
+  add_executable(ruckig_c_platform_clock_custom test/c/platform_clock_custom_compile.c)
+  target_include_directories(ruckig_c_platform_clock_custom PRIVATE src test/c)
+  if(MSVC)
+    target_compile_options(ruckig_c_platform_clock_custom PRIVATE /W4)
+  else()
+    target_compile_options(ruckig_c_platform_clock_custom PRIVATE -Wall -Wextra -Wpedantic)
+  endif()
+  add_test(NAME ruckig_c_platform_clock_custom COMMAND ruckig_c_platform_clock_custom)
+
   configure_file(
     test/cmake/test_cmake_consumer.cmake.in
     ${CMAKE_CURRENT_BINARY_DIR}/test_cmake_consumer.cmake

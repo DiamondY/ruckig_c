@@ -1,19 +1,9 @@
-#if !defined(_WIN32) && !defined(_POSIX_C_SOURCE)
-#define _POSIX_C_SOURCE 200809L
-#endif
-
+#include "ruckig_c/platform_clock.h"
 #include "ruckig_c/internal.h"
 
 #include <float.h>
 #include <math.h>
 #include <string.h>
-#include <time.h>
-#if defined(_WIN32)
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <windows.h>
-#endif
 
 #define RUCKIG_WAYPOINT_BRANCH_QUEUE_CAPACITY 64u
 #define RUCKIG_WAYPOINT_BRANCH_ITERATION_BUDGET 256u
@@ -28,55 +18,27 @@ typedef struct waypoint_branch {
 typedef struct waypoint_interrupt_context {
     bool enabled;
     bool interrupted;
-    double start_us;
+    uint64_t start_us;
     double duration_us;
 } waypoint_interrupt_context_t;
-
-static double waypoint_clock_fallback_us(void) {
-    const clock_t value = clock();
-    if (value == (clock_t)-1) {
-        return 0.0;
-    }
-    return ((double)value * 1000000.0) / (double)CLOCKS_PER_SEC;
-}
-
-static double waypoint_monotonic_now_us(void) {
-#if defined(_WIN32)
-    LARGE_INTEGER counter;
-    LARGE_INTEGER frequency;
-    if (QueryPerformanceFrequency(&frequency) && frequency.QuadPart > 0
-        && QueryPerformanceCounter(&counter)) {
-        return ((double)counter.QuadPart * 1000000.0) / (double)frequency.QuadPart;
-    }
-#else
-#if defined(CLOCK_MONOTONIC)
-    struct timespec ts;
-    if (clock_gettime(CLOCK_MONOTONIC, &ts) == 0) {
-        return (double)ts.tv_sec * 1000000.0 + (double)ts.tv_nsec / 1000.0;
-    }
-#endif
-#endif
-    return waypoint_clock_fallback_us();
-}
 
 static waypoint_interrupt_context_t waypoint_interrupt_context_start(const ruckig_input_t* input) {
     waypoint_interrupt_context_t context;
     context.enabled = input && input->has_interrupt_calculation_duration;
     context.interrupted = false;
-    context.start_us = context.enabled ? waypoint_monotonic_now_us() : 0.0;
+    context.start_us = context.enabled ? ruckig_platform_monotonic_time_us() : 0u;
     context.duration_us = context.enabled ? input->interrupt_calculation_duration : 0.0;
     return context;
 }
 
 static bool waypoint_interrupt_check(waypoint_interrupt_context_t* context) {
+    uint64_t now_us;
     double elapsed_us;
     if (!context || !context->enabled || context->interrupted) {
         return false;
     }
-    elapsed_us = waypoint_monotonic_now_us() - context->start_us;
-    if (elapsed_us < 0.0) {
-        elapsed_us = 0.0;
-    }
+    now_us = ruckig_platform_monotonic_time_us();
+    elapsed_us = now_us >= context->start_us ? (double)(now_us - context->start_us) : 0.0;
     if (elapsed_us >= context->duration_us) {
         context->interrupted = true;
         return true;

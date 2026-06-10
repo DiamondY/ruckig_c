@@ -32,17 +32,19 @@ Added C coverage:
 | No-waypoint update | Setting the field does not interrupt no-waypoint `ruckig_update`. |
 | Public waypoint calculate | Setting the field does not interrupt public `ruckig_calculate`. |
 | Allocation | The zero-budget feasible fallback path is covered under the runtime no-allocation guard. |
+| Platform clock override | Internal custom provider/header injection compiles without adding public ABI. |
 
 Local verification:
 
 | Command | Result |
 | --- | --- |
 | `cmake --build out\build\windows-clang-ninja --config Debug` | Passed |
-| `ctest --test-dir out\build\windows-clang-ninja --output-on-failure -R "ruckig_c_waypoint_optimizer\|ruckig_c_per_section_constraints\|ruckig_c_waypoint_quality\|ruckig_c_allocation_audit"` | 4/4 passed |
-| `ctest --test-dir out\build\windows-clang-ninja --output-on-failure` | 45/45 passed |
-| `ctest --test-dir out\build\windows-clang-ninja-duration --output-on-failure` | 45/45 passed with `RUCKIG_C_ENABLE_CALCULATION_DURATION=ON` |
+| `ctest --test-dir out\build\windows-clang-ninja --output-on-failure -R "ruckig_c_platform_clock_custom\|ruckig_c_waypoint_optimizer\|ruckig_c_per_section_constraints\|ruckig_c_waypoint_quality\|ruckig_c_allocation_audit"` | 5/5 passed |
+| `ctest --test-dir out\build\windows-clang-ninja --output-on-failure` | 46/46 passed |
+| `ctest --test-dir out\build\windows-clang-ninja-duration --output-on-failure` | 46/46 passed with `RUCKIG_C_ENABLE_CALCULATION_DURATION=ON` |
 | `cmake --build out\build\windows-clang-ninja-shared --target ruckig_c_compare_public_exported_symbols` | Public exported symbols match the approved allowlist |
 | `zig cc -target x86_64-linux-gnu -std=c99 -Wall -Wextra -Wpedantic -D_POSIX_C_SOURCE=200809L -Iinclude -Isrc -c src\ruckig_c\waypoint.c` | POSIX monotonic timing branch compiled for a Linux target |
+| `zig cc -target x86_64-linux-gnu -std=c99 -Wall -Wextra -Wpedantic -DRUCKIG_C_PLATFORM_CLOCK_HEADER=<platform_clock_custom_provider.h> -DRUCKIG_C_CUSTOM_MONOTONIC_TIME_US=ruckig_test_platform_clock_us -Iinclude -Isrc -Itest\c -c src\ruckig_c\waypoint.c` | Custom platform clock provider compiled through the waypoint soft-interruption path |
 
 ## 0.7.0-alpha.4 Targeted Solver Branch Coverage
 

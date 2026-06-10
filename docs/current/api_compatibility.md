@@ -56,6 +56,11 @@ public C ABI:
 - `RUCKIG_C_ENABLE_CALCULATION_DURATION` continues to control only
   `ruckig_output_get_calculation_duration`; soft interruption uses internal
   budget timing when the input field is set.
+- The internal platform clock abstraction can be overridden at compile time
+  with `RUCKIG_C_PLATFORM_CLOCK_HEADER` and
+  `RUCKIG_C_CUSTOM_MONOTONIC_TIME_US`. These are build-time implementation
+  hooks only; they do not add public symbols, public structs, or exported C ABI
+  entries.
 
 ## 0.2.2 ABI Evidence Procedure
 

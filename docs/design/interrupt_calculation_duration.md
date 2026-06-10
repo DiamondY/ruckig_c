@@ -25,6 +25,38 @@ microsecond value by the duration of the current complete candidate evaluation.
   behavior: it reports measured duration only when
   `RUCKIG_C_ENABLE_CALCULATION_DURATION` is enabled.
 
+## Platform Clock Abstraction
+
+Soft interruption reads time through the internal
+`ruckig_platform_monotonic_time_us()` helper. This is not a public ABI surface
+and does not add exported symbols.
+
+Default providers are selected at compile time:
+
+- Windows uses `QueryPerformanceCounter`.
+- POSIX targets use `clock_gettime(CLOCK_MONOTONIC)` when available.
+- Other hosted targets fall back to `clock()`.
+
+Embedded, RTOS, or bare-metal ports can provide a project-specific monotonic
+microsecond provider without changing the public C API:
+
+```c
+#define RUCKIG_C_PLATFORM_CLOCK_HEADER "my_ruckig_clock.h"
+#define RUCKIG_C_CUSTOM_MONOTONIC_TIME_US my_ruckig_clock_us
+```
+
+`RUCKIG_C_PLATFORM_CLOCK_HEADER` is optional and is included from the internal
+clock helper before the provider is used. `RUCKIG_C_CUSTOM_MONOTONIC_TIME_US`
+must name a no-argument function or macro returning an integer-compatible
+microsecond count.
+
+For MCU ports, the provider should return an expanded 64-bit monotonic
+microsecond counter. Do not return a raw 16-bit or 32-bit hardware timer value
+that can wrap during a calculation; handle timer extension or wrap accounting
+in the platform layer. The soft-interruption budget remains soft: even with a
+hardware timer provider, checks still happen only at complete waypoint
+candidate boundaries.
+
 ## Checkpoint Semantics
 
 - The optimizer checks the budget only after a complete waypoint candidate has
