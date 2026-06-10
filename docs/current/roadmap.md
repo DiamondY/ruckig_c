@@ -23,12 +23,13 @@ only after a separate user or release demand decision.
 Current `main` is `0.11.0-design - Unreleased` after the published `v0.10.0`
 Visualization v2 evidence release.
 
-- First priority: soft interruption checkpoint design and evidence planning.
-- Review `docs/design/interrupt_calculation_duration.md` before changing
-  timeout/checkpoint behavior.
-- Keep soft interruption semantics behind a dedicated compatibility review;
-  do not change public C ABI, enum numeric values, or result-code numeric
-  values by default.
+- First priority: soft interruption V1 implementation and evidence closeout.
+- `interrupt_calculation_duration` now has local waypoint `ruckig_update`
+  checkpoint semantics in the `0.11.0-design` line. Public `ruckig_calculate`,
+  no-waypoint target solving, and tracking remain unchanged by the field.
+- Keep any further soft interruption expansion behind a dedicated
+  compatibility review; do not change public C ABI, enum numeric values, or
+  result-code numeric values by default.
 - Keep `v0.10.0` as the current stable release.
 - Keep the `v0.9.0` 172-symbol public C ABI baseline unless a separate public
   API decision is accepted.

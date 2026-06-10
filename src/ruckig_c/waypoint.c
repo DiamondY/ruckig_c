@@ -1,8 +1,19 @@
+#if !defined(_WIN32) && !defined(_POSIX_C_SOURCE)
+#define _POSIX_C_SOURCE 200809L
+#endif
+
 #include "ruckig_c/internal.h"
 
 #include <float.h>
 #include <math.h>
 #include <string.h>
+#include <time.h>
+#if defined(_WIN32)
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+#endif
 
 #define RUCKIG_WAYPOINT_BRANCH_QUEUE_CAPACITY 64u
 #define RUCKIG_WAYPOINT_BRANCH_ITERATION_BUDGET 256u
@@ -13,6 +24,65 @@ typedef struct waypoint_branch {
     double delta;
     double lower_bound;
 } waypoint_branch_t;
+
+typedef struct waypoint_interrupt_context {
+    bool enabled;
+    bool interrupted;
+    double start_us;
+    double duration_us;
+} waypoint_interrupt_context_t;
+
+static double waypoint_clock_fallback_us(void) {
+    const clock_t value = clock();
+    if (value == (clock_t)-1) {
+        return 0.0;
+    }
+    return ((double)value * 1000000.0) / (double)CLOCKS_PER_SEC;
+}
+
+static double waypoint_monotonic_now_us(void) {
+#if defined(_WIN32)
+    LARGE_INTEGER counter;
+    LARGE_INTEGER frequency;
+    if (QueryPerformanceFrequency(&frequency) && frequency.QuadPart > 0
+        && QueryPerformanceCounter(&counter)) {
+        return ((double)counter.QuadPart * 1000000.0) / (double)frequency.QuadPart;
+    }
+#else
+#if defined(CLOCK_MONOTONIC)
+    struct timespec ts;
+    if (clock_gettime(CLOCK_MONOTONIC, &ts) == 0) {
+        return (double)ts.tv_sec * 1000000.0 + (double)ts.tv_nsec / 1000.0;
+    }
+#endif
+#endif
+    return waypoint_clock_fallback_us();
+}
+
+static waypoint_interrupt_context_t waypoint_interrupt_context_start(const ruckig_input_t* input) {
+    waypoint_interrupt_context_t context;
+    context.enabled = input && input->has_interrupt_calculation_duration;
+    context.interrupted = false;
+    context.start_us = context.enabled ? waypoint_monotonic_now_us() : 0.0;
+    context.duration_us = context.enabled ? input->interrupt_calculation_duration : 0.0;
+    return context;
+}
+
+static bool waypoint_interrupt_check(waypoint_interrupt_context_t* context) {
+    double elapsed_us;
+    if (!context || !context->enabled || context->interrupted) {
+        return false;
+    }
+    elapsed_us = waypoint_monotonic_now_us() - context->start_us;
+    if (elapsed_us < 0.0) {
+        elapsed_us = 0.0;
+    }
+    if (elapsed_us >= context->duration_us) {
+        context->interrupted = true;
+        return true;
+    }
+    return false;
+}
 
 static double point_position(const ruckig_input_t* input, size_t point, size_t dof) {
     if (point == 0) {
@@ -349,7 +419,8 @@ static size_t build_branch_queue(
 static bool explore_branch_queue(
     ruckig_t* otg,
     const ruckig_input_t* input,
-    double* best_duration
+    double* best_duration,
+    waypoint_interrupt_context_t* interrupt
 ) {
     bool improved_any = false;
     bool pass_improved = true;
@@ -371,6 +442,7 @@ static bool explore_branch_queue(
              branch_index < branch_count && iteration < RUCKIG_WAYPOINT_BRANCH_ITERATION_BUDGET;
              ++branch_index, ++iteration) {
             const waypoint_branch_t branch = queue[branch_index];
+            bool accepted;
             memcpy(otg->waypoint_candidate_velocity, otg->waypoint_best_velocity, sizeof(double) * count);
             memcpy(otg->waypoint_candidate_acceleration, otg->waypoint_best_acceleration, sizeof(double) * count);
             if (branch.acceleration) {
@@ -388,7 +460,11 @@ static bool explore_branch_queue(
                 otg->waypoint_candidate_velocity[branch.index] =
                     clamp_value(otg->waypoint_candidate_velocity[branch.index] + branch.delta, v_min, v_max);
             }
-            if (accept_if_better(otg, input, otg->waypoint_candidate_velocity, otg->waypoint_candidate_acceleration, best_duration)) {
+            accepted = accept_if_better(otg, input, otg->waypoint_candidate_velocity, otg->waypoint_candidate_acceleration, best_duration);
+            if (waypoint_interrupt_check(interrupt)) {
+                return improved_any || accepted;
+            }
+            if (accepted) {
                 improved_any = true;
                 pass_improved = true;
                 break;
@@ -407,7 +483,8 @@ static bool explore_branch_queue(
 static bool refine_candidate(
     ruckig_t* otg,
     const ruckig_input_t* input,
-    double* best_duration
+    double* best_duration,
+    waypoint_interrupt_context_t* interrupt
 ) {
     bool improved = false;
     size_t pass;
@@ -444,6 +521,9 @@ static bool refine_candidate(
                         otg->waypoint_candidate_velocity[index] = original;
                     }
                 }
+                if (waypoint_interrupt_check(interrupt)) {
+                    return improved;
+                }
 
                 original = otg->waypoint_candidate_acceleration[index];
                 otg->waypoint_candidate_acceleration[index] = clamp_value(original + a_step, a_min, a_max);
@@ -456,6 +536,9 @@ static bool refine_candidate(
                     } else {
                         otg->waypoint_candidate_acceleration[index] = original;
                     }
+                }
+                if (waypoint_interrupt_check(interrupt)) {
+                    return improved;
                 }
                 memcpy(otg->waypoint_candidate_velocity, otg->waypoint_best_velocity, sizeof(double) * count);
                 memcpy(otg->waypoint_candidate_acceleration, otg->waypoint_best_acceleration, sizeof(double) * count);
@@ -501,10 +584,11 @@ static ruckig_result_t write_best_trajectory(
     return RUCKIG_WORKING;
 }
 
-ruckig_result_t ruckig_calculate_waypoints(
+static ruckig_result_t ruckig_calculate_waypoints_impl(
     ruckig_t* otg,
     const ruckig_input_t* input,
-    ruckig_trajectory_t* trajectory
+    ruckig_trajectory_t* trajectory,
+    waypoint_interrupt_context_t* interrupt
 ) {
     const size_t count = input ? input->waypoint_count * input->dofs : 0;
     double best_duration = DBL_MAX;
@@ -531,16 +615,31 @@ ruckig_result_t ruckig_calculate_waypoints(
     if (found) {
         otg->waypoint_last_baseline_duration = best_duration;
     }
+    if (waypoint_interrupt_check(interrupt)) {
+        goto finish_search;
+    }
 
     fill_finite_difference_candidate(input, otg->waypoint_candidate_velocity, otg->waypoint_candidate_acceleration, 0.35);
     found = accept_if_better(otg, input, otg->waypoint_candidate_velocity, otg->waypoint_candidate_acceleration, &best_duration) || found;
+    if (waypoint_interrupt_check(interrupt)) {
+        goto finish_search;
+    }
 
     fill_finite_difference_candidate(input, otg->waypoint_candidate_velocity, otg->waypoint_candidate_acceleration, 0.70);
     found = accept_if_better(otg, input, otg->waypoint_candidate_velocity, otg->waypoint_candidate_acceleration, &best_duration) || found;
+    if (waypoint_interrupt_check(interrupt)) {
+        goto finish_search;
+    }
 
     if (found) {
-        (void)refine_candidate(otg, input, &best_duration);
-        (void)explore_branch_queue(otg, input, &best_duration);
+        (void)refine_candidate(otg, input, &best_duration, interrupt);
+        if (!interrupt || !interrupt->interrupted) {
+            (void)explore_branch_queue(otg, input, &best_duration, interrupt);
+        }
+    }
+
+finish_search:
+    if (found) {
         otg->waypoint_last_best_duration = best_duration;
         otg->waypoint_last_improved_baseline =
             otg->waypoint_last_baseline_duration != DBL_MAX
@@ -548,7 +647,39 @@ ruckig_result_t ruckig_calculate_waypoints(
         return write_best_trajectory(otg, input, trajectory);
     }
 
+    if (interrupt && interrupt->interrupted) {
+        return RUCKIG_ERROR_EXECUTION_TIME_CALCULATION;
+    }
+
     return RUCKIG_ERROR;
+}
+
+ruckig_result_t ruckig_calculate_waypoints(
+    ruckig_t* otg,
+    const ruckig_input_t* input,
+    ruckig_trajectory_t* trajectory
+) {
+    return ruckig_calculate_waypoints_impl(otg, input, trajectory, NULL);
+}
+
+ruckig_result_t ruckig_calculate_waypoints_interruptible(
+    ruckig_t* otg,
+    const ruckig_input_t* input,
+    ruckig_trajectory_t* trajectory,
+    bool* was_interrupted
+) {
+    waypoint_interrupt_context_t interrupt;
+    if (was_interrupted) {
+        *was_interrupted = false;
+    }
+    interrupt = waypoint_interrupt_context_start(input);
+    {
+        const ruckig_result_t result = ruckig_calculate_waypoints_impl(otg, input, trajectory, &interrupt);
+        if (was_interrupted) {
+            *was_interrupted = interrupt.interrupted;
+        }
+        return result;
+    }
 }
 
 RUCKIG_C_API ruckig_result_t ruckig_filter_intermediate_positions(

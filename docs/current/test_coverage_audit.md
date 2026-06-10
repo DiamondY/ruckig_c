@@ -13,6 +13,37 @@ Coverage is tracked in three different senses:
 - Oracle coverage: frozen C++ differential comparisons against
   `original/ruckig-main`.
 
+## 0.11.0-design Soft Interruption V1 Evidence
+
+`0.11.0-design` adds local waypoint `ruckig_update` soft interruption through
+the existing `interrupt_calculation_duration` input field and
+`was_calculation_interrupted` output state. This does not add public symbols and
+does not affect public `ruckig_calculate`, no-waypoint target solving, or
+tracking.
+
+Added C coverage:
+
+| Scenario | Evidence |
+| --- | --- |
+| Cleared waypoint interrupt budget | Waypoint `ruckig_update` completes normally, reports `was_calculation_interrupted=false`, and evaluates more than the first candidate. |
+| Zero budget with feasible candidate | Waypoint `ruckig_update` stops after the first complete feasible candidate, returns `RUCKIG_WORKING`, marks a new calculation, writes a sampleable trajectory, and sets `was_calculation_interrupted=true`. |
+| Zero budget with no feasible candidate | Waypoint `ruckig_update` returns `RUCKIG_ERROR_EXECUTION_TIME_CALCULATION`, does not mark a new calculation, and sets `was_calculation_interrupted=true`. |
+| Continued online sampling | The next no-recalculation update after `pass_to_input` clears `was_calculation_interrupted`. |
+| No-waypoint update | Setting the field does not interrupt no-waypoint `ruckig_update`. |
+| Public waypoint calculate | Setting the field does not interrupt public `ruckig_calculate`. |
+| Allocation | The zero-budget feasible fallback path is covered under the runtime no-allocation guard. |
+
+Local verification:
+
+| Command | Result |
+| --- | --- |
+| `cmake --build out\build\windows-clang-ninja --config Debug` | Passed |
+| `ctest --test-dir out\build\windows-clang-ninja --output-on-failure -R "ruckig_c_waypoint_optimizer\|ruckig_c_per_section_constraints\|ruckig_c_waypoint_quality\|ruckig_c_allocation_audit"` | 4/4 passed |
+| `ctest --test-dir out\build\windows-clang-ninja --output-on-failure` | 45/45 passed |
+| `ctest --test-dir out\build\windows-clang-ninja-duration --output-on-failure` | 45/45 passed with `RUCKIG_C_ENABLE_CALCULATION_DURATION=ON` |
+| `cmake --build out\build\windows-clang-ninja-shared --target ruckig_c_compare_public_exported_symbols` | Public exported symbols match the approved allowlist |
+| `zig cc -target x86_64-linux-gnu -std=c99 -Wall -Wextra -Wpedantic -D_POSIX_C_SOURCE=200809L -Iinclude -Isrc -c src\ruckig_c\waypoint.c` | POSIX monotonic timing branch compiled for a Linux target |
+
 ## 0.7.0-alpha.4 Targeted Solver Branch Coverage
 
 `0.7.0-alpha.4` follows the `0.7.0-alpha.3` audit by adding targeted evidence

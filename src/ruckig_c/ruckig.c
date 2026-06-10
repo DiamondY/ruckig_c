@@ -1369,7 +1369,9 @@ RUCKIG_C_API ruckig_result_t ruckig_update(
     output->new_calculation = false;
     output->was_calculation_interrupted = false;
     if (!output->trajectory->valid || !otg->current_input_initialized || !ruckig_input_equals(input, otg->current_input)) {
-        ruckig_result_t result = ruckig_calculate(otg, input, output->trajectory);
+        ruckig_result_t result = input->waypoint_count > 0 && input->has_interrupt_calculation_duration
+            ? ruckig_calculate_waypoints_interruptible(otg, input, output->trajectory, &output->was_calculation_interrupted)
+            : ruckig_calculate(otg, input, output->trajectory);
         if (result != RUCKIG_WORKING) {
             output->calculation_duration = calculation_duration_finish(calculation_start);
             return result;

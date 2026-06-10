@@ -76,12 +76,14 @@
       "metrics": {
         "dofs": 3,
         "duration": 8.32,
-        "interrupt_duration_storage_only": true,
+        "interrupt_budget_us": 1000000000.0,
         "online_result": "FINISHED",
         "position_extent": 3.746663382,
         "pro_cloud_equivalence_claim": false,
         "samples": 833,
-        "section_change_count": 5
+        "section_change_count": 5,
+        "soft_interruption_expected": false,
+        "soft_interruption_v1": true
       },
       "original_examples": [
         "04_waypoints_online"
@@ -408,10 +410,13 @@
       "description": "Online local waypoint update section changes and section index trace.",
       "file": "26_waypoint_online_section_changes.png",
       "metrics": {
+        "interrupt_budget_us": 1000000000.0,
         "online_result": "FINISHED",
         "pro_cloud_equivalence_claim": false,
         "samples": 833,
-        "section_change_count": 5
+        "section_change_count": 5,
+        "soft_interruption_expected": false,
+        "soft_interruption_v1": true
       },
       "original_examples": [],
       "sha256": "c5331eb696cbea6061c6168a5993b8521888c0d1e8304d321082e59ca0091a60",

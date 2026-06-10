@@ -186,5 +186,11 @@ ruckig_result_t ruckig_calculate_waypoints(
     const ruckig_input_t* input,
     ruckig_trajectory_t* trajectory
 );
+ruckig_result_t ruckig_calculate_waypoints_interruptible(
+    ruckig_t* otg,
+    const ruckig_input_t* input,
+    ruckig_trajectory_t* trajectory,
+    bool* was_interrupted
+);
 
 #endif

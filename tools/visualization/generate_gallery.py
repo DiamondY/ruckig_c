@@ -46,6 +46,7 @@ DPI = 100
 SAVE_METADATA = {"Software": "ruckig_c matplotlib visualization"}
 MANIFEST_LABEL = "0.10.0-alpha visualization v2 evidence"
 PALETTE = ["#176fb5", "#20916c", "#d07b53", "#8d5fb8", "#59636f", "#c43d4d", "#2b8a9f", "#b58bd2"]
+WAYPOINT_GALLERY_INTERRUPT_BUDGET_US = 1000000000.0
 
 
 @dataclass(frozen=True)
@@ -473,7 +474,7 @@ def render_03_waypoints(output: Path, samples: int) -> GalleryImage:
 def render_04_waypoints_online(output: Path, samples: int) -> GalleryImage:
     def configure(input_: Input) -> None:
         configure_original_waypoint_input(input_)
-        input_.set_interrupt_calculation_duration(500.0)
+        input_.set_interrupt_calculation_duration(WAYPOINT_GALLERY_INTERRUPT_BUDGET_US)
 
     motion, result, changes = run_online(3, configure, max_waypoints=10)
     return save_motion_image(
@@ -488,7 +489,9 @@ def render_04_waypoints_online(output: Path, samples: int) -> GalleryImage:
         extra_metrics={
             "online_result": result.name,
             "section_change_count": len(changes),
-            "interrupt_duration_storage_only": True,
+            "interrupt_budget_us": WAYPOINT_GALLERY_INTERRUPT_BUDGET_US,
+            "soft_interruption_v1": True,
+            "soft_interruption_expected": False,
             "pro_cloud_equivalence_claim": False,
         },
     )
@@ -1379,7 +1382,7 @@ def render_25_waypoint_position_bounds(output: Path, samples: int) -> GalleryIma
 def render_26_waypoint_online_section_changes(output: Path, samples: int) -> GalleryImage:
     def configure(input_: Input) -> None:
         configure_original_waypoint_input(input_)
-        input_.set_interrupt_calculation_duration(500.0)
+        input_.set_interrupt_calculation_duration(WAYPOINT_GALLERY_INTERRUPT_BUDGET_US)
 
     motion, result, changes = run_online(3, configure, max_waypoints=10)
     path = output / "26_waypoint_online_section_changes.png"
@@ -1409,6 +1412,9 @@ def render_26_waypoint_online_section_changes(output: Path, samples: int) -> Gal
             "online_result": result.name,
             "section_change_count": int(len(changes)),
             "samples": int(motion.time.size),
+            "interrupt_budget_us": WAYPOINT_GALLERY_INTERRUPT_BUDGET_US,
+            "soft_interruption_v1": True,
+            "soft_interruption_expected": False,
             "pro_cloud_equivalence_claim": False,
         },
     )

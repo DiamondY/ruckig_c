@@ -68,8 +68,9 @@ Implemented and covered by fixed C/oracle tests plus deterministic random oracle
   gallery, local verifier, strict regeneration evidence, and manual-only CI
   artifact workflow while keeping the `v0.9.0` stable C ABI unchanged.
 - `0.11.0-design - Unreleased` is the current `main` line after `v0.10.0`;
-  first priority is soft interruption checkpoint design and evidence planning
-  without default public C ABI expansion.
+  waypoint `ruckig_update` soft-interruption V1 is implemented through the
+  existing interrupt field without default public C ABI expansion, with
+  evidence closeout in progress.
 - `0.10.0-alpha` visualization v2 local gallery evidence, replacing the
   current `main` gallery with 30 project-owned `1400x900` PNGs and a strict
   local verifier while keeping the `v0.9.0` stable C ABI unchanged.
@@ -92,7 +93,7 @@ stable release. It keeps the `v0.9.0` 172-symbol public C ABI unchanged and
 stabilizes the Visualization v2 gallery, local verifier, strict regeneration
 evidence, and manual-only CI artifact workflow reviewed during
 `0.10.0-readiness`. Current `main` is `0.11.0-design - Unreleased`, with soft
-interruption checkpoint design and evidence planning as the first priority.
+interruption V1 implementation and evidence closeout as the first priority.
 `v0.10.0` adopts the current gallery as 30 `1400x900` Matplotlib `Agg` and
 NumPy PNG assets under `docs/assets/visualization/`. The gallery covers local
 C ABI equivalents of original examples `01-10` and `14-16`, plus tracking
@@ -129,6 +130,13 @@ stabilizes the tracking public C API and local Fast-mode implementation.
 Tracking public C API is not exposed in `v0.4.2`. `v0.3.0`
 remains the last no-new-C-API hardening release, and `v0.2.5` remains the final
 planned `0.2.x` stabilization baseline.
+
+On the current `0.11.0-design` line, waypoint `ruckig_update` implements
+soft-interruption V1 through the existing `interrupt_calculation_duration`
+field and `was_calculation_interrupted` output state. Public
+`ruckig_calculate`, no-waypoint target solving, and tracking remain unchanged
+by that field.
+
 Current stable release scope intentionally excludes:
 
 - Cloud and remote calculation runtime; local optimizer and tracking work only.
@@ -141,8 +149,9 @@ Current stable release scope intentionally excludes:
   implementation is a bounded deterministic local evaluator with Fast fallback
   diagnostics, strategy presets, and diagnostics snapshots; these are local
   quality controls, not a global optimality claim.
-- Soft interruption checkpoints for waypoint optimization; the interrupt
-  duration field remains storage/API-surface parity only.
+- Soft interruption checkpoints in the stable `v0.10.0` release. The current
+  `0.11.0-design` line adds waypoint `ruckig_update` soft-interruption V1
+  without expanding the public C ABI.
 - Python/Rust binding publication. The Python `cffi` prototype and Rust alpha
   wrapper remain prototype-only; package publication is frozen until a
   separate demand decision accepts it.

@@ -135,7 +135,7 @@ Cross-topic summaries:
 | `01_position` | `01_position.png`, `27-30` trajectory anatomy | Public C ABI position trajectory and derived anatomy views. |
 | `02_position_offline` | `02_position_offline.png` | Offline trajectory with directional limits. |
 | `03_waypoints` | `03_waypoints_local.png`, `22`, `25` | Local waypoint optimizer equivalent, no proprietary Pro equivalence claim. |
-| `04_waypoints_online` | `04_waypoints_online_local.png`, `26` | Online local waypoint update path, interruption remains storage-only. |
+| `04_waypoints_online` | `04_waypoints_online_local.png`, `26` | Online local waypoint update path. Gallery generation uses a deliberately high soft-interruption budget for deterministic plots; V1 interruption behavior is covered by C tests. |
 | `05_velocity` | `05_velocity.png` | Velocity-control trajectory through public C ABI. |
 | `06_stop` | `06_stop.png` | Stop command trajectory through public C ABI. |
 | `07_minimum_duration` | `07_minimum_duration.png` | Minimum-duration trajectory. |

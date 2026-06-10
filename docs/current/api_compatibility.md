@@ -38,6 +38,25 @@ Before each patch release:
 The initial `0.2.x` process records exported symbols as release evidence; it
 does not require a strict automated ABI diff yet.
 
+## 0.11.0 Design-Line Soft Interruption
+
+The `0.11.0-design` line implements V1 soft interruption without expanding the
+public C ABI:
+
+- No public function, enum value, result-code numeric value, or exported symbol
+  is added or removed.
+- Existing `ruckig_input_set_interrupt_calculation_duration` and
+  `ruckig_input_clear_interrupt_calculation_duration` configure waypoint
+  `ruckig_update` interruption only.
+- Existing `ruckig_output_was_calculation_interrupted` now reports whether a
+  waypoint `ruckig_update` new-trajectory calculation was interrupted at a safe
+  candidate boundary.
+- Public `ruckig_calculate`, no-waypoint target solving, and tracking remain
+  unchanged by the field.
+- `RUCKIG_C_ENABLE_CALCULATION_DURATION` continues to control only
+  `ruckig_output_get_calculation_duration`; soft interruption uses internal
+  budget timing when the input field is set.
+
 ## 0.2.2 ABI Evidence Procedure
 
 Shared builds expose a non-invasive helper target:

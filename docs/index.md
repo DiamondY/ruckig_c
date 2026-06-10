@@ -109,8 +109,9 @@ provenance remains available through the `v0.9.0` tag.
   possible Fast-only stable `v0.5.0`.
 - `design/tracking_optimized_mode.md` - accepted `v0.6.0` design for bounded
   local `Optimized` tracking.
-- `design/interrupt_calculation_duration.md` - storage-only behavior in
-  `0.4.x` and future soft-interruption semantics.
+- `design/interrupt_calculation_duration.md` - current waypoint
+  `ruckig_update` soft-interruption V1 semantics plus historical `0.4.x`
+  storage-only behavior.
 - `../bindings/rust/README.md` - experimental Rust alpha wrapper over the
   public C ABI.
 - `design/python_bindings_feasibility.md` - Python binding feasibility, without

@@ -1,54 +1,82 @@
 # Interrupt Calculation Duration Design Notes
 
 `interrupt_calculation_duration` is part of the public C API surface for
-original API shape parity. In `0.4.x`, including `0.4.2`, it is a stored input
-field only. The local waypoint optimizer does not yet implement interruption
-checkpoints, best-feasible timeout fallback, or hard/soft real-time guarantees.
+original API shape parity. In the current `0.11.0-design` line, it implements
+V1 soft interruption for local waypoint `ruckig_update` recalculation only.
 
-## Current 0.4.x Behavior
+This is not a hard real-time guarantee. The budget is checked at safe waypoint
+candidate boundaries, so the actual elapsed time can exceed the configured
+microsecond value by the duration of the current complete candidate evaluation.
 
-- The input can store and clear an interrupt calculation duration.
-- The stored value is preserved through the public C accessors.
-- No waypoint optimizer loop is interrupted solely because this value is set.
-- `ruckig_output_was_calculation_interrupted` is not forced by the local
-  optimizer budget in `0.4.x`.
-- Release notes must not claim hard or soft real-time waypoint optimization.
+## Current V1 Behavior
 
-## Future Semantics to Design
+- Unset or cleared `interrupt_calculation_duration` disables soft
+  interruption.
+- `interrupt_calculation_duration = 0.0` enables interruption at the first safe
+  candidate boundary after at least one complete candidate evaluation.
+- Negative values and NaN remain invalid input through the existing setter.
+- The feature only affects `ruckig_update` when the input contains intermediate
+  waypoints and a new trajectory calculation is required.
+- Public `ruckig_calculate`, no-waypoint target solving, and tracking remain
+  unchanged by the field.
+- Internal budget timing is always available when the field is set. It does not
+  depend on `RUCKIG_C_ENABLE_CALCULATION_DURATION`.
+- `ruckig_output_get_calculation_duration` keeps its existing compile-time
+  behavior: it reports measured duration only when
+  `RUCKIG_C_ENABLE_CALCULATION_DURATION` is enabled.
 
-Before implementation, a separate design must decide these cases:
+## Checkpoint Semantics
 
-- Tiny budget: whether the optimizer may return a previous best feasible
-  candidate, a newly found best feasible candidate, or an error.
-- Zero or no budget: whether this disables interruption or requests immediate
-  fallback.
-- Best feasible candidate exists: how to set result code, output trajectory,
-  and `was_calculation_interrupted`.
-- No feasible candidate exists: whether to return invalid input, generic error,
-  or a dedicated future diagnostic.
-- Online recalculation: how to reuse previous best candidates without
-  allocating or accepting stale constraints.
-- Timeout during candidate generation: how to preserve deterministic search
-  ordering and cleanup.
-- Timeout during section evaluation: whether a partially evaluated complete
-  waypoint candidate can ever be accepted. The default should be no.
-- Determinism: repeated calls with the same input and budget should return the
-  same accepted candidate on the same platform.
-- Allocation: checkpoint and timeout paths must not allocate in the prepared
-  online update path.
+- The optimizer checks the budget only after a complete waypoint candidate has
+  been evaluated across all sections.
+- A partially evaluated section or candidate is never accepted.
+- The target/profile/root solvers are not interrupted.
+- Candidate generation and evaluation order remain deterministic for the same
+  input and platform.
+- The first implementation does not reuse previous best candidates across
+  update cycles.
 
-## Implementation Preconditions
+## Result Semantics
 
-Future implementation should not start until:
+- If the budget expires and at least one complete feasible waypoint candidate
+  exists, `ruckig_update` writes the best complete candidate found so far,
+  returns `RUCKIG_WORKING`, sets `output.new_calculation = true`, and sets
+  `output.was_calculation_interrupted = true`.
+- If the budget expires before any complete feasible candidate exists,
+  `ruckig_update` returns `RUCKIG_ERROR_EXECUTION_TIME_CALCULATION`, does not
+  mark a new calculation, and sets `output.was_calculation_interrupted = true`.
+- Normal sampling cycles that do not create a new trajectory reset
+  `output.was_calculation_interrupted` to false.
+- If the field is unset or cleared, `output.was_calculation_interrupted`
+  remains false for waypoint `ruckig_update` calculations.
 
-- The optimizer has explicit phase and candidate-loop checkpoints.
-- The best-feasible candidate is stored in a reusable workspace.
-- Tests cover tiny budget, no budget, feasible fallback, no-feasible fallback,
-  online previous-best reuse, and lifecycle cleanup.
-- Release notes can state the exact semantics without implying a hard real-time
-  guarantee.
+## Evidence Requirements
 
-## 0.4.2 Acceptance
+Routine evidence for this feature should include:
 
-`0.4.2` is accepted when the storage-only behavior is documented clearly and
-all release notes keep soft interruption as deferred work.
+- Waypoint update with no budget and cleared budget.
+- Waypoint update with zero budget and an early feasible candidate.
+- Waypoint update with zero budget and no feasible candidate.
+- Continued online sampling after an interrupted waypoint update.
+- No-waypoint `ruckig_update` and public `ruckig_calculate` unchanged when the
+  field is set.
+- No-allocation checks for the prepared update path.
+- A duration-enabled build proving soft interruption does not depend on
+  `RUCKIG_C_ENABLE_CALCULATION_DURATION`.
+
+## Historical 0.4.x Behavior
+
+In `0.4.x`, including `0.4.2`, `interrupt_calculation_duration` was a stored
+input field only. Those release notes remain historical records and should not
+be rewritten to claim V1 soft interruption.
+
+## Deferred Work
+
+The following remain separate design items:
+
+- Cross-cycle previous-best reuse or true continuation of interrupted waypoint
+  optimization.
+- Finer-grained section or target-solver checkpoints.
+- Public waypoint optimizer diagnostics.
+- Hard real-time claims, proprietary Pro equivalence claims, or cloud/remote
+  fallback behavior.
