@@ -73,7 +73,10 @@ Historical rewrite plans and release evidence are retained for traceability.
   stable-review readiness audit for the Visualization v2 gallery, verifier,
   and manual artifact path without creating a tag or GitHub Release.
   `release/checklists/0.10.0.md` records the stable Visualization v2 evidence
-  release closeout.
+  release closeout. `release/checklists/0.11.0-readiness.md` records the full
+  local stable-review readiness audit for waypoint soft interruption V1 and
+  the internal platform clock abstraction without creating a tag or GitHub
+  Release.
 - `release/evidence/verification_report.md` - local and CI verification
   history.
 - `release/evidence/performance_report.md` - performance procedure and release
@@ -83,11 +86,12 @@ Historical rewrite plans and release evidence are retained for traceability.
   tracking quality/stability evidence release notes, and the stable `0.10.0`
   Visualization v2 evidence release notes.
 
-Current `main` is `0.11.0-design - Unreleased`; the first priority is soft
-interruption checkpoint design and evidence planning. `v0.10.0` is the current
-stable release. It stabilizes the 30 local `1400x900` Visualization v2 PNG
-assets, manifest, strict local verifier, and manual-only CI artifact evidence
-without making visualization a default push/PR gate. The previous v1 gallery
+Current `main` is `0.11.0-design - Unreleased`; `0.11.0-readiness` records
+local stable-review evidence for waypoint soft interruption V1 and the
+internal platform clock abstraction. `v0.10.0` is the current stable release.
+It stabilizes the 30 local `1400x900` Visualization v2 PNG assets, manifest,
+strict local verifier, and manual-only CI artifact evidence without making
+visualization a default push/PR gate. The previous v1 gallery
 provenance remains available through the `v0.9.0` tag.
 
 ## Design Documents

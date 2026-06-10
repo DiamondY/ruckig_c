@@ -23,10 +23,13 @@ only after a separate user or release demand decision.
 Current `main` is `0.11.0-design - Unreleased` after the published `v0.10.0`
 Visualization v2 evidence release.
 
-- First priority: soft interruption V1 implementation and evidence closeout.
+- First priority: `0.11.0-readiness` evidence audit for soft interruption V1
+  and the internal platform clock abstraction.
 - `interrupt_calculation_duration` now has local waypoint `ruckig_update`
   checkpoint semantics in the `0.11.0-design` line. Public `ruckig_calculate`,
   no-waypoint target solving, and tracking remain unchanged by the field.
+- The internal platform clock abstraction supports Windows/POSIX defaults and
+  compile-time embedded/RTOS provider injection without adding public C ABI.
 - Keep any further soft interruption expansion behind a dedicated
   compatibility review; do not change public C ABI, enum numeric values, or
   result-code numeric values by default.

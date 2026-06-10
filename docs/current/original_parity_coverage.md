@@ -91,5 +91,6 @@ full local stable-review evidence for that Visualization v2 line, and
 `v0.10.0` stabilizes the 30-PNG gallery, verifier, strict regeneration, and
 manual artifact workflow without changing public ABI, tracked gallery assets,
 the frozen original baseline, or default CI behavior. The next design line is
-`0.11.0-design`, with soft interruption checkpoint design and evidence
-planning as the first priority.
+`0.11.0-design`, where waypoint `ruckig_update` soft-interruption V1 and the
+internal platform clock abstraction have local readiness evidence recorded
+without expanding public C ABI.
