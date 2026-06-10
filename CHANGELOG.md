@@ -1,26 +1,67 @@
 # Changelog
 
-## 0.11.0-design - Unreleased
+## 0.11.0 - 2026-06-10
 
-Current `main` is open for `0.11.0-design` work after the published `v0.10.0`
-stable Visualization v2 evidence release.
+`0.11.0` is the stable waypoint soft-interruption and platform-clock evidence
+release. It keeps the `v0.9.0` 172-symbol public C ABI unchanged while
+stabilizing V1 soft interruption for waypoint `ruckig_update` new-trajectory
+calculations and the internal platform clock abstraction reviewed during
+`0.11.0-readiness`.
 
-First priority:
+Release focus:
 
-- Soft interruption checkpoint design and evidence planning.
-- Keep any timeout/checkpoint semantics behind a dedicated design and
-  compatibility review before changing public behavior.
-- Preserve the stable `v0.10.0` Visualization v2 gallery and the 172-symbol
-  public C ABI unless a separate public API decision is accepted.
+- Waypoint `ruckig_update` soft interruption through the existing
+  `interrupt_calculation_duration` input field and
+  `ruckig_output_was_calculation_interrupted` output getter.
+- Internal monotonic platform clock abstraction with Windows/POSIX defaults
+  and compile-time custom provider hooks for embedded/RTOS ports.
+- No public C ABI expansion, no new exported symbols, and no changes to enum
+  numeric values or result-code numeric values.
+- No change to public `ruckig_calculate`, no-waypoint target solving, or
+  tracking behavior when the interrupt field is set.
+
+`0.11.0-readiness` release readiness audit evidence:
+
+- Records full local readiness evidence for deciding whether waypoint
+  soft-interruption V1 and the internal platform clock abstraction can enter
+  stable closeout.
+- Reruns local build, duration-enabled build, routine CTest, focused waypoint
+  and platform-clock gates, oracle, performance, ABI/export, visualization
+  verifier, Python smoke, Rust smoke, wrapper examples, coverage, and boundary
+  diff gates.
+- Confirms the public C ABI remains at 172 symbols with public additions `0`,
+  public removals `0`, and unapproved exported symbols `0`.
+- Keeps readiness evidence-only: no version bump, tag, GitHub Release, manual
+  release-random workflow, public C API, public symbol, workflow, package, or
+  Cloud/Pro runtime change is added.
+- Readiness conclusion: ordinary push CI succeeded for the evidence commit, so
+  the line entered `v0.11.0` stable closeout.
+
+`v0.11.0` stable closeout:
+
+- Stabilizes waypoint `ruckig_update` soft-interruption V1 at safe complete
+  waypoint candidate boundaries.
+- Stabilizes the internal platform clock abstraction for hosted Windows/POSIX
+  builds and compile-time custom monotonic clock providers.
+- Moves ABI artifact output paths to `artifacts/abi/0.11.0`.
+- Keeps the public C ABI unchanged at 172 symbols, with public additions `0`,
+  public removals `0`, and unapproved exported symbols `0`.
+- Records full local release gates, ordinary CI, manual release-random
+  workflow evidence, annotated tag publication, and GitHub Release
+  publication.
 
 Release boundary:
 
-- `v0.10.0` is the current stable release.
-- Public C ABI expansion is not the default goal for `0.11.0-design`.
-- `0.10.1` remains reserved for emergency patch fixes only.
+- `v0.11.0` is the current stable release.
+- Public C ABI expansion was not part of `v0.11.0`.
+- `0.11.1` remains reserved for emergency patch fixes only.
 - Package-manager recipes, formal Python/Rust publication, cloud/remote
   calculation, Pro/cloud equivalence claims, formal global optimality proof,
   and upstream baseline upgrades remain deferred unless separately accepted.
+- Cross-cycle waypoint continuation, no-waypoint interruption, tracking
+  interruption, runtime platform clock setters, hard real-time guarantees, and
+  proprietary output equivalence claims remain deferred unless separately
+  accepted.
 
 ## 0.10.0 - 2026-06-09
 

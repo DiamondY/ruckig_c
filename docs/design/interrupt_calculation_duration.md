@@ -1,8 +1,8 @@
 # Interrupt Calculation Duration Design Notes
 
 `interrupt_calculation_duration` is part of the public C API surface for
-original API shape parity. In the current `0.11.0-design` line, it implements
-V1 soft interruption for local waypoint `ruckig_update` recalculation only.
+original API shape parity. In `v0.11.0`, it implements V1 soft interruption for
+local waypoint `ruckig_update` recalculation only.
 
 This is not a hard real-time guarantee. The budget is checked at safe waypoint
 candidate boundaries, so the actual elapsed time can exceed the configured

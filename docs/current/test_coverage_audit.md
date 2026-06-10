@@ -13,9 +13,9 @@ Coverage is tracked in three different senses:
 - Oracle coverage: frozen C++ differential comparisons against
   `original/ruckig-main`.
 
-## 0.11.0-design Soft Interruption V1 Evidence
+## v0.11.0 Soft Interruption V1 Evidence
 
-`0.11.0-design` adds local waypoint `ruckig_update` soft interruption through
+`v0.11.0` stabilizes local waypoint `ruckig_update` soft interruption through
 the existing `interrupt_calculation_duration` input field and
 `was_calculation_interrupted` output state. This does not add public symbols and
 does not affect public `ruckig_calculate`, no-waypoint target solving, or

@@ -38,10 +38,10 @@ Before each patch release:
 The initial `0.2.x` process records exported symbols as release evidence; it
 does not require a strict automated ABI diff yet.
 
-## 0.11.0 Design-Line Soft Interruption
+## 0.11.0 Stable Soft Interruption
 
-The `0.11.0-design` line implements V1 soft interruption without expanding the
-public C ABI:
+The `v0.11.0` stable release implements V1 soft interruption without expanding
+the public C ABI:
 
 - No public function, enum value, result-code numeric value, or exported symbol
   is added or removed.

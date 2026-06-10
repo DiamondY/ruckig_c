@@ -7,8 +7,7 @@ Historical rewrite plans and release evidence are retained for traceability.
 ## Current Maintainer Entry Points
 
 - `current/roadmap.md` - shipped scope, maintenance queues, current stable
-  release scope, the current `0.11.0-design` line, and future design
-  boundaries.
+  release scope, the `v0.11.0` stable line, and future design boundaries.
 - `current/api_compatibility.md` - patch-release API/ABI policy and
   exported-symbol review.
 - `current/api_diagnostics.md` - C API validation and diagnostics behavior.
@@ -76,23 +75,25 @@ Historical rewrite plans and release evidence are retained for traceability.
   release closeout. `release/checklists/0.11.0-readiness.md` records the full
   local stable-review readiness audit for waypoint soft interruption V1 and
   the internal platform clock abstraction without creating a tag or GitHub
-  Release.
+  Release. `release/checklists/0.11.0.md` records the stable waypoint
+  soft-interruption and platform-clock evidence release closeout.
 - `release/evidence/verification_report.md` - local and CI verification
   history.
 - `release/evidence/performance_report.md` - performance procedure and release
   benchmark records.
 - `release/notes/` - release notes source material, including the stable
   `0.8.0` visualization/gallery evidence release notes, the stable `0.9.0`
-  tracking quality/stability evidence release notes, and the stable `0.10.0`
-  Visualization v2 evidence release notes.
+  tracking quality/stability evidence release notes, the stable `0.10.0`
+  Visualization v2 evidence release notes, and the stable `0.11.0` waypoint
+  soft-interruption and platform-clock evidence release notes.
 
-Current `main` is `0.11.0-design - Unreleased`; `0.11.0-readiness` records
-local stable-review evidence for waypoint soft interruption V1 and the
-internal platform clock abstraction. `v0.10.0` is the current stable release.
-It stabilizes the 30 local `1400x900` Visualization v2 PNG assets, manifest,
-strict local verifier, and manual-only CI artifact evidence without making
-visualization a default push/PR gate. The previous v1 gallery
-provenance remains available through the `v0.9.0` tag.
+`v0.11.0` is the current stable release. It stabilizes waypoint `ruckig_update`
+soft-interruption V1 and the internal platform clock abstraction without
+expanding the 172-symbol public C ABI. `v0.10.0` stabilizes the 30 local
+`1400x900` Visualization v2 PNG assets, manifest, strict local verifier, and
+manual-only CI artifact evidence without making visualization a default push/PR
+gate. The previous v1 gallery provenance remains available through the
+`v0.9.0` tag.
 
 ## Design Documents
 
