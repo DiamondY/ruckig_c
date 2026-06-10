@@ -4,12 +4,15 @@
 
 Current `main` is open for `0.12.0-design` work after the published
 `v0.11.0` stable waypoint soft-interruption and platform-clock evidence
-release. The first accepted evidence slice is `0.12.0-alpha.1`.
+release. The first accepted evidence slice, `0.12.0-alpha.1`, has local and
+ordinary remote push CI evidence.
 
 First priority:
 
-- Implement and collect local evidence for waypoint `ruckig_update`
-  soft-interruption true resume.
+- Continue with `0.12.0-alpha.2` true-resume hardening: multi-DoF and
+  multi-waypoint resume loops, per-section constraint coverage, full-solve
+  comparison evidence, invalidation matrix coverage, expanded no-allocation
+  audit, public `ruckig_calculate` isolation, and long online-loop stability.
 - Keep the expansion scoped to intermediate-waypoint `ruckig_update` only.
   Public `ruckig_calculate`, no-waypoint target solving, and tracking remain
   unchanged by the interrupt field.
@@ -33,6 +36,10 @@ First priority:
 - Keeps the public C ABI unchanged: no public header signature changes, no
   new exported symbols, no enum/result-code numeric changes, and no runtime
   clock setter.
+- Passed ordinary remote push CI for commit `2f689b2` in run `27275153996`
+  (`https://github.com/DiamondY/ruckig_c/actions/runs/27275153996`) with
+  conclusion `success`; no `v0.12.0*` tag, GitHub Release, or manual
+  release-random run was part of the alpha evidence step.
 
 Release boundary:
 
