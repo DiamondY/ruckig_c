@@ -5,19 +5,39 @@
 Current `main` is open for `0.12.0-design` work after the published
 `v0.11.0` stable waypoint soft-interruption and platform-clock evidence
 release. The first accepted evidence slice, `0.12.0-alpha.1`, has local and
-ordinary remote push CI evidence.
+ordinary remote push CI evidence. The next local hardening slice is
+`0.12.0-alpha.2`.
 
 First priority:
 
-- Continue with `0.12.0-alpha.2` true-resume hardening: multi-DoF and
-  multi-waypoint resume loops, per-section constraint coverage, full-solve
-  comparison evidence, invalidation matrix coverage, expanded no-allocation
-  audit, public `ruckig_calculate` isolation, and long online-loop stability.
+- Complete local `0.12.0-alpha.2` evidence and then collect ordinary remote
+  push CI evidence before promoting further `0.12.0` work.
 - Keep the expansion scoped to intermediate-waypoint `ruckig_update` only.
   Public `ruckig_calculate`, no-waypoint target solving, and tracking remain
   unchanged by the interrupt field.
 - Keep runtime clock public hooks, wrapper publication, upstream baseline
   upgrades, and package-manager work deferred unless separately accepted.
+
+`0.12.0-alpha.2` local hardening slice:
+
+- Unifies complete waypoint solving and soft-interruption resume on the same
+  private step-driven waypoint optimizer engine.
+- Keeps public `ruckig_calculate` complete and non-interruptible: it ignores
+  `interrupt_calculation_duration`, runs the unified engine to completion, and
+  leaves no active private resume state.
+- Preserves V2 online semantics for waypoint `ruckig_update`: complete
+  candidate-boundary interruption, background continuation after normal
+  `pass_to_input`, and publishing only when a complete feasible candidate
+  improves over incumbent remaining duration.
+- Adds C hardening coverage for multi-DoF and multi-waypoint resume,
+  per-section constraints, fresh full-solve quality comparison, invalidation
+  matrix behavior, allocation-free background completion, no-waypoint and
+  `ruckig_calculate` isolation, and long online-loop stability.
+- Keeps the public C ABI unchanged: no public header signature changes, no
+  new exported symbols, no enum/result-code numeric changes, and no runtime
+  clock setter.
+- This is local alpha evidence only; no `v0.12.0*` tag, GitHub Release,
+  version bump, or manual release-random workflow is part of this slice.
 
 `0.12.0-alpha.1` local evidence slice:
 

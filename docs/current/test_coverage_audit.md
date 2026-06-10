@@ -13,6 +13,27 @@ Coverage is tracked in three different senses:
 - Oracle coverage: frozen C++ differential comparisons against
   `original/ruckig-main`.
 
+## 0.12.0-alpha.2 True-Resume Unified Engine Hardening
+
+`0.12.0-alpha.2` hardens the waypoint soft-interruption true-resume line by
+sharing one private step-driven waypoint optimizer engine between complete
+waypoint solves and interruptible online resume. It does not add public C ABI
+and does not expand soft interruption beyond waypoint `ruckig_update`.
+
+Added C coverage:
+
+| Scenario | Evidence |
+| --- | --- |
+| Unified complete solve | Public waypoint `ruckig_calculate` runs the step-driven engine to completion, ignores the interrupt field, matches existing fixed waypoint regression expectations, and leaves no active resume state. |
+| No-budget waypoint update | Waypoint `ruckig_update` without an interrupt budget completes through the same engine, reports no interruption, and leaves no active resume state. |
+| Multi-DoF/multi-waypoint resume | A 3-DoF, two-waypoint online case resumes across `pass_to_input`, can finish background optimization after changing only the interrupt duration, and publishes only an improved complete trajectory. |
+| Per-section constraints during resume | Published trajectories in the multi-waypoint resume case satisfy sampled per-section velocity, acceleration, jerk, position, and minimum-duration constraints. |
+| Fresh full-solve quality comparison | The current remaining input is also solved with a complete waypoint calculation; the resumed publish is checked against incumbent remaining duration while the fresh solve remains feasible. |
+| Long online loop | Repeated zero-budget online cycles keep old trajectory sampling valid when no publish occurs and reset time through normal new-calculation semantics when publishing. |
+| Invalidation matrix | Target, intermediate waypoints, waypoint count, limits, per-section constraints, enabled DoFs, synchronization, invalid control mode, invalid duration discretization, and interrupt clear all invalidate or clear stale resume state. |
+| Isolation | Public waypoint `ruckig_calculate` clears active resume state; no-waypoint `ruckig_update` with the interrupt field set does not use resume state. |
+| Allocation | Background completion after an interrupt-duration change runs under the allocation guard without runtime allocation. |
+
 ## 0.12.0-alpha.1 Waypoint Soft Interruption True Resume
 
 `0.12.0-alpha.1` extends the waypoint `ruckig_update`

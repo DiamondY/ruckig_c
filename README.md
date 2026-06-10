@@ -73,8 +73,10 @@ Implemented and covered by fixed C/oracle tests plus deterministic random oracle
   ABI unchanged.
 - `0.12.0-design - Unreleased` is the current `main` line after `v0.11.0`;
   `0.12.0-alpha.1` waypoint `ruckig_update` soft-interruption true resume has
-  local and ordinary remote push CI evidence, and the next priority is
-  `0.12.0-alpha.2` true-resume hardening without public C ABI expansion.
+  local and ordinary remote push CI evidence. `0.12.0-alpha.2` unifies the
+  complete waypoint solver and soft-interruption resume on the private
+  step-driven optimizer engine and hardens true-resume evidence without public
+  C ABI expansion.
 - `0.10.0-alpha` visualization v2 local gallery evidence, replacing the
   current `main` gallery with 30 project-owned `1400x900` PNGs and a strict
   local verifier while keeping the `v0.9.0` stable C ABI unchanged.
@@ -98,9 +100,11 @@ stabilizes waypoint `ruckig_update` soft-interruption V1 plus the internal
 platform clock abstraction reviewed during `0.11.0-readiness`. Current `main`
 is `0.12.0-design - Unreleased`; the accepted `0.12.0-alpha.1` slice extends
 waypoint `ruckig_update` soft interruption with private true-resume/background
-publish semantics and has local plus ordinary remote push CI evidence. The
-next priority is `0.12.0-alpha.2` hardening, and public C ABI expansion is not
-part of the line.
+publish semantics and has local plus ordinary remote push CI evidence.
+`0.12.0-alpha.2` hardens that implementation locally by sharing the same
+private step-driven optimizer between complete waypoint solves and
+soft-interruption resume, while keeping public C ABI expansion out of the
+line.
 `v0.10.0` adopts the current gallery as 30 `1400x900` Matplotlib `Agg` and
 NumPy PNG assets under `docs/assets/visualization/`. The gallery covers local
 C ABI equivalents of original examples `01-10` and `14-16`, plus tracking
@@ -149,7 +153,8 @@ private true-resume after an interrupted calculation. Later normal
 `pass_to_input` cycles can continue the waypoint optimizer and publish a
 better complete remaining trajectory; no public ABI, no-waypoint interruption,
 tracking interruption, or runtime clock setter is added. `0.12.0-alpha.2`
-hardening is the next implementation slice.
+keeps that public boundary and removes the internal split between complete
+waypoint solving and the resumable optimizer engine.
 
 Current stable release scope intentionally excludes:
 

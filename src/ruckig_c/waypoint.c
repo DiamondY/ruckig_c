@@ -506,138 +506,6 @@ static size_t build_branch_queue(
     return branch_count;
 }
 
-static bool explore_branch_queue(
-    ruckig_t* otg,
-    const ruckig_input_t* input,
-    double* best_duration,
-    waypoint_interrupt_context_t* interrupt
-) {
-    bool improved_any = false;
-    bool pass_improved = true;
-    size_t iteration = 0;
-    const size_t count = input->waypoint_count * input->dofs;
-    double scale = 0.20;
-
-    while (pass_improved && iteration < RUCKIG_WAYPOINT_BRANCH_ITERATION_BUDGET && scale >= 0.025) {
-        ruckig_waypoint_branch_t queue[RUCKIG_WAYPOINT_BRANCH_QUEUE_CAPACITY];
-        size_t branch_count;
-        size_t branch_index;
-        pass_improved = false;
-        branch_count = build_branch_queue(input, *best_duration, scale, queue);
-        if (branch_count > 0 && queue[0].lower_bound < otg->waypoint_last_best_lower_bound) {
-            otg->waypoint_last_best_lower_bound = queue[0].lower_bound;
-        }
-
-        for (branch_index = 0;
-             branch_index < branch_count && iteration < RUCKIG_WAYPOINT_BRANCH_ITERATION_BUDGET;
-             ++branch_index, ++iteration) {
-            const ruckig_waypoint_branch_t branch = queue[branch_index];
-            bool accepted;
-            memcpy(otg->waypoint_candidate_velocity, otg->waypoint_best_velocity, sizeof(double) * count);
-            memcpy(otg->waypoint_candidate_acceleration, otg->waypoint_best_acceleration, sizeof(double) * count);
-            if (branch.acceleration) {
-                const size_t waypoint = branch.index / input->dofs;
-                const size_t dof = branch.index % input->dofs;
-                const double a_min = waypoint_acceleration_min(input, waypoint, dof);
-                const double a_max = waypoint_acceleration_max(input, waypoint, dof);
-                otg->waypoint_candidate_acceleration[branch.index] =
-                    clamp_value(otg->waypoint_candidate_acceleration[branch.index] + branch.delta, a_min, a_max);
-            } else {
-                const size_t waypoint = branch.index / input->dofs;
-                const size_t dof = branch.index % input->dofs;
-                const double v_min = waypoint_velocity_min(input, waypoint, dof);
-                const double v_max = waypoint_velocity_max(input, waypoint, dof);
-                otg->waypoint_candidate_velocity[branch.index] =
-                    clamp_value(otg->waypoint_candidate_velocity[branch.index] + branch.delta, v_min, v_max);
-            }
-            accepted = accept_if_better(otg, input, otg->waypoint_candidate_velocity, otg->waypoint_candidate_acceleration, best_duration);
-            if (waypoint_interrupt_check(interrupt)) {
-                return improved_any || accepted;
-            }
-            if (accepted) {
-                improved_any = true;
-                pass_improved = true;
-                break;
-            }
-        }
-
-        if (!pass_improved) {
-            scale *= 0.5;
-            pass_improved = true;
-        }
-    }
-
-    return improved_any;
-}
-
-static bool refine_candidate(
-    ruckig_t* otg,
-    const ruckig_input_t* input,
-    double* best_duration,
-    waypoint_interrupt_context_t* interrupt
-) {
-    bool improved = false;
-    size_t pass;
-    const size_t count = input->waypoint_count * input->dofs;
-    memcpy(otg->waypoint_candidate_velocity, otg->waypoint_best_velocity, sizeof(double) * count);
-    memcpy(otg->waypoint_candidate_acceleration, otg->waypoint_best_acceleration, sizeof(double) * count);
-
-    for (pass = 0; pass < 2; ++pass) {
-        size_t waypoint;
-        size_t dof;
-        const double scale = pass == 0 ? 0.25 : 0.10;
-        for (waypoint = 0; waypoint < input->waypoint_count; ++waypoint) {
-            for (dof = 0; dof < input->dofs; ++dof) {
-                const size_t index = waypoint * input->dofs + dof;
-                const double v_min = waypoint_velocity_min(input, waypoint, dof);
-                const double v_max = waypoint_velocity_max(input, waypoint, dof);
-                const double a_min = waypoint_acceleration_min(input, waypoint, dof);
-                const double a_max = waypoint_acceleration_max(input, waypoint, dof);
-                const double v_step = scale * (v_max - v_min);
-                const double a_step = scale * (a_max - a_min);
-                double original;
-
-                original = otg->waypoint_candidate_velocity[index];
-                otg->waypoint_candidate_velocity[index] = clamp_value(original + v_step, v_min, v_max);
-                if (accept_if_better(otg, input, otg->waypoint_candidate_velocity, otg->waypoint_candidate_acceleration, best_duration)) {
-                    improved = true;
-                    original = otg->waypoint_candidate_velocity[index];
-                } else {
-                    otg->waypoint_candidate_velocity[index] = clamp_value(original - v_step, v_min, v_max);
-                    if (accept_if_better(otg, input, otg->waypoint_candidate_velocity, otg->waypoint_candidate_acceleration, best_duration)) {
-                        improved = true;
-                        original = otg->waypoint_candidate_velocity[index];
-                    } else {
-                        otg->waypoint_candidate_velocity[index] = original;
-                    }
-                }
-                if (waypoint_interrupt_check(interrupt)) {
-                    return improved;
-                }
-
-                original = otg->waypoint_candidate_acceleration[index];
-                otg->waypoint_candidate_acceleration[index] = clamp_value(original + a_step, a_min, a_max);
-                if (accept_if_better(otg, input, otg->waypoint_candidate_velocity, otg->waypoint_candidate_acceleration, best_duration)) {
-                    improved = true;
-                } else {
-                    otg->waypoint_candidate_acceleration[index] = clamp_value(original - a_step, a_min, a_max);
-                    if (accept_if_better(otg, input, otg->waypoint_candidate_velocity, otg->waypoint_candidate_acceleration, best_duration)) {
-                        improved = true;
-                    } else {
-                        otg->waypoint_candidate_acceleration[index] = original;
-                    }
-                }
-                if (waypoint_interrupt_check(interrupt)) {
-                    return improved;
-                }
-                memcpy(otg->waypoint_candidate_velocity, otg->waypoint_best_velocity, sizeof(double) * count);
-                memcpy(otg->waypoint_candidate_acceleration, otg->waypoint_best_acceleration, sizeof(double) * count);
-            }
-        }
-    }
-    return improved;
-}
-
 static void waypoint_resume_update_last_diagnostics(ruckig_t* otg) {
     otg->waypoint_last_baseline_duration = otg->waypoint_resume_baseline_duration;
     otg->waypoint_last_best_duration = otg->waypoint_resume_found ? otg->waypoint_resume_best_duration : DBL_MAX;
@@ -881,7 +749,6 @@ static ruckig_result_t waypoint_resume_step_branch(
                 otg->waypoint_resume_branch_queue[otg->waypoint_resume_branch_index];
             bool accepted;
             ++otg->waypoint_resume_branch_index;
-            ++otg->waypoint_resume_branch_iteration;
             memcpy(otg->waypoint_candidate_velocity, otg->waypoint_best_velocity, sizeof(double) * count);
             memcpy(otg->waypoint_candidate_acceleration, otg->waypoint_best_acceleration, sizeof(double) * count);
             if (branch.acceleration) {
@@ -908,6 +775,8 @@ static ruckig_result_t waypoint_resume_step_branch(
             if (accepted) {
                 otg->waypoint_resume_branch_improved_any = true;
                 otg->waypoint_resume_branch_queue_valid = false;
+            } else {
+                ++otg->waypoint_resume_branch_iteration;
             }
             *candidate_evaluated = true;
             return RUCKIG_WORKING;
@@ -1095,71 +964,35 @@ static ruckig_result_t copy_waypoint_trajectory(
 static ruckig_result_t ruckig_calculate_waypoints_impl(
     ruckig_t* otg,
     const ruckig_input_t* input,
-    ruckig_trajectory_t* trajectory,
-    waypoint_interrupt_context_t* interrupt
+    ruckig_trajectory_t* trajectory
 ) {
-    const size_t count = input ? input->waypoint_count * input->dofs : 0;
-    double best_duration = DBL_MAX;
-    bool found = false;
+    ruckig_result_t result;
 
     if (!otg || !input || !trajectory || input->waypoint_count == 0
         || input->waypoint_count > otg->max_number_of_waypoints
-        || input->waypoint_count > trajectory->max_number_of_waypoints
-        || !otg->waypoint_section_input || !otg->waypoint_section_trajectory) {
+        || input->waypoint_count > trajectory->max_number_of_waypoints) {
         return RUCKIG_ERROR_INVALID_INPUT;
     }
     trajectory->valid = false;
-    otg->waypoint_last_baseline_duration = DBL_MAX;
-    otg->waypoint_last_best_duration = DBL_MAX;
-    otg->waypoint_last_best_lower_bound = DBL_MAX;
-    otg->waypoint_last_candidate_evaluations = 0;
-    otg->waypoint_last_improved_baseline = false;
-    if (ruckig_validate_input(otg, input, false, true) != RUCKIG_WORKING) {
-        return RUCKIG_ERROR_INVALID_INPUT;
+
+    result = waypoint_resume_start(otg, input, false);
+    if (result != RUCKIG_WORKING) {
+        ruckig_waypoint_resume_clear(otg);
+        return result;
+    }
+    result = waypoint_resume_run(otg, input, NULL);
+    if (result != RUCKIG_WORKING) {
+        ruckig_waypoint_resume_clear(otg);
+        return result;
+    }
+    if (!otg->waypoint_resume_found) {
+        ruckig_waypoint_resume_clear(otg);
+        return RUCKIG_ERROR;
     }
 
-    fill_zero_candidate(otg->waypoint_baseline_velocity, otg->waypoint_baseline_acceleration, count);
-    found = accept_if_better(otg, input, otg->waypoint_baseline_velocity, otg->waypoint_baseline_acceleration, &best_duration);
-    if (found) {
-        otg->waypoint_last_baseline_duration = best_duration;
-    }
-    if (waypoint_interrupt_check(interrupt)) {
-        goto finish_search;
-    }
-
-    fill_finite_difference_candidate(input, otg->waypoint_candidate_velocity, otg->waypoint_candidate_acceleration, 0.35);
-    found = accept_if_better(otg, input, otg->waypoint_candidate_velocity, otg->waypoint_candidate_acceleration, &best_duration) || found;
-    if (waypoint_interrupt_check(interrupt)) {
-        goto finish_search;
-    }
-
-    fill_finite_difference_candidate(input, otg->waypoint_candidate_velocity, otg->waypoint_candidate_acceleration, 0.70);
-    found = accept_if_better(otg, input, otg->waypoint_candidate_velocity, otg->waypoint_candidate_acceleration, &best_duration) || found;
-    if (waypoint_interrupt_check(interrupt)) {
-        goto finish_search;
-    }
-
-    if (found) {
-        (void)refine_candidate(otg, input, &best_duration, interrupt);
-        if (!interrupt || !interrupt->interrupted) {
-            (void)explore_branch_queue(otg, input, &best_duration, interrupt);
-        }
-    }
-
-finish_search:
-    if (found) {
-        otg->waypoint_last_best_duration = best_duration;
-        otg->waypoint_last_improved_baseline =
-            otg->waypoint_last_baseline_duration != DBL_MAX
-            && best_duration < otg->waypoint_last_baseline_duration - 1.0e-12;
-        return write_best_trajectory(otg, input, trajectory);
-    }
-
-    if (interrupt && interrupt->interrupted) {
-        return RUCKIG_ERROR_EXECUTION_TIME_CALCULATION;
-    }
-
-    return RUCKIG_ERROR;
+    result = write_best_trajectory(otg, input, trajectory);
+    ruckig_waypoint_resume_clear(otg);
+    return result;
 }
 
 ruckig_result_t ruckig_calculate_waypoints(
@@ -1167,7 +1000,7 @@ ruckig_result_t ruckig_calculate_waypoints(
     const ruckig_input_t* input,
     ruckig_trajectory_t* trajectory
 ) {
-    return ruckig_calculate_waypoints_impl(otg, input, trajectory, NULL);
+    return ruckig_calculate_waypoints_impl(otg, input, trajectory);
 }
 
 ruckig_result_t ruckig_calculate_waypoints_interruptible(

@@ -80,7 +80,8 @@ Historical rewrite plans and release evidence are retained for traceability.
   soft-interruption and platform-clock evidence release closeout.
   `release/checklists/0.12.0-alpha.1.md` records the first `0.12.0-design`
   waypoint soft-interruption true-resume evidence slice, including ordinary
-  remote push CI evidence.
+  remote push CI evidence. `release/checklists/0.12.0-alpha.2.md` records the
+  local true-resume unified-engine hardening evidence slice.
 - `release/evidence/verification_report.md` - local and CI verification
   history.
 - `release/evidence/performance_report.md` - performance procedure and release
@@ -93,8 +94,8 @@ Historical rewrite plans and release evidence are retained for traceability.
 
 Current `main` is `0.12.0-design - Unreleased`; the accepted
 `0.12.0-alpha.1` waypoint soft-interruption true-resume slice has local and
-ordinary remote push CI evidence. The first priority is `0.12.0-alpha.2`
-true-resume hardening without public C ABI expansion.
+ordinary remote push CI evidence. `0.12.0-alpha.2` is the local
+true-resume unified-engine hardening slice without public C ABI expansion.
 
 `v0.11.0` is the current stable release. It stabilizes waypoint `ruckig_update`
 soft-interruption V1 and the internal platform clock abstraction without

@@ -4,7 +4,8 @@
 original API shape parity. In `v0.11.0`, it implemented V1 soft interruption
 for local waypoint `ruckig_update` new-trajectory recalculation. In
 `0.12.0-alpha.1`, the same public field drives V2 true-resume for waypoint
-`ruckig_update` only.
+`ruckig_update` only. In `0.12.0-alpha.2`, complete waypoint solving and
+soft-interruption resume share the same private step-driven optimizer engine.
 
 This is not a hard real-time guarantee. The budget is checked at safe waypoint
 candidate boundaries, so the actual elapsed time can exceed the configured
@@ -21,6 +22,9 @@ microsecond value by the duration of the current complete candidate evaluation.
   waypoints.
 - Public `ruckig_calculate`, no-waypoint target solving, and tracking remain
   unchanged by the field.
+- Public waypoint `ruckig_calculate` uses the same private step-driven
+  waypoint optimizer engine, but always runs it to completion, ignores the
+  interrupt field, and leaves no active private resume state.
 - Internal budget timing is always available when the field is set. It does not
   depend on `RUCKIG_C_ENABLE_CALCULATION_DURATION`.
 - `ruckig_output_get_calculation_duration` keeps its existing compile-time
@@ -42,8 +46,10 @@ The optimizer is still advanced only at complete-candidate boundaries:
   candidates are each evaluated across all sections before they can be accepted.
 - The target/profile/root solvers are not interrupted.
 - No half-candidate or partially evaluated section is published.
-- With no budget pressure, candidate order and tie-break behavior remain the
-  same as the complete waypoint optimizer path.
+- Complete waypoint solving and resumable waypoint solving share one
+  step-driven candidate engine. With no budget pressure, the engine runs to
+  completion and preserves the established candidate order and tie-break
+  behavior.
 
 Ordinary online cycles can continue an active resume before sampling the old
 trajectory when all of the following are true:
@@ -104,6 +110,9 @@ candidate boundaries.
 - The V2 implementation resumes the private search cursor across normal online
   cycles, but each candidate is still fully evaluated against the current input
   state before it can be accepted or published.
+- The complete waypoint calculation path uses the same candidate steps without
+  an interrupt context, so it cannot stop early due to
+  `interrupt_calculation_duration`.
 
 ## Result Semantics
 
@@ -146,6 +155,11 @@ Routine evidence for this feature should include:
 - Waypoint update with zero budget and no feasible candidate.
 - No-waypoint `ruckig_update` and public `ruckig_calculate` unchanged when the
   field is set.
+- Unified-engine complete waypoint solve parity with existing fixed waypoint
+  regression durations, intermediate durations, samples, and section limits.
+- Multi-DoF and multi-waypoint background resume with per-section constraints,
+  fresh full-solve quality comparison, invalidation matrix coverage, and long
+  online-loop stability.
 - No-allocation checks for the prepared update and background resume paths.
 - A duration-enabled build proving soft interruption does not depend on
   `RUCKIG_C_ENABLE_CALCULATION_DURATION`.
