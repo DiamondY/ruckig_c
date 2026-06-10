@@ -18,6 +18,31 @@ install, pkg-config, static/DLL, shared install-tree, and CI consumer paths
 remain maintained; vcpkg, Conan, Homebrew, and similar recipes are reopened
 only after a separate user or release demand decision.
 
+## 0.12.0 Design Line
+
+Current `main` is `0.12.0-design - Unreleased` after the published `v0.11.0`
+waypoint soft-interruption and platform-clock evidence release.
+
+- First priority: select and document the next accepted work slice before
+  implementation.
+- Keep `v0.11.0` as the current stable release.
+- Keep the `v0.9.0` 172-symbol public C ABI baseline unless a separate public
+  API decision is accepted.
+- Keep waypoint soft-interruption V1 boundaries intact unless a dedicated
+  compatibility review accepts expansion beyond waypoint `ruckig_update` new
+  trajectory calculations.
+- Candidate directions remain design-only until accepted: cross-cycle waypoint
+  continuation, no-waypoint interruption, tracking interruption, runtime
+  platform clock hooks, wrapper publication, upstream baseline upgrades, or
+  package-manager work.
+- `0.11.1` remains reserved for emergency patch fixes only.
+- Package-manager recipes and package publication remain frozen unless
+  separately accepted.
+- Cloud/remote runtime, proprietary Pro equivalence claims, hard real-time
+  guarantees, formal global optimality proof, formal Python/Rust API
+  publication, and upstream baseline upgrades remain deferred unless
+  separately accepted.
+
 ## 0.11.0 Soft Interruption And Platform Clock Release
 
 Published as `v0.11.0`. This release keeps the `v0.9.0` 172-symbol public C

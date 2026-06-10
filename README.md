@@ -71,6 +71,9 @@ Implemented and covered by fixed C/oracle tests plus deterministic random oracle
   stabilization, adopting waypoint `ruckig_update` soft-interruption V1 and
   the internal platform clock abstraction while keeping the `v0.9.0` stable C
   ABI unchanged.
+- `0.12.0-design - Unreleased` is the current `main` line after `v0.11.0`;
+  first priority is selecting and documenting the next accepted work slice
+  before implementation, without default public C ABI expansion.
 - `0.10.0-alpha` visualization v2 local gallery evidence, replacing the
   current `main` gallery with 30 project-owned `1400x900` PNGs and a strict
   local verifier while keeping the `v0.9.0` stable C ABI unchanged.
@@ -91,7 +94,10 @@ Release-readiness evidence is tracked under `docs/release/`; see
 `docs/index.md` for the organized documentation map. `v0.11.0` is the current
 stable release. It keeps the `v0.9.0` 172-symbol public C ABI unchanged and
 stabilizes waypoint `ruckig_update` soft-interruption V1 plus the internal
-platform clock abstraction reviewed during `0.11.0-readiness`.
+platform clock abstraction reviewed during `0.11.0-readiness`. Current `main`
+is `0.12.0-design - Unreleased`; the next accepted work slice must be scoped
+and documented before implementation, and public C ABI expansion is not the
+default goal.
 `v0.10.0` adopts the current gallery as 30 `1400x900` Matplotlib `Agg` and
 NumPy PNG assets under `docs/assets/visualization/`. The gallery covers local
 C ABI equivalents of original examples `01-10` and `14-16`, plus tracking

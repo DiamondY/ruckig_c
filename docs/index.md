@@ -7,7 +7,8 @@ Historical rewrite plans and release evidence are retained for traceability.
 ## Current Maintainer Entry Points
 
 - `current/roadmap.md` - shipped scope, maintenance queues, current stable
-  release scope, the `v0.11.0` stable line, and future design boundaries.
+  release scope, the current `0.12.0-design` line, the `v0.11.0` stable line,
+  and future design boundaries.
 - `current/api_compatibility.md` - patch-release API/ABI policy and
   exported-symbol review.
 - `current/api_diagnostics.md` - C API validation and diagnostics behavior.
@@ -86,6 +87,10 @@ Historical rewrite plans and release evidence are retained for traceability.
   tracking quality/stability evidence release notes, the stable `0.10.0`
   Visualization v2 evidence release notes, and the stable `0.11.0` waypoint
   soft-interruption and platform-clock evidence release notes.
+
+Current `main` is `0.12.0-design - Unreleased`; the first priority is
+selecting and documenting the next accepted work slice before implementation,
+without default public C ABI expansion.
 
 `v0.11.0` is the current stable release. It stabilizes waypoint `ruckig_update`
 soft-interruption V1 and the internal platform clock abstraction without

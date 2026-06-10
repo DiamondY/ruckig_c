@@ -1,5 +1,31 @@
 # Changelog
 
+## 0.12.0-design - Unreleased
+
+Current `main` is open for `0.12.0-design` work after the published
+`v0.11.0` stable waypoint soft-interruption and platform-clock evidence
+release.
+
+First priority:
+
+- Select and document the next accepted work slice before implementation.
+- Keep `v0.11.0` waypoint soft-interruption V1 boundaries intact unless a
+  separate compatibility review accepts expansion.
+- Candidate directions remain design-only until accepted: cross-cycle waypoint
+  continuation, no-waypoint interruption, tracking interruption, runtime clock
+  hooks, wrapper publication, upstream baseline upgrades, or package-manager
+  work.
+
+Release boundary:
+
+- `v0.11.0` remains the current stable release.
+- Public C ABI expansion is not the default goal for `0.12.0-design`.
+- `0.11.1` remains reserved for emergency patch fixes only.
+- Package-manager recipes, formal Python/Rust publication, cloud/remote
+  calculation, Pro/cloud equivalence claims, formal global optimality proof,
+  hard real-time guarantees, and upstream baseline upgrades remain deferred
+  unless separately accepted.
+
 ## 0.11.0 - 2026-06-10
 
 `0.11.0` is the stable waypoint soft-interruption and platform-clock evidence
