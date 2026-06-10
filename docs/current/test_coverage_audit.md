@@ -151,7 +151,7 @@ Original source: `original/ruckig-main/test/test_target.cpp`.
 | `phase-synchronization` | Fixed C tests, fixed oracle cases, random oracle synchronization modes, and phase/none/time-if-necessary per-DoF coverage. | Strong |
 | `dynamic-dofs` | All public C handles are dynamic DoF handles; C examples and oracle tests cover 1-3 DoF, waypoint tests cover up to 8 DoF. | Strong for C ABI |
 | `zero-limits` | C zero-limit diagnostics and oracle result paths cover accepted and rejected zero-limit shapes. | Strong |
-| `custom-vector-type` | Not directly applicable to C ABI; C uses flat arrays and dynamic handles. Header compile and wrapper smoke cover consumer ergonomics instead. | Product-shape gap |
+| `custom-vector-type` | Not directly applicable to C ABI; C uses flat arrays and dynamic handles. Header compile and wrapper smoke cover consumer ergonomics instead. | Out of C ABI scope |
 | `random-discrete-3` | Random oracle generator covers continuous/discrete duration with 1-3 DoF inputs; release random reaches 1M seed 1. | Strong |
 | `velocity-random-3` | Random oracle generator covers velocity control, second/third-order velocity paths, and online sampling. | Strong |
 | `velocity-random-discrete-3` | Random oracle generator covers velocity control with discrete duration; fixed C tests cover discrete behavior. | Strong |
@@ -177,18 +177,20 @@ Original source: `original/ruckig-main/examples`.
 | `08_per_section_minimum_duration` | `examples/c/10_per_section_minimum_duration.c`; Rust `per_section_minimum_duration.rs`. | Covered |
 | `09_dynamic_dofs` | C ABI is dynamic-DoF by construction; no separate template-style C example is needed. | Covered by API shape |
 | `10_dynamic_dofs_waypoints` | `examples/c/14_dynamic_dofs_waypoints.c`. | Covered |
-| `11_eigen_vector_type` | Not applicable to flat C ABI. | Product-shape gap |
-| `12_custom_vector_type` | Not applicable to flat C ABI. | Product-shape gap |
-| `13_custom_vector_type_dynamic_dofs` | Not applicable to flat C ABI. | Product-shape gap |
+| `11_eigen_vector_type` | Not applicable to flat C ABI. | Out of C ABI scope |
+| `12_custom_vector_type` | Not applicable to flat C ABI. | Out of C ABI scope |
+| `13_custom_vector_type_dynamic_dofs` | Not applicable to flat C ABI. | Out of C ABI scope |
 | `14_tracking` | `examples/c/15_tracking_online_fast_ramp.c`, `16_tracking_online_constant_acceleration.c`, `18_tracking_online_optimized_lookahead.c`, and `19_tracking_online_optimized_sinus.c`. | Local tracking evidence |
 | `15_tracking_offline` | `examples/c/17_tracking_offline_sequence.c` and `20_tracking_offline_optimized_sequence.c`. | Local tracking evidence |
 | `16_speed` | `ruckig_c_performance_benchmark` and release performance evidence. | Covered |
 
 Original example trajectory PDFs and `examples/plotter.py` are visualization
-assets rather than solver behavior tests. `ruckig_c` does not yet generate
-equivalent project-owned trajectory gallery images. That work is deferred until
-after `v0.7.0` so the stable closeout does not add plotting dependencies,
-generated image/PDF artifacts, or new release gates.
+assets rather than solver behavior tests. `v0.10.0` stabilizes a
+project-owned Visualization v2 PNG gallery generated from the public C ABI and
+Python prototype. The gallery covers original example mappings `01-10` and
+`14-16`, plus tracking diagnostics, waypoint diagnostics, trajectory anatomy,
+and summary plots. It remains local evidence and is not a default CI or release
+gate.
 
 ## Interpretation
 
@@ -196,15 +198,18 @@ The strongest coverage area remains the no-waypoint target solver: fixed oracle
 cases, routine 100k random seeds, per-DoF random coverage, and release/manual
 1M random evidence directly compare C behavior to the frozen C++ oracle.
 
-Coverage is weaker where the C runtime intentionally differs from the original
-C++ product shape:
+Coverage is weaker where the C runtime intentionally differs from, or
+deliberately scopes out, original product surfaces:
 
 - C++ template/static DoF, Eigen, and custom vector ergonomics do not map to
-  the C ABI.
-- Waypoint global optimality and Pro/cloud equivalence are not claimed.
+  the C ABI and are not counted against current scoped parity.
+- Waypoint global optimality and proprietary Pro output equivalence are not
+  claimed; local waypoint behavior is evaluated by interface/effect evidence.
 - Tracking has local Fast and bounded Optimized evidence, but no frozen local
   source-level tracking oracle.
-- Python and Rust remain prototype/alpha evidence, not published packages.
+- Python and Rust remain prototype/alpha evidence. Package publication is
+  frozen until a separate demand decision accepts it.
 
-The coverage audit supports the existing original parity estimate; it does not
-raise the full product parity percentage by itself.
+The coverage audit supports the current project-scoped original-surface parity
+estimate; it does not create a claim of cloud runtime support, proprietary Pro
+equivalence, or package ecosystem completion.

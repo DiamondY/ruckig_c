@@ -97,7 +97,8 @@ counts. They intentionally do not require a quality improvement over Fast.
   and acceptance-policy changes are handled by `0.9.0-alpha.2` in
   `docs/current/tracking_quality_hardening.md`.
 - No public C API or ABI change is part of this baseline.
-- No Pro/cloud equivalence, package publication, visualization v2, or upstream
-  baseline upgrade is part of this evidence.
+- No proprietary Pro equivalence, package publication, visualization v2, or
+  upstream baseline upgrade is part of this evidence. Package publication
+  remains frozen until a separate demand decision accepts it.
 - Visualization v2, optional CI artifacts, and richer plots move to the next
   design line after `v0.9.0`.

@@ -475,7 +475,7 @@ Compatibility rules for the `v0.6.0` tracking line:
 - `ruckig_tracking_calculation_status_t` is additive. Existing enum numeric
   values and result-code numeric values are unchanged.
 - `RUCKIG_TRACKING_OPTIMIZED` has bounded local behavior. This is not a formal
-  global optimality guarantee and not a Pro/cloud equivalence claim.
+  global optimality guarantee and not a proprietary Pro equivalence claim.
 - Tracking internals, candidate buffers, scoring helpers, and workspace
   structures must not be exported.
 - `original/ruckig-main` remains frozen as the Ruckig Community `0.17.3`
@@ -515,7 +515,7 @@ Compatibility rules for the `0.7.0-alpha.2` strategy and diagnostics line:
 - The default strategy is `RUCKIG_TRACKING_OPTIMIZED_BALANCED`; invalid
   strategy values return `RUCKIG_ERROR_INVALID_INPUT`.
 - Strategy presets are local quality controls. They are not a formal global
-  optimality guarantee and not a Pro/cloud equivalence claim.
+  optimality guarantee and not a proprietary Pro equivalence claim.
 - Diagnostics expose score summary, aggregate step counts, and named
   candidate-family counters. They do not expose internal weights, family masks,
   raw tuning knobs, or optimizer workspace.
@@ -603,7 +603,7 @@ Compatibility rules for the `v0.9.0` line:
   evidence work. It does not add tracking-specific public C functions,
   exported symbols, or public diagnostics fields.
 - `RUCKIG_TRACKING_OPTIMIZED` remains a bounded deterministic local evaluator,
-  not a formal global optimizer and not a Pro/cloud equivalence surface.
+  not a formal global optimizer and not a proprietary Pro equivalence surface.
 - `CMakeLists.txt` project version and `RUCKIG_C_VERSION_*` macros are
   `0.9.0`.
 - ABI artifact output paths use the stable release evidence directory:

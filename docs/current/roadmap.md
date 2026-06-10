@@ -3,6 +3,21 @@
 This roadmap keeps shipped release scope locked while preserving concrete
 follow-up work for stability and future feature planning.
 
+## Frozen Scope Boundaries
+
+The current project target is local C implementation of the original public
+motion-generation surfaces, evaluated by interface shape, deterministic
+behavior, tests, examples, and release evidence. Upstream Cloud/Pro
+implementation source is not available, so cloud and Pro-only behavior is not a
+source-porting requirement. Accepted Cloud/Pro-described surfaces, such as
+waypoints and tracking, are implemented locally and reviewed as interface/effect
+parity with explicit boundaries.
+
+Package-manager recipes and package publication are frozen. Existing CMake
+install, pkg-config, static/DLL, shared install-tree, and CI consumer paths
+remain maintained; vcpkg, Conan, Homebrew, and similar recipes are reopened
+only after a separate user or release demand decision.
+
 ## 0.11.0 Design Line
 
 Current `main` is `0.11.0-design - Unreleased` after the published `v0.10.0`
@@ -18,9 +33,14 @@ Visualization v2 evidence release.
 - Keep the `v0.9.0` 172-symbol public C ABI baseline unless a separate public
   API decision is accepted.
 - `0.10.1` remains reserved for emergency patch fixes only.
-- Package-manager recipes, formal Python/Rust publication, cloud/remote
-  calculation, Pro/cloud equivalence claims, formal global optimality proof,
-  and upstream baseline upgrades remain deferred unless separately accepted.
+- Package-manager recipes and package publication remain frozen unless
+  separately accepted.
+- Cloud/remote runtime remains out of scope. Local waypoint and tracking work
+  is evaluated by interface/effect evidence, not by unavailable proprietary
+  source parity.
+- Formal global optimality proof, proprietary Pro equivalence claims, formal
+  Python/Rust API publication, and upstream baseline upgrades remain deferred
+  unless separately accepted.
 
 ## 0.10.0 Visualization V2 Evidence Release
 
@@ -60,10 +80,11 @@ during `0.10.0-readiness`.
   version bump, tag, GitHub Release, and manual release-random workflow steps
   occur. For this line, those steps are complete in `v0.10.0`.
 - `0.10.1` remains reserved for emergency patch fixes only.
-- Package-manager recipes, formal Python/Rust publication, soft interruption,
-  cloud/remote calculation, formal Pro/cloud equivalence claims, formal global
-  optimality proof, and upstream baseline upgrades remain deferred unless
+- Package-manager recipes and package publication remain frozen unless
   separately accepted.
+- Formal Python/Rust API publication, soft interruption, cloud/remote runtime,
+  proprietary Pro equivalence claims, formal global optimality proof, and
+  upstream baseline upgrades remain deferred unless separately accepted.
 
 ## 0.1.x Stability Queue
 
@@ -169,11 +190,11 @@ performance, consumer, and Python prototype evidence are recorded in
 - Evaluate Python or Rust bindings only after the C ABI has passed at least one
   `0.2.x` patch cycle, `docs/current/api_compatibility.md` is complete, and CMake,
   pkg-config, and shared/static consumer paths are stable.
-- Package-manager recipes and new package-manager prototypes are downgraded to
-  long-term optional work. The active roadmap keeps only the existing installed
+- Package-manager recipes and new package-manager prototypes are frozen outside
+  the active roadmap. The active roadmap keeps only the existing installed
   CMake package, pkg-config, Windows static/DLL, and shared install-tree
-  consumption paths. Existing package-manager prototype notes may be frozen
-  unless a separate packaging project is explicitly accepted.
+  consumption paths. Existing package-manager prototype notes may remain frozen
+  unless a separate packaging demand decision accepts new work.
 - Evaluate an upstream Ruckig baseline upgrade only as a separate project with
   upstream diff review, source inventory update, tolerance review, oracle
   corpus update, full random stress, and new performance baselines.
@@ -199,7 +220,7 @@ performance, consumer, and Python prototype evidence are recorded in
   5. Upstream baseline upgrade evaluation as a separate project.
   6. Rust binding feasibility after Python feasibility results.
 
-Long-term optional, outside the active roadmap:
+Frozen until accepted by a separate demand decision:
 
 - Package-manager recipes for vcpkg, Conan, Homebrew, FetchContent, and
   vendored subdirectory use.
@@ -236,8 +257,9 @@ optimizer, not a cloud client.
   waypoint performance output, Python prototype smoke, and Rust alpha wrapper
   smoke. Multiple alpha push CI runs have passed; the stable release closeout
   uses the same artifact path for final CI evidence.
-- Package-manager recipes, cloud API support, and upstream baseline upgrades
-  remain separate projects.
+- Package-manager recipes remain frozen. Cloud runtime support and upstream
+  baseline upgrades remain separate projects; local waypoint behavior is
+  evaluated by interface/effect evidence.
 
 ## 0.4.1 Deep Stabilization
 
@@ -254,9 +276,9 @@ optimizer, not a cloud client.
   `0.4.1`; optimizer interruption checkpoints require a later design and are
   not claimed as hard or soft real-time behavior in this release.
 - The Python `cffi` prototype receives smoke-test hardening only. Python wheel
-  publication, Rust crate publication, package-manager recipes, new public C
-  API expansion, and upstream baseline upgrades move to separate future design
-  work such as `0.5.0-design`.
+  publication, Rust crate publication, and new public C API expansion move to
+  separate future design work such as `0.5.0-design`. Package-manager recipes
+  remain frozen until separately accepted.
 
 ## 0.4.2 Original Parity Coverage Closeout
 
@@ -275,9 +297,9 @@ before `0.5.0-design` and a patch release, not a feature release.
   `0.4.2`; optimizer interruption checkpoints and timeout fallback semantics
   require future implementation work.
 - Python `cffi` and Rust remain prototype/alpha evidence. Wheels, crate
-  publication, package-manager recipes, cloud/remote calculation, formal
-  Pro/cloud numerical equivalence claims, and upstream baseline upgrades remain
-  separate projects.
+  publication, cloud/remote runtime, proprietary Pro equivalence claims, and
+  upstream baseline upgrades remain separate projects. Package-manager recipes
+  remain frozen until separately accepted.
 
 ## 0.5.0 Stable Tracking Release
 
@@ -307,10 +329,10 @@ tracking release; `Optimized` remains declared for API shape parity but returns
   `artifacts/abi/0.5.0`.
 - Soft-interruption implementation design continues separately and is not
   coupled to the first tracking implementation.
-- Cloud/remote calculation, package-manager recipes, formal Pro/cloud
-  numerical equivalence claims, stable Python wheels, Rust crate publication,
-  and upstream baseline upgrades stay outside the `0.5.x` patch scope and
-  require a separate `0.6.0-design` or later decision.
+- Cloud/remote runtime, proprietary Pro equivalence claims, stable Python
+  wheels, Rust crate publication, and upstream baseline upgrades stay outside
+  the `0.5.x` patch scope and require a separate `0.6.0-design` or later
+  decision. Package-manager recipes remain frozen until separately accepted.
 
 ## 0.6.0 Optimized Tracking Release
 
@@ -326,9 +348,9 @@ tracking release from `v0.5.0`.
   `artifacts/abi/0.6.0`.
 - `0.6.1` is reserved for emergency patches only.
 - Soft-interruption implementation, formal Python/Rust publication,
-  package-manager recipes, cloud/remote calculation, formal Pro/cloud
-  equivalence claims, and upstream baseline upgrades remain separate projects
-  unless explicitly accepted.
+  cloud/remote runtime, proprietary Pro equivalence claims, and upstream
+  baseline upgrades remain separate projects unless explicitly accepted.
+  Package-manager recipes remain frozen until separately accepted.
 
 ## 0.7.0 Strategy And Diagnostics Release
 
@@ -373,9 +395,10 @@ diagnostics snapshot getter.
   gates. A later visualization evidence project can generate `ruckig_c`-owned
   plots for no-waypoint trajectories, velocity/stop/minimum-duration cases,
   local waypoint sections, and Fast/Optimized tracking comparison.
-- Soft interruption, formal Python/Rust publication, package-manager recipes,
-  cloud/remote calculation, formal Pro/cloud equivalence claims, and upstream
-  baseline upgrades remain deferred unless separately accepted.
+- Soft interruption, formal Python/Rust publication, cloud/remote runtime,
+  proprietary Pro equivalence claims, and upstream baseline upgrades remain
+  deferred unless separately accepted. Package-manager recipes remain frozen
+  until separately accepted.
 
 ## 0.8.0 Visualization Evidence Release
 
@@ -410,10 +433,10 @@ public C ABI.
 - Do not add visualization as a default CI or stable-release gate until a
   separate dependency and artifact policy is accepted.
 - `0.8.1` remains reserved for emergency patches only.
-- Formal Python/Rust publication, package-manager recipes, soft interruption,
-  cloud/remote calculation, formal Pro/cloud equivalence claims, formal global
-  optimality proof, and upstream baseline upgrades remain deferred unless
-  separately accepted.
+- Formal Python/Rust publication, soft interruption, cloud/remote runtime,
+  proprietary Pro equivalence claims, formal global optimality proof, and
+  upstream baseline upgrades remain deferred unless separately accepted.
+  Package-manager recipes remain frozen until separately accepted.
 
 ## 0.9.0 Tracking Quality And Stability Evidence Release
 
@@ -446,7 +469,7 @@ evidence without changing the `v0.8.0` 172-symbol public C ABI.
   post-release route.
 - `0.10.0-design - Unreleased` starts after `v0.9.0`, with visualization v2,
   optional CI artifacts, and richer plots as the first priority.
-- Package-manager recipes, formal Python/Rust publication, soft interruption,
-  cloud/remote calculation, formal Pro/cloud equivalence claims, formal global
-  optimality proof, and upstream baseline upgrades remain deferred unless
-  separately accepted.
+- Formal Python/Rust publication, soft interruption, cloud/remote runtime,
+  proprietary Pro equivalence claims, formal global optimality proof, and
+  upstream baseline upgrades remain deferred unless separately accepted.
+  Package-manager recipes remain frozen until separately accepted.

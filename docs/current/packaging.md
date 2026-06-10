@@ -234,17 +234,17 @@ On Unix systems with `pkg-config`, the `ruckig_c_shared_install_consumer` CTest
 configures a temporary `BUILD_SHARED_LIBS=ON` build, installs it, then verifies
 both installed CMake and pkg-config consumers against that shared install tree.
 
-## Future Packaging
+## Frozen Packaging Scope
 
 The active maintenance scope keeps the existing installed CMake package,
 pkg-config, Windows static/DLL, and shared install-tree consumption paths.
 Those paths are the supported downstream integration surface for now.
 
 vcpkg, Conan, Homebrew, CMake FetchContent, and vendored subdirectory recipes
-are downgraded to long-term optional work. The existing feasibility notes and
+are frozen outside the active roadmap. The existing feasibility notes and
 experimental vcpkg overlay may remain as frozen reference material, but no new
 package-manager recipe, prototype, or release commitment is part of the active
-`0.3.0` roadmap unless a separate packaging project is accepted.
+roadmap unless a separate packaging demand decision accepts it.
 
 See `docs/design/package_manager_feasibility.md` for the frozen feasibility
 record and the conditions that would need to be revisited before any future

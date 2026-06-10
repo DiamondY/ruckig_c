@@ -131,7 +131,10 @@ remains the last no-new-C-API hardening release, and `v0.2.5` remains the final
 planned `0.2.x` stabilization baseline.
 Current stable release scope intentionally excludes:
 
-- Cloud and remote calculation; local optimizer and tracking work only.
+- Cloud and remote calculation runtime; local optimizer and tracking work only.
+- Source-level Cloud/Pro parity. Upstream Cloud/Pro implementation source is
+  not available, so accepted Cloud/Pro-described surfaces are evaluated by
+  local interface/effect behavior instead of source copying.
 - Formal Ruckig Pro/cloud global numerical equivalence claims.
 - Hard real-time guarantees for waypoint optimization.
 - Formal global optimality guarantees for `Optimized` tracking. The `v0.7.0`
@@ -141,14 +144,16 @@ Current stable release scope intentionally excludes:
 - Soft interruption checkpoints for waypoint optimization; the interrupt
   duration field remains storage/API-surface parity only.
 - Python/Rust binding publication. The Python `cffi` prototype and Rust alpha
-  wrapper remain prototype-only and are not installed or published packages.
+  wrapper remain prototype-only; package publication is frozen until a
+  separate demand decision accepts it.
 - Algorithm visualization as a default CI release gate. `v0.8.0` stabilizes the
   local `ruckig_c`-owned Matplotlib PNG gallery and verifier evidence, but no
   original images or PDFs are copied as primary project evidence and no
   plotting job is added to default CI.
-- Package-manager recipes and new package-manager prototypes are outside the
-  active roadmap. Existing CMake install, pkg-config, static/DLL, and shared
-  install-tree consumption paths remain the supported integration surface.
+- Package-manager recipes and new package-manager prototypes are frozen
+  outside the active roadmap. Existing CMake install, pkg-config, static/DLL,
+  and shared install-tree consumption paths remain the supported integration
+  surface.
 
 ## Build
 

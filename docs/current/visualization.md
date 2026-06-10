@@ -15,7 +15,7 @@ duplicated in a historical assets directory on `main`.
 Visualization v2 is local-only, PNG-only, and evidence-only. It does not add a
 default GitHub Actions plotting job, CMake/CTest gate, public C API, public
 symbol, enum value, result-code value, Python package, Rust crate, package
-recipe, cloud path, or Pro/cloud equivalence claim. `0.10.0-alpha.2` added an
+recipe, cloud path, or proprietary Pro equivalence claim. `0.10.0-alpha.2` added an
 optional manual GitHub Actions artifact path for review copies of the gallery;
 it remains off for push and pull-request CI. `v0.10.0` records local verifier,
 strict regeneration, manual artifact workflow, release-random, CI, tag, and
@@ -134,7 +134,7 @@ Cross-topic summaries:
 | --- | --- | --- |
 | `01_position` | `01_position.png`, `27-30` trajectory anatomy | Public C ABI position trajectory and derived anatomy views. |
 | `02_position_offline` | `02_position_offline.png` | Offline trajectory with directional limits. |
-| `03_waypoints` | `03_waypoints_local.png`, `22`, `25` | Local waypoint optimizer equivalent, no Pro/cloud equivalence claim. |
+| `03_waypoints` | `03_waypoints_local.png`, `22`, `25` | Local waypoint optimizer equivalent, no proprietary Pro equivalence claim. |
 | `04_waypoints_online` | `04_waypoints_online_local.png`, `26` | Online local waypoint update path, interruption remains storage-only. |
 | `05_velocity` | `05_velocity.png` | Velocity-control trajectory through public C ABI. |
 | `06_stop` | `06_stop.png` | Stop command trajectory through public C ABI. |
@@ -227,8 +227,8 @@ Cross-topic summaries:
   not publish or stabilize a Python package.
 - No public C API, public symbol, enum value, result code, or release gate
   changes are introduced by this visualization work.
-- No cloud, Pro license, network image fetching, remote calculation, formal
-  Pro/cloud equivalence claim, or formal global optimality claim is used.
+- No cloud, Pro license, network image fetching, remote calculation,
+  proprietary Pro equivalence claim, or formal global optimality claim is used.
 
 ## Follow-Up
 

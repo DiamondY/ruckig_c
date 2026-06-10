@@ -67,9 +67,10 @@ where alpha.2 already required improvement.
 ## Interpretation
 
 `0.9.0-alpha.3` is stability evidence, not readiness or stable closeout. It
-does not raise a Pro/cloud equivalence claim and does not prove formal global
-optimality for Optimized tracking. The intended next step, if the alpha.3
-evidence and ordinary CI remain green, is a separate `0.9.0-readiness` audit.
+does not raise a proprietary Pro equivalence claim and does not prove formal
+global optimality for Optimized tracking. The intended next step, if the
+alpha.3 evidence and ordinary CI remain green, is a separate
+`0.9.0-readiness` audit.
 
 That separate `0.9.0-readiness` audit now records full local stable-review
 evidence for the alpha, alpha.2, and alpha.3 tracking work. It treats this
@@ -78,4 +79,4 @@ C ABI unchanged at 172 symbols and leaving version bump, tag, GitHub Release,
 and manual release-random workflow work to a later stable closeout decision.
 
 `v0.9.0` stabilizes this corpus as release evidence. It does not retune the
-evaluator, expand public diagnostics, or claim Pro/cloud equivalence.
+evaluator, expand public diagnostics, or claim proprietary Pro equivalence.
