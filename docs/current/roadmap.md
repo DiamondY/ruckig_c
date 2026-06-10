@@ -23,11 +23,11 @@ only after a separate user or release demand decision.
 Current `main` is `0.12.0-design - Unreleased` after the published `v0.11.0`
 waypoint soft-interruption and platform-clock evidence release. The first
 accepted slice, `0.12.0-alpha.1` waypoint soft-interruption true resume, has
-local and ordinary remote push CI evidence. The next local hardening slice is
-`0.12.0-alpha.2`.
+local and ordinary remote push CI evidence. The second hardening slice,
+`0.12.0-alpha.2`, also has local and ordinary remote push CI evidence.
 
-- First priority: finish local `0.12.0-alpha.2` evidence and then collect
-  ordinary remote push CI evidence before promoting further `0.12.0` work.
+- First priority: prepare `0.12.0-readiness` local evidence audit before any
+  stable `v0.12.0` closeout decision.
 - `0.12.0-alpha.2` unifies complete waypoint solving and soft-interruption
   resume on the private step-driven optimizer engine, then hardens multi-DoF
   and multi-waypoint resume loops, per-section constraint coverage,

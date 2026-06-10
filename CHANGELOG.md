@@ -5,13 +5,13 @@
 Current `main` is open for `0.12.0-design` work after the published
 `v0.11.0` stable waypoint soft-interruption and platform-clock evidence
 release. The first accepted evidence slice, `0.12.0-alpha.1`, has local and
-ordinary remote push CI evidence. The next local hardening slice is
-`0.12.0-alpha.2`.
+ordinary remote push CI evidence. The second hardening slice,
+`0.12.0-alpha.2`, also has local and ordinary remote push CI evidence.
 
 First priority:
 
-- Complete local `0.12.0-alpha.2` evidence and then collect ordinary remote
-  push CI evidence before promoting further `0.12.0` work.
+- Prepare the `0.12.0-readiness` local evidence audit before any stable
+  `v0.12.0` closeout decision.
 - Keep the expansion scoped to intermediate-waypoint `ruckig_update` only.
   Public `ruckig_calculate`, no-waypoint target solving, and tracking remain
   unchanged by the interrupt field.
@@ -36,8 +36,10 @@ First priority:
 - Keeps the public C ABI unchanged: no public header signature changes, no
   new exported symbols, no enum/result-code numeric changes, and no runtime
   clock setter.
-- This is local alpha evidence only; no `v0.12.0*` tag, GitHub Release,
-  version bump, or manual release-random workflow is part of this slice.
+- Passed ordinary remote push CI for commit `8a80df4` in run `27291284191`
+  (`https://github.com/DiamondY/ruckig_c/actions/runs/27291284191`) with
+  conclusion `success`; no `v0.12.0*` tag, GitHub Release, version bump, or
+  manual release-random workflow was part of this slice.
 
 `0.12.0-alpha.1` local evidence slice:
 

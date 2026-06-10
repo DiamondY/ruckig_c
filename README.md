@@ -75,8 +75,8 @@ Implemented and covered by fixed C/oracle tests plus deterministic random oracle
   `0.12.0-alpha.1` waypoint `ruckig_update` soft-interruption true resume has
   local and ordinary remote push CI evidence. `0.12.0-alpha.2` unifies the
   complete waypoint solver and soft-interruption resume on the private
-  step-driven optimizer engine and hardens true-resume evidence without public
-  C ABI expansion.
+  step-driven optimizer engine and has local plus ordinary remote push CI
+  evidence without public C ABI expansion.
 - `0.10.0-alpha` visualization v2 local gallery evidence, replacing the
   current `main` gallery with 30 project-owned `1400x900` PNGs and a strict
   local verifier while keeping the `v0.9.0` stable C ABI unchanged.
@@ -101,10 +101,10 @@ platform clock abstraction reviewed during `0.11.0-readiness`. Current `main`
 is `0.12.0-design - Unreleased`; the accepted `0.12.0-alpha.1` slice extends
 waypoint `ruckig_update` soft interruption with private true-resume/background
 publish semantics and has local plus ordinary remote push CI evidence.
-`0.12.0-alpha.2` hardens that implementation locally by sharing the same
-private step-driven optimizer between complete waypoint solves and
-soft-interruption resume, while keeping public C ABI expansion out of the
-line.
+`0.12.0-alpha.2` hardens that implementation by sharing the same private
+step-driven optimizer between complete waypoint solves and soft-interruption
+resume, with local plus ordinary remote push CI evidence while keeping public
+C ABI expansion out of the line.
 `v0.10.0` adopts the current gallery as 30 `1400x900` Matplotlib `Agg` and
 NumPy PNG assets under `docs/assets/visualization/`. The gallery covers local
 C ABI equivalents of original examples `01-10` and `14-16`, plus tracking
