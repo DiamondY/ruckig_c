@@ -13,6 +13,42 @@ Coverage is tracked in three different senses:
 - Oracle coverage: frozen C++ differential comparisons against
   `original/ruckig-main`.
 
+## 0.12.0-alpha.1 Waypoint Soft Interruption True Resume
+
+`0.12.0-alpha.1` extends the waypoint `ruckig_update`
+soft-interruption evidence from V1 one-shot interruption to private true
+resume. It does not add public C ABI and does not affect public
+`ruckig_calculate`, no-waypoint target solving, or tracking.
+
+Added C coverage:
+
+| Scenario | Evidence |
+| --- | --- |
+| Initial zero-budget waypoint update | Publishes the first complete feasible baseline trajectory, marks `new_calculation=true`, sets `was_calculation_interrupted=true`, and leaves private resume active. |
+| Background publish | After `ruckig_output_pass_to_input`, the next online cycle continues the optimizer, publishes a better complete waypoint trajectory, resets output time through normal new-calculation semantics, and remains allocation-free. |
+| Background interrupted without publish | A budget-interrupted background cycle with no publishable candidate preserves the old trajectory, returns `RUCKIG_WORKING`, keeps `new_calculation=false`, and sets `was_calculation_interrupted=true`. |
+| Interrupt clear | Clearing the interrupt field drops private resume state and later sampling reports `was_calculation_interrupted=false`. |
+| Non-normal current state | A current-state change that is not the normal `pass_to_input` progression does not reuse private resume state and starts from the baseline candidate again. |
+| Reset | `ruckig_reset` clears private resume state. |
+| No feasible initial candidate | Initial budget expiry before any feasible complete candidate still returns `RUCKIG_ERROR_EXECUTION_TIME_CALCULATION`, does not publish an invalid trajectory, and does not leave resume active. |
+
+Local verification recorded for this slice:
+
+| Command | Result |
+| --- | --- |
+| `cmake --build --preset windows-clang-ninja` | Passed |
+| `ctest --test-dir out\build\windows-clang-ninja --output-on-failure -R "ruckig_c_waypoint_optimizer\|ruckig_c_per_section_constraints\|ruckig_c_waypoint_quality\|ruckig_c_allocation_audit\|ruckig_c_tests"` | 5/5 passed |
+| `ctest --test-dir out\build\windows-clang-ninja --output-on-failure` | 46/46 passed |
+| `ctest --test-dir out\build\windows-clang-ninja-shared --output-on-failure` | 46/46 passed |
+| `ctest --test-dir out\build\windows-clang-ninja-duration --output-on-failure` | 46/46 passed with `RUCKIG_C_ENABLE_CALCULATION_DURATION=ON` |
+| `cmake --build out\build\windows-clang-ninja-shared --target ruckig_c_compare_public_exported_symbols` | Public symbol count remains `172`; unapproved exported symbol count `0` |
+| `out\build\windows-clang-ninja-oracle\ruckig_c_oracle_tests.exe` | Fixed oracle passed: 82 comparisons; waypoint section oracle passed: 4 comparisons |
+| `out\build\windows-clang-ninja-oracle\ruckig_c_oracle_tests.exe --random 10000 --seed 1` | Passed |
+| `out\build\windows-clang-ninja-oracle\ruckig_c_oracle_tests.exe --random-per-dof 10000 --seed 1` | Passed |
+| `out\build\windows-clang-ninja-performance\ruckig_c_performance_benchmark.exe --samples 10000 --seed 1` | Average ratio `1.02735`, under release threshold `1.5` |
+| `out\build\windows-clang-ninja-performance\ruckig_c_performance_benchmark.exe --samples 10000 --seed 1 --waypoints` | Waypoint alpha benchmark average `3.29881e+06 ns`, p99 `1.21819e+07 ns` |
+| POSIX and custom platform clock `zig cc` probes for `src\ruckig_c\waypoint.c` | Passed |
+
 ## v0.11.0 Soft Interruption V1 Evidence
 
 `v0.11.0` stabilizes local waypoint `ruckig_update` soft interruption through

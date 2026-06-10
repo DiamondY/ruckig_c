@@ -802,7 +802,7 @@ static bool synchronization_arrays_equal(const ruckig_synchronization_t* lhs, co
     return true;
 }
 
-bool ruckig_input_equals(const ruckig_input_t* lhs, const ruckig_input_t* rhs) {
+static bool ruckig_input_equals_impl(const ruckig_input_t* lhs, const ruckig_input_t* rhs, bool compare_interrupt) {
     const size_t n = lhs && rhs ? lhs->dofs : 0;
     const size_t waypoint_values = lhs && rhs ? lhs->waypoint_count * lhs->dofs : 0;
     const size_t section_values = lhs && rhs ? (lhs->waypoint_count + 1) * lhs->dofs : 0;
@@ -828,9 +828,9 @@ bool ruckig_input_equals(const ruckig_input_t* lhs, const ruckig_input_t* rhs) {
         && lhs->has_per_section_max_position == rhs->has_per_section_max_position
         && lhs->has_per_section_min_position == rhs->has_per_section_min_position
         && lhs->has_per_section_minimum_duration == rhs->has_per_section_minimum_duration
-        && lhs->has_interrupt_calculation_duration == rhs->has_interrupt_calculation_duration
+        && (!compare_interrupt || lhs->has_interrupt_calculation_duration == rhs->has_interrupt_calculation_duration)
         && (!lhs->has_minimum_duration || lhs->minimum_duration == rhs->minimum_duration)
-        && (!lhs->has_interrupt_calculation_duration || lhs->interrupt_calculation_duration == rhs->interrupt_calculation_duration)
+        && (!compare_interrupt || !lhs->has_interrupt_calculation_duration || lhs->interrupt_calculation_duration == rhs->interrupt_calculation_duration)
         && double_arrays_equal(lhs->current_position, rhs->current_position, n)
         && double_arrays_equal(lhs->current_velocity, rhs->current_velocity, n)
         && double_arrays_equal(lhs->current_acceleration, rhs->current_acceleration, n)
@@ -856,4 +856,12 @@ bool ruckig_input_equals(const ruckig_input_t* lhs, const ruckig_input_t* rhs) {
         && (!lhs->has_per_section_min_position || double_arrays_equal(lhs->per_section_min_position, rhs->per_section_min_position, section_values))
         && (!lhs->has_per_section_minimum_duration || double_arrays_equal(lhs->per_section_minimum_duration, rhs->per_section_minimum_duration, section_count))
         && bool_arrays_equal(lhs->enabled, rhs->enabled, n);
+}
+
+bool ruckig_input_equals(const ruckig_input_t* lhs, const ruckig_input_t* rhs) {
+    return ruckig_input_equals_impl(lhs, rhs, true);
+}
+
+bool ruckig_input_equals_ignoring_interrupt(const ruckig_input_t* lhs, const ruckig_input_t* rhs) {
+    return ruckig_input_equals_impl(lhs, rhs, false);
 }

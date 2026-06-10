@@ -72,8 +72,8 @@ Implemented and covered by fixed C/oracle tests plus deterministic random oracle
   the internal platform clock abstraction while keeping the `v0.9.0` stable C
   ABI unchanged.
 - `0.12.0-design - Unreleased` is the current `main` line after `v0.11.0`;
-  first priority is selecting and documenting the next accepted work slice
-  before implementation, without default public C ABI expansion.
+  first priority is `0.12.0-alpha.1` waypoint `ruckig_update`
+  soft-interruption true resume, without public C ABI expansion.
 - `0.10.0-alpha` visualization v2 local gallery evidence, replacing the
   current `main` gallery with 30 project-owned `1400x900` PNGs and a strict
   local verifier while keeping the `v0.9.0` stable C ABI unchanged.
@@ -95,9 +95,9 @@ Release-readiness evidence is tracked under `docs/release/`; see
 stable release. It keeps the `v0.9.0` 172-symbol public C ABI unchanged and
 stabilizes waypoint `ruckig_update` soft-interruption V1 plus the internal
 platform clock abstraction reviewed during `0.11.0-readiness`. Current `main`
-is `0.12.0-design - Unreleased`; the next accepted work slice must be scoped
-and documented before implementation, and public C ABI expansion is not the
-default goal.
+is `0.12.0-design - Unreleased`; the accepted `0.12.0-alpha.1` slice extends
+waypoint `ruckig_update` soft interruption with private true-resume/background
+publish semantics, and public C ABI expansion is not part of the slice.
 `v0.10.0` adopts the current gallery as 30 `1400x900` Matplotlib `Agg` and
 NumPy PNG assets under `docs/assets/visualization/`. The gallery covers local
 C ABI equivalents of original examples `01-10` and `14-16`, plus tracking
@@ -141,6 +141,11 @@ In `v0.11.0`, waypoint `ruckig_update` implements soft-interruption V1 through
 the existing `interrupt_calculation_duration` field and
 `was_calculation_interrupted` output state. Public `ruckig_calculate`,
 no-waypoint target solving, and tracking remain unchanged by that field.
+On current `main`, `0.12.0-alpha.1` extends only waypoint `ruckig_update` with
+private true-resume after an interrupted calculation. Later normal
+`pass_to_input` cycles can continue the waypoint optimizer and publish a
+better complete remaining trajectory; no public ABI, no-waypoint interruption,
+tracking interruption, or runtime clock setter is added.
 
 Current stable release scope intentionally excludes:
 
@@ -154,9 +159,8 @@ Current stable release scope intentionally excludes:
   implementation is a bounded deterministic local evaluator with Fast fallback
   diagnostics, strategy presets, and diagnostics snapshots; these are local
   quality controls, not a global optimality claim.
-- Soft interruption expansion beyond V1. `v0.11.0` stabilizes waypoint
-  `ruckig_update` soft-interruption only; cross-cycle continuation,
-  no-waypoint interruption, tracking interruption, hard real-time guarantees,
+- Soft interruption expansion beyond waypoint `ruckig_update` true resume.
+  No-waypoint interruption, tracking interruption, hard real-time guarantees,
   and runtime platform-clock setters remain deferred.
 - Python/Rust binding publication. The Python `cffi` prototype and Rust alpha
   wrapper remain prototype-only; package publication is frozen until a

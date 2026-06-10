@@ -1779,20 +1779,110 @@ static void test_waypoint_soft_interruption_update(void) {
         ruckig_t* otg = NULL;
         ruckig_input_t* input = NULL;
         ruckig_output_t* output = NULL;
+        ruckig_trajectory_t* reference = NULL;
+        ruckig_result_t result;
+        double reference_duration = 0.0;
+
+        CHECK_EQ_INT(ruckig_create_with_waypoints(&otg, 1, 0.05, 1), RUCKIG_WORKING);
+        CHECK_EQ_INT(ruckig_input_create_with_waypoints(&input, 1, 1), RUCKIG_WORKING);
+        CHECK_EQ_INT(ruckig_output_create_with_waypoints(&output, 1, 1), RUCKIG_WORKING);
+        CHECK_EQ_INT(ruckig_trajectory_create_with_waypoints(&reference, 1, 1), RUCKIG_WORKING);
+        configure_soft_interruption_waypoint_input(input);
+
+        CHECK_EQ_INT(ruckig_input_set_interrupt_calculation_duration(input, 0.0), RUCKIG_WORKING);
+        ruckig_input_clear_interrupt_calculation_duration(input);
+        CHECK_EQ_INT(ruckig_calculate(otg, input, reference), RUCKIG_WORKING);
+        reference_duration = ruckig_trajectory_get_duration(reference);
+        result = ruckig_update(otg, input, output);
+        CHECK_EQ_INT(result, RUCKIG_WORKING);
+        CHECK_TRUE(ruckig_output_new_calculation(output));
+        CHECK_TRUE(!ruckig_output_was_calculation_interrupted(output));
+        CHECK_TRUE(otg->waypoint_last_candidate_evaluations > 1);
+        CHECK_NEAR(ruckig_trajectory_get_duration(ruckig_output_get_trajectory(output)), reference_duration, 1e-12);
+        CHECK_TRUE(!otg->waypoint_resume_active);
+
+        ruckig_reset(otg);
+        CHECK_EQ_INT(ruckig_input_set_interrupt_calculation_duration(input, 1000000000.0), RUCKIG_WORKING);
+        result = ruckig_update(otg, input, output);
+        CHECK_EQ_INT(result, RUCKIG_WORKING);
+        CHECK_TRUE(ruckig_output_new_calculation(output));
+        CHECK_TRUE(!ruckig_output_was_calculation_interrupted(output));
+        CHECK_TRUE(otg->waypoint_last_candidate_evaluations > 1);
+        CHECK_NEAR(ruckig_trajectory_get_duration(ruckig_output_get_trajectory(output)), reference_duration, 1e-12);
+        CHECK_TRUE(!otg->waypoint_resume_active);
+
+        ruckig_trajectory_destroy(reference);
+        ruckig_output_destroy(output);
+        ruckig_input_destroy(input);
+        ruckig_destroy(otg);
+    }
+
+    {
+        ruckig_t* otg = NULL;
+        ruckig_input_t* input = NULL;
+        ruckig_output_t* output = NULL;
         ruckig_result_t result;
 
         CHECK_EQ_INT(ruckig_create_with_waypoints(&otg, 1, 0.05, 1), RUCKIG_WORKING);
         CHECK_EQ_INT(ruckig_input_create_with_waypoints(&input, 1, 1), RUCKIG_WORKING);
         CHECK_EQ_INT(ruckig_output_create_with_waypoints(&output, 1, 1), RUCKIG_WORKING);
         configure_soft_interruption_waypoint_input(input);
-
         CHECK_EQ_INT(ruckig_input_set_interrupt_calculation_duration(input, 0.0), RUCKIG_WORKING);
+
+        CHECK_EQ_INT(ruckig_update(otg, input, output), RUCKIG_WORKING);
+        CHECK_TRUE(ruckig_output_new_calculation(output));
+        CHECK_TRUE(ruckig_output_was_calculation_interrupted(output));
+        CHECK_TRUE(otg->waypoint_resume_active);
+
+        ruckig_output_pass_to_input(output, input);
+        otg->waypoint_resume_best_duration = -1.0;
+        result = ruckig_update(otg, input, output);
+        CHECK_EQ_INT(result, RUCKIG_WORKING);
+        CHECK_TRUE(!ruckig_output_new_calculation(output));
+        CHECK_TRUE(ruckig_output_was_calculation_interrupted(output));
+        CHECK_EQ_INT(otg->waypoint_last_candidate_evaluations, 1);
+        CHECK_TRUE(otg->waypoint_resume_active);
+
+        ruckig_output_pass_to_input(output, input);
         ruckig_input_clear_interrupt_calculation_duration(input);
         result = ruckig_update(otg, input, output);
         CHECK_EQ_INT(result, RUCKIG_WORKING);
-        CHECK_TRUE(ruckig_output_new_calculation(output));
+        CHECK_TRUE(!ruckig_output_new_calculation(output));
         CHECK_TRUE(!ruckig_output_was_calculation_interrupted(output));
-        CHECK_TRUE(otg->waypoint_last_candidate_evaluations > 1);
+        CHECK_TRUE(!otg->waypoint_resume_active);
+
+        ruckig_output_destroy(output);
+        ruckig_input_destroy(input);
+        ruckig_destroy(otg);
+    }
+
+    {
+        ruckig_t* otg = NULL;
+        ruckig_input_t* input = NULL;
+        ruckig_output_t* output = NULL;
+
+        CHECK_EQ_INT(ruckig_create_with_waypoints(&otg, 1, 0.05, 1), RUCKIG_WORKING);
+        CHECK_EQ_INT(ruckig_input_create_with_waypoints(&input, 1, 1), RUCKIG_WORKING);
+        CHECK_EQ_INT(ruckig_output_create_with_waypoints(&output, 1, 1), RUCKIG_WORKING);
+        configure_soft_interruption_waypoint_input(input);
+        CHECK_EQ_INT(ruckig_input_set_interrupt_calculation_duration(input, 0.0), RUCKIG_WORKING);
+
+        CHECK_EQ_INT(ruckig_update(otg, input, output), RUCKIG_WORKING);
+        CHECK_TRUE(otg->waypoint_resume_active);
+        ruckig_output_pass_to_input(output, input);
+        ruckig_input_current_position_data(input)[0] += 0.01;
+        CHECK_EQ_INT(ruckig_update(otg, input, output), RUCKIG_WORKING);
+        CHECK_TRUE(ruckig_output_new_calculation(output));
+        CHECK_TRUE(ruckig_output_was_calculation_interrupted(output));
+        CHECK_EQ_INT(otg->waypoint_last_candidate_evaluations, 1);
+        CHECK_TRUE(otg->waypoint_resume_active);
+
+        ruckig_reset(otg);
+        CHECK_TRUE(!otg->waypoint_resume_active);
+        CHECK_EQ_INT(ruckig_update(otg, input, output), RUCKIG_WORKING);
+        CHECK_TRUE(ruckig_output_new_calculation(output));
+        CHECK_TRUE(ruckig_output_was_calculation_interrupted(output));
+        CHECK_EQ_INT(otg->waypoint_last_candidate_evaluations, 1);
 
         ruckig_output_destroy(output);
         ruckig_input_destroy(input);
@@ -1827,6 +1917,8 @@ static void test_waypoint_soft_interruption_update(void) {
         CHECK_TRUE(ruckig_output_new_calculation(output));
         CHECK_TRUE(ruckig_output_was_calculation_interrupted(output));
         CHECK_EQ_INT(otg->waypoint_last_candidate_evaluations, 1);
+        CHECK_TRUE(otg->waypoint_resume_active);
+        CHECK_TRUE(!otg->waypoint_resume_complete);
 
         trajectory = ruckig_output_get_trajectory(output);
         duration = ruckig_trajectory_get_duration(trajectory);
@@ -1836,10 +1928,20 @@ static void test_waypoint_soft_interruption_update(void) {
         CHECK_NEAR(position[0], 2.0, 1e-7);
 
         ruckig_output_pass_to_input(output, input);
+        allocations_before = ruckig_allocation_count();
+        ruckig_allocation_forbidden_set(true);
         result = ruckig_update(otg, input, output);
+        ruckig_allocation_forbidden_set(false);
         CHECK_EQ_INT(result, RUCKIG_WORKING);
-        CHECK_TRUE(!ruckig_output_new_calculation(output));
-        CHECK_TRUE(!ruckig_output_was_calculation_interrupted(output));
+        CHECK_EQ_INT(ruckig_allocation_count(), allocations_before);
+        CHECK_EQ_INT(ruckig_allocation_forbidden_count(), 0);
+        CHECK_TRUE(ruckig_output_new_calculation(output));
+        CHECK_TRUE(ruckig_output_was_calculation_interrupted(output));
+        CHECK_EQ_INT(otg->waypoint_last_candidate_evaluations, 1);
+        CHECK_NEAR(ruckig_output_get_time(output), 0.05, 1e-12);
+        trajectory = ruckig_output_get_trajectory(output);
+        CHECK_TRUE(ruckig_trajectory_get_duration(trajectory) > 0.0);
+        check_waypoint_samples(trajectory, waypoint, 1, 1);
 
         ruckig_output_destroy(output);
         ruckig_input_destroy(input);
@@ -1872,6 +1974,7 @@ static void test_waypoint_soft_interruption_update(void) {
         CHECK_TRUE(!ruckig_output_new_calculation(output));
         CHECK_TRUE(ruckig_output_was_calculation_interrupted(output));
         CHECK_EQ_INT(otg->waypoint_last_candidate_evaluations, 1);
+        CHECK_TRUE(!otg->waypoint_resume_active);
         CHECK_NEAR(ruckig_trajectory_get_duration(ruckig_output_get_trajectory(output)), 0.0, 0.0);
 
         ruckig_output_destroy(output);

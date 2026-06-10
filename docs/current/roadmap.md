@@ -21,20 +21,19 @@ only after a separate user or release demand decision.
 ## 0.12.0 Design Line
 
 Current `main` is `0.12.0-design - Unreleased` after the published `v0.11.0`
-waypoint soft-interruption and platform-clock evidence release.
+waypoint soft-interruption and platform-clock evidence release. The first
+accepted slice is `0.12.0-alpha.1` waypoint soft-interruption true resume.
 
-- First priority: select and document the next accepted work slice before
-  implementation.
+- First priority: collect local `0.12.0-alpha.1` evidence for waypoint
+  `ruckig_update` soft-interruption true resume.
 - Keep `v0.11.0` as the current stable release.
 - Keep the `v0.9.0` 172-symbol public C ABI baseline unless a separate public
   API decision is accepted.
-- Keep waypoint soft-interruption V1 boundaries intact unless a dedicated
-  compatibility review accepts expansion beyond waypoint `ruckig_update` new
-  trajectory calculations.
-- Candidate directions remain design-only until accepted: cross-cycle waypoint
-  continuation, no-waypoint interruption, tracking interruption, runtime
-  platform clock hooks, wrapper publication, upstream baseline upgrades, or
-  package-manager work.
+- Extend only waypoint `ruckig_update` from V1 one-shot interruption to private
+  true-resume and background publish semantics. Public `ruckig_calculate`,
+  no-waypoint interruption, tracking interruption, runtime platform clock
+  hooks, wrapper publication, upstream baseline upgrades, and package-manager
+  work remain out of this slice.
 - `0.11.1` remains reserved for emergency patch fixes only.
 - Package-manager recipes and package publication remain frozen unless
   separately accepted.

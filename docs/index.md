@@ -78,6 +78,8 @@ Historical rewrite plans and release evidence are retained for traceability.
   the internal platform clock abstraction without creating a tag or GitHub
   Release. `release/checklists/0.11.0.md` records the stable waypoint
   soft-interruption and platform-clock evidence release closeout.
+  `release/checklists/0.12.0-alpha.1.md` records the first `0.12.0-design`
+  waypoint soft-interruption true-resume evidence slice.
 - `release/evidence/verification_report.md` - local and CI verification
   history.
 - `release/evidence/performance_report.md` - performance procedure and release
@@ -88,9 +90,9 @@ Historical rewrite plans and release evidence are retained for traceability.
   Visualization v2 evidence release notes, and the stable `0.11.0` waypoint
   soft-interruption and platform-clock evidence release notes.
 
-Current `main` is `0.12.0-design - Unreleased`; the first priority is
-selecting and documenting the next accepted work slice before implementation,
-without default public C ABI expansion.
+Current `main` is `0.12.0-design - Unreleased`; the first priority is local
+evidence for the accepted `0.12.0-alpha.1` waypoint soft-interruption
+true-resume slice, without public C ABI expansion.
 
 `v0.11.0` is the current stable release. It stabilizes waypoint `ruckig_update`
 soft-interruption V1 and the internal platform clock abstraction without

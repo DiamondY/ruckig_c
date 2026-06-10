@@ -11,6 +11,27 @@
 #include "ruckig_c/profile.h"
 
 #define RUCKIG_TRACKING_AUDIT_FAMILY_COUNT 6u
+#define RUCKIG_WAYPOINT_BRANCH_QUEUE_CAPACITY 64u
+#define RUCKIG_WAYPOINT_BRANCH_ITERATION_BUDGET 256u
+
+typedef struct ruckig_waypoint_branch {
+    size_t index;
+    bool acceleration;
+    double delta;
+    double lower_bound;
+} ruckig_waypoint_branch_t;
+
+typedef enum ruckig_waypoint_resume_phase {
+    RUCKIG_WAYPOINT_RESUME_PHASE_IDLE = 0,
+    RUCKIG_WAYPOINT_RESUME_PHASE_BASELINE,
+    RUCKIG_WAYPOINT_RESUME_PHASE_FINITE_DIFFERENCE_035,
+    RUCKIG_WAYPOINT_RESUME_PHASE_FINITE_DIFFERENCE_070,
+    RUCKIG_WAYPOINT_RESUME_PHASE_REFINE_INIT,
+    RUCKIG_WAYPOINT_RESUME_PHASE_REFINE,
+    RUCKIG_WAYPOINT_RESUME_PHASE_BRANCH_INIT,
+    RUCKIG_WAYPOINT_RESUME_PHASE_BRANCH,
+    RUCKIG_WAYPOINT_RESUME_PHASE_COMPLETE
+} ruckig_waypoint_resume_phase_t;
 
 struct ruckig_trajectory {
     size_t dofs;
@@ -98,12 +119,38 @@ struct ruckig {
     struct ruckig_input* current_input;
     struct ruckig_input* waypoint_section_input;
     struct ruckig_trajectory* waypoint_section_trajectory;
+    struct ruckig_trajectory* waypoint_resume_trajectory;
     double* waypoint_candidate_velocity;
     double* waypoint_candidate_acceleration;
     double* waypoint_best_velocity;
     double* waypoint_best_acceleration;
     double* waypoint_baseline_velocity;
     double* waypoint_baseline_acceleration;
+    struct ruckig_input* waypoint_resume_identity_input;
+    ruckig_waypoint_branch_t* waypoint_resume_branch_queue;
+    bool waypoint_resume_active;
+    bool waypoint_resume_complete;
+    bool waypoint_resume_found;
+    bool waypoint_resume_initial_calculation;
+    bool waypoint_resume_has_published_candidate;
+    ruckig_waypoint_resume_phase_t waypoint_resume_phase;
+    double waypoint_resume_best_duration;
+    double waypoint_resume_baseline_duration;
+    double waypoint_resume_published_duration;
+    size_t waypoint_resume_refine_pass;
+    size_t waypoint_resume_refine_waypoint;
+    size_t waypoint_resume_refine_dof;
+    size_t waypoint_resume_refine_component;
+    size_t waypoint_resume_refine_attempt;
+    double waypoint_resume_refine_original;
+    bool waypoint_resume_refine_original_valid;
+    bool waypoint_resume_refine_improved;
+    double waypoint_resume_branch_scale;
+    size_t waypoint_resume_branch_iteration;
+    size_t waypoint_resume_branch_count;
+    size_t waypoint_resume_branch_index;
+    bool waypoint_resume_branch_queue_valid;
+    bool waypoint_resume_branch_improved_any;
     double waypoint_last_baseline_duration;
     double waypoint_last_best_duration;
     double waypoint_last_best_lower_bound;
@@ -176,6 +223,7 @@ struct ruckig_tracking {
 ruckig_result_t ruckig_input_copy_state(const ruckig_input_t* src, ruckig_input_t* dst);
 bool ruckig_input_same_dofs(const ruckig_input_t* input, size_t dofs);
 bool ruckig_input_equals(const ruckig_input_t* lhs, const ruckig_input_t* rhs);
+bool ruckig_input_equals_ignoring_interrupt(const ruckig_input_t* lhs, const ruckig_input_t* rhs);
 ruckig_result_t ruckig_calculate_target(
     ruckig_t* otg,
     const ruckig_input_t* input,
@@ -191,6 +239,16 @@ ruckig_result_t ruckig_calculate_waypoints_interruptible(
     const ruckig_input_t* input,
     ruckig_trajectory_t* trajectory,
     bool* was_interrupted
+);
+void ruckig_waypoint_resume_clear(ruckig_t* otg);
+bool ruckig_waypoint_resume_can_continue(const ruckig_t* otg, const ruckig_input_t* input);
+ruckig_result_t ruckig_waypoint_resume_continue(
+    ruckig_t* otg,
+    const ruckig_input_t* input,
+    ruckig_trajectory_t* trajectory,
+    double incumbent_remaining_duration,
+    bool* was_interrupted,
+    bool* published
 );
 
 #endif

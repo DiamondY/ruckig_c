@@ -4,22 +4,40 @@
 
 Current `main` is open for `0.12.0-design` work after the published
 `v0.11.0` stable waypoint soft-interruption and platform-clock evidence
-release.
+release. The first accepted evidence slice is `0.12.0-alpha.1`.
 
 First priority:
 
-- Select and document the next accepted work slice before implementation.
-- Keep `v0.11.0` waypoint soft-interruption V1 boundaries intact unless a
-  separate compatibility review accepts expansion.
-- Candidate directions remain design-only until accepted: cross-cycle waypoint
-  continuation, no-waypoint interruption, tracking interruption, runtime clock
-  hooks, wrapper publication, upstream baseline upgrades, or package-manager
-  work.
+- Implement and collect local evidence for waypoint `ruckig_update`
+  soft-interruption true resume.
+- Keep the expansion scoped to intermediate-waypoint `ruckig_update` only.
+  Public `ruckig_calculate`, no-waypoint target solving, and tracking remain
+  unchanged by the interrupt field.
+- Keep runtime clock public hooks, wrapper publication, upstream baseline
+  upgrades, and package-manager work deferred unless separately accepted.
+
+`0.12.0-alpha.1` local evidence slice:
+
+- Adds private waypoint optimizer resume state for interrupted online waypoint
+  calculations, including complete-candidate cursors for baseline,
+  finite-difference, refine, and branch search phases.
+- Lets normal `pass_to_input` online cycles continue the waypoint optimizer in
+  the background while the interrupt field remains enabled.
+- Publishes a new waypoint trajectory only when a complete feasible candidate
+  improves over the old trajectory's remaining duration. Background cycles
+  that are budget-interrupted without a publishable candidate keep sampling the
+  old trajectory and return `RUCKIG_WORKING`.
+- Invalidates private resume state when the planning identity changes, when
+  the current state is not the normal `pass_to_input` progression, when the
+  interrupt field is cleared, or when `ruckig_reset` is called.
+- Keeps the public C ABI unchanged: no public header signature changes, no
+  new exported symbols, no enum/result-code numeric changes, and no runtime
+  clock setter.
 
 Release boundary:
 
 - `v0.11.0` remains the current stable release.
-- Public C ABI expansion is not the default goal for `0.12.0-design`.
+- Public C ABI expansion is not part of `0.12.0-alpha.1`.
 - `0.11.1` remains reserved for emergency patch fixes only.
 - Package-manager recipes, formal Python/Rust publication, cloud/remote
   calculation, Pro/cloud equivalence claims, formal global optimality proof,
