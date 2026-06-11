@@ -18,9 +18,41 @@ Coverage is tracked in three different senses:
 Current `main` has moved to `0.13.0-design - Unreleased` after publishing
 `v0.12.0`. The accepted post-release waypoint true-resume evidence slices are
 `0.13.0-alpha.1` stress coverage and `0.13.0-alpha.2` private engine rewrite
-quality-baseline hardening. The latest stable coverage baseline remains the
-`v0.12.0` release evidence below, and `0.12.1` is reserved for emergency patch
-fixes only.
+quality-baseline hardening. `0.13.0-readiness` now records the full local
+stable-review audit for those slices. The latest stable coverage baseline
+remains the `v0.12.0` release evidence below, and `0.12.1` is reserved for
+emergency patch fixes only.
+
+## 0.13.0-readiness Local Stable-Review Audit
+
+`0.13.0-readiness` reruns the full local release-readiness gate set for the
+post-`v0.12.0` waypoint true-resume line. It does not add public C ABI and
+does not expand soft interruption beyond waypoint `ruckig_update`.
+
+Readiness gate evidence:
+
+| Area | Evidence |
+| --- | --- |
+| Alpha remote evidence | `0.13.0-alpha.1` ordinary push CI succeeded on `9d322ad`; `0.13.0-alpha.2` ordinary push CI succeeded on `6354c41`, run `27330887817`. |
+| Focused waypoint gates | `ruckig_c_waypoint_optimizer`, per-section constraints, waypoint quality, resume stress, resume quality audit, allocation audit, platform clock custom, and solver branch coverage all passed. |
+| Routine gates | Default, shared, and duration-enabled CTest each passed 48/48. |
+| Oracle gates | Fixed oracle 82 plus waypoint section oracle 4 passed; random 100k seeds 1, 2, 41 and per-DoF 100k seed 1 passed; local 1M release-random seed 1 passed. |
+| Performance and ABI | No-waypoint benchmark ratio `1.18379` stayed below the `1.5` threshold; waypoint benchmark was recorded as C-only trend; public exported-symbol diff stayed clean at 172 public symbols and 0 unapproved exports. |
+| Wrappers and visualization | Visualization verifier and strict regeneration passed with the shared DLL; Python prototype passed 21 tests with the shared DLL; Rust wrapper tests passed 13/13 and examples built. |
+| Boundary | Public header, ABI docs, workflow, `CMakeLists.txt`, package-manager paths, `original/ruckig-main`, and visualization assets remain outside the readiness documentation diff. |
+
+Local `0.13.0-readiness` coverage summary after filtering out generated,
+test, example, and original-reference code:
+
+| Metric | Covered | Total | Coverage |
+| --- | ---: | ---: | ---: |
+| Regions | 6566 | 7432 | 88.35% |
+| Functions | 386 | 418 | 92.34% |
+| Lines | 6792 | 7702 | 88.18% |
+| Branches | 3013 | 4299 | 70.09% |
+
+Artifacts are under `out/coverage/0.13.0-readiness/`, and the command log is
+recorded in `docs/release/checklists/0.13.0-readiness.md`.
 
 ## 0.13.0-alpha.2 Waypoint True-Resume Engine Rewrite And Quality Baseline
 

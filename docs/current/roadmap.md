@@ -34,14 +34,19 @@ Current `main` has moved to `0.13.0-design - Unreleased` after publishing
   allocation-guard tests around the `v0.12.0` soft-interruption true-resume
   behavior. Its ordinary remote push CI evidence succeeded on commit
   `9d322ad`.
-- First priority is now `0.13.0-alpha.2` waypoint true-resume engine rewrite
-  and quality-baseline hardening: keep the public surface frozen while
-  restructuring the private waypoint optimizer/resume state into a single
-  engine, adding a 128-case deterministic quality baseline, and proving no
-  complete-solve duration regression against the current `9d322ad` behavior.
-- `0.13.0-alpha.2` is a local evidence slice only. It does not push remote CI
-  evidence, create a tag, publish a GitHub Release, bump the version, or
-  trigger manual `release-random`.
+- `0.13.0-alpha.2` waypoint true-resume engine rewrite and
+  quality-baseline hardening is complete. It kept the public surface frozen,
+  restructured the private waypoint optimizer/resume state into a single
+  engine, added a 128-case deterministic quality baseline, and proved no
+  complete-solve duration regression against the `9d322ad` behavior. Its
+  ordinary remote push CI evidence succeeded on commit `6354c41`, run
+  `27330887817`.
+- First priority is now `0.13.0-readiness`: rerun the full local
+  stable-review audit for the alpha.1 stress evidence and alpha.2 private
+  engine rewrite before any stable release candidate work.
+- `0.13.0-readiness` is evidence-only. It does not create a tag, publish a
+  GitHub Release, bump the version, push remote CI evidence, or trigger manual
+  `release-random`.
 - Keep the `v0.9.0` 172-symbol public C ABI baseline unless a separate public
   API decision is accepted.
 - Package-manager recipes and package publication remain frozen unless

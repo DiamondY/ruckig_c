@@ -15,6 +15,22 @@ publishing `v0.12.0`.
   formal global optimality proof, and upstream baseline upgrades remain
   deferred unless separately accepted.
 
+`0.13.0-readiness` release readiness audit evidence:
+
+- Records full local readiness evidence for deciding whether the post-`v0.12.0`
+  waypoint true-resume stress and private engine rewrite evidence is ready for
+  a later `v0.13.0` stable closeout.
+- Includes `0.13.0-alpha.1` remote push CI success on commit `9d322ad` and
+  `0.13.0-alpha.2` remote push CI success on commit `6354c41`, run
+  `27330887817`.
+- Reruns local build, routine CTest, duration-enabled CTest, 100k oracle
+  seeds, local 1M release-random, no-waypoint performance threshold,
+  waypoint performance trend, ABI/export, platform clock probes,
+  visualization, Python/Rust wrapper smoke, coverage, and boundary gates.
+- Keeps readiness evidence-only: no version bump, tag, GitHub Release,
+  manual release-random workflow, public C ABI change, workflow change,
+  package-manager work, or `original/ruckig-main` change.
+
 `0.13.0-alpha.2` local evidence slice:
 
 - Rewrites the private waypoint optimizer/resume state into an internal
@@ -31,8 +47,9 @@ publishing `v0.12.0`.
   checked-in baseline within tolerance, and records resume publish,
   interrupted-without-publish, completion, and fresh full-solve reference
   evidence.
-- Keeps `0.13.0-alpha.2` local-only: no version bump, tag, GitHub Release,
-  remote push CI wait, or manual `release-random` workflow.
+- The implementation slice was local-only; ordinary remote push CI evidence
+  was later collected on commit `6354c41`, run `27330887817`, before
+  `0.13.0-readiness`.
 
 `0.13.0-alpha.1` local evidence slice:
 

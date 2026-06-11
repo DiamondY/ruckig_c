@@ -91,7 +91,9 @@ Historical rewrite plans and release evidence are retained for traceability.
   waypoint true-resume stress and quality evidence slice on the
   `0.13.0-design` line. `release/checklists/0.13.0-alpha.2.md` records the
   waypoint true-resume private engine rewrite and deterministic quality
-  baseline evidence slice.
+  baseline evidence slice. `release/checklists/0.13.0-readiness.md` records
+  the full local stable-review audit for those post-`v0.12.0` waypoint
+  true-resume slices without creating a tag or GitHub Release.
 - `release/evidence/verification_report.md` - local and CI verification
   history.
 - `release/evidence/performance_report.md` - performance procedure and release
@@ -104,10 +106,11 @@ Historical rewrite plans and release evidence are retained for traceability.
   `0.12.0` waypoint soft-interruption true-resume release notes.
 
 `v0.12.0` is the current stable release, and current `main` is
-`0.13.0-design - Unreleased` with no accepted post-`v0.12.0` public API or ABI
-expansion yet. `v0.12.0` stabilizes waypoint `ruckig_update`
-soft-interruption true-resume and the unified private waypoint optimizer
-engine without expanding the 172-symbol public C ABI. `v0.11.0` stabilizes
+`0.13.0-design - Unreleased` with `0.13.0-readiness` local evidence being
+recorded and no accepted post-`v0.12.0` public API or ABI expansion yet.
+`v0.12.0` stabilizes waypoint `ruckig_update` soft-interruption true-resume
+and the unified private waypoint optimizer engine without expanding the
+172-symbol public C ABI. `v0.11.0` stabilizes
 waypoint `ruckig_update` soft-interruption V1 and the internal platform clock
 abstraction without expanding the public C ABI. `v0.10.0`
 stabilizes the 30 local

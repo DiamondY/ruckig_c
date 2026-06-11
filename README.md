@@ -81,6 +81,10 @@ Implemented and covered by fixed C/oracle tests plus deterministic random oracle
 - `0.13.0-alpha.2` waypoint true-resume engine hardening, rewriting the
   private optimizer/resume state into an internal waypoint engine and adding a
   128-case deterministic quality baseline audit without changing public C ABI.
+- `0.13.0-readiness` local stable-review audit evidence, rerunning build,
+  CTest, oracle, release-random, performance, ABI/export, platform-clock,
+  visualization, wrapper, coverage, and boundary gates for the alpha.1/alpha.2
+  waypoint true-resume evidence without changing public C ABI.
 - `0.10.0-alpha` visualization v2 local gallery evidence, replacing the
   current `main` gallery with 30 project-owned `1400x900` PNGs and a strict
   local verifier while keeping the `v0.9.0` stable C ABI unchanged.
@@ -100,12 +104,14 @@ Implemented and covered by fixed C/oracle tests plus deterministic random oracle
 Release-readiness evidence is tracked under `docs/release/`; see
 `docs/index.md` for the organized documentation map. `v0.12.0` is the current
 stable release, and current `main` has moved to
-`0.13.0-design - Unreleased` for future design triage. `v0.12.0` keeps the
-`v0.9.0` 172-symbol public C ABI unchanged and stabilizes waypoint
-`ruckig_update` soft-interruption true-resume, background publish semantics,
-and the unified private waypoint optimizer engine reviewed during
-`0.12.0-readiness`. Public `ruckig_calculate`, no-waypoint target solving, and
-tracking remain unchanged by `interrupt_calculation_duration`.
+`0.13.0-design - Unreleased`; `0.13.0-readiness` evidence is being recorded
+for stable review of the post-`v0.12.0` waypoint true-resume stress and
+private engine rewrite slices. `v0.12.0` keeps the `v0.9.0` 172-symbol public
+C ABI unchanged and stabilizes waypoint `ruckig_update` soft-interruption
+true-resume, background publish semantics, and the unified private waypoint
+optimizer engine reviewed during `0.12.0-readiness`. Public
+`ruckig_calculate`, no-waypoint target solving, and tracking remain unchanged
+by `interrupt_calculation_duration`.
 `v0.10.0` adopts the current gallery as 30 `1400x900` Matplotlib `Agg` and
 NumPy PNG assets under `docs/assets/visualization/`. The gallery covers local
 C ABI equivalents of original examples `01-10` and `14-16`, plus tracking
