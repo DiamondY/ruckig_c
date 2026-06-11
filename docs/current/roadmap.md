@@ -28,8 +28,13 @@ Current `main` has moved to `0.13.0-design - Unreleased` after publishing
   default post-release development route.
 - No `0.13.0` public C API, public ABI, exported-symbol, enum numeric, or
   result-code numeric change is accepted yet.
-- The next `0.13.0` implementation slice requires a separate design and
-  compatibility review before code changes.
+- First priority is `0.13.0-alpha.1` waypoint true-resume stress and quality
+  evidence: add focused multi-DoF, multi-waypoint, per-section, budget-matrix,
+  fresh-solve quality-reference, long online-loop, and allocation-guard tests
+  around the `v0.12.0` soft-interruption true-resume behavior.
+- `0.13.0-alpha.1` is a local evidence slice only. It does not push remote CI
+  evidence, create a tag, publish a GitHub Release, bump the version, or
+  trigger manual `release-random`.
 - Keep the `v0.9.0` 172-symbol public C ABI baseline unless a separate public
   API decision is accepted.
 - Package-manager recipes and package publication remain frozen unless

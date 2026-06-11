@@ -16,9 +16,33 @@ Coverage is tracked in three different senses:
 ## 0.13.0-design - Unreleased
 
 Current `main` has moved to `0.13.0-design - Unreleased` after publishing
-`v0.12.0`. No new `0.13.0` coverage baseline or accepted feature scope exists
-yet. The latest stable coverage baseline remains the `v0.12.0` release
-evidence below, and `0.12.1` is reserved for emergency patch fixes only.
+`v0.12.0`. The first accepted `0.13.0` evidence slice is
+`0.13.0-alpha.1` waypoint true-resume stress and quality audit. The latest
+stable coverage baseline remains the `v0.12.0` release evidence below, and
+`0.12.1` is reserved for emergency patch fixes only.
+
+## 0.13.0-alpha.1 Waypoint True-Resume Stress And Quality Audit
+
+`0.13.0-alpha.1` is a local post-`v0.12.0` evidence slice for the existing
+waypoint `ruckig_update` soft-interruption true-resume behavior. It does not
+add public C ABI and does not expand soft interruption beyond waypoint
+`ruckig_update`.
+
+Added C coverage:
+
+| Scenario | Evidence |
+| --- | --- |
+| Focused selector | Adds `--waypoint-resume-stress` and `ruckig_c_waypoint_resume_stress` so true-resume stress can run independently of the broader waypoint selectors. |
+| Multi-DoF/multi-waypoint stress | Covers a 4-DoF, three-waypoint online resume case with four constrained sections. |
+| Per-section constraints | Published and sampled trajectories are checked against per-section velocity, acceleration, jerk, position, and minimum-duration constraints. |
+| Budget matrix | Exercises zero budget, a tiny positive budget, zero-budget continuation, large-budget completion, runtime budget changes, and interrupt clear. |
+| Background interrupted without publish | Uses the private test hook to force a stable no-publish background cycle that preserves the incumbent trajectory while reporting interruption. |
+| Background publish quality | Checks that any background publish resets time through normal new-calculation semantics and improves over incumbent remaining duration. |
+| Fresh full-solve reference | Solves the current remaining input completely as a local quality reference during active resume cycles without requiring equality against the resumed result. |
+| Allocation guard | Runs initial interrupted update, interrupted-without-publish background resume, and background completion/publish paths under the allocation guard. |
+
+Local verification for this slice is recorded in
+`docs/release/checklists/0.13.0-alpha.1.md`.
 
 ## v0.12.0 Waypoint Soft Interruption True-Resume Release
 

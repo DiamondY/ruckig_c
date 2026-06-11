@@ -6,6 +6,9 @@ for local waypoint `ruckig_update` new-trajectory recalculation. In
 `0.12.0-alpha.1`, the same public field drives V2 true-resume for waypoint
 `ruckig_update` only. In `0.12.0-alpha.2`, complete waypoint solving and
 soft-interruption resume share the same private step-driven optimizer engine.
+After `v0.12.0`, `0.13.0-alpha.1` adds local stress and quality evidence for
+the same V2 behavior; it does not change the public API, public ABI, or the
+runtime semantics described below.
 
 This is not a hard real-time guarantee. The budget is checked at safe waypoint
 candidate boundaries, so the actual elapsed time can exceed the configured
@@ -160,6 +163,10 @@ Routine evidence for this feature should include:
 - Multi-DoF and multi-waypoint background resume with per-section constraints,
   fresh full-solve quality comparison, invalidation matrix coverage, and long
   online-loop stability.
+- Post-`v0.12.0` stress evidence for budget matrices, background
+  interrupted-without-publish cycles, background publish incumbent-improvement
+  checks, fresh full-solve quality references, and allocation-guarded resume
+  paths.
 - No-allocation checks for the prepared update and background resume paths.
 - A duration-enabled build proving soft interruption does not depend on
   `RUCKIG_C_ENABLE_CALCULATION_DURATION`.

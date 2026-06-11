@@ -1894,6 +1894,154 @@ static void check_alpha2_resume_trajectory(const ruckig_trajectory_t* trajectory
         dofs);
 }
 
+static void configure_alpha1_resume_stress_input(ruckig_input_t* input) {
+    const size_t dofs = 4;
+    double waypoints[12] = {
+        0.25, -0.10, 0.15, -0.05,
+        0.55, -0.28, 0.34, -0.18,
+        0.90, -0.50, 0.58, -0.34
+    };
+    double per_section_min_velocity[16] = {
+        -0.80, -0.75, -0.70, -0.65,
+        -0.85, -0.80, -0.75, -0.70,
+        -0.95, -0.90, -0.85, -0.80,
+        -1.05, -1.00, -0.95, -0.90
+    };
+    double per_section_max_velocity[16] = {
+        0.90, 0.85, 0.80, 0.75,
+        0.98, 0.92, 0.86, 0.80,
+        1.08, 1.00, 0.94, 0.88,
+        1.18, 1.10, 1.02, 0.96
+    };
+    double per_section_min_acceleration[16] = {
+        -1.5, -1.4, -1.3, -1.2,
+        -1.6, -1.5, -1.4, -1.3,
+        -1.7, -1.6, -1.5, -1.4,
+        -1.8, -1.7, -1.6, -1.5
+    };
+    double per_section_max_acceleration[16] = {
+        1.5, 1.4, 1.3, 1.2,
+        1.6, 1.5, 1.4, 1.3,
+        1.7, 1.6, 1.5, 1.4,
+        1.8, 1.7, 1.6, 1.5
+    };
+    double per_section_max_jerk[16] = {
+        3.8, 3.6, 3.4, 3.2,
+        4.0, 3.8, 3.6, 3.4,
+        4.2, 4.0, 3.8, 3.6,
+        4.4, 4.2, 4.0, 3.8
+    };
+    double per_section_min_position[16] = {
+        -0.05, -0.15, -0.05, -0.10,
+        0.18, -0.33, 0.10, -0.22,
+        0.48, -0.55, 0.28, -0.38,
+        0.82, -0.75, 0.52, -0.55
+    };
+    double per_section_max_position[16] = {
+        0.32, 0.03, 0.22, 0.02,
+        0.62, -0.05, 0.40, -0.02,
+        0.98, -0.22, 0.64, -0.14,
+        1.35, -0.45, 0.90, -0.30
+    };
+    double per_section_minimum_duration[4] = {0.55, 0.45, 0.45, 0.40};
+    size_t i;
+
+    for (i = 0; i < dofs; ++i) {
+        ruckig_input_max_velocity_data(input)[i] = 1.4;
+        ruckig_input_max_acceleration_data(input)[i] = 2.0;
+        ruckig_input_max_jerk_data(input)[i] = 4.8;
+    }
+    ruckig_input_target_position_data(input)[0] = 1.25;
+    ruckig_input_target_position_data(input)[1] = -0.70;
+    ruckig_input_target_position_data(input)[2] = 0.82;
+    ruckig_input_target_position_data(input)[3] = -0.50;
+    CHECK_EQ_INT(ruckig_input_set_intermediate_positions(input, waypoints, 3, dofs), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_input_set_per_section_min_velocity(input, per_section_min_velocity, 4, dofs), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_input_set_per_section_max_velocity(input, per_section_max_velocity, 4, dofs), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_input_set_per_section_min_acceleration(input, per_section_min_acceleration, 4, dofs), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_input_set_per_section_max_acceleration(input, per_section_max_acceleration, 4, dofs), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_input_set_per_section_max_jerk(input, per_section_max_jerk, 4, dofs), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_input_set_per_section_min_position(input, per_section_min_position, 4, dofs), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_input_set_per_section_max_position(input, per_section_max_position, 4, dofs), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_input_set_per_section_minimum_duration(input, per_section_minimum_duration, 4), RUCKIG_WORKING);
+}
+
+static void check_alpha1_resume_stress_trajectory(const ruckig_trajectory_t* trajectory) {
+    const size_t dofs = 4;
+    double waypoints[12] = {
+        0.25, -0.10, 0.15, -0.05,
+        0.55, -0.28, 0.34, -0.18,
+        0.90, -0.50, 0.58, -0.34
+    };
+    double per_section_min_velocity[16] = {
+        -0.80, -0.75, -0.70, -0.65,
+        -0.85, -0.80, -0.75, -0.70,
+        -0.95, -0.90, -0.85, -0.80,
+        -1.05, -1.00, -0.95, -0.90
+    };
+    double per_section_max_velocity[16] = {
+        0.90, 0.85, 0.80, 0.75,
+        0.98, 0.92, 0.86, 0.80,
+        1.08, 1.00, 0.94, 0.88,
+        1.18, 1.10, 1.02, 0.96
+    };
+    double per_section_min_acceleration[16] = {
+        -1.5, -1.4, -1.3, -1.2,
+        -1.6, -1.5, -1.4, -1.3,
+        -1.7, -1.6, -1.5, -1.4,
+        -1.8, -1.7, -1.6, -1.5
+    };
+    double per_section_max_acceleration[16] = {
+        1.5, 1.4, 1.3, 1.2,
+        1.6, 1.5, 1.4, 1.3,
+        1.7, 1.6, 1.5, 1.4,
+        1.8, 1.7, 1.6, 1.5
+    };
+    double per_section_max_jerk[16] = {
+        3.8, 3.6, 3.4, 3.2,
+        4.0, 3.8, 3.6, 3.4,
+        4.2, 4.0, 3.8, 3.6,
+        4.4, 4.2, 4.0, 3.8
+    };
+    double per_section_min_position[16] = {
+        -0.05, -0.15, -0.05, -0.10,
+        0.18, -0.33, 0.10, -0.22,
+        0.48, -0.55, 0.28, -0.38,
+        0.82, -0.75, 0.52, -0.55
+    };
+    double per_section_max_position[16] = {
+        0.32, 0.03, 0.22, 0.02,
+        0.62, -0.05, 0.40, -0.02,
+        0.98, -0.22, 0.64, -0.14,
+        1.35, -0.45, 0.90, -0.30
+    };
+    double per_section_minimum_duration[4] = {0.55, 0.45, 0.45, 0.40};
+    double durations[3] = {0.0, 0.0, 0.0};
+    const double total_duration = ruckig_trajectory_get_duration(trajectory);
+    size_t section;
+
+    CHECK_TRUE(total_duration > 0.0);
+    check_waypoint_samples(trajectory, waypoints, 3, dofs);
+    check_waypoint_section_sampled_limits(
+        trajectory,
+        per_section_min_velocity,
+        per_section_max_velocity,
+        per_section_min_acceleration,
+        per_section_max_acceleration,
+        per_section_max_jerk,
+        per_section_min_position,
+        per_section_max_position,
+        4,
+        dofs);
+    CHECK_EQ_INT(ruckig_trajectory_get_intermediate_durations(trajectory, durations, 3), RUCKIG_WORKING);
+    for (section = 0; section < 4; ++section) {
+        const double start = section == 0 ? 0.0 : durations[section - 1];
+        const double end = section == 3 ? total_duration : durations[section];
+        CHECK_TRUE(end > start);
+        CHECK_TRUE(end - start >= per_section_minimum_duration[section] - 1e-9);
+    }
+}
+
 static void test_waypoint_soft_interruption_update(void) {
     {
         ruckig_t* otg = NULL;
@@ -2436,6 +2584,285 @@ static void test_waypoint_soft_interruption_alpha2_hardening(void) {
     check_alpha2_invalidation_case(WAYPOINT_ALPHA2_INVALIDATE_CONTROL_INTERFACE, RUCKIG_ERROR_INVALID_INPUT);
     check_alpha2_invalidation_case(WAYPOINT_ALPHA2_INVALIDATE_DURATION_DISCRETIZATION, RUCKIG_ERROR_INVALID_INPUT);
     check_alpha2_invalidation_case(WAYPOINT_ALPHA2_INVALIDATE_CLEAR_INTERRUPT, RUCKIG_WORKING);
+}
+
+static ruckig_result_t ruckig_update_under_allocation_guard(
+    ruckig_t* otg,
+    ruckig_input_t* input,
+    ruckig_output_t* output
+) {
+    ruckig_result_t result;
+    const size_t allocations_before = ruckig_allocation_count();
+    ruckig_allocation_forbidden_set(true);
+    result = ruckig_update(otg, input, output);
+    ruckig_allocation_forbidden_set(false);
+    CHECK_EQ_INT(ruckig_allocation_count(), allocations_before);
+    CHECK_EQ_INT(ruckig_allocation_forbidden_count(), 0);
+    return result;
+}
+
+static void test_waypoint_resume_stress_budget_matrix(void) {
+    {
+        ruckig_t* otg = NULL;
+        ruckig_input_t* input = NULL;
+        ruckig_output_t* output = NULL;
+        double incumbent_remaining_duration = 0.0;
+        ruckig_result_t result;
+
+        CHECK_EQ_INT(ruckig_create_with_waypoints(&otg, 4, 0.01, 3), RUCKIG_WORKING);
+        CHECK_EQ_INT(ruckig_input_create_with_waypoints(&input, 4, 3), RUCKIG_WORKING);
+        CHECK_EQ_INT(ruckig_output_create_with_waypoints(&output, 4, 3), RUCKIG_WORKING);
+        configure_alpha1_resume_stress_input(input);
+
+        CHECK_EQ_INT(ruckig_input_set_interrupt_calculation_duration(input, 0.0), RUCKIG_WORKING);
+        result = ruckig_update(otg, input, output);
+        CHECK_EQ_INT(result, RUCKIG_WORKING);
+        CHECK_TRUE(ruckig_output_new_calculation(output));
+        CHECK_TRUE(ruckig_output_was_calculation_interrupted(output));
+        CHECK_EQ_INT(otg->waypoint_last_candidate_evaluations, 1);
+        CHECK_TRUE(otg->waypoint_resume_active);
+        check_alpha1_resume_stress_trajectory(ruckig_output_get_trajectory(output));
+
+        incumbent_remaining_duration =
+            ruckig_trajectory_get_duration(ruckig_output_get_trajectory(output)) - ruckig_output_get_time(output);
+        ruckig_output_pass_to_input(output, input);
+        CHECK_EQ_INT(ruckig_input_set_interrupt_calculation_duration(input, 1.0), RUCKIG_WORKING);
+        result = ruckig_update(otg, input, output);
+        CHECK_EQ_INT(result, RUCKIG_WORKING);
+        CHECK_TRUE(ruckig_output_was_calculation_interrupted(output));
+        CHECK_TRUE(otg->waypoint_resume_active);
+        CHECK_TRUE(otg->waypoint_last_candidate_evaluations >= 1);
+        if (ruckig_output_new_calculation(output)) {
+            CHECK_NEAR(ruckig_output_get_time(output), 0.01, 1e-12);
+            CHECK_TRUE(ruckig_trajectory_get_duration(ruckig_output_get_trajectory(output))
+                < incumbent_remaining_duration - 1e-12);
+        }
+        check_alpha1_resume_stress_trajectory(ruckig_output_get_trajectory(output));
+
+        incumbent_remaining_duration =
+            ruckig_trajectory_get_duration(ruckig_output_get_trajectory(output)) - ruckig_output_get_time(output);
+        ruckig_output_pass_to_input(output, input);
+        CHECK_EQ_INT(ruckig_input_set_interrupt_calculation_duration(input, 0.0), RUCKIG_WORKING);
+        result = ruckig_update(otg, input, output);
+        CHECK_EQ_INT(result, RUCKIG_WORKING);
+        CHECK_TRUE(ruckig_output_was_calculation_interrupted(output));
+        CHECK_TRUE(otg->waypoint_resume_active);
+        CHECK_EQ_INT(otg->waypoint_last_candidate_evaluations, 1);
+        if (ruckig_output_new_calculation(output)) {
+            CHECK_NEAR(ruckig_output_get_time(output), 0.01, 1e-12);
+            CHECK_TRUE(ruckig_trajectory_get_duration(ruckig_output_get_trajectory(output))
+                < incumbent_remaining_duration - 1e-12);
+        }
+        check_alpha1_resume_stress_trajectory(ruckig_output_get_trajectory(output));
+
+        incumbent_remaining_duration =
+            ruckig_trajectory_get_duration(ruckig_output_get_trajectory(output)) - ruckig_output_get_time(output);
+        ruckig_output_pass_to_input(output, input);
+        CHECK_EQ_INT(ruckig_input_set_interrupt_calculation_duration(input, 1000000000.0), RUCKIG_WORKING);
+        result = ruckig_update(otg, input, output);
+        CHECK_EQ_INT(result, RUCKIG_WORKING);
+        CHECK_TRUE(!ruckig_output_was_calculation_interrupted(output));
+        CHECK_TRUE(!otg->waypoint_resume_active);
+        if (ruckig_output_new_calculation(output)) {
+            CHECK_NEAR(ruckig_output_get_time(output), 0.01, 1e-12);
+            CHECK_TRUE(ruckig_trajectory_get_duration(ruckig_output_get_trajectory(output))
+                < incumbent_remaining_duration - 1e-12);
+        }
+        check_alpha1_resume_stress_trajectory(ruckig_output_get_trajectory(output));
+
+        ruckig_output_destroy(output);
+        ruckig_input_destroy(input);
+        ruckig_destroy(otg);
+    }
+
+    {
+        ruckig_t* otg = NULL;
+        ruckig_input_t* input = NULL;
+        ruckig_output_t* output = NULL;
+        const double previous_time = 0.0;
+        ruckig_result_t result;
+
+        CHECK_EQ_INT(ruckig_create_with_waypoints(&otg, 4, 0.01, 3), RUCKIG_WORKING);
+        CHECK_EQ_INT(ruckig_input_create_with_waypoints(&input, 4, 3), RUCKIG_WORKING);
+        CHECK_EQ_INT(ruckig_output_create_with_waypoints(&output, 4, 3), RUCKIG_WORKING);
+        configure_alpha1_resume_stress_input(input);
+
+        CHECK_EQ_INT(ruckig_input_set_interrupt_calculation_duration(input, 0.0), RUCKIG_WORKING);
+        CHECK_EQ_INT(ruckig_update(otg, input, output), RUCKIG_WORKING);
+        CHECK_TRUE(otg->waypoint_resume_active);
+        ruckig_output_pass_to_input(output, input);
+        ruckig_input_clear_interrupt_calculation_duration(input);
+        result = ruckig_update(otg, input, output);
+        CHECK_EQ_INT(result, RUCKIG_WORKING);
+        CHECK_TRUE(!ruckig_output_new_calculation(output));
+        CHECK_TRUE(!ruckig_output_was_calculation_interrupted(output));
+        CHECK_TRUE(!otg->waypoint_resume_active);
+        CHECK_TRUE(ruckig_output_get_time(output) > previous_time);
+        check_alpha1_resume_stress_trajectory(ruckig_output_get_trajectory(output));
+
+        ruckig_output_destroy(output);
+        ruckig_input_destroy(input);
+        ruckig_destroy(otg);
+    }
+}
+
+static void test_waypoint_resume_stress_long_online_loop(void) {
+    ruckig_t* otg = NULL;
+    ruckig_t* fresh_otg = NULL;
+    ruckig_input_t* input = NULL;
+    ruckig_input_t* fresh_input = NULL;
+    ruckig_output_t* output = NULL;
+    ruckig_trajectory_t* fresh_trajectory = NULL;
+    bool saw_publish = false;
+    bool saw_fresh_quality_reference = false;
+    bool saw_budget_interruption = false;
+    bool saw_completion = false;
+    size_t cycle;
+
+    CHECK_EQ_INT(ruckig_create_with_waypoints(&otg, 4, 0.01, 3), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_create_with_waypoints(&fresh_otg, 4, 0.01, 3), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_input_create_with_waypoints(&input, 4, 3), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_input_create_with_waypoints(&fresh_input, 4, 3), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_output_create_with_waypoints(&output, 4, 3), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_trajectory_create_with_waypoints(&fresh_trajectory, 4, 3), RUCKIG_WORKING);
+    configure_alpha1_resume_stress_input(input);
+    CHECK_EQ_INT(ruckig_input_set_interrupt_calculation_duration(input, 0.0), RUCKIG_WORKING);
+
+    CHECK_EQ_INT(ruckig_update(otg, input, output), RUCKIG_WORKING);
+    CHECK_TRUE(ruckig_output_new_calculation(output));
+    CHECK_TRUE(ruckig_output_was_calculation_interrupted(output));
+    CHECK_TRUE(otg->waypoint_resume_active);
+    check_alpha1_resume_stress_trajectory(ruckig_output_get_trajectory(output));
+
+    for (cycle = 0; cycle < 32; ++cycle) {
+        const double previous_time = ruckig_output_get_time(output);
+        const size_t previous_section = ruckig_output_get_new_section(output);
+        const double incumbent_remaining_duration =
+            ruckig_trajectory_get_duration(ruckig_output_get_trajectory(output)) - previous_time;
+        const bool was_active_before_update = otg->waypoint_resume_active;
+        double fresh_duration = 0.0;
+        ruckig_result_t result;
+
+        ruckig_output_pass_to_input(output, input);
+        if (cycle == 2) {
+            CHECK_EQ_INT(ruckig_input_set_interrupt_calculation_duration(input, 1.0), RUCKIG_WORKING);
+        } else if (cycle == 3) {
+            CHECK_EQ_INT(ruckig_input_set_interrupt_calculation_duration(input, 0.0), RUCKIG_WORKING);
+        } else if (cycle == 10) {
+            CHECK_EQ_INT(ruckig_input_set_interrupt_calculation_duration(input, 1000000000.0), RUCKIG_WORKING);
+        }
+
+        if (was_active_before_update) {
+            CHECK_EQ_INT(ruckig_input_copy_state(input, fresh_input), RUCKIG_WORKING);
+            ruckig_input_clear_interrupt_calculation_duration(fresh_input);
+            CHECK_EQ_INT(ruckig_calculate(fresh_otg, fresh_input, fresh_trajectory), RUCKIG_WORKING);
+            fresh_duration = ruckig_trajectory_get_duration(fresh_trajectory);
+            CHECK_TRUE(fresh_duration > 0.0);
+            saw_fresh_quality_reference = true;
+        }
+
+        result = ruckig_update(otg, input, output);
+        CHECK_EQ_INT(result, RUCKIG_WORKING);
+        CHECK_TRUE(ruckig_output_get_new_section(output) < 4);
+        if (ruckig_output_new_calculation(output)) {
+            const double published_duration = ruckig_trajectory_get_duration(ruckig_output_get_trajectory(output));
+            CHECK_NEAR(ruckig_output_get_time(output), 0.01, 1e-12);
+            CHECK_TRUE(published_duration < incumbent_remaining_duration - 1e-12);
+            CHECK_TRUE(published_duration > 0.0);
+            saw_publish = true;
+        } else {
+            CHECK_TRUE(ruckig_output_get_time(output) > previous_time);
+            CHECK_TRUE(ruckig_output_get_new_section(output) >= previous_section);
+            if (ruckig_output_was_calculation_interrupted(output)) {
+                saw_budget_interruption = true;
+            }
+        }
+        check_alpha1_resume_stress_trajectory(ruckig_output_get_trajectory(output));
+
+        if (cycle >= 10 && was_active_before_update && !otg->waypoint_resume_active) {
+            CHECK_TRUE(!ruckig_output_was_calculation_interrupted(output));
+            saw_completion = true;
+            break;
+        }
+    }
+
+    CHECK_TRUE(saw_fresh_quality_reference);
+    CHECK_TRUE(saw_budget_interruption);
+    CHECK_TRUE(saw_publish);
+    CHECK_TRUE(saw_completion);
+
+    ruckig_trajectory_destroy(fresh_trajectory);
+    ruckig_output_destroy(output);
+    ruckig_input_destroy(fresh_input);
+    ruckig_input_destroy(input);
+    ruckig_destroy(fresh_otg);
+    ruckig_destroy(otg);
+}
+
+static void test_waypoint_resume_stress_allocation_paths(void) {
+    {
+        ruckig_t* otg = NULL;
+        ruckig_input_t* input = NULL;
+        ruckig_output_t* output = NULL;
+
+        CHECK_EQ_INT(ruckig_create_with_waypoints(&otg, 4, 0.01, 3), RUCKIG_WORKING);
+        CHECK_EQ_INT(ruckig_input_create_with_waypoints(&input, 4, 3), RUCKIG_WORKING);
+        CHECK_EQ_INT(ruckig_output_create_with_waypoints(&output, 4, 3), RUCKIG_WORKING);
+        configure_alpha1_resume_stress_input(input);
+        CHECK_EQ_INT(ruckig_input_set_interrupt_calculation_duration(input, 0.0), RUCKIG_WORKING);
+
+        ruckig_allocation_counters_reset();
+        CHECK_EQ_INT(ruckig_update_under_allocation_guard(otg, input, output), RUCKIG_WORKING);
+        CHECK_TRUE(ruckig_output_new_calculation(output));
+        CHECK_TRUE(ruckig_output_was_calculation_interrupted(output));
+        CHECK_TRUE(otg->waypoint_resume_active);
+
+        ruckig_output_pass_to_input(output, input);
+        otg->waypoint_resume_best_duration = -1.0;
+        CHECK_EQ_INT(ruckig_update_under_allocation_guard(otg, input, output), RUCKIG_WORKING);
+        CHECK_TRUE(!ruckig_output_new_calculation(output));
+        CHECK_TRUE(ruckig_output_was_calculation_interrupted(output));
+        CHECK_TRUE(otg->waypoint_resume_active);
+        check_alpha1_resume_stress_trajectory(ruckig_output_get_trajectory(output));
+
+        ruckig_output_destroy(output);
+        ruckig_input_destroy(input);
+        ruckig_destroy(otg);
+    }
+
+    {
+        ruckig_t* otg = NULL;
+        ruckig_input_t* input = NULL;
+        ruckig_output_t* output = NULL;
+        double incumbent_remaining_duration = 0.0;
+
+        CHECK_EQ_INT(ruckig_create_with_waypoints(&otg, 4, 0.01, 3), RUCKIG_WORKING);
+        CHECK_EQ_INT(ruckig_input_create_with_waypoints(&input, 4, 3), RUCKIG_WORKING);
+        CHECK_EQ_INT(ruckig_output_create_with_waypoints(&output, 4, 3), RUCKIG_WORKING);
+        configure_alpha1_resume_stress_input(input);
+        CHECK_EQ_INT(ruckig_input_set_interrupt_calculation_duration(input, 0.0), RUCKIG_WORKING);
+        CHECK_EQ_INT(ruckig_update(otg, input, output), RUCKIG_WORKING);
+        CHECK_TRUE(otg->waypoint_resume_active);
+
+        incumbent_remaining_duration =
+            ruckig_trajectory_get_duration(ruckig_output_get_trajectory(output)) - ruckig_output_get_time(output);
+        ruckig_output_pass_to_input(output, input);
+        CHECK_EQ_INT(ruckig_input_set_interrupt_calculation_duration(input, 1000000000.0), RUCKIG_WORKING);
+        ruckig_allocation_counters_reset();
+        CHECK_EQ_INT(ruckig_update_under_allocation_guard(otg, input, output), RUCKIG_WORKING);
+        CHECK_TRUE(!ruckig_output_was_calculation_interrupted(output));
+        CHECK_TRUE(!otg->waypoint_resume_active);
+        if (ruckig_output_new_calculation(output)) {
+            CHECK_NEAR(ruckig_output_get_time(output), 0.01, 1e-12);
+            CHECK_TRUE(ruckig_trajectory_get_duration(ruckig_output_get_trajectory(output))
+                < incumbent_remaining_duration - 1e-12);
+        }
+        check_alpha1_resume_stress_trajectory(ruckig_output_get_trajectory(output));
+
+        ruckig_output_destroy(output);
+        ruckig_input_destroy(input);
+        ruckig_destroy(otg);
+    }
 }
 
 static void test_waypoint_fixed_regression_corpus(void) {
@@ -5376,6 +5803,12 @@ void run_waypoint_quality_tests(void) {
     test_waypoint_fixed_regression_corpus();
     test_waypoint_041_deep_regression_corpus();
     test_waypoint_alpha2_quality_regressions();
+}
+
+void run_waypoint_resume_stress_tests(void) {
+    test_waypoint_resume_stress_budget_matrix();
+    test_waypoint_resume_stress_long_online_loop();
+    test_waypoint_resume_stress_allocation_paths();
 }
 
 void run_tracking_api_tests(void) {

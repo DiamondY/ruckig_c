@@ -15,6 +15,21 @@ publishing `v0.12.0`.
   formal global optimality proof, and upstream baseline upgrades remain
   deferred unless separately accepted.
 
+`0.13.0-alpha.1` local evidence slice:
+
+- Adds a focused `--waypoint-resume-stress` C test selector and
+  `ruckig_c_waypoint_resume_stress` CTest entry for post-`v0.12.0` waypoint
+  true-resume stress and quality audit.
+- Covers multi-DoF, multi-waypoint online resume with per-section velocity,
+  acceleration, jerk, position, and minimum-duration constraints.
+- Exercises zero, tiny, large, changed, and cleared interrupt budgets;
+  background interrupted-without-publish behavior; background publish
+  incumbent-improvement semantics; fresh full-solve quality references; and
+  allocation-guarded resume paths.
+- Keeps the `v0.12.0` public C ABI, exported-symbol set, no-waypoint update,
+  tracking, runtime clock public hook, package-manager, and Cloud/Pro
+  boundaries unchanged.
+
 ## 0.12.0 - 2026-06-11
 
 `0.12.0` is the stable waypoint soft-interruption true-resume release. It keeps

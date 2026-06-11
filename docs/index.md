@@ -87,6 +87,9 @@ Historical rewrite plans and release evidence are retained for traceability.
   the unified waypoint optimizer engine without creating a tag or GitHub
   Release. `release/checklists/0.12.0.md` records the stable waypoint
   soft-interruption true-resume release closeout.
+  `release/checklists/0.13.0-alpha.1.md` records the first post-`v0.12.0`
+  waypoint true-resume stress and quality evidence slice on the
+  `0.13.0-design` line.
 - `release/evidence/verification_report.md` - local and CI verification
   history.
 - `release/evidence/performance_report.md` - performance procedure and release
