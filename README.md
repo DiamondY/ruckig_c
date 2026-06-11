@@ -92,11 +92,13 @@ Implemented and covered by fixed C/oracle tests plus deterministic random oracle
 
 Release-readiness evidence is tracked under `docs/release/`; see
 `docs/index.md` for the organized documentation map. `v0.12.0` is the current
-stable release. It keeps the `v0.9.0` 172-symbol public C ABI unchanged and
-stabilizes waypoint `ruckig_update` soft-interruption true-resume, background
-publish semantics, and the unified private waypoint optimizer engine reviewed
-during `0.12.0-readiness`. Public `ruckig_calculate`, no-waypoint target
-solving, and tracking remain unchanged by `interrupt_calculation_duration`.
+stable release, and current `main` has moved to
+`0.13.0-design - Unreleased` for future design triage. `v0.12.0` keeps the
+`v0.9.0` 172-symbol public C ABI unchanged and stabilizes waypoint
+`ruckig_update` soft-interruption true-resume, background publish semantics,
+and the unified private waypoint optimizer engine reviewed during
+`0.12.0-readiness`. Public `ruckig_calculate`, no-waypoint target solving, and
+tracking remain unchanged by `interrupt_calculation_duration`.
 `v0.10.0` adopts the current gallery as 30 `1400x900` Matplotlib `Agg` and
 NumPy PNG assets under `docs/assets/visualization/`. The gallery covers local
 C ABI equivalents of original examples `01-10` and `14-16`, plus tracking
@@ -141,13 +143,13 @@ In `v0.11.0`, waypoint `ruckig_update` implements soft-interruption V1 through
 the existing `interrupt_calculation_duration` field and
 `was_calculation_interrupted` output state. Public `ruckig_calculate`,
 no-waypoint target solving, and tracking remain unchanged by that field.
-On current `main`, `0.12.0-alpha.1` extends only waypoint `ruckig_update` with
-private true-resume after an interrupted calculation. Later normal
-`pass_to_input` cycles can continue the waypoint optimizer and publish a
-better complete remaining trajectory; no public ABI, no-waypoint interruption,
-tracking interruption, or runtime clock setter is added. `0.12.0-alpha.2`
-keeps that public boundary and removes the internal split between complete
-waypoint solving and the resumable optimizer engine.
+`v0.12.0` extends only waypoint `ruckig_update` with private true-resume after
+an interrupted calculation. Later normal `pass_to_input` cycles can continue
+the waypoint optimizer and publish a better complete remaining trajectory; no
+public ABI, no-waypoint interruption, tracking interruption, or runtime clock
+setter is added. The stable release keeps that public boundary and removes the
+internal split between complete waypoint solving and the resumable optimizer
+engine.
 
 Current stable release scope intentionally excludes:
 

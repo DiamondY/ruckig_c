@@ -7,7 +7,8 @@ Historical rewrite plans and release evidence are retained for traceability.
 ## Current Maintainer Entry Points
 
 - `current/roadmap.md` - shipped scope, maintenance queues, current stable
-  release scope, the `v0.12.0` stable line, and future design boundaries.
+  release scope, the `v0.12.0` stable line, the
+  `0.13.0-design - Unreleased` line, and future design boundaries.
 - `current/api_compatibility.md` - patch-release API/ABI policy and
   exported-symbol review.
 - `current/api_diagnostics.md` - C API validation and diagnostics behavior.
@@ -97,11 +98,13 @@ Historical rewrite plans and release evidence are retained for traceability.
   soft-interruption and platform-clock evidence release notes, and the stable
   `0.12.0` waypoint soft-interruption true-resume release notes.
 
-`v0.12.0` is the current stable release. It stabilizes waypoint
-`ruckig_update` soft-interruption true-resume and the unified private waypoint
-optimizer engine without expanding the 172-symbol public C ABI. `v0.11.0`
-stabilizes waypoint `ruckig_update` soft-interruption V1 and the internal
-platform clock abstraction without expanding the public C ABI. `v0.10.0`
+`v0.12.0` is the current stable release, and current `main` is
+`0.13.0-design - Unreleased` with no accepted post-`v0.12.0` public API or ABI
+expansion yet. `v0.12.0` stabilizes waypoint `ruckig_update`
+soft-interruption true-resume and the unified private waypoint optimizer
+engine without expanding the 172-symbol public C ABI. `v0.11.0` stabilizes
+waypoint `ruckig_update` soft-interruption V1 and the internal platform clock
+abstraction without expanding the public C ABI. `v0.10.0`
 stabilizes the 30 local
 `1400x900` Visualization v2 PNG assets, manifest, strict local verifier, and
 manual-only CI artifact evidence without making visualization a default push/PR

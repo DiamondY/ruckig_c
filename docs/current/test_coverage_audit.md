@@ -13,6 +13,13 @@ Coverage is tracked in three different senses:
 - Oracle coverage: frozen C++ differential comparisons against
   `original/ruckig-main`.
 
+## 0.13.0-design - Unreleased
+
+Current `main` has moved to `0.13.0-design - Unreleased` after publishing
+`v0.12.0`. No new `0.13.0` coverage baseline or accepted feature scope exists
+yet. The latest stable coverage baseline remains the `v0.12.0` release
+evidence below, and `0.12.1` is reserved for emergency patch fixes only.
+
 ## v0.12.0 Waypoint Soft Interruption True-Resume Release
 
 `v0.12.0` stabilizes the waypoint soft-interruption true-resume and unified

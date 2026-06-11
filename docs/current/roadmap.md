@@ -18,6 +18,28 @@ install, pkg-config, static/DLL, shared install-tree, and CI consumer paths
 remain maintained; vcpkg, Conan, Homebrew, and similar recipes are reopened
 only after a separate user or release demand decision.
 
+## 0.13.0 Design Line - Unreleased
+
+Current `main` has moved to `0.13.0-design - Unreleased` after publishing
+`v0.12.0`.
+
+- `v0.12.0` remains the current stable release.
+- `0.12.1` remains reserved for emergency patch fixes only; it is not the
+  default post-release development route.
+- No `0.13.0` public C API, public ABI, exported-symbol, enum numeric, or
+  result-code numeric change is accepted yet.
+- The next `0.13.0` implementation slice requires a separate design and
+  compatibility review before code changes.
+- Keep the `v0.9.0` 172-symbol public C ABI baseline unless a separate public
+  API decision is accepted.
+- Package-manager recipes and package publication remain frozen unless
+  separately accepted.
+- Cloud/remote runtime, proprietary Pro equivalence claims, hard real-time
+  guarantees, formal global optimality proof, runtime platform clock public
+  hooks, no-waypoint interruption, tracking interruption, formal Python/Rust
+  API publication, and upstream baseline upgrades remain deferred unless
+  separately accepted.
+
 ## 0.12.0 Waypoint Soft Interruption True-Resume Release
 
 Published as `v0.12.0`. This release keeps the `v0.9.0` 172-symbol public C

@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.13.0-design - Unreleased
+
+Current `main` has moved to the `0.13.0-design - Unreleased` line after
+publishing `v0.12.0`.
+
+- `v0.12.0` is the current stable release.
+- `0.12.1` is reserved for emergency patch fixes only.
+- No `0.13.0` public C API, public ABI, exported-symbol, enum numeric, or
+  result-code numeric change is accepted yet.
+- Package-manager recipes, formal Python/Rust publication, cloud/remote
+  calculation, Pro/cloud equivalence claims, hard real-time guarantees,
+  runtime clock public hooks, no-waypoint interruption, tracking interruption,
+  formal global optimality proof, and upstream baseline upgrades remain
+  deferred unless separately accepted.
+
 ## 0.12.0 - 2026-06-11
 
 `0.12.0` is the stable waypoint soft-interruption true-resume release. It keeps
