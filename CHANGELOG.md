@@ -23,6 +23,13 @@ stable release, and `0.13.1` is reserved for emergency patch fixes only.
   present, while public `ruckig_calculate`, no-waypoint `ruckig_update`, and
   tracking remain outside waypoint resume semantics. No public ABI, version,
   tag, GitHub Release, remote CI, or manual `release-random` action is added.
+- `0.14.0-alpha.2` local design evidence adds
+  `docs/design/future_interrupt_surfaces.md`, a quasi-spec for possible future
+  no-waypoint complete-trajectory-boundary interruption and online tracking
+  candidate-boundary interruption. It is design-only, keeps
+  `ruckig_tracking_calculate_sequence` deferred, and does not implement or
+  approve any new runtime behavior, public ABI, version, tag, GitHub Release,
+  remote CI, or manual `release-random` action.
 
 ## 0.13.0 - 2026-06-11
 

@@ -98,7 +98,9 @@ Historical rewrite plans and release evidence are retained for traceability.
   stress and private engine rewrite release closeout.
   `release/checklists/0.14.0-alpha.1.md` records the first
   `0.14.0-design` API-neutral interrupt boundary audit without creating a tag
-  or GitHub Release.
+  or GitHub Release. `release/checklists/0.14.0-alpha.2.md` records the
+  design-only future interrupt surfaces quasi-spec for no-waypoint and online
+  tracking interruption.
 - `release/evidence/verification_report.md` - local and CI verification
   history.
 - `release/evidence/performance_report.md` - performance procedure and release
@@ -113,8 +115,9 @@ Historical rewrite plans and release evidence are retained for traceability.
 
 `v0.13.0` is the current stable release after completed `0.13.0-readiness`,
 release-candidate, tag, and manual release-random evidence. Current `main` is
-`0.14.0-design - Unreleased`; `0.14.0-alpha.1` is the active local
-API-neutral interrupt boundary audit slice. `v0.13.0` stabilizes
+`0.14.0-design - Unreleased`; `0.14.0-alpha.2` is the active local
+design-only future interrupt surfaces slice after the `0.14.0-alpha.1`
+API-neutral interrupt boundary audit. `v0.13.0` stabilizes
 post-`v0.12.0` waypoint
 true-resume stress coverage and the private waypoint optimizer engine rewrite
 without expanding the 172-symbol public C ABI. `v0.12.0` stabilizes waypoint
@@ -148,8 +151,11 @@ gate. The previous v1 gallery provenance remains available through the
 - `design/tracking_optimized_mode.md` - accepted `v0.6.0` design for bounded
   local `Optimized` tracking.
 - `design/interrupt_calculation_duration.md` - current waypoint
-  `ruckig_update` soft-interruption V1 semantics, internal platform clock
-  override hooks, and historical `0.4.x` storage-only behavior.
+  `ruckig_update` soft-interruption true-resume semantics and historical
+  `0.4.x` storage-only behavior.
+- `design/future_interrupt_surfaces.md` - design-only quasi-spec for possible
+  future no-waypoint and online tracking interruption surfaces without public
+  ABI changes.
 - `../bindings/rust/README.md` - experimental Rust alpha wrapper over the
   public C ABI.
 - `design/python_bindings_feasibility.md` - Python binding feasibility, without

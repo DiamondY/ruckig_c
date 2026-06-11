@@ -16,8 +16,10 @@ semantics described below. Current `main` is `0.14.0-design - Unreleased`;
 `0.14.0-alpha.1` adds an API-neutral interrupt boundary audit for these same
 semantics. It proves the field remains limited to waypoint `ruckig_update`
 with intermediate waypoints and does not extend interruption to public
-`ruckig_calculate`, no-waypoint update, or tracking. No new interrupt
-semantics are accepted yet.
+`ruckig_calculate`, no-waypoint update, or tracking. `0.14.0-alpha.2` adds
+`future_interrupt_surfaces.md` as a design-only quasi-spec for possible future
+no-waypoint and online tracking interruption, but it does not implement or
+approve new runtime semantics. No new interrupt semantics are accepted yet.
 
 This is not a hard real-time guarantee. The budget is checked at safe waypoint
 candidate boundaries, so the actual elapsed time can exceed the configured
@@ -80,6 +82,12 @@ The optimizer is still advanced only at complete-candidate boundaries:
   update, public `ruckig_calculate` clears active resume state, and tracking
   keeps its own diagnostics and behavior even when the input interrupt field
   is set.
+- `0.14.0-alpha.2` records future design boundaries only. The recommended
+  future no-waypoint policy is complete-trajectory-boundary interruption
+  without true-resume, and the recommended future tracking policy is
+  online-only candidate-boundary interruption for `ruckig_tracking_update` and
+  `ruckig_tracking_update_with_lookahead`. `ruckig_tracking_calculate_sequence`
+  remains deferred until a separate public diagnostics/API decision.
 
 Ordinary online cycles can continue an active resume before sampling the old
 trajectory when all of the following are true:
