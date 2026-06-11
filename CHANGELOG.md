@@ -16,6 +16,13 @@ stable release, and `0.13.1` is reserved for emergency patch fixes only.
   ordinary push CI, candidate manual release-random, annotated tag, tag push
   CI, tag manual release-random, and GitHub Release publication, is recorded in
   `docs/release/checklists/0.13.0.md`.
+- `0.14.0-alpha.1` local evidence adds the API-neutral
+  `--interrupt-boundary-audit` selector and `ruckig_c_interrupt_boundary_audit`
+  CTest. The audit proves `interrupt_calculation_duration` still only enables
+  waypoint `ruckig_update` soft interruption when intermediate waypoints are
+  present, while public `ruckig_calculate`, no-waypoint `ruckig_update`, and
+  tracking remain outside waypoint resume semantics. No public ABI, version,
+  tag, GitHub Release, remote CI, or manual `release-random` action is added.
 
 ## 0.13.0 - 2026-06-11
 

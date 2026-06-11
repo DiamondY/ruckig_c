@@ -48,8 +48,12 @@ Current `main` is `0.14.0-design - Unreleased` after the published
   tag, tag push CI, tag manual release-random, GitHub Release publication, and
   tag/release evidence push CI. Evidence is recorded in
   `docs/release/checklists/0.13.0.md`.
-- Current priority is post-release design triage on the `0.14.0-design` line,
-  while keeping the published `v0.13.0` ABI and release evidence stable.
+- Current priority is `0.14.0-alpha.1` API-neutral interrupt boundary audit.
+  The slice adds focused local tests and evidence proving
+  `interrupt_calculation_duration` remains limited to waypoint
+  `ruckig_update` with intermediate waypoints. Public `ruckig_calculate`,
+  no-waypoint `ruckig_update`, and tracking remain outside waypoint
+  soft-interruption true-resume semantics.
 - Keep the `v0.9.0` 172-symbol public C ABI baseline unless a separate public
   API decision is accepted.
 - Package-manager recipes and package publication remain frozen unless

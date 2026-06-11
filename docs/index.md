@@ -96,6 +96,9 @@ Historical rewrite plans and release evidence are retained for traceability.
   true-resume slices without creating a tag or GitHub Release.
   `release/checklists/0.13.0.md` records the stable waypoint true-resume
   stress and private engine rewrite release closeout.
+  `release/checklists/0.14.0-alpha.1.md` records the first
+  `0.14.0-design` API-neutral interrupt boundary audit without creating a tag
+  or GitHub Release.
 - `release/evidence/verification_report.md` - local and CI verification
   history.
 - `release/evidence/performance_report.md` - performance procedure and release
@@ -110,7 +113,9 @@ Historical rewrite plans and release evidence are retained for traceability.
 
 `v0.13.0` is the current stable release after completed `0.13.0-readiness`,
 release-candidate, tag, and manual release-random evidence. Current `main` is
-`0.14.0-design - Unreleased`. `v0.13.0` stabilizes post-`v0.12.0` waypoint
+`0.14.0-design - Unreleased`; `0.14.0-alpha.1` is the active local
+API-neutral interrupt boundary audit slice. `v0.13.0` stabilizes
+post-`v0.12.0` waypoint
 true-resume stress coverage and the private waypoint optimizer engine rewrite
 without expanding the 172-symbol public C ABI. `v0.12.0` stabilizes waypoint
 `ruckig_update` soft-interruption true-resume and the unified private waypoint

@@ -13,7 +13,11 @@ evidence. `0.13.0-readiness` reruns the full local stable-review audit for
 that post-release evidence line, and the published `v0.13.0` stable release
 adopts that evidence without changing the public API, public ABI, or runtime
 semantics described below. Current `main` is `0.14.0-design - Unreleased`;
-no new interrupt semantics are accepted yet.
+`0.14.0-alpha.1` adds an API-neutral interrupt boundary audit for these same
+semantics. It proves the field remains limited to waypoint `ruckig_update`
+with intermediate waypoints and does not extend interruption to public
+`ruckig_calculate`, no-waypoint update, or tracking. No new interrupt
+semantics are accepted yet.
 
 This is not a hard real-time guarantee. The budget is checked at safe waypoint
 candidate boundaries, so the actual elapsed time can exceed the configured
@@ -70,6 +74,12 @@ The optimizer is still advanced only at complete-candidate boundaries:
   audit, allocation, duration-enabled, coverage, ABI/export, oracle,
   performance, wrapper, and visualization gates without changing the semantics
   above.
+- `0.14.0-alpha.1` adds `--interrupt-boundary-audit` and
+  `ruckig_c_interrupt_boundary_audit` to check the API-neutral boundary after
+  the stable release: active waypoint resume does not leak into no-waypoint
+  update, public `ruckig_calculate` clears active resume state, and tracking
+  keeps its own diagnostics and behavior even when the input interrupt field
+  is set.
 
 Ordinary online cycles can continue an active resume before sampling the old
 trajectory when all of the following are true:

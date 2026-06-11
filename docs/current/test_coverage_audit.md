@@ -22,6 +22,31 @@ engine rewrite quality-baseline hardening. `v0.13.0` keeps the public C ABI
 unchanged and records stable release-candidate coverage under the `0.13.0`
 label.
 
+## 0.14.0-alpha.1 Interrupt Boundary API-Neutral Audit
+
+`0.14.0-alpha.1` adds a focused local audit for the existing
+`interrupt_calculation_duration` boundary. It does not change source
+implementation or public ABI. The audit proves waypoint `ruckig_update` with
+intermediate waypoints remains the only path that can trigger waypoint
+soft-interruption true-resume, while public `ruckig_calculate`, no-waypoint
+`ruckig_update`, and tracking stay outside that behavior.
+
+| Area | Evidence |
+| --- | --- |
+| Focused selector | Adds `--interrupt-boundary-audit` and CTest `ruckig_c_interrupt_boundary_audit`. |
+| Waypoint positive path | Zero-budget waypoint `ruckig_update` publishes an initial complete candidate, marks interruption, and leaves private resume active. |
+| No-waypoint isolation | No-waypoint update with interrupt set, changed, and cleared reports `was_calculation_interrupted=false` and clears private waypoint resume state. |
+| Public calculate isolation | Waypoint `ruckig_calculate` ignores the interrupt budget, completes the solve, and leaves no active private resume state. |
+| Tracking isolation | `ruckig_tracking_update`, `ruckig_tracking_update_with_lookahead`, and `ruckig_tracking_calculate_sequence` keep tracking diagnostics and do not use waypoint interruption state. |
+| Allocation guard | Covers initial interrupted waypoint update, background interrupted-without-publish resume, and transition to no-waypoint update without online allocation. |
+| Local gates | Main build passed; focused selector group passed 7/7; default CTest passed 49/49; duration-enabled selector group passed 3/3. |
+| ABI/export | Public header symbol count remains `172`; public additions `0`; public removals `0`; unapproved exported symbols `0`. |
+| Boundary | Public header, ABI docs, CI workflow, `original/ruckig-main`, and visualization assets remain unchanged; `CMakeLists.txt` only adds the focused CTest entry. |
+
+The local evidence checklist is
+`docs/release/checklists/0.14.0-alpha.1.md`. This slice ends as one local
+commit only; remote CI evidence is deferred to a separate step.
+
 ## v0.13.0 Release-Candidate Coverage
 
 `v0.13.0` release-candidate local gates rerun the readiness gate after the
