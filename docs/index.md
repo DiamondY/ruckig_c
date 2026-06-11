@@ -7,8 +7,8 @@ Historical rewrite plans and release evidence are retained for traceability.
 ## Current Maintainer Entry Points
 
 - `current/roadmap.md` - shipped scope, maintenance queues, current stable
-  release scope, the `v0.12.0` stable line, the
-  `0.13.0-design - Unreleased` line, and future design boundaries.
+  release scope, the `v0.13.0` stable closeout line, and future design
+  boundaries.
 - `current/api_compatibility.md` - patch-release API/ABI policy and
   exported-symbol review.
 - `current/api_diagnostics.md` - C API validation and diagnostics behavior.
@@ -94,6 +94,8 @@ Historical rewrite plans and release evidence are retained for traceability.
   baseline evidence slice. `release/checklists/0.13.0-readiness.md` records
   the full local stable-review audit for those post-`v0.12.0` waypoint
   true-resume slices without creating a tag or GitHub Release.
+  `release/checklists/0.13.0.md` records the stable waypoint true-resume
+  stress and private engine rewrite release closeout.
 - `release/evidence/verification_report.md` - local and CI verification
   history.
 - `release/evidence/performance_report.md` - performance procedure and release
@@ -102,15 +104,16 @@ Historical rewrite plans and release evidence are retained for traceability.
   `0.8.0` visualization/gallery evidence release notes, the stable `0.9.0`
   tracking quality/stability evidence release notes, the stable `0.10.0`
   Visualization v2 evidence release notes, the stable `0.11.0` waypoint
-  soft-interruption and platform-clock evidence release notes, and the stable
-  `0.12.0` waypoint soft-interruption true-resume release notes.
+  soft-interruption and platform-clock evidence release notes, the stable
+  `0.12.0` waypoint soft-interruption true-resume release notes, and the
+  stable `0.13.0` waypoint true-resume stress/private-engine release notes.
 
-`v0.12.0` is the current stable release, and current `main` is
-`0.13.0-design - Unreleased` with `0.13.0-readiness` local evidence being
-recorded and no accepted post-`v0.12.0` public API or ABI expansion yet.
-`v0.12.0` stabilizes waypoint `ruckig_update` soft-interruption true-resume
-and the unified private waypoint optimizer engine without expanding the
-172-symbol public C ABI. `v0.11.0` stabilizes
+`v0.13.0` is in stable closeout as the next release candidate after completed
+`0.13.0-readiness` evidence. It stabilizes post-`v0.12.0` waypoint
+true-resume stress coverage and the private waypoint optimizer engine rewrite
+without expanding the 172-symbol public C ABI. `v0.12.0` stabilizes waypoint
+`ruckig_update` soft-interruption true-resume and the unified private waypoint
+optimizer engine. `v0.11.0` stabilizes
 waypoint `ruckig_update` soft-interruption V1 and the internal platform clock
 abstraction without expanding the public C ABI. `v0.10.0`
 stabilizes the 30 local

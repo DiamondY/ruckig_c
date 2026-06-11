@@ -13,15 +13,43 @@ Coverage is tracked in three different senses:
 - Oracle coverage: frozen C++ differential comparisons against
   `original/ruckig-main`.
 
-## 0.13.0-design - Unreleased
+## 0.13.0 Stable Closeout
 
-Current `main` has moved to `0.13.0-design - Unreleased` after publishing
-`v0.12.0`. The accepted post-release waypoint true-resume evidence slices are
-`0.13.0-alpha.1` stress coverage and `0.13.0-alpha.2` private engine rewrite
-quality-baseline hardening. `0.13.0-readiness` now records the full local
-stable-review audit for those slices. The latest stable coverage baseline
-remains the `v0.12.0` release evidence below, and `0.12.1` is reserved for
-emergency patch fixes only.
+Current `main` is in `v0.13.0` stable closeout after completed
+`0.13.0-readiness` evidence. The accepted post-release waypoint true-resume
+evidence slices are `0.13.0-alpha.1` stress coverage and `0.13.0-alpha.2`
+private engine rewrite quality-baseline hardening. The release candidate keeps
+the public C ABI unchanged and records release-candidate coverage under the
+`0.13.0` label.
+
+## v0.13.0 Release-Candidate Coverage
+
+`v0.13.0` release-candidate local gates rerun the readiness gate after the
+version bump and ABI artifact path update.
+
+Release-candidate gate evidence:
+
+| Area | Evidence |
+| --- | --- |
+| Focused waypoint gates | `ruckig_c_waypoint_optimizer`, per-section constraints, waypoint quality, resume stress, resume quality audit, allocation audit, platform clock custom, and solver branch coverage all passed. |
+| Routine gates | Default and shared CTest each passed 48/48; duration-enabled CTest passed 48/48. |
+| Oracle gates | Fixed oracle 82 plus waypoint section oracle 4 passed; random 100k seeds 1, 2, 41 and per-DoF 100k seed 1 passed; local 1M release-random seed 1 passed. |
+| Performance and ABI | No-waypoint benchmark ratio `1.20798` stayed below the `1.5` threshold; waypoint benchmark was recorded as C-only trend; public exported-symbol diff stayed clean at 172 public symbols and 0 unapproved exports. |
+| Wrappers and visualization | Visualization verifier and strict regeneration passed with the shared DLL; Python prototype passed 21 tests with the shared DLL; Rust wrapper tests passed 13/13 and examples built. |
+| Boundary | Public header diff is limited to version macros/string; workflow diff is limited to ABI artifact path `0.13.0`; ABI docs, `original/ruckig-main`, and visualization assets remain unchanged. |
+
+Local `0.13.0` release-candidate coverage summary after filtering out
+generated, test, example, and original-reference code:
+
+| Metric | Covered | Total | Coverage |
+| --- | ---: | ---: | ---: |
+| Regions | 6566 | 7432 | 88.35% |
+| Functions | 386 | 418 | 92.34% |
+| Lines | 6792 | 7702 | 88.18% |
+| Branches | 3013 | 4299 | 70.09% |
+
+Artifacts are under `out/coverage/0.13.0/`, and the command log is recorded in
+`docs/release/checklists/0.13.0.md`.
 
 ## 0.13.0-readiness Local Stable-Review Audit
 

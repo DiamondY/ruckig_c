@@ -1,14 +1,36 @@
 # Changelog
 
-## 0.13.0-design - Unreleased
+## 0.13.0 - 2026-06-11
 
-Current `main` has moved to the `0.13.0-design - Unreleased` line after
-publishing `v0.12.0`.
+`0.13.0` is the stable waypoint true-resume stress and private engine rewrite
+release candidate. It keeps the `v0.12.0` 172-symbol public C ABI unchanged
+while stabilizing the post-`v0.12.0` waypoint `ruckig_update`
+soft-interruption stress, quality, and private engine hardening reviewed
+during `0.13.0-readiness`.
 
-- `v0.12.0` is the current stable release.
-- `0.12.1` is reserved for emergency patch fixes only.
-- No `0.13.0` public C API, public ABI, exported-symbol, enum numeric, or
-  result-code numeric change is accepted yet.
+Release focus:
+
+- Waypoint `ruckig_update` soft-interruption true-resume stress coverage for
+  multi-DoF, multi-waypoint, per-section, budget-matrix, fresh full-solve
+  reference, long online-loop, and allocation-guarded behavior.
+- Private waypoint optimizer/resume state rewritten into a single internal
+  waypoint engine.
+- Transaction-style background publishing that writes a scratch trajectory
+  first and only replaces the incumbent with a complete valid improvement.
+- A 128-case deterministic quality baseline proving complete waypoint solve
+  durations are not regressed against the prior `9d322ad` private engine
+  behavior within tolerance.
+- No public C ABI expansion, no new exported symbols, and no changes to enum
+  numeric values or result-code numeric values.
+- No change to public `ruckig_calculate`, no-waypoint target solving, or
+  tracking behavior when the interrupt field is set.
+
+Release boundary:
+
+- `v0.13.0` is being closed out as the next stable release.
+- Public C ABI expansion is not part of `0.13.0`.
+- `0.13.1` is reserved for emergency patch fixes only after publication.
+- `0.12.1` remains reserved for emergency `v0.12.0` patch fixes only.
 - Package-manager recipes, formal Python/Rust publication, cloud/remote
   calculation, Pro/cloud equivalence claims, hard real-time guarantees,
   runtime clock public hooks, no-waypoint interruption, tracking interruption,
@@ -30,6 +52,15 @@ publishing `v0.12.0`.
 - Keeps readiness evidence-only: no version bump, tag, GitHub Release,
   manual release-random workflow, public C ABI change, workflow change,
   package-manager work, or `original/ruckig-main` change.
+
+`v0.13.0` stable closeout:
+
+- Moves ABI artifact output paths to `artifacts/abi/0.13.0`.
+- Keeps the public C ABI unchanged at 172 symbols, with public additions `0`,
+  public removals `0`, and unapproved exported symbols `0`.
+- Records full local release gates, ordinary CI, manual release-random
+  workflow evidence, annotated tag publication, and GitHub Release
+  publication in `docs/release/checklists/0.13.0.md`.
 
 `0.13.0-alpha.2` local evidence slice:
 

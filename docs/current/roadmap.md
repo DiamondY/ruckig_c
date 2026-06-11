@@ -18,16 +18,19 @@ install, pkg-config, static/DLL, shared install-tree, and CI consumer paths
 remain maintained; vcpkg, Conan, Homebrew, and similar recipes are reopened
 only after a separate user or release demand decision.
 
-## 0.13.0 Design Line - Unreleased
+## 0.13.0 Stable Closeout
 
-Current `main` has moved to `0.13.0-design - Unreleased` after publishing
-`v0.12.0`.
+Current `main` is in `v0.13.0` stable closeout after completed
+`0.13.0-readiness` evidence.
 
-- `v0.12.0` remains the current stable release.
-- `0.12.1` remains reserved for emergency patch fixes only; it is not the
-  default post-release development route.
+- `v0.13.0` is the active stable release candidate.
+- `v0.12.0` remains the latest published stable release until the `v0.13.0`
+  tag and GitHub Release are published.
+- `0.12.1` remains reserved for emergency `v0.12.0` patch fixes only.
+- `0.13.1` is reserved for emergency `v0.13.0` patch fixes only after
+  publication.
 - No `0.13.0` public C API, public ABI, exported-symbol, enum numeric, or
-  result-code numeric change is accepted yet.
+  result-code numeric change is part of this closeout.
 - `0.13.0-alpha.1` waypoint true-resume stress and quality evidence is
   complete. It added focused multi-DoF, multi-waypoint, per-section,
   budget-matrix, fresh-solve quality-reference, long online-loop, and
@@ -41,12 +44,12 @@ Current `main` has moved to `0.13.0-design - Unreleased` after publishing
   complete-solve duration regression against the `9d322ad` behavior. Its
   ordinary remote push CI evidence succeeded on commit `6354c41`, run
   `27330887817`.
-- First priority is now `0.13.0-readiness`: rerun the full local
-  stable-review audit for the alpha.1 stress evidence and alpha.2 private
-  engine rewrite before any stable release candidate work.
-- `0.13.0-readiness` is evidence-only. It does not create a tag, publish a
-  GitHub Release, bump the version, push remote CI evidence, or trigger manual
-  `release-random`.
+- `0.13.0-readiness` passed local readiness gates and ordinary remote push CI
+  before the version bump.
+- Current priority is the `v0.13.0` release-candidate gate, ordinary push CI,
+  manual release-random workflow, final evidence commit, annotated tag, tag
+  CI, tag manual release-random workflow, GitHub Release publication, and
+  post-release transition to `0.14.0-design - Unreleased`.
 - Keep the `v0.9.0` 172-symbol public C ABI baseline unless a separate public
   API decision is accepted.
 - Package-manager recipes and package publication remain frozen unless

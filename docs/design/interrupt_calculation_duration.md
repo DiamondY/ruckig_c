@@ -10,8 +10,9 @@ After `v0.12.0`, `0.13.0-alpha.1` adds stress and quality evidence for the
 same V2 behavior. `0.13.0-alpha.2` then rewrites the private optimizer/resume
 state into an internal waypoint engine and adds deterministic quality-baseline
 evidence. `0.13.0-readiness` reruns the full local stable-review audit for
-that post-release evidence line. Neither alpha nor readiness changes the
-public API, public ABI, or runtime semantics described below.
+that post-release evidence line, and `v0.13.0` stable closeout adopts that
+evidence without changing the public API, public ABI, or runtime semantics
+described below.
 
 This is not a hard real-time guarantee. The budget is checked at safe waypoint
 candidate boundaries, so the actual elapsed time can exceed the configured
@@ -63,10 +64,10 @@ The optimizer is still advanced only at complete-candidate boundaries:
   Post-`v0.12.0` alpha.2 evidence uses a 128-case checked-in quality baseline
   to prevent complete-solve duration regressions if the private engine changes
   its internal candidate ordering or quality strategy.
-- `0.13.0-readiness` validates the same V2 behavior through focused resume
-  stress, quality audit, allocation, duration-enabled, coverage, ABI/export,
-  oracle, performance, wrapper, and visualization gates without changing the
-  semantics above.
+- `0.13.0-readiness` and `v0.13.0` release-candidate gates validate the same
+  V2 behavior through focused resume stress, quality audit, allocation,
+  duration-enabled, coverage, ABI/export, oracle, performance, wrapper, and
+  visualization gates without changing the semantics above.
 
 Ordinary online cycles can continue an active resume before sampling the old
 trajectory when all of the following are true:
