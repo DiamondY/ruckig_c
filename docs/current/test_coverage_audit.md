@@ -13,14 +13,14 @@ Coverage is tracked in three different senses:
 - Oracle coverage: frozen C++ differential comparisons against
   `original/ruckig-main`.
 
-## 0.13.0 Stable Closeout
+## 0.14.0 Design Baseline
 
-Current `main` is in `v0.13.0` stable closeout after completed
-`0.13.0-readiness` evidence. The accepted post-release waypoint true-resume
-evidence slices are `0.13.0-alpha.1` stress coverage and `0.13.0-alpha.2`
-private engine rewrite quality-baseline hardening. The release candidate keeps
-the public C ABI unchanged and records release-candidate coverage under the
-`0.13.0` label.
+Current `main` is `0.14.0-design - Unreleased` after the published `v0.13.0`
+stable release. The accepted post-`v0.12.0` waypoint true-resume evidence
+slices are `0.13.0-alpha.1` stress coverage and `0.13.0-alpha.2` private
+engine rewrite quality-baseline hardening. `v0.13.0` keeps the public C ABI
+unchanged and records stable release-candidate coverage under the `0.13.0`
+label.
 
 ## v0.13.0 Release-Candidate Coverage
 

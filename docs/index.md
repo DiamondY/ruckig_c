@@ -7,7 +7,7 @@ Historical rewrite plans and release evidence are retained for traceability.
 ## Current Maintainer Entry Points
 
 - `current/roadmap.md` - shipped scope, maintenance queues, current stable
-  release scope, the `v0.13.0` stable closeout line, and future design
+  release scope, the post-`v0.13.0` `0.14.0-design` line, and future design
   boundaries.
 - `current/api_compatibility.md` - patch-release API/ABI policy and
   exported-symbol review.
@@ -108,8 +108,9 @@ Historical rewrite plans and release evidence are retained for traceability.
   `0.12.0` waypoint soft-interruption true-resume release notes, and the
   stable `0.13.0` waypoint true-resume stress/private-engine release notes.
 
-`v0.13.0` is in stable closeout as the next release candidate after completed
-`0.13.0-readiness` evidence. It stabilizes post-`v0.12.0` waypoint
+`v0.13.0` is the current stable release after completed `0.13.0-readiness`,
+release-candidate, tag, and manual release-random evidence. Current `main` is
+`0.14.0-design - Unreleased`. `v0.13.0` stabilizes post-`v0.12.0` waypoint
 true-resume stress coverage and the private waypoint optimizer engine rewrite
 without expanding the 172-symbol public C ABI. `v0.12.0` stabilizes waypoint
 `ruckig_update` soft-interruption true-resume and the unified private waypoint

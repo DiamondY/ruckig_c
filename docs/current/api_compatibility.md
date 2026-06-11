@@ -38,22 +38,24 @@ Before each patch release:
 The initial `0.2.x` process records exported symbols as release evidence; it
 does not require a strict automated ABI diff yet.
 
-## v0.13.0 Stable Closeout ABI Position
+## v0.13.0 Stable ABI Baseline
 
-Current `main` is in `v0.13.0` stable closeout after completed
-`0.13.0-readiness` evidence. The release candidate changes only version
-metadata and ABI artifact output paths:
+`v0.13.0` is the current stable release after completed `0.13.0-readiness`,
+release-candidate, tag, and GitHub Release evidence. Current `main` is
+`0.14.0-design - Unreleased`; no `0.14.0` public ABI change is accepted yet.
+The `v0.13.0` release changed only version metadata and ABI artifact output
+paths:
 
 - `CMakeLists.txt` project version is `0.13.0`.
 - `RUCKIG_C_VERSION_*` macros and string are `0.13.0`.
 - ABI artifact output paths use `artifacts/abi/0.13.0`.
 
 No `0.13.0` public C API, public ABI, exported-symbol, enum numeric, or
-result-code numeric change is part of this closeout. The stable ABI baseline
-remains the 172-symbol public C ABI from `v0.12.0`; after publication,
-`0.13.1` is reserved for emergency patch fixes only.
+result-code numeric change is part of the stable release. The stable ABI
+baseline remains the 172-symbol public C ABI from `v0.12.0`; `0.13.1` is
+reserved for emergency patch fixes only.
 
-Compatibility rules for the `v0.13.0` release candidate:
+Compatibility rules for the `v0.13.0` stable release:
 
 - Public C symbol count remains `172`.
 - Public additions in `v0.13.0`: `0`.

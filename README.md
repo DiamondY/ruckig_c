@@ -85,7 +85,7 @@ Implemented and covered by fixed C/oracle tests plus deterministic random oracle
   CTest, oracle, release-random, performance, ABI/export, platform-clock,
   visualization, wrapper, coverage, and boundary gates for the alpha.1/alpha.2
   waypoint true-resume evidence without changing public C ABI.
-- `v0.13.0` stable closeout candidate, adopting the post-`v0.12.0`
+- `v0.13.0` stable release, adopting the post-`v0.12.0`
   waypoint true-resume stress coverage and private engine rewrite while
   keeping the 172-symbol public C ABI unchanged.
 - `0.10.0-alpha` visualization v2 local gallery evidence, replacing the
@@ -105,13 +105,14 @@ Implemented and covered by fixed C/oracle tests plus deterministic random oracle
   tracking Fast-mode scenarios, and Optimized tracking scenarios.
 
 Release-readiness evidence is tracked under `docs/release/`; see
-`docs/index.md` for the organized documentation map. `v0.13.0` is in stable
-closeout as the next release candidate after completed `0.13.0-readiness`
-evidence for post-`v0.12.0` waypoint true-resume stress and private engine
-rewrite slices. `v0.13.0` keeps the `v0.9.0` 172-symbol public C ABI
-unchanged while stabilizing the waypoint true-resume stress coverage,
+`docs/index.md` for the organized documentation map. `v0.13.0` is the current
+stable release after completed `0.13.0-readiness`, release-candidate, tag, and
+manual release-random gates for post-`v0.12.0` waypoint true-resume stress and
+private engine rewrite slices. `v0.13.0` keeps the `v0.9.0` 172-symbol public
+C ABI unchanged while stabilizing the waypoint true-resume stress coverage,
 transaction-style background publish boundary, and private waypoint optimizer
-engine rewrite. Public
+engine rewrite. Current `main` is `0.14.0-design - Unreleased` for post-release
+planning. Public
 `ruckig_calculate`, no-waypoint target solving, and tracking remain unchanged
 by `interrupt_calculation_duration`.
 `v0.10.0` adopts the current gallery as 30 `1400x900` Matplotlib `Agg` and
@@ -142,8 +143,8 @@ Optimized tracking quality thresholds while keeping the public C ABI unchanged.
 as regression evidence before readiness. `0.9.0-readiness` records full local
 readiness evidence for the tracking quality/stability line, and `v0.9.0`
 stabilizes that evidence without changing the 172-symbol public C ABI.
-`0.9.1`, `0.10.1`, `0.11.1`, `0.12.1`, and post-release `0.13.1` are
-reserved for emergency patch work only.
+`0.9.1`, `0.10.1`, `0.11.1`, `0.12.1`, and `0.13.1` are reserved for
+emergency patch work only.
 `v0.4.0` added waypoint-aware C ABI entry points, per-section constraints,
 global position bounds, and a local coupled waypoint optimizer; `v0.4.1`
 deepened waypoint optimizer evidence; `v0.4.2` keeps that public C surface

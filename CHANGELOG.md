@@ -1,12 +1,29 @@
 # Changelog
 
+## 0.14.0-design - Unreleased
+
+Post-`v0.13.0` mainline planning is open on `main`. `v0.13.0` is the current
+stable release, and `0.13.1` is reserved for emergency patch fixes only.
+
+- No `0.14.0` public C API, public ABI, exported-symbol, enum numeric, or
+  result-code numeric change is accepted yet.
+- Package-manager recipes, formal Python/Rust publication, cloud/remote
+  calculation, Pro/cloud equivalence claims, hard real-time guarantees,
+  runtime clock public hooks, no-waypoint interruption, tracking interruption,
+  public resume diagnostics, formal global optimality proof, and upstream
+  baseline upgrades remain deferred unless separately accepted.
+- `v0.13.0` release evidence, including release-candidate local gates,
+  ordinary push CI, candidate manual release-random, annotated tag, tag push
+  CI, tag manual release-random, and GitHub Release publication, is recorded in
+  `docs/release/checklists/0.13.0.md`.
+
 ## 0.13.0 - 2026-06-11
 
 `0.13.0` is the stable waypoint true-resume stress and private engine rewrite
-release candidate. It keeps the `v0.12.0` 172-symbol public C ABI unchanged
-while stabilizing the post-`v0.12.0` waypoint `ruckig_update`
-soft-interruption stress, quality, and private engine hardening reviewed
-during `0.13.0-readiness`.
+release. It keeps the `v0.12.0` 172-symbol public C ABI unchanged while
+stabilizing the post-`v0.12.0` waypoint `ruckig_update` soft-interruption
+stress, quality, and private engine hardening reviewed during
+`0.13.0-readiness`.
 
 Release focus:
 
@@ -27,9 +44,9 @@ Release focus:
 
 Release boundary:
 
-- `v0.13.0` is being closed out as the next stable release.
+- `v0.13.0` is the current stable release.
 - Public C ABI expansion is not part of `0.13.0`.
-- `0.13.1` is reserved for emergency patch fixes only after publication.
+- `0.13.1` is reserved for emergency patch fixes only.
 - `0.12.1` remains reserved for emergency `v0.12.0` patch fixes only.
 - Package-manager recipes, formal Python/Rust publication, cloud/remote
   calculation, Pro/cloud equivalence claims, hard real-time guarantees,
@@ -41,7 +58,7 @@ Release boundary:
 
 - Records full local readiness evidence for deciding whether the post-`v0.12.0`
   waypoint true-resume stress and private engine rewrite evidence is ready for
-  a later `v0.13.0` stable closeout.
+  the completed `v0.13.0` stable closeout.
 - Includes `0.13.0-alpha.1` remote push CI success on commit `9d322ad` and
   `0.13.0-alpha.2` remote push CI success on commit `6354c41`, run
   `27330887817`.

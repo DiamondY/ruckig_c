@@ -18,19 +18,16 @@ install, pkg-config, static/DLL, shared install-tree, and CI consumer paths
 remain maintained; vcpkg, Conan, Homebrew, and similar recipes are reopened
 only after a separate user or release demand decision.
 
-## 0.13.0 Stable Closeout
+## 0.14.0 Design Line
 
-Current `main` is in `v0.13.0` stable closeout after completed
-`0.13.0-readiness` evidence.
+Current `main` is `0.14.0-design - Unreleased` after the published
+`v0.13.0` stable release.
 
-- `v0.13.0` is the active stable release candidate.
-- `v0.12.0` remains the latest published stable release until the `v0.13.0`
-  tag and GitHub Release are published.
+- `v0.13.0` is the current stable release.
+- `0.13.1` is reserved for emergency `v0.13.0` patch fixes only.
 - `0.12.1` remains reserved for emergency `v0.12.0` patch fixes only.
-- `0.13.1` is reserved for emergency `v0.13.0` patch fixes only after
-  publication.
-- No `0.13.0` public C API, public ABI, exported-symbol, enum numeric, or
-  result-code numeric change is part of this closeout.
+- No `0.14.0` public C API, public ABI, exported-symbol, enum numeric, or
+  result-code numeric change is accepted yet.
 - `0.13.0-alpha.1` waypoint true-resume stress and quality evidence is
   complete. It added focused multi-DoF, multi-waypoint, per-section,
   budget-matrix, fresh-solve quality-reference, long online-loop, and
@@ -46,10 +43,13 @@ Current `main` is in `v0.13.0` stable closeout after completed
   `27330887817`.
 - `0.13.0-readiness` passed local readiness gates and ordinary remote push CI
   before the version bump.
-- Current priority is the `v0.13.0` release-candidate gate, ordinary push CI,
-  manual release-random workflow, final evidence commit, annotated tag, tag
-  CI, tag manual release-random workflow, GitHub Release publication, and
-  post-release transition to `0.14.0-design - Unreleased`.
+- `v0.13.0` stable closeout completed release-candidate local gates, ordinary
+  push CI, candidate manual release-random, final evidence commit, annotated
+  tag, tag push CI, tag manual release-random, GitHub Release publication, and
+  tag/release evidence push CI. Evidence is recorded in
+  `docs/release/checklists/0.13.0.md`.
+- Current priority is post-release design triage on the `0.14.0-design` line,
+  while keeping the published `v0.13.0` ABI and release evidence stable.
 - Keep the `v0.9.0` 172-symbol public C ABI baseline unless a separate public
   API decision is accepted.
 - Package-manager recipes and package publication remain frozen unless
@@ -86,7 +86,8 @@ true-resume and the unified private waypoint optimizer engine reviewed during
   clock compile probes, ordinary CI, manual release-random workflows on the
   release candidate and tag, annotated tag publication, and GitHub Release
   publication.
-- Keep `v0.12.0` as the current stable release.
+- Keep `v0.12.0` as the published stable baseline for the `0.12.x`
+  emergency patch line.
 - Keep the `v0.9.0` 172-symbol public C ABI baseline unless a separate public
   API decision is accepted.
 - Keep any further soft-interruption expansion behind a dedicated
@@ -125,7 +126,8 @@ and the internal platform clock abstraction reviewed during
 - Keep any further soft interruption expansion behind a dedicated
   compatibility review; do not change public C ABI, enum numeric values, or
   result-code numeric values by default.
-- Keep `v0.11.0` as the current stable release.
+- Keep `v0.11.0` as the published stable baseline for the `0.11.x`
+  emergency patch line.
 - Keep the `v0.9.0` 172-symbol public C ABI baseline unless a separate public
   API decision is accepted.
 - `0.11.1` remains reserved for emergency patch fixes only.
@@ -169,7 +171,8 @@ during `0.10.0-readiness`.
   GitHub Release publication.
 - The alpha replaces the current `main` gallery assets; the previous v1
   provenance remains available through the `v0.9.0` tag.
-- Keep `v0.10.0` as the current stable release.
+- Keep `v0.10.0` as the published stable baseline for the `0.10.x`
+  emergency patch line.
 - Keep the `v0.9.0` 172-symbol public C ABI baseline unless a separate public
   API decision is accepted.
 - Do not promote plotting or verifier work into a default release/CI gate
