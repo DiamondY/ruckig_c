@@ -7,11 +7,12 @@ Current `main` is open for `0.12.0-design` work after the published
 release. The first accepted evidence slice, `0.12.0-alpha.1`, has local and
 ordinary remote push CI evidence. The second hardening slice,
 `0.12.0-alpha.2`, also has local and ordinary remote push CI evidence.
+`0.12.0-readiness` local evidence is clean for stable release closeout.
 
 First priority:
 
-- Prepare the `0.12.0-readiness` local evidence audit before any stable
-  `v0.12.0` closeout decision.
+- Complete `v0.12.0` stable release closeout from the clean readiness
+  baseline.
 - Keep the expansion scoped to intermediate-waypoint `ruckig_update` only.
   Public `ruckig_calculate`, no-waypoint target solving, and tracking remain
   unchanged by the interrupt field.
@@ -40,6 +41,17 @@ First priority:
   (`https://github.com/DiamondY/ruckig_c/actions/runs/27291284191`) with
   conclusion `success`; no `v0.12.0*` tag, GitHub Release, version bump, or
   manual release-random workflow was part of this slice.
+
+`0.12.0-readiness` local evidence audit:
+
+- Records full local stable-review readiness evidence for waypoint
+  soft-interruption true-resume and the unified waypoint optimizer engine.
+- Keeps readiness evidence-only: no version bump, tag, GitHub Release, manual
+  release-random workflow, public C API, public symbol, workflow, package, or
+  `original/ruckig-main` changes.
+- Passes local static/shared/duration CTest, oracle 100k seeds, local 1M
+  release-random, performance threshold, ABI/export, platform-clock probes,
+  visualization verifier, wrapper smoke, coverage, and boundary gates.
 
 `0.12.0-alpha.1` local evidence slice:
 

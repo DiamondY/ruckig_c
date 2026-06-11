@@ -76,7 +76,8 @@ Implemented and covered by fixed C/oracle tests plus deterministic random oracle
   local and ordinary remote push CI evidence. `0.12.0-alpha.2` unifies the
   complete waypoint solver and soft-interruption resume on the private
   step-driven optimizer engine and has local plus ordinary remote push CI
-  evidence without public C ABI expansion.
+  evidence without public C ABI expansion. `0.12.0-readiness` local evidence
+  is clean for stable release closeout.
 - `0.10.0-alpha` visualization v2 local gallery evidence, replacing the
   current `main` gallery with 30 project-owned `1400x900` PNGs and a strict
   local verifier while keeping the `v0.9.0` stable C ABI unchanged.
@@ -104,7 +105,8 @@ publish semantics and has local plus ordinary remote push CI evidence.
 `0.12.0-alpha.2` hardens that implementation by sharing the same private
 step-driven optimizer between complete waypoint solves and soft-interruption
 resume, with local plus ordinary remote push CI evidence while keeping public
-C ABI expansion out of the line.
+C ABI expansion out of the line. `0.12.0-readiness` records the full local
+stable-review audit for this line before the stable release closeout.
 `v0.10.0` adopts the current gallery as 30 `1400x900` Matplotlib `Agg` and
 NumPy PNG assets under `docs/assets/visualization/`. The gallery covers local
 C ABI equivalents of original examples `01-10` and `14-16`, plus tracking
