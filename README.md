@@ -71,13 +71,9 @@ Implemented and covered by fixed C/oracle tests plus deterministic random oracle
   stabilization, adopting waypoint `ruckig_update` soft-interruption V1 and
   the internal platform clock abstraction while keeping the `v0.9.0` stable C
   ABI unchanged.
-- `0.12.0-design - Unreleased` is the current `main` line after `v0.11.0`;
-  `0.12.0-alpha.1` waypoint `ruckig_update` soft-interruption true resume has
-  local and ordinary remote push CI evidence. `0.12.0-alpha.2` unifies the
-  complete waypoint solver and soft-interruption resume on the private
-  step-driven optimizer engine and has local plus ordinary remote push CI
-  evidence without public C ABI expansion. `0.12.0-readiness` local evidence
-  is clean for stable release closeout.
+- `v0.12.0` waypoint soft-interruption true-resume stabilization, adopting
+  background resume/publish semantics and the unified private waypoint
+  optimizer engine while keeping the `v0.9.0` stable C ABI unchanged.
 - `0.10.0-alpha` visualization v2 local gallery evidence, replacing the
   current `main` gallery with 30 project-owned `1400x900` PNGs and a strict
   local verifier while keeping the `v0.9.0` stable C ABI unchanged.
@@ -95,18 +91,12 @@ Implemented and covered by fixed C/oracle tests plus deterministic random oracle
   tracking Fast-mode scenarios, and Optimized tracking scenarios.
 
 Release-readiness evidence is tracked under `docs/release/`; see
-`docs/index.md` for the organized documentation map. `v0.11.0` is the current
+`docs/index.md` for the organized documentation map. `v0.12.0` is the current
 stable release. It keeps the `v0.9.0` 172-symbol public C ABI unchanged and
-stabilizes waypoint `ruckig_update` soft-interruption V1 plus the internal
-platform clock abstraction reviewed during `0.11.0-readiness`. Current `main`
-is `0.12.0-design - Unreleased`; the accepted `0.12.0-alpha.1` slice extends
-waypoint `ruckig_update` soft interruption with private true-resume/background
-publish semantics and has local plus ordinary remote push CI evidence.
-`0.12.0-alpha.2` hardens that implementation by sharing the same private
-step-driven optimizer between complete waypoint solves and soft-interruption
-resume, with local plus ordinary remote push CI evidence while keeping public
-C ABI expansion out of the line. `0.12.0-readiness` records the full local
-stable-review audit for this line before the stable release closeout.
+stabilizes waypoint `ruckig_update` soft-interruption true-resume, background
+publish semantics, and the unified private waypoint optimizer engine reviewed
+during `0.12.0-readiness`. Public `ruckig_calculate`, no-waypoint target
+solving, and tracking remain unchanged by `interrupt_calculation_duration`.
 `v0.10.0` adopts the current gallery as 30 `1400x900` Matplotlib `Agg` and
 NumPy PNG assets under `docs/assets/visualization/`. The gallery covers local
 C ABI equivalents of original examples `01-10` and `14-16`, plus tracking
@@ -135,7 +125,8 @@ Optimized tracking quality thresholds while keeping the public C ABI unchanged.
 as regression evidence before readiness. `0.9.0-readiness` records full local
 readiness evidence for the tracking quality/stability line, and `v0.9.0`
 stabilizes that evidence without changing the 172-symbol public C ABI.
-`0.9.1`, `0.10.1`, and `0.11.1` are reserved for emergency patch work only.
+`0.9.1`, `0.10.1`, `0.11.1`, and `0.12.1` are reserved for emergency patch
+work only.
 `v0.4.0` added waypoint-aware C ABI entry points, per-section constraints,
 global position bounds, and a local coupled waypoint optimizer; `v0.4.1`
 deepened waypoint optimizer evidence; `v0.4.2` keeps that public C surface

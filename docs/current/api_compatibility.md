@@ -62,6 +62,37 @@ the public C ABI:
   hooks only; they do not add public symbols, public structs, or exported C ABI
   entries.
 
+## v0.12.0 Stable True-Resume ABI Baseline
+
+The `v0.12.0` stable release implements waypoint `ruckig_update`
+soft-interruption true-resume and the unified private waypoint optimizer engine
+without expanding the public C ABI:
+
+- No public function, enum value, result-code numeric value, or exported symbol
+  is added or removed.
+- Existing `ruckig_input_set_interrupt_calculation_duration` and
+  `ruckig_input_clear_interrupt_calculation_duration` configure waypoint
+  `ruckig_update` interruption only.
+- Existing `ruckig_output_was_calculation_interrupted` reports whether the
+  current waypoint `ruckig_update` cycle had a soft-interruption budget
+  truncation, including background resume cycles.
+- Public `ruckig_calculate` remains complete and non-interruptible even when
+  the interrupt field is set.
+- No-waypoint target solving and tracking remain unchanged by the interrupt
+  field.
+- Soft interruption still uses internal budget timing independent of
+  `RUCKIG_C_ENABLE_CALCULATION_DURATION`; the public calculation-duration
+  getter keeps its existing compile-time option semantics.
+- The private true-resume state, planning-identity snapshot, branch queue, and
+  step-driven optimizer cursors are internal implementation details. They do
+  not add public getters, runtime diagnostics, public structs, or exported C
+  ABI entries.
+- ABI artifact output paths use the stable release evidence directory:
+
+```text
+out/build/<preset>/artifacts/abi/0.12.0/
+```
+
 ## 0.2.2 ABI Evidence Procedure
 
 Shared builds expose a non-invasive helper target:

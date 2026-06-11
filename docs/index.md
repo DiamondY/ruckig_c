@@ -7,8 +7,7 @@ Historical rewrite plans and release evidence are retained for traceability.
 ## Current Maintainer Entry Points
 
 - `current/roadmap.md` - shipped scope, maintenance queues, current stable
-  release scope, the current `0.12.0-design` line, the `v0.11.0` stable line,
-  and future design boundaries.
+  release scope, the `v0.12.0` stable line, and future design boundaries.
 - `current/api_compatibility.md` - patch-release API/ABI policy and
   exported-symbol review.
 - `current/api_diagnostics.md` - C API validation and diagnostics behavior.
@@ -85,7 +84,8 @@ Historical rewrite plans and release evidence are retained for traceability.
   `release/checklists/0.12.0-readiness.md` records the full local
   stable-review readiness audit for waypoint soft-interruption true-resume and
   the unified waypoint optimizer engine without creating a tag or GitHub
-  Release.
+  Release. `release/checklists/0.12.0.md` records the stable waypoint
+  soft-interruption true-resume release closeout.
 - `release/evidence/verification_report.md` - local and CI verification
   history.
 - `release/evidence/performance_report.md` - performance procedure and release
@@ -93,18 +93,16 @@ Historical rewrite plans and release evidence are retained for traceability.
 - `release/notes/` - release notes source material, including the stable
   `0.8.0` visualization/gallery evidence release notes, the stable `0.9.0`
   tracking quality/stability evidence release notes, the stable `0.10.0`
-  Visualization v2 evidence release notes, and the stable `0.11.0` waypoint
-  soft-interruption and platform-clock evidence release notes.
+  Visualization v2 evidence release notes, the stable `0.11.0` waypoint
+  soft-interruption and platform-clock evidence release notes, and the stable
+  `0.12.0` waypoint soft-interruption true-resume release notes.
 
-Current `main` is `0.12.0-design - Unreleased`; the accepted
-`0.12.0-alpha.1` waypoint soft-interruption true-resume slice has local and
-ordinary remote push CI evidence. `0.12.0-alpha.2` is the local
-true-resume unified-engine hardening slice without public C ABI expansion.
-`0.12.0-readiness` local evidence is clean for stable release closeout.
-
-`v0.11.0` is the current stable release. It stabilizes waypoint `ruckig_update`
-soft-interruption V1 and the internal platform clock abstraction without
-expanding the 172-symbol public C ABI. `v0.10.0` stabilizes the 30 local
+`v0.12.0` is the current stable release. It stabilizes waypoint
+`ruckig_update` soft-interruption true-resume and the unified private waypoint
+optimizer engine without expanding the 172-symbol public C ABI. `v0.11.0`
+stabilizes waypoint `ruckig_update` soft-interruption V1 and the internal
+platform clock abstraction without expanding the public C ABI. `v0.10.0`
+stabilizes the 30 local
 `1400x900` Visualization v2 PNG assets, manifest, strict local verifier, and
 manual-only CI artifact evidence without making visualization a default push/PR
 gate. The previous v1 gallery provenance remains available through the

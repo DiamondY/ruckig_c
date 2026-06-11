@@ -18,38 +18,46 @@ install, pkg-config, static/DLL, shared install-tree, and CI consumer paths
 remain maintained; vcpkg, Conan, Homebrew, and similar recipes are reopened
 only after a separate user or release demand decision.
 
-## 0.12.0 Design Line
+## 0.12.0 Waypoint Soft Interruption True-Resume Release
 
-Current `main` is `0.12.0-design - Unreleased` after the published `v0.11.0`
-waypoint soft-interruption and platform-clock evidence release. The first
-accepted slice, `0.12.0-alpha.1` waypoint soft-interruption true resume, has
-local and ordinary remote push CI evidence. The second hardening slice,
-`0.12.0-alpha.2`, also has local and ordinary remote push CI evidence.
-`0.12.0-readiness` local evidence is clean for stable release closeout.
+Published as `v0.12.0`. This release keeps the `v0.9.0` 172-symbol public C
+ABI unchanged while stabilizing waypoint `ruckig_update` soft-interruption
+true-resume and the unified private waypoint optimizer engine reviewed during
+`0.12.0-readiness`.
 
-- First priority: complete `v0.12.0` stable release closeout from the clean
-  readiness baseline.
+- First priority: waypoint `ruckig_update` soft-interruption true-resume and
+  unified waypoint optimizer evidence. This priority is complete for the
+  stable release.
+- `0.12.0-alpha.1` adds private true-resume for interrupted online waypoint
+  calculations and background publish semantics after normal `pass_to_input`
+  progression.
 - `0.12.0-alpha.2` unifies complete waypoint solving and soft-interruption
   resume on the private step-driven optimizer engine, then hardens multi-DoF
   and multi-waypoint resume loops, per-section constraint coverage,
   full-solve comparison evidence, invalidation matrix coverage,
   no-allocation audit expansion, public `ruckig_calculate` isolation, and long
   online-loop stability.
-- Keep `v0.11.0` as the current stable release.
+- `0.12.0-readiness` records the full local release-readiness audit for
+  waypoint true-resume and the unified optimizer engine. The ordinary push CI
+  for the evidence commit succeeded, and the line entered stable closeout.
+- Stable release evidence includes local duration-enabled gates, platform
+  clock compile probes, ordinary CI, manual release-random workflows on the
+  release candidate and tag, annotated tag publication, and GitHub Release
+  publication.
+- Keep `v0.12.0` as the current stable release.
 - Keep the `v0.9.0` 172-symbol public C ABI baseline unless a separate public
   API decision is accepted.
-- Keep the soft-interruption expansion limited to waypoint `ruckig_update`
-  private true-resume and background publish semantics. Public
-  `ruckig_calculate`, no-waypoint interruption, tracking interruption, runtime
-  platform clock hooks, wrapper publication, upstream baseline upgrades, and
-  package-manager work remain out of this line unless separately accepted.
-- `0.11.1` remains reserved for emergency patch fixes only.
+- Keep any further soft-interruption expansion behind a dedicated
+  compatibility review; do not change public C ABI, enum numeric values, or
+  result-code numeric values by default.
+- `0.12.1` remains reserved for emergency patch fixes only.
 - Package-manager recipes and package publication remain frozen unless
   separately accepted.
-- Cloud/remote runtime, proprietary Pro equivalence claims, hard real-time
-  guarantees, formal global optimality proof, formal Python/Rust API
-  publication, and upstream baseline upgrades remain deferred unless
-  separately accepted.
+- Public `ruckig_calculate`, no-waypoint interruption, tracking interruption,
+  runtime platform clock hooks, wrapper publication, upstream baseline
+  upgrades, Cloud/remote runtime, proprietary Pro equivalence claims, hard
+  real-time guarantees, formal global optimality proof, and formal
+  Python/Rust API publication remain deferred unless separately accepted.
 
 ## 0.11.0 Soft Interruption And Platform Clock Release
 

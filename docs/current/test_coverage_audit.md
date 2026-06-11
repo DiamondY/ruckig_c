@@ -13,6 +13,42 @@ Coverage is tracked in three different senses:
 - Oracle coverage: frozen C++ differential comparisons against
   `original/ruckig-main`.
 
+## v0.12.0 Waypoint Soft Interruption True-Resume Release
+
+`v0.12.0` stabilizes the waypoint soft-interruption true-resume and unified
+waypoint optimizer evidence from `0.12.0-alpha.1`, `0.12.0-alpha.2`, and
+`0.12.0-readiness`. It does not add public C ABI and does not expand soft
+interruption beyond waypoint `ruckig_update`.
+
+Stable release coverage interpretation:
+
+| Area | Evidence |
+| --- | --- |
+| Initial interruption | Covered by zero-budget waypoint update cases that publish a complete feasible baseline or return execution-time calculation error without publishing invalid trajectories. |
+| True resume | Covered by repeated online `pass_to_input` cycles that continue private optimizer cursors and publish only complete feasible improvements. |
+| Unified engine | Covered by public waypoint `ruckig_calculate` and no-budget waypoint `ruckig_update` running the same step-driven engine to completion without active resume state. |
+| Constraints | Covered by published resumed trajectories satisfying sampled per-section velocity, acceleration, jerk, position, and minimum-duration constraints. |
+| Invalidation | Covered by target, waypoint, count, limits, per-section, enabled DoF, synchronization, duration discretization, interrupt clear, non-`pass_to_input`, and reset invalidation cases. |
+| Isolation | Covered by no-waypoint update, tracking, and public `ruckig_calculate` behavior remaining outside soft-interruption resume semantics. |
+| Allocation | Covered by allocation-guard tests for online interrupted update and background completion paths. |
+
+Release evidence is recorded in `docs/release/checklists/0.12.0.md`,
+including local release-candidate gates, coverage label `0.12.0`, ordinary CI,
+manual release-random workflows, tag CI, and release publication evidence.
+
+Local `0.12.0` release-candidate coverage summary after filtering out
+`original/`, `test/`, `examples/`, `bindings/`, and `out/`:
+
+| Metric | Covered | Total | Coverage |
+| --- | ---: | ---: | ---: |
+| Regions | 6535 | 7417 | 88.11% |
+| Functions | 385 | 417 | 92.33% |
+| Lines | 6752 | 7700 | 87.69% |
+| Branches | 2986 | 4287 | 69.65% |
+
+Artifacts are written under `out/coverage/0.12.0/`; generated coverage files
+remain untracked release evidence.
+
 ## 0.12.0-alpha.2 True-Resume Unified Engine Hardening
 
 `0.12.0-alpha.2` hardens the waypoint soft-interruption true-resume line by

@@ -1,89 +1,70 @@
 # Changelog
 
-## 0.12.0-design - Unreleased
+## 0.12.0 - 2026-06-11
 
-Current `main` is open for `0.12.0-design` work after the published
-`v0.11.0` stable waypoint soft-interruption and platform-clock evidence
-release. The first accepted evidence slice, `0.12.0-alpha.1`, has local and
-ordinary remote push CI evidence. The second hardening slice,
-`0.12.0-alpha.2`, also has local and ordinary remote push CI evidence.
-`0.12.0-readiness` local evidence is clean for stable release closeout.
+`0.12.0` is the stable waypoint soft-interruption true-resume release. It keeps
+the `v0.9.0` 172-symbol public C ABI unchanged while stabilizing the
+`0.12.0-alpha.1` true-resume and `0.12.0-alpha.2` unified-engine hardening
+slices reviewed during `0.12.0-readiness`.
 
-First priority:
+Release focus:
 
-- Complete `v0.12.0` stable release closeout from the clean readiness
-  baseline.
-- Keep the expansion scoped to intermediate-waypoint `ruckig_update` only.
-  Public `ruckig_calculate`, no-waypoint target solving, and tracking remain
-  unchanged by the interrupt field.
-- Keep runtime clock public hooks, wrapper publication, upstream baseline
-  upgrades, and package-manager work deferred unless separately accepted.
+- Waypoint `ruckig_update` soft-interruption true-resume through the existing
+  `interrupt_calculation_duration` input field and
+  `ruckig_output_was_calculation_interrupted` output getter.
+- Background continuation of interrupted waypoint optimizer work on later
+  normal `pass_to_input` online cycles while the interrupt field remains
+  enabled.
+- Complete-candidate-boundary publish semantics: background resume only
+  replaces the incumbent trajectory when a complete feasible candidate improves
+  over remaining duration.
+- A unified private step-driven waypoint optimizer engine shared by complete
+  waypoint solves and soft-interruption resume.
+- No public C ABI expansion, no new exported symbols, and no changes to enum
+  numeric values or result-code numeric values.
+- No change to public `ruckig_calculate`, no-waypoint target solving, or
+  tracking behavior when the interrupt field is set.
 
-`0.12.0-alpha.2` local hardening slice:
+`0.12.0-readiness` release readiness audit evidence:
 
-- Unifies complete waypoint solving and soft-interruption resume on the same
-  private step-driven waypoint optimizer engine.
-- Keeps public `ruckig_calculate` complete and non-interruptible: it ignores
-  `interrupt_calculation_duration`, runs the unified engine to completion, and
-  leaves no active private resume state.
-- Preserves V2 online semantics for waypoint `ruckig_update`: complete
-  candidate-boundary interruption, background continuation after normal
-  `pass_to_input`, and publishing only when a complete feasible candidate
-  improves over incumbent remaining duration.
-- Adds C hardening coverage for multi-DoF and multi-waypoint resume,
-  per-section constraints, fresh full-solve quality comparison, invalidation
-  matrix behavior, allocation-free background completion, no-waypoint and
-  `ruckig_calculate` isolation, and long online-loop stability.
-- Keeps the public C ABI unchanged: no public header signature changes, no
-  new exported symbols, no enum/result-code numeric changes, and no runtime
-  clock setter.
-- Passed ordinary remote push CI for commit `8a80df4` in run `27291284191`
-  (`https://github.com/DiamondY/ruckig_c/actions/runs/27291284191`) with
-  conclusion `success`; no `v0.12.0*` tag, GitHub Release, version bump, or
-  manual release-random workflow was part of this slice.
-
-`0.12.0-readiness` local evidence audit:
-
-- Records full local stable-review readiness evidence for waypoint
-  soft-interruption true-resume and the unified waypoint optimizer engine.
+- Records full local readiness evidence for deciding whether waypoint
+  soft-interruption true-resume and the unified waypoint optimizer engine can
+  enter stable closeout.
+- Reruns local build, duration-enabled build, routine CTest, focused waypoint
+  and platform-clock gates, oracle, local 1M release-random, performance,
+  ABI/export, visualization verifier, Python smoke, Rust smoke, wrapper
+  examples, coverage, and boundary diff gates.
+- Confirms the public C ABI remains at 172 symbols with public additions `0`,
+  public removals `0`, and unapproved exported symbols `0`.
 - Keeps readiness evidence-only: no version bump, tag, GitHub Release, manual
   release-random workflow, public C API, public symbol, workflow, package, or
-  `original/ruckig-main` changes.
-- Passes local static/shared/duration CTest, oracle 100k seeds, local 1M
-  release-random, performance threshold, ABI/export, platform-clock probes,
-  visualization verifier, wrapper smoke, coverage, and boundary gates.
+  Cloud/Pro runtime change is added.
+- Readiness conclusion: ordinary push CI succeeded for the evidence commit, so
+  the line entered `v0.12.0` stable closeout.
 
-`0.12.0-alpha.1` local evidence slice:
+`v0.12.0` stable closeout:
 
-- Adds private waypoint optimizer resume state for interrupted online waypoint
-  calculations, including complete-candidate cursors for baseline,
-  finite-difference, refine, and branch search phases.
-- Lets normal `pass_to_input` online cycles continue the waypoint optimizer in
-  the background while the interrupt field remains enabled.
-- Publishes a new waypoint trajectory only when a complete feasible candidate
-  improves over the old trajectory's remaining duration. Background cycles
-  that are budget-interrupted without a publishable candidate keep sampling the
-  old trajectory and return `RUCKIG_WORKING`.
-- Invalidates private resume state when the planning identity changes, when
-  the current state is not the normal `pass_to_input` progression, when the
-  interrupt field is cleared, or when `ruckig_reset` is called.
-- Keeps the public C ABI unchanged: no public header signature changes, no
-  new exported symbols, no enum/result-code numeric changes, and no runtime
-  clock setter.
-- Passed ordinary remote push CI for commit `2f689b2` in run `27275153996`
-  (`https://github.com/DiamondY/ruckig_c/actions/runs/27275153996`) with
-  conclusion `success`; no `v0.12.0*` tag, GitHub Release, or manual
-  release-random run was part of the alpha evidence step.
+- Stabilizes waypoint `ruckig_update` soft-interruption true-resume and
+  background publish semantics at safe complete waypoint candidate boundaries.
+- Stabilizes the unified waypoint optimizer engine for complete waypoint
+  solves and soft-interruption resume.
+- Moves ABI artifact output paths to `artifacts/abi/0.12.0`.
+- Keeps the public C ABI unchanged at 172 symbols, with public additions `0`,
+  public removals `0`, and unapproved exported symbols `0`.
+- Records full local release gates, ordinary CI, manual release-random
+  workflow evidence, annotated tag publication, and GitHub Release
+  publication.
 
 Release boundary:
 
-- `v0.11.0` remains the current stable release.
-- Public C ABI expansion is not part of `0.12.0-alpha.1`.
-- `0.11.1` remains reserved for emergency patch fixes only.
+- `v0.12.0` is the current stable release.
+- Public C ABI expansion is not part of `0.12.0`.
+- `0.12.1` is reserved for emergency patch fixes only.
 - Package-manager recipes, formal Python/Rust publication, cloud/remote
   calculation, Pro/cloud equivalence claims, formal global optimality proof,
-  hard real-time guarantees, and upstream baseline upgrades remain deferred
-  unless separately accepted.
+  hard real-time guarantees, runtime clock public hooks, no-waypoint
+  interruption, tracking interruption, and upstream baseline upgrades remain
+  deferred unless separately accepted.
 
 ## 0.11.0 - 2026-06-10
 
