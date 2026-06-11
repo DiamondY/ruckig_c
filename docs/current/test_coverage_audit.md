@@ -16,10 +16,46 @@ Coverage is tracked in three different senses:
 ## 0.13.0-design - Unreleased
 
 Current `main` has moved to `0.13.0-design - Unreleased` after publishing
-`v0.12.0`. The first accepted `0.13.0` evidence slice is
-`0.13.0-alpha.1` waypoint true-resume stress and quality audit. The latest
-stable coverage baseline remains the `v0.12.0` release evidence below, and
-`0.12.1` is reserved for emergency patch fixes only.
+`v0.12.0`. The accepted post-release waypoint true-resume evidence slices are
+`0.13.0-alpha.1` stress coverage and `0.13.0-alpha.2` private engine rewrite
+quality-baseline hardening. The latest stable coverage baseline remains the
+`v0.12.0` release evidence below, and `0.12.1` is reserved for emergency patch
+fixes only.
+
+## 0.13.0-alpha.2 Waypoint True-Resume Engine Rewrite And Quality Baseline
+
+`0.13.0-alpha.2` rewrites the private waypoint optimizer/resume state into a
+single internal engine structure and adds deterministic complete-solve quality
+baselines for the same public waypoint `ruckig_update` soft-interruption
+true-resume behavior. It does not add public C ABI and does not expand soft
+interruption beyond waypoint `ruckig_update`.
+
+Added C coverage:
+
+| Scenario | Evidence |
+| --- | --- |
+| Private engine state | Moves optimizer scratch buffers, resume cursors, branch queue, best candidate state, and waypoint diagnostics into the private `waypoint_engine` state under `ruckig_t`. |
+| Publish transaction | Background resume writes a scratch trajectory first and only copies a complete valid improvement into the output trajectory. |
+| Deterministic baseline | Adds `--waypoint-resume-quality-audit` and `ruckig_c_waypoint_resume_quality_audit` with 128 deterministic waypoint cases captured against commit `9d322ad`. |
+| Complete-solve quality | Asserts each successful complete waypoint solve remains at or below the checked-in baseline duration within `1e-9`. |
+| Resume quality | Records background publish, interrupted-without-publish, completion, and fresh full-solve reference counts across corpus online loops. |
+| Allocation/API boundary | Reuses existing preallocated waypoint engine buffers and keeps no-waypoint update, tracking, public `ruckig_calculate`, and public ABI behavior outside this slice. |
+
+Local alpha.2 quality audit evidence:
+
+| Metric | Result |
+| --- | --- |
+| Corpus cases | 128 |
+| Successful complete solves | 128 |
+| Average duration ratio vs baseline | 1.0 |
+| Max complete-solve regression | 0 |
+| Background publishes | 113 |
+| Interrupted-without-publish cycles | 559 |
+| Resume completions | 32 |
+| Fresh full-solve references | 672 |
+
+Local verification for this slice is recorded in
+`docs/release/checklists/0.13.0-alpha.2.md`.
 
 ## 0.13.0-alpha.1 Waypoint True-Resume Stress And Quality Audit
 
@@ -27,6 +63,10 @@ stable coverage baseline remains the `v0.12.0` release evidence below, and
 waypoint `ruckig_update` soft-interruption true-resume behavior. It does not
 add public C ABI and does not expand soft interruption beyond waypoint
 `ruckig_update`.
+
+The slice was later pushed to `ruckig_c/main`; ordinary push CI for commit
+`9d322ad` succeeded. No `v0.13.0*` tag, GitHub Release, version bump, or
+manual `release-random` workflow was created for alpha.1.
 
 Added C coverage:
 

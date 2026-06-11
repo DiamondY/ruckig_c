@@ -6,9 +6,11 @@ for local waypoint `ruckig_update` new-trajectory recalculation. In
 `0.12.0-alpha.1`, the same public field drives V2 true-resume for waypoint
 `ruckig_update` only. In `0.12.0-alpha.2`, complete waypoint solving and
 soft-interruption resume share the same private step-driven optimizer engine.
-After `v0.12.0`, `0.13.0-alpha.1` adds local stress and quality evidence for
-the same V2 behavior; it does not change the public API, public ABI, or the
-runtime semantics described below.
+After `v0.12.0`, `0.13.0-alpha.1` adds stress and quality evidence for the
+same V2 behavior. `0.13.0-alpha.2` then rewrites the private optimizer/resume
+state into an internal waypoint engine and adds deterministic quality-baseline
+evidence. Neither alpha changes the public API, public ABI, or runtime
+semantics described below.
 
 This is not a hard real-time guarantee. The budget is checked at safe waypoint
 candidate boundaries, so the actual elapsed time can exceed the configured
@@ -39,9 +41,11 @@ microsecond value by the duration of the current complete candidate evaluation.
 ## True Resume
 
 V2 keeps private waypoint optimizer state after an interrupted waypoint
-`ruckig_update` calculation. The stored state includes the current search
-phase, complete-candidate cursor, branch queue cursor, best waypoint
-velocity/acceleration candidate, baseline duration, and best duration.
+`ruckig_update` calculation. The stored state is held in the internal waypoint
+engine and includes the current search phase, complete-candidate cursor,
+branch queue cursor, best waypoint velocity/acceleration candidate, baseline
+duration, best duration, scratch trajectory, and diagnostics used by the C
+tests.
 
 The optimizer is still advanced only at complete-candidate boundaries:
 
@@ -49,10 +53,15 @@ The optimizer is still advanced only at complete-candidate boundaries:
   candidates are each evaluated across all sections before they can be accepted.
 - The target/profile/root solvers are not interrupted.
 - No half-candidate or partially evaluated section is published.
-- Complete waypoint solving and resumable waypoint solving share one
-  step-driven candidate engine. With no budget pressure, the engine runs to
-  completion and preserves the established candidate order and tie-break
-  behavior.
+- Background publish uses a transaction boundary: the engine first writes a
+  scratch trajectory, verifies it is complete and valid, and only then copies
+  it into the output trajectory when it improves over incumbent remaining
+  duration.
+- Complete waypoint solving and resumable waypoint solving share one private
+  candidate engine. With no budget pressure, the engine runs to completion.
+  Post-`v0.12.0` alpha.2 evidence uses a 128-case checked-in quality baseline
+  to prevent complete-solve duration regressions if the private engine changes
+  its internal candidate ordering or quality strategy.
 
 Ordinary online cycles can continue an active resume before sampling the old
 trajectory when all of the following are true:

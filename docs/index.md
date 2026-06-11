@@ -89,7 +89,9 @@ Historical rewrite plans and release evidence are retained for traceability.
   soft-interruption true-resume release closeout.
   `release/checklists/0.13.0-alpha.1.md` records the first post-`v0.12.0`
   waypoint true-resume stress and quality evidence slice on the
-  `0.13.0-design` line.
+  `0.13.0-design` line. `release/checklists/0.13.0-alpha.2.md` records the
+  waypoint true-resume private engine rewrite and deterministic quality
+  baseline evidence slice.
 - `release/evidence/verification_report.md` - local and CI verification
   history.
 - `release/evidence/performance_report.md` - performance procedure and release

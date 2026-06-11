@@ -21,17 +21,57 @@ typedef struct ruckig_waypoint_branch {
     double lower_bound;
 } ruckig_waypoint_branch_t;
 
-typedef enum ruckig_waypoint_resume_phase {
-    RUCKIG_WAYPOINT_RESUME_PHASE_IDLE = 0,
-    RUCKIG_WAYPOINT_RESUME_PHASE_BASELINE,
-    RUCKIG_WAYPOINT_RESUME_PHASE_FINITE_DIFFERENCE_035,
-    RUCKIG_WAYPOINT_RESUME_PHASE_FINITE_DIFFERENCE_070,
-    RUCKIG_WAYPOINT_RESUME_PHASE_REFINE_INIT,
-    RUCKIG_WAYPOINT_RESUME_PHASE_REFINE,
-    RUCKIG_WAYPOINT_RESUME_PHASE_BRANCH_INIT,
-    RUCKIG_WAYPOINT_RESUME_PHASE_BRANCH,
-    RUCKIG_WAYPOINT_RESUME_PHASE_COMPLETE
-} ruckig_waypoint_resume_phase_t;
+typedef enum ruckig_waypoint_engine_phase {
+    RUCKIG_WAYPOINT_ENGINE_PHASE_IDLE = 0,
+    RUCKIG_WAYPOINT_ENGINE_PHASE_BASELINE,
+    RUCKIG_WAYPOINT_ENGINE_PHASE_FINITE_DIFFERENCE_035,
+    RUCKIG_WAYPOINT_ENGINE_PHASE_FINITE_DIFFERENCE_070,
+    RUCKIG_WAYPOINT_ENGINE_PHASE_REFINE_INIT,
+    RUCKIG_WAYPOINT_ENGINE_PHASE_REFINE,
+    RUCKIG_WAYPOINT_ENGINE_PHASE_BRANCH_INIT,
+    RUCKIG_WAYPOINT_ENGINE_PHASE_BRANCH,
+    RUCKIG_WAYPOINT_ENGINE_PHASE_COMPLETE
+} ruckig_waypoint_engine_phase_t;
+
+typedef struct ruckig_waypoint_optimizer_engine {
+    struct ruckig_trajectory* scratch_trajectory;
+    double* candidate_velocity;
+    double* candidate_acceleration;
+    double* best_velocity;
+    double* best_acceleration;
+    double* baseline_velocity;
+    double* baseline_acceleration;
+    struct ruckig_input* identity_input;
+    ruckig_waypoint_branch_t* branch_queue;
+    bool active;
+    bool complete;
+    bool found;
+    bool initial_calculation;
+    bool has_published_candidate;
+    ruckig_waypoint_engine_phase_t phase;
+    double best_duration;
+    double baseline_duration;
+    double published_duration;
+    size_t refine_pass;
+    size_t refine_waypoint;
+    size_t refine_dof;
+    size_t refine_component;
+    size_t refine_attempt;
+    double refine_original;
+    bool refine_original_valid;
+    bool refine_improved;
+    double branch_scale;
+    size_t branch_iteration;
+    size_t branch_count;
+    size_t branch_index;
+    bool branch_queue_valid;
+    bool branch_improved_any;
+    double last_baseline_duration;
+    double last_best_duration;
+    double last_best_lower_bound;
+    size_t last_candidate_evaluations;
+    bool last_improved_baseline;
+} ruckig_waypoint_optimizer_engine_t;
 
 struct ruckig_trajectory {
     size_t dofs;
@@ -119,43 +159,7 @@ struct ruckig {
     struct ruckig_input* current_input;
     struct ruckig_input* waypoint_section_input;
     struct ruckig_trajectory* waypoint_section_trajectory;
-    struct ruckig_trajectory* waypoint_resume_trajectory;
-    double* waypoint_candidate_velocity;
-    double* waypoint_candidate_acceleration;
-    double* waypoint_best_velocity;
-    double* waypoint_best_acceleration;
-    double* waypoint_baseline_velocity;
-    double* waypoint_baseline_acceleration;
-    struct ruckig_input* waypoint_resume_identity_input;
-    ruckig_waypoint_branch_t* waypoint_resume_branch_queue;
-    bool waypoint_resume_active;
-    bool waypoint_resume_complete;
-    bool waypoint_resume_found;
-    bool waypoint_resume_initial_calculation;
-    bool waypoint_resume_has_published_candidate;
-    ruckig_waypoint_resume_phase_t waypoint_resume_phase;
-    double waypoint_resume_best_duration;
-    double waypoint_resume_baseline_duration;
-    double waypoint_resume_published_duration;
-    size_t waypoint_resume_refine_pass;
-    size_t waypoint_resume_refine_waypoint;
-    size_t waypoint_resume_refine_dof;
-    size_t waypoint_resume_refine_component;
-    size_t waypoint_resume_refine_attempt;
-    double waypoint_resume_refine_original;
-    bool waypoint_resume_refine_original_valid;
-    bool waypoint_resume_refine_improved;
-    double waypoint_resume_branch_scale;
-    size_t waypoint_resume_branch_iteration;
-    size_t waypoint_resume_branch_count;
-    size_t waypoint_resume_branch_index;
-    bool waypoint_resume_branch_queue_valid;
-    bool waypoint_resume_branch_improved_any;
-    double waypoint_last_baseline_duration;
-    double waypoint_last_best_duration;
-    double waypoint_last_best_lower_bound;
-    size_t waypoint_last_candidate_evaluations;
-    bool waypoint_last_improved_baseline;
+    ruckig_waypoint_optimizer_engine_t waypoint_engine;
 };
 
 struct ruckig_target_state {

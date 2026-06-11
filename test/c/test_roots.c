@@ -100,6 +100,8 @@ void run_waypoint_tests(void);
 void run_waypoint_per_section_tests(void);
 void run_waypoint_quality_tests(void);
 void run_waypoint_resume_stress_tests(void);
+void run_waypoint_resume_quality_tests(void);
+void run_waypoint_resume_quality_baseline_dump(void);
 void run_solver_branch_coverage_tests(void);
 void run_tracking_api_tests(void);
 void run_tracking_validation_tests(void);
@@ -129,6 +131,10 @@ int main(int argc, char** argv) {
         return ruckig_c_test_failures == 0 ? 0 : 1;
     }
     if (argc == 2) {
+        if (strcmp(argv[1], "--waypoint-resume-quality-dump") == 0) {
+            run_waypoint_resume_quality_baseline_dump();
+            return ruckig_c_test_failures == 0 ? 0 : 1;
+        }
         if (strcmp(argv[1], "--waypoint") == 0) {
             run_waypoint_tests();
             return ruckig_c_test_failures == 0 ? 0 : 1;
@@ -143,6 +149,10 @@ int main(int argc, char** argv) {
         }
         if (strcmp(argv[1], "--waypoint-resume-stress") == 0) {
             run_waypoint_resume_stress_tests();
+            return ruckig_c_test_failures == 0 ? 0 : 1;
+        }
+        if (strcmp(argv[1], "--waypoint-resume-quality-audit") == 0) {
+            run_waypoint_resume_quality_tests();
             return ruckig_c_test_failures == 0 ? 0 : 1;
         }
         if (strcmp(argv[1], "--solver-branch-coverage") == 0) {

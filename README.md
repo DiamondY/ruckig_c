@@ -74,6 +74,13 @@ Implemented and covered by fixed C/oracle tests plus deterministic random oracle
 - `v0.12.0` waypoint soft-interruption true-resume stabilization, adopting
   background resume/publish semantics and the unified private waypoint
   optimizer engine while keeping the `v0.9.0` stable C ABI unchanged.
+- `0.13.0-alpha.1` waypoint true-resume stress evidence, adding focused
+  multi-DoF, multi-waypoint, per-section, budget-matrix, fresh-solve
+  reference, long online-loop, and allocation-guard coverage without changing
+  public C ABI.
+- `0.13.0-alpha.2` waypoint true-resume engine hardening, rewriting the
+  private optimizer/resume state into an internal waypoint engine and adding a
+  128-case deterministic quality baseline audit without changing public C ABI.
 - `0.10.0-alpha` visualization v2 local gallery evidence, replacing the
   current `main` gallery with 30 project-owned `1400x900` PNGs and a strict
   local verifier while keeping the `v0.9.0` stable C ABI unchanged.

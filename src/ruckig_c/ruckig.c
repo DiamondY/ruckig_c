@@ -1254,28 +1254,28 @@ static ruckig_result_t ruckig_create_impl(
         return RUCKIG_ERROR;
     }
     if (waypoint_values > 0) {
-        if (ruckig_input_create_with_waypoints(&value->waypoint_resume_identity_input, dofs, max_number_of_waypoints) != RUCKIG_WORKING) {
+        if (ruckig_input_create_with_waypoints(&value->waypoint_engine.identity_input, dofs, max_number_of_waypoints) != RUCKIG_WORKING) {
             ruckig_destroy(value);
             return RUCKIG_ERROR;
         }
-        if (ruckig_trajectory_create_with_waypoints(&value->waypoint_resume_trajectory, dofs, max_number_of_waypoints) != RUCKIG_WORKING) {
+        if (ruckig_trajectory_create_with_waypoints(&value->waypoint_engine.scratch_trajectory, dofs, max_number_of_waypoints) != RUCKIG_WORKING) {
             ruckig_destroy(value);
             return RUCKIG_ERROR;
         }
-        value->waypoint_resume_branch_queue = (ruckig_waypoint_branch_t*)ruckig_calloc(
+        value->waypoint_engine.branch_queue = (ruckig_waypoint_branch_t*)ruckig_calloc(
             RUCKIG_WAYPOINT_BRANCH_QUEUE_CAPACITY,
-            sizeof(*value->waypoint_resume_branch_queue)
+            sizeof(*value->waypoint_engine.branch_queue)
         );
-        value->waypoint_candidate_velocity = (double*)ruckig_calloc(waypoint_values, sizeof(double));
-        value->waypoint_candidate_acceleration = (double*)ruckig_calloc(waypoint_values, sizeof(double));
-        value->waypoint_best_velocity = (double*)ruckig_calloc(waypoint_values, sizeof(double));
-        value->waypoint_best_acceleration = (double*)ruckig_calloc(waypoint_values, sizeof(double));
-        value->waypoint_baseline_velocity = (double*)ruckig_calloc(waypoint_values, sizeof(double));
-        value->waypoint_baseline_acceleration = (double*)ruckig_calloc(waypoint_values, sizeof(double));
-        if (!value->waypoint_resume_branch_queue
-            || !value->waypoint_candidate_velocity || !value->waypoint_candidate_acceleration
-            || !value->waypoint_best_velocity || !value->waypoint_best_acceleration
-            || !value->waypoint_baseline_velocity || !value->waypoint_baseline_acceleration) {
+        value->waypoint_engine.candidate_velocity = (double*)ruckig_calloc(waypoint_values, sizeof(double));
+        value->waypoint_engine.candidate_acceleration = (double*)ruckig_calloc(waypoint_values, sizeof(double));
+        value->waypoint_engine.best_velocity = (double*)ruckig_calloc(waypoint_values, sizeof(double));
+        value->waypoint_engine.best_acceleration = (double*)ruckig_calloc(waypoint_values, sizeof(double));
+        value->waypoint_engine.baseline_velocity = (double*)ruckig_calloc(waypoint_values, sizeof(double));
+        value->waypoint_engine.baseline_acceleration = (double*)ruckig_calloc(waypoint_values, sizeof(double));
+        if (!value->waypoint_engine.branch_queue
+            || !value->waypoint_engine.candidate_velocity || !value->waypoint_engine.candidate_acceleration
+            || !value->waypoint_engine.best_velocity || !value->waypoint_engine.best_acceleration
+            || !value->waypoint_engine.baseline_velocity || !value->waypoint_engine.baseline_acceleration) {
             ruckig_destroy(value);
             return RUCKIG_ERROR;
         }
@@ -1304,16 +1304,16 @@ RUCKIG_C_API void ruckig_destroy(ruckig_t* otg) {
     }
     ruckig_input_destroy(otg->current_input);
     ruckig_input_destroy(otg->waypoint_section_input);
-    ruckig_input_destroy(otg->waypoint_resume_identity_input);
+    ruckig_input_destroy(otg->waypoint_engine.identity_input);
     ruckig_trajectory_destroy(otg->waypoint_section_trajectory);
-    ruckig_trajectory_destroy(otg->waypoint_resume_trajectory);
-    ruckig_free(otg->waypoint_resume_branch_queue);
-    ruckig_free(otg->waypoint_candidate_velocity);
-    ruckig_free(otg->waypoint_candidate_acceleration);
-    ruckig_free(otg->waypoint_best_velocity);
-    ruckig_free(otg->waypoint_best_acceleration);
-    ruckig_free(otg->waypoint_baseline_velocity);
-    ruckig_free(otg->waypoint_baseline_acceleration);
+    ruckig_trajectory_destroy(otg->waypoint_engine.scratch_trajectory);
+    ruckig_free(otg->waypoint_engine.branch_queue);
+    ruckig_free(otg->waypoint_engine.candidate_velocity);
+    ruckig_free(otg->waypoint_engine.candidate_acceleration);
+    ruckig_free(otg->waypoint_engine.best_velocity);
+    ruckig_free(otg->waypoint_engine.best_acceleration);
+    ruckig_free(otg->waypoint_engine.baseline_velocity);
+    ruckig_free(otg->waypoint_engine.baseline_acceleration);
     ruckig_free(otg);
 }
 

@@ -15,6 +15,25 @@ publishing `v0.12.0`.
   formal global optimality proof, and upstream baseline upgrades remain
   deferred unless separately accepted.
 
+`0.13.0-alpha.2` local evidence slice:
+
+- Rewrites the private waypoint optimizer/resume state into an internal
+  `waypoint_engine` structure while keeping the public C ABI, exported-symbol
+  set, no-waypoint update, tracking, runtime clock public hook,
+  package-manager, and Cloud/Pro boundaries unchanged.
+- Adds a transaction-style publish boundary for waypoint true-resume so
+  background optimization writes a scratch trajectory first and only copies a
+  complete valid improvement into the output trajectory.
+- Adds `--waypoint-resume-quality-audit` and
+  `ruckig_c_waypoint_resume_quality_audit`, with a 128-case deterministic
+  waypoint corpus captured against commit `9d322ad`.
+- The quality audit asserts complete waypoint solves are not slower than the
+  checked-in baseline within tolerance, and records resume publish,
+  interrupted-without-publish, completion, and fresh full-solve reference
+  evidence.
+- Keeps `0.13.0-alpha.2` local-only: no version bump, tag, GitHub Release,
+  remote push CI wait, or manual `release-random` workflow.
+
 `0.13.0-alpha.1` local evidence slice:
 
 - Adds a focused `--waypoint-resume-stress` C test selector and
@@ -29,6 +48,9 @@ publishing `v0.12.0`.
 - Keeps the `v0.12.0` public C ABI, exported-symbol set, no-waypoint update,
   tracking, runtime clock public hook, package-manager, and Cloud/Pro
   boundaries unchanged.
+- Ordinary remote push CI evidence for commit `9d322ad` succeeded; no
+  `v0.13.0*` tag, GitHub Release, or manual `release-random` workflow was
+  created for the alpha.1 evidence slice.
 
 ## 0.12.0 - 2026-06-11
 
