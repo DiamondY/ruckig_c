@@ -29,6 +29,9 @@ tracking interrupt semantics are active yet. `0.14.0-alpha.4` implements the
 no-waypoint half of that plan: no-waypoint `ruckig_update` can now preserve a
 valid no-waypoint incumbent when the budget expires at a complete target
 trajectory boundary, but it still does not provide no-waypoint true-resume.
+`0.14.0-alpha.5` implements the online tracking half for Optimized
+`ruckig_tracking_update` and `ruckig_tracking_update_with_lookahead`, while
+leaving `ruckig_tracking_calculate_sequence` deferred.
 
 This is not a hard real-time guarantee. The budget is checked at safe waypoint
 candidate boundaries, so the actual elapsed time can exceed the configured
@@ -106,6 +109,9 @@ The optimizer is still advanced only at complete-candidate boundaries:
 - `0.14.0-alpha.4` implements no-waypoint complete-trajectory-boundary
   interruption without true-resume. Tracking remains isolated until a later
   alpha explicitly implements online tracking interruption.
+- `0.14.0-alpha.5` implements Optimized online tracking candidate-boundary
+  interruption for update and lookahead update. It publishes only complete
+  best-so-far candidates and keeps sequence interruption deferred.
 
 ## No-Waypoint Complete-Trajectory Boundary
 
@@ -123,8 +129,29 @@ adding public API:
 - No no-waypoint root/profile cursor is stored, so this is not true-resume.
 - Public `ruckig_calculate` remains a complete solve and ignores the interrupt
   budget.
-- Tracking clears the interrupt field on its internal work input until online
-  tracking interruption is implemented separately.
+- Tracking still clears the interrupt field on its internal no-waypoint work
+  input; online tracking interruption is checked by the tracking layer at
+  complete candidate boundaries.
+
+## Online Tracking Candidate Boundary
+
+Optimized online tracking now uses `interrupt_calculation_duration` without
+adding public API:
+
+- Scope is limited to `ruckig_tracking_update` and
+  `ruckig_tracking_update_with_lookahead`.
+- Fast mode keeps the existing single-candidate behavior and normally does not
+  report interruption when that complete candidate is accepted.
+- Optimized mode checks the budget after each complete tracking candidate is
+  scored.
+- If the budget expires, the best complete candidate evaluated so far is
+  published, `output.was_calculation_interrupted` is true, and diagnostics
+  reflect only candidates actually evaluated.
+- Internal no-waypoint `ruckig_update` calls still receive cleared interrupt
+  fields; tracking interruption is not implemented by reusing no-waypoint or
+  waypoint resume state.
+- `ruckig_tracking_calculate_sequence` remains deferred because the public
+  sequence output has no API-neutral interruption carrier.
 
 Ordinary online cycles can continue an active resume before sampling the old
 trajectory when all of the following are true:

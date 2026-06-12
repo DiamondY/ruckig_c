@@ -104,7 +104,8 @@ Historical rewrite plans and release evidence are retained for traceability.
   implementation-readiness gap audit for conditional API-neutral no-waypoint
   and online tracking interruption slices. `release/checklists/0.14.0-alpha.4.md`
   records the local no-waypoint complete-trajectory-boundary interruption
-  implementation evidence.
+  implementation evidence. `release/checklists/0.14.0-alpha.5.md` records the
+  local online tracking best-so-far candidate-boundary interruption evidence.
 - `release/evidence/verification_report.md` - local and CI verification
   history.
 - `release/evidence/performance_report.md` - performance procedure and release
@@ -119,9 +120,10 @@ Historical rewrite plans and release evidence are retained for traceability.
 
 `v0.13.0` is the current stable release after completed `0.13.0-readiness`,
 release-candidate, tag, and manual release-random evidence. Current `main` is
-`0.14.0-design - Unreleased`; `0.14.0-alpha.5` is the active local online
-tracking interruption slice after `0.14.0-alpha.4` added no-waypoint
-complete-trajectory-boundary interruption. `v0.13.0` stabilizes
+`0.14.0-design - Unreleased`; the next step is cumulative remote CI evidence
+for the local `0.14.0-alpha.3` through `0.14.0-alpha.5` commits after alpha.4
+added no-waypoint interruption and alpha.5 added online tracking interruption.
+`v0.13.0` stabilizes
 post-`v0.12.0` waypoint
 true-resume stress coverage and the private waypoint optimizer engine rewrite
 without expanding the 172-symbol public C ABI. `v0.12.0` stabilizes waypoint

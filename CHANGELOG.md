@@ -46,6 +46,13 @@ stable release, and `0.13.1` is reserved for emergency patch fixes only.
   storage, preserves valid no-waypoint incumbents when budget expires, avoids
   no-waypoint true-resume state, keeps public `ruckig_calculate` complete, and
   keeps tracking isolated for the later alpha.5 tracking interruption slice.
+- `0.14.0-alpha.5` local implementation evidence adds Optimized-mode online
+  tracking candidate-boundary interruption for `ruckig_tracking_update` and
+  `ruckig_tracking_update_with_lookahead`. It publishes the best complete
+  candidate evaluated so far when budget expires, keeps Fast mode
+  single-candidate behavior unchanged, leaves
+  `ruckig_tracking_calculate_sequence` deferred, and does not add public
+  diagnostics or public ABI.
 
 ## 0.13.0 - 2026-06-11
 

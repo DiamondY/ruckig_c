@@ -71,10 +71,15 @@ Current `main` is `0.14.0-design - Unreleased` after the published
   through the existing interrupt field, preserves valid no-waypoint incumbents
   when budget expires, does not implement true-resume, and keeps tracking
   isolated for alpha.5.
-- Current implementation priority is `0.14.0-alpha.5` online tracking
-  interruption for `ruckig_tracking_update` and
-  `ruckig_tracking_update_with_lookahead`, using best-so-far complete
-  candidate publication without public diagnostics or ABI expansion.
+- `0.14.0-alpha.5` online tracking interruption is complete locally. It adds
+  Optimized-mode candidate-boundary interruption for `ruckig_tracking_update`
+  and `ruckig_tracking_update_with_lookahead`, publishes the best complete
+  candidate evaluated so far when budget expires, and keeps
+  `ruckig_tracking_calculate_sequence`, public diagnostics, and public ABI
+  expansion deferred.
+- Current priority is a separate alpha.3 through alpha.5 cumulative remote CI
+  evidence step. Do not enter `0.14.0-readiness`, tag, release, version bump,
+  or manual release-random until that ordinary push CI evidence succeeds.
 - Keep the `v0.9.0` 172-symbol public C ABI baseline unless a separate public
   API decision is accepted.
 - Package-manager recipes and package publication remain frozen unless

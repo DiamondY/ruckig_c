@@ -116,6 +116,28 @@ Added C coverage:
 The local implementation checklist is
 `docs/release/checklists/0.14.0-alpha.4.md`.
 
+## 0.14.0-alpha.5 Online Tracking Interrupt Boundary Support
+
+`0.14.0-alpha.5` adds API-neutral online tracking interruption for Optimized
+mode. It uses the existing interrupt field and output flag, adds no public ABI,
+and checks budget only after complete tracking candidates.
+
+Added C coverage:
+
+| Scenario | Evidence |
+| --- | --- |
+| Focused selector | Adds `--tracking-interrupt-audit` and CTest `ruckig_c_tracking_interrupt_audit`. |
+| Fast mode | Zero-budget Fast tracking update accepts the single complete candidate and does not report interruption. |
+| Optimized update | Zero-budget Optimized tracking update publishes the best complete candidate evaluated so far, reports interruption, and records diagnostics for only evaluated candidates. |
+| Optimized lookahead | Zero-budget Optimized lookahead update follows the same best-so-far complete-candidate boundary. |
+| Sequence deferred | `ruckig_tracking_calculate_sequence` continues to ignore tracking interruption because there is no API-neutral sequence carrier. |
+| Allocation guard | Fast, Optimized update, and Optimized lookahead interruption paths run under the allocation guard. |
+| Local gates | Main build passed; focused selector group passed 6/6; default CTest passed 51/51; duration-enabled selector group passed 3/3. |
+| ABI/export | Public header symbol count remains `172`; public exported symbols match the approved allowlist. |
+
+The local implementation checklist is
+`docs/release/checklists/0.14.0-alpha.5.md`.
+
 ## v0.13.0 Release-Candidate Coverage
 
 `v0.13.0` release-candidate local gates rerun the readiness gate after the
