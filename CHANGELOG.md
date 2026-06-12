@@ -68,6 +68,18 @@ and `0.14.1` is reserved for emergency patch fixes only.
   bindings/tests/examples. The wrappers remain prototype-only; no symbols are
   added beyond the 184-symbol alpha.4 baseline, and no package-manager,
   version, tag, release, push, or manual workflow change is included.
+- `0.15.0-alpha.8` hardens the tracking sequence continuation implementation.
+  Continuations now capture the initiating tracking `delta_time`, reject
+  same-DoF resume attempts from handles with a different `delta_time`, keep
+  output sequence timestamps on the captured time axis, and share the
+  Optimized candidate-step engine between complete and continuation paths. The
+  public ABI remains the 184-symbol alpha.4 baseline.
+- `0.15.0-readiness` local stable-review audit evidence records full build,
+  CTest, oracle, release-random, performance, ABI/export, platform-clock,
+  visualization, wrapper, coverage, and boundary gates for alpha.1 through
+  alpha.8. This readiness slice does not bump version metadata, create a tag,
+  publish a GitHub Release, trigger a manual workflow, or make wrapper
+  publication claims.
 
 ## 0.14.0 - 2026-06-12
 

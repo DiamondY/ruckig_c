@@ -125,13 +125,19 @@ CI.
   keeping wrapper APIs prototype-only and making no further public C ABI
   expansion beyond alpha.4.
 - `0.15.0-alpha.8` tracking sequence continuation hardening is complete
-  locally. It tightens the private continuation `delta_time` resume contract,
-  shares the Optimized candidate-step engine between complete and continuation
-  paths, expands continuation matrix coverage, and keeps the public ABI at the
-  184-symbol alpha.4 baseline.
-- Next project step after alpha.8 is ordinary remote push CI evidence for the
-  cumulative alpha.4 through alpha.8 continuation line. If that passes, start a
-  separate local `0.15.0-readiness` audit.
+  locally and covered by ordinary remote push CI on head commit
+  `5066290c2f8937ca94149e2f53adb9172f2a0b39`, run `27421851576`, conclusion
+  `success`. It tightens the private continuation `delta_time` resume
+  contract, shares the Optimized candidate-step engine between complete and
+  continuation paths, expands continuation matrix coverage, and keeps the
+  public ABI at the 184-symbol alpha.4 baseline.
+- `0.15.0-readiness` passed the full local stable-review gate for alpha.1
+  through alpha.8, including build, CTest, oracle, release-random,
+  performance, ABI/export, platform clock, visualization, wrapper, coverage,
+  and boundary evidence. It does not bump version, create a tag, publish a
+  GitHub Release, or trigger a manual workflow.
+- Next project step after readiness is a separate `v0.15.0` stable closeout
+  decision and plan.
 - Keep the 184-symbol `0.15.0-alpha.4` public C ABI baseline unless a later
   separate public API decision is accepted.
 - Package-manager recipes and package publication remain frozen unless

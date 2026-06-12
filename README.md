@@ -127,6 +127,10 @@ Implemented and covered by fixed C/oracle tests plus deterministic random oracle
 - `0.15.0-alpha.8` tracking sequence continuation hardening, tightening the
   private `delta_time` resume contract, sharing Optimized candidate enumeration,
   and adding continuation matrix coverage without new exported C symbols.
+- `0.15.0-readiness` local stable-review audit evidence for alpha.1 through
+  alpha.8, rerunning build, CTest, oracle, release-random, performance,
+  ABI/export, platform-clock, visualization, wrapper, coverage, and boundary
+  gates without version bump, tag, release, or manual workflow.
 - `0.10.0-alpha` visualization v2 local gallery evidence, replacing the
   current `main` gallery with 30 project-owned `1400x900` PNGs and a strict
   local verifier while keeping the `v0.9.0` stable C ABI unchanged.
@@ -150,8 +154,10 @@ manual release-random gates for the API-neutral interrupt surface line. Current
 `main` is in `0.15.0-design - Unreleased`; alpha.4 accepts the tracking
 sequence continuation public API and moves the design-line public C ABI
 baseline to 184 symbols, with alpha.5/alpha.6 behavior and alpha.7
-C/Python/Rust prototype smoke coverage layered on that API. `v0.14.0` keeps
-the `v0.9.0` 172-symbol public C ABI unchanged while stabilizing API-neutral
+C/Python/Rust prototype smoke coverage layered on that API. Alpha.8 hardens the
+private continuation contract and `0.15.0-readiness` records the full local
+stable-review audit before any stable closeout decision. `v0.14.0` keeps the
+`v0.9.0` 172-symbol public C ABI unchanged while stabilizing API-neutral
 interrupt surfaces. Public
 `ruckig_calculate` still ignores
 `interrupt_calculation_duration` and runs complete solves. On the `0.14.0`

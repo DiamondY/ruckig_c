@@ -171,6 +171,41 @@ Added coverage:
 | Candidate engine | Complete Optimized tracking and Optimized sequence continuation share the same internal candidate-step implementation for candidate family order, horizon values, terminal blends, derivative damping, budget behavior, and scoring updates. |
 | API ergonomics | Header compilation covers `RUCKIG_RESULT_IS_OK`, while diagnostics reserved fields and C++ opaque tag usage are documented as source-level API guidance without ABI symbol changes. |
 
+The local checklist is `docs/release/checklists/0.15.0-alpha.8.md`.
+Ordinary remote push CI later passed on head commit `5066290`, run
+`27421851576`, conclusion `success`.
+
+## 0.15.0-readiness Local Stable-Review Audit
+
+`0.15.0-readiness` reruns the full local release-readiness gate set for the
+alpha.1 through alpha.8 tracking sequence interruption and continuation line.
+It keeps the public C ABI at the 184-symbol alpha.4 baseline and does not bump
+version metadata, create a tag, publish a GitHub Release, trigger a manual
+workflow, or make Python/Rust wrapper publication claims.
+
+Readiness coverage summary:
+
+| Area | Evidence |
+| --- | --- |
+| Build and CTest | Normal, shared, and duration-enabled builds passed; normal/shared/duration full CTest each passed 61/61; focused continuation/interrupt/tracking/allocation/solver/platform selector passed 14/14. |
+| Oracle gates | Fixed oracle 82 plus waypoint section oracle 4 passed; random 100k seeds 1, 2, and 41 passed; per-DoF 100k seed 1 passed; local 1M release-random seed 1 passed. |
+| ABI/export | Public header and allowlist both contain 184 symbols; current public exported symbols `184`; missing public symbols `0`; public removals `0`; unapproved exported symbols `0`. |
+| Wrappers and visualization | Python prototype 24/24 passed against the shared DLL; Rust wrapper 16/16 plus doc tests passed; 10 Rust examples compiled and ran; visualization verify and strict regeneration passed for 30 PNG assets. |
+| Boundary | Public header, ABI docs, workflow, `CMakeLists.txt`, upstream baseline, visualization assets, package-manager paths, version metadata, tags, releases, and manual workflows remain outside the readiness documentation diff. |
+
+Local `0.15.0-readiness` coverage summary after filtering out generated, test,
+example, binding, and output paths:
+
+| Metric | Total | Missed | Coverage |
+| --- | ---: | ---: | ---: |
+| Regions | 7990 | 932 | 88.34% |
+| Functions | 451 | 32 | 92.90% |
+| Lines | 8525 | 1042 | 87.78% |
+| Branches | 4649 | 1400 | 69.89% |
+
+Coverage artifacts are under `out/coverage/0.15.0-readiness/`. The readiness
+checklist is `docs/release/checklists/0.15.0-readiness.md`.
+
 ## 0.14.0-alpha.1 Interrupt Boundary API-Neutral Audit
 
 `0.14.0-alpha.1` adds a focused local audit for the existing

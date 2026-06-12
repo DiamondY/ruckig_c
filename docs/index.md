@@ -122,6 +122,11 @@ Historical rewrite plans and release evidence are retained for traceability.
   records the Optimized tracking sequence continuation implementation evidence.
   `release/checklists/0.15.0-alpha.7.md` records the tracking sequence
   continuation C/Python/Rust prototype smoke evidence.
+  `release/checklists/0.15.0-alpha.8.md` records the tracking sequence
+  continuation hardening evidence, and
+  `release/checklists/0.15.0-readiness.md` records the full local
+  stable-review audit for alpha.1 through alpha.8 without creating a tag or
+  GitHub Release.
 - `release/evidence/verification_report.md` - local and CI verification
   history.
 - `release/evidence/performance_report.md` - performance procedure and release
