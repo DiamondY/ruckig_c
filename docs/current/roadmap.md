@@ -48,17 +48,24 @@ Current `main` is `0.14.0-design - Unreleased` after the published
   tag, tag push CI, tag manual release-random, GitHub Release publication, and
   tag/release evidence push CI. Evidence is recorded in
   `docs/release/checklists/0.13.0.md`.
-- `0.14.0-alpha.1` API-neutral interrupt boundary audit is complete locally.
+- `0.14.0-alpha.1` API-neutral interrupt boundary audit is complete. It was
+  later covered by cumulative ordinary remote push CI with alpha.2 on head
+  commit `ea06684`, run `27387177406`.
   It adds focused local tests and evidence proving
   `interrupt_calculation_duration` remains limited to waypoint
   `ruckig_update` with intermediate waypoints. Public `ruckig_calculate`,
   no-waypoint `ruckig_update`, and tracking remain outside waypoint
-  soft-interruption true-resume semantics. Remote CI evidence is deferred.
-- Current priority is `0.14.0-alpha.2` future interrupt surfaces design. This
-  docs-only quasi-spec covers possible future no-waypoint complete-trajectory
-  boundary interruption and online tracking candidate-boundary interruption
-  without approving implementation, public ABI expansion, or active runtime
-  behavior changes.
+  soft-interruption true-resume semantics.
+- `0.14.0-alpha.2` future interrupt surfaces design is complete. It was
+  covered by ordinary remote push CI on head commit `ea06684`, run
+  `27387177406`, conclusion `success`. This docs-only quasi-spec covers
+  possible future no-waypoint complete-trajectory boundary interruption and
+  online tracking candidate-boundary interruption without approving active
+  runtime behavior changes.
+- Current priority is `0.14.0-alpha.3` implementation-readiness gap audit.
+  It decides whether the alpha.2 quasi-spec can move into API-neutral
+  no-waypoint and online tracking implementation slices while keeping
+  `ruckig_tracking_calculate_sequence` and public diagnostics deferred.
 - Keep the `v0.9.0` 172-symbol public C ABI baseline unless a separate public
   API decision is accepted.
 - Package-manager recipes and package publication remain frozen unless

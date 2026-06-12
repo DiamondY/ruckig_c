@@ -29,7 +29,17 @@ stable release, and `0.13.1` is reserved for emergency patch fixes only.
   candidate-boundary interruption. It is design-only, keeps
   `ruckig_tracking_calculate_sequence` deferred, and does not implement or
   approve any new runtime behavior, public ABI, version, tag, GitHub Release,
-  remote CI, or manual `release-random` action.
+  remote CI, or manual `release-random` action. Alpha.1 and alpha.2 were later
+  covered together by ordinary remote push CI on head commit `ea06684`, run
+  `27387177406`, conclusion `success`.
+- `0.14.0-alpha.3` implementation-readiness evidence records the gap audit for
+  moving the future interrupt surfaces into conditional API-neutral
+  implementation slices. It approves no-waypoint complete-trajectory-boundary
+  interruption and online tracking best-so-far candidate-boundary interruption
+  for later local alpha slices if their gates pass, while keeping
+  `ruckig_tracking_calculate_sequence`, public diagnostics, public ABI,
+  version, tag, GitHub Release, and manual `release-random` actions out of
+  scope.
 
 ## 0.13.0 - 2026-06-11
 

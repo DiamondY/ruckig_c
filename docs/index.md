@@ -100,7 +100,9 @@ Historical rewrite plans and release evidence are retained for traceability.
   `0.14.0-design` API-neutral interrupt boundary audit without creating a tag
   or GitHub Release. `release/checklists/0.14.0-alpha.2.md` records the
   design-only future interrupt surfaces quasi-spec for no-waypoint and online
-  tracking interruption.
+  tracking interruption. `release/checklists/0.14.0-alpha.3.md` records the
+  implementation-readiness gap audit for conditional API-neutral no-waypoint
+  and online tracking interruption slices.
 - `release/evidence/verification_report.md` - local and CI verification
   history.
 - `release/evidence/performance_report.md` - performance procedure and release
@@ -115,9 +117,10 @@ Historical rewrite plans and release evidence are retained for traceability.
 
 `v0.13.0` is the current stable release after completed `0.13.0-readiness`,
 release-candidate, tag, and manual release-random evidence. Current `main` is
-`0.14.0-design - Unreleased`; `0.14.0-alpha.2` is the active local
-design-only future interrupt surfaces slice after the `0.14.0-alpha.1`
-API-neutral interrupt boundary audit. `v0.13.0` stabilizes
+`0.14.0-design - Unreleased`; `0.14.0-alpha.3` is the active local
+implementation-readiness gap audit after the `0.14.0-alpha.1` boundary audit
+and `0.14.0-alpha.2` design-only future interrupt surfaces slice. `v0.13.0`
+stabilizes
 post-`v0.12.0` waypoint
 true-resume stress coverage and the private waypoint optimizer engine rewrite
 without expanding the 172-symbol public C ABI. `v0.12.0` stabilizes waypoint

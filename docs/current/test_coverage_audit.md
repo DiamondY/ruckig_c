@@ -44,8 +44,9 @@ soft-interruption true-resume, while public `ruckig_calculate`, no-waypoint
 | Boundary | Public header, ABI docs, CI workflow, `original/ruckig-main`, and visualization assets remain unchanged; `CMakeLists.txt` only adds the focused CTest entry. |
 
 The local evidence checklist is
-`docs/release/checklists/0.14.0-alpha.1.md`. This slice ends as one local
-commit only; remote CI evidence is deferred to a separate step.
+`docs/release/checklists/0.14.0-alpha.1.md`. This slice was later covered by
+cumulative ordinary remote push CI with alpha.2 on head commit `ea06684`, run
+`27387177406`, conclusion `success`.
 
 ## 0.14.0-alpha.2 Future Interrupt Surfaces Design
 
@@ -68,7 +69,30 @@ Coverage impact:
 
 The local design checklist is
 `docs/release/checklists/0.14.0-alpha.2.md`. Remote CI evidence for alpha.1
-and alpha.2 remains deferred to a separate step.
+and alpha.2 succeeded cumulatively on head commit `ea06684`, run
+`27387177406`, conclusion `success`.
+
+## 0.14.0-alpha.3 Interrupt Implementation Readiness Audit
+
+`0.14.0-alpha.3` is docs-only implementation-readiness evidence. It records
+that no-waypoint complete-trajectory-boundary interruption and online tracking
+best-so-far candidate-boundary interruption can proceed as conditional
+API-neutral implementation slices if their local gates pass. It does not
+change implementation, tests, public API, public ABI, or active runtime
+behavior.
+
+Coverage impact:
+
+| Area | Evidence |
+| --- | --- |
+| Behavioral tests | No new selector or CTest is added by this docs-only audit. |
+| No-waypoint go/no-go | Approved for a later alpha as complete-trajectory-boundary interruption without true-resume. |
+| Tracking go/no-go | Approved for a later alpha as online-only best-so-far candidate-boundary interruption for update and lookahead update. |
+| Deferred tracking sequence | `ruckig_tracking_calculate_sequence` remains deferred until a separate public diagnostics/API decision. |
+| ABI/export boundary | No public header, ABI allowlist, source, CMake, or workflow change is part of this slice. |
+
+The local readiness checklist is
+`docs/release/checklists/0.14.0-alpha.3.md`.
 
 ## v0.13.0 Release-Candidate Coverage
 

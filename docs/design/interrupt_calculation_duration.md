@@ -19,7 +19,13 @@ with intermediate waypoints and does not extend interruption to public
 `ruckig_calculate`, no-waypoint update, or tracking. `0.14.0-alpha.2` adds
 `future_interrupt_surfaces.md` as a design-only quasi-spec for possible future
 no-waypoint and online tracking interruption, but it does not implement or
-approve new runtime semantics. No new interrupt semantics are accepted yet.
+approve new runtime semantics. `0.14.0-alpha.3` records the implementation
+readiness gap audit for those future surfaces. It allows later local alpha
+slices to implement no-waypoint complete-trajectory-boundary interruption and
+online tracking best-so-far candidate-boundary interruption if their gates
+pass, while keeping `ruckig_tracking_calculate_sequence`, public diagnostics,
+public ABI changes, version bumps, tags, and releases out of scope. No new
+interrupt semantics are active yet.
 
 This is not a hard real-time guarantee. The budget is checked at safe waypoint
 candidate boundaries, so the actual elapsed time can exceed the configured
@@ -88,6 +94,11 @@ The optimizer is still advanced only at complete-candidate boundaries:
   online-only candidate-boundary interruption for `ruckig_tracking_update` and
   `ruckig_tracking_update_with_lookahead`. `ruckig_tracking_calculate_sequence`
   remains deferred until a separate public diagnostics/API decision.
+- `0.14.0-alpha.3` records the implementation-readiness gap audit. It
+  identifies the no-waypoint `ruckig_update` changed-input path and optimized
+  online tracking candidate enumeration as API-neutral implementation points
+  for later local alpha slices, with public ABI and public diagnostics still
+  frozen.
 
 Ordinary online cycles can continue an active resume before sampling the old
 trajectory when all of the following are true:
