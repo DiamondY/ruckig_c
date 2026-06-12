@@ -40,6 +40,12 @@ stable release, and `0.13.1` is reserved for emergency patch fixes only.
   `ruckig_tracking_calculate_sequence`, public diagnostics, public ABI,
   version, tag, GitHub Release, and manual `release-random` actions out of
   scope.
+- `0.14.0-alpha.4` local implementation evidence adds no-waypoint
+  `ruckig_update` complete-trajectory-boundary interruption through the
+  existing interrupt field. It uses private preallocated scratch trajectory
+  storage, preserves valid no-waypoint incumbents when budget expires, avoids
+  no-waypoint true-resume state, keeps public `ruckig_calculate` complete, and
+  keeps tracking isolated for the later alpha.5 tracking interruption slice.
 
 ## 0.13.0 - 2026-06-11
 

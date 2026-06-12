@@ -25,7 +25,10 @@ slices to implement no-waypoint complete-trajectory-boundary interruption and
 online tracking best-so-far candidate-boundary interruption if their gates
 pass, while keeping `ruckig_tracking_calculate_sequence`, public diagnostics,
 public ABI changes, version bumps, tags, and releases out of scope. No new
-interrupt semantics are active yet.
+tracking interrupt semantics are active yet. `0.14.0-alpha.4` implements the
+no-waypoint half of that plan: no-waypoint `ruckig_update` can now preserve a
+valid no-waypoint incumbent when the budget expires at a complete target
+trajectory boundary, but it still does not provide no-waypoint true-resume.
 
 This is not a hard real-time guarantee. The budget is checked at safe waypoint
 candidate boundaries, so the actual elapsed time can exceed the configured
@@ -39,7 +42,8 @@ microsecond value by the duration of the current complete candidate evaluation.
   candidate boundary after at least one complete candidate evaluation.
 - Negative values and NaN remain invalid input through the existing setter.
 - The feature only affects `ruckig_update` when the input contains intermediate
-  waypoints.
+  waypoints, plus the post-`0.14.0-alpha.4` no-waypoint
+  complete-trajectory-boundary policy described below.
 - Public `ruckig_calculate`, no-waypoint target solving, and tracking remain
   unchanged by the field.
 - Public waypoint `ruckig_calculate` uses the same private step-driven
@@ -99,6 +103,28 @@ The optimizer is still advanced only at complete-candidate boundaries:
   online tracking candidate enumeration as API-neutral implementation points
   for later local alpha slices, with public ABI and public diagnostics still
   frozen.
+- `0.14.0-alpha.4` implements no-waypoint complete-trajectory-boundary
+  interruption without true-resume. Tracking remains isolated until a later
+  alpha explicitly implements online tracking interruption.
+
+## No-Waypoint Complete-Trajectory Boundary
+
+No-waypoint `ruckig_update` now uses `interrupt_calculation_duration` without
+adding public API:
+
+- New no-waypoint target candidates are calculated into private preallocated
+  scratch trajectory storage.
+- Budget is checked only after the complete target trajectory attempt returns.
+- If no valid no-waypoint incumbent exists, a successful complete candidate is
+  published through normal first-calculation semantics.
+- If a valid no-waypoint incumbent exists and the budget is exhausted at the
+  complete trajectory boundary, the incumbent is sampled, `new_calculation`
+  remains false, and `output.was_calculation_interrupted` is true.
+- No no-waypoint root/profile cursor is stored, so this is not true-resume.
+- Public `ruckig_calculate` remains a complete solve and ignores the interrupt
+  budget.
+- Tracking clears the interrupt field on its internal work input until online
+  tracking interruption is implemented separately.
 
 Ordinary online cycles can continue an active resume before sampling the old
 trajectory when all of the following are true:

@@ -66,6 +66,15 @@ Current `main` is `0.14.0-design - Unreleased` after the published
   It decides whether the alpha.2 quasi-spec can move into API-neutral
   no-waypoint and online tracking implementation slices while keeping
   `ruckig_tracking_calculate_sequence` and public diagnostics deferred.
+- `0.14.0-alpha.4` no-waypoint interruption is complete locally. It adds
+  complete-trajectory-boundary interruption for no-waypoint `ruckig_update`
+  through the existing interrupt field, preserves valid no-waypoint incumbents
+  when budget expires, does not implement true-resume, and keeps tracking
+  isolated for alpha.5.
+- Current implementation priority is `0.14.0-alpha.5` online tracking
+  interruption for `ruckig_tracking_update` and
+  `ruckig_tracking_update_with_lookahead`, using best-so-far complete
+  candidate publication without public diagnostics or ABI expansion.
 - Keep the `v0.9.0` 172-symbol public C ABI baseline unless a separate public
   API decision is accepted.
 - Package-manager recipes and package publication remain frozen unless

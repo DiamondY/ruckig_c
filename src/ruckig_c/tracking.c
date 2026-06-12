@@ -712,6 +712,8 @@ static ruckig_result_t prepare_tracking_base(ruckig_tracking_t* tracking, const 
             return RUCKIG_ERROR_INVALID_INPUT;
         }
     }
+    tracking->work_input->has_interrupt_calculation_duration = false;
+    tracking->work_input->interrupt_calculation_duration = 0.0;
     return RUCKIG_WORKING;
 }
 

@@ -157,6 +157,7 @@ struct ruckig {
     double delta_time;
     bool current_input_initialized;
     struct ruckig_input* current_input;
+    struct ruckig_trajectory* no_waypoint_scratch_trajectory;
     struct ruckig_input* waypoint_section_input;
     struct ruckig_trajectory* waypoint_section_trajectory;
     ruckig_waypoint_optimizer_engine_t waypoint_engine;

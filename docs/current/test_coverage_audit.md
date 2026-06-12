@@ -94,6 +94,28 @@ Coverage impact:
 The local readiness checklist is
 `docs/release/checklists/0.14.0-alpha.3.md`.
 
+## 0.14.0-alpha.4 No-Waypoint Interrupt Boundary Support
+
+`0.14.0-alpha.4` adds API-neutral no-waypoint interruption for
+`ruckig_update`. It uses the existing interrupt field and output flag, adds no
+public ABI, and checks budget only after a complete target trajectory attempt.
+
+Added C coverage:
+
+| Scenario | Evidence |
+| --- | --- |
+| Focused selector | Adds `--no-waypoint-interrupt-audit` and CTest `ruckig_c_no_waypoint_interrupt_audit`. |
+| First solve | Zero-budget first no-waypoint update publishes a complete candidate when no incumbent exists. |
+| Incumbent preservation | Zero-budget changed-target update with a valid no-waypoint incumbent preserves the old trajectory, reports interruption, and does not mark a new calculation. |
+| Budget matrix | Covers zero, tiny, large, changed, and cleared interrupt budgets without no-waypoint resume state. |
+| Cross-surface isolation | Waypoint incumbents are not preserved when switching from waypoint input to no-waypoint input. |
+| Tracking isolation | Tracking clears interrupt on its internal work input in this alpha, so online tracking behavior remains unchanged until alpha.5. |
+| Allocation guard | No-waypoint first solve, interrupted incumbent preservation, and budget-clear paths run under the allocation guard. |
+| Local gates | Main build passed; focused selector group passed 5/5; default CTest passed 50/50; duration-enabled selector group passed 3/3. |
+
+The local implementation checklist is
+`docs/release/checklists/0.14.0-alpha.4.md`.
+
 ## v0.13.0 Release-Candidate Coverage
 
 `v0.13.0` release-candidate local gates rerun the readiness gate after the

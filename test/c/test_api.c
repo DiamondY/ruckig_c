@@ -3951,7 +3951,7 @@ static void test_interrupt_boundary_no_waypoint_update_ignores_interrupt_and_cle
     CHECK_TRUE(!otg->waypoint_engine.active);
 
     ruckig_output_pass_to_input(no_waypoint_output, no_waypoint_input);
-    CHECK_EQ_INT(ruckig_input_set_interrupt_calculation_duration(no_waypoint_input, 0.5), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_input_set_interrupt_calculation_duration(no_waypoint_input, 1000000000.0), RUCKIG_WORKING);
     result = ruckig_update(otg, no_waypoint_input, no_waypoint_output);
     CHECK_TRUE(result == RUCKIG_WORKING || result == RUCKIG_FINISHED);
     CHECK_TRUE(!ruckig_output_was_calculation_interrupted(no_waypoint_output));
@@ -4097,6 +4097,122 @@ static void test_interrupt_boundary_allocation_guard(void) {
     ruckig_input_destroy(no_waypoint_input);
     ruckig_output_destroy(waypoint_output);
     ruckig_input_destroy(waypoint_input);
+    ruckig_destroy(otg);
+}
+
+static void test_no_waypoint_interrupt_first_solve_publishes_complete_candidate(void) {
+    ruckig_t* otg = NULL;
+    ruckig_input_t* input = NULL;
+    ruckig_output_t* output = NULL;
+    ruckig_result_t result;
+
+    CHECK_EQ_INT(ruckig_create(&otg, 1, 0.05), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_input_create(&input, 1), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_output_create(&output, 1), RUCKIG_WORKING);
+    configure_interrupt_boundary_no_waypoint_input(input);
+    CHECK_EQ_INT(ruckig_input_set_interrupt_calculation_duration(input, 0.0), RUCKIG_WORKING);
+
+    result = ruckig_update_under_allocation_guard(otg, input, output);
+    CHECK_TRUE(result == RUCKIG_WORKING || result == RUCKIG_FINISHED);
+    CHECK_TRUE(ruckig_output_new_calculation(output));
+    CHECK_TRUE(!ruckig_output_was_calculation_interrupted(output));
+    CHECK_TRUE(ruckig_trajectory_get_duration(ruckig_output_get_trajectory(output)) > 0.0);
+    CHECK_TRUE(!otg->waypoint_engine.active);
+
+    ruckig_output_destroy(output);
+    ruckig_input_destroy(input);
+    ruckig_destroy(otg);
+}
+
+static void test_no_waypoint_interrupt_preserves_incumbent_at_boundary(void) {
+    ruckig_t* otg = NULL;
+    ruckig_input_t* input = NULL;
+    ruckig_output_t* output = NULL;
+    ruckig_result_t result;
+    double incumbent_duration;
+    double old_time;
+
+    CHECK_EQ_INT(ruckig_create(&otg, 1, 0.05), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_input_create(&input, 1), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_output_create(&output, 1), RUCKIG_WORKING);
+    configure_interrupt_boundary_no_waypoint_input(input);
+    CHECK_EQ_INT(ruckig_input_set_interrupt_calculation_duration(input, 1000000000.0), RUCKIG_WORKING);
+
+    result = ruckig_update_under_allocation_guard(otg, input, output);
+    CHECK_TRUE(result == RUCKIG_WORKING || result == RUCKIG_FINISHED);
+    CHECK_TRUE(ruckig_output_new_calculation(output));
+    CHECK_TRUE(!ruckig_output_was_calculation_interrupted(output));
+    incumbent_duration = ruckig_trajectory_get_duration(ruckig_output_get_trajectory(output));
+    old_time = ruckig_output_get_time(output);
+    CHECK_TRUE(incumbent_duration > old_time);
+
+    ruckig_output_pass_to_input(output, input);
+    ruckig_input_target_position_data(input)[0] = 1.8;
+    CHECK_EQ_INT(ruckig_input_set_interrupt_calculation_duration(input, 0.0), RUCKIG_WORKING);
+    result = ruckig_update_under_allocation_guard(otg, input, output);
+    CHECK_TRUE(result == RUCKIG_WORKING || result == RUCKIG_FINISHED);
+    CHECK_TRUE(!ruckig_output_new_calculation(output));
+    CHECK_TRUE(ruckig_output_was_calculation_interrupted(output));
+    CHECK_TRUE(ruckig_trajectory_get_duration(ruckig_output_get_trajectory(output)) == incumbent_duration);
+    CHECK_TRUE(ruckig_output_get_time(output) > old_time);
+    CHECK_TRUE(!otg->waypoint_engine.active);
+
+    ruckig_output_destroy(output);
+    ruckig_input_destroy(input);
+    ruckig_destroy(otg);
+}
+
+static void test_no_waypoint_interrupt_budget_matrix_and_clear(void) {
+    ruckig_t* otg = NULL;
+    ruckig_input_t* input = NULL;
+    ruckig_output_t* output = NULL;
+    ruckig_result_t result;
+    double interrupted_duration;
+
+    CHECK_EQ_INT(ruckig_create(&otg, 1, 0.05), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_input_create(&input, 1), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_output_create(&output, 1), RUCKIG_WORKING);
+    configure_interrupt_boundary_no_waypoint_input(input);
+    CHECK_EQ_INT(ruckig_input_set_interrupt_calculation_duration(input, 1000000000.0), RUCKIG_WORKING);
+
+    result = ruckig_update_under_allocation_guard(otg, input, output);
+    CHECK_TRUE(result == RUCKIG_WORKING || result == RUCKIG_FINISHED);
+    CHECK_TRUE(ruckig_output_new_calculation(output));
+    CHECK_TRUE(!ruckig_output_was_calculation_interrupted(output));
+
+    ruckig_output_pass_to_input(output, input);
+    ruckig_input_target_position_data(input)[0] = 1.6;
+    CHECK_EQ_INT(ruckig_input_set_interrupt_calculation_duration(input, 0.0), RUCKIG_WORKING);
+    result = ruckig_update_under_allocation_guard(otg, input, output);
+    CHECK_TRUE(result == RUCKIG_WORKING || result == RUCKIG_FINISHED);
+    CHECK_TRUE(!ruckig_output_new_calculation(output));
+    CHECK_TRUE(ruckig_output_was_calculation_interrupted(output));
+    interrupted_duration = ruckig_trajectory_get_duration(ruckig_output_get_trajectory(output));
+
+    ruckig_output_pass_to_input(output, input);
+    CHECK_EQ_INT(ruckig_input_set_interrupt_calculation_duration(input, 1000000000.0), RUCKIG_WORKING);
+    result = ruckig_update_under_allocation_guard(otg, input, output);
+    CHECK_TRUE(result == RUCKIG_WORKING || result == RUCKIG_FINISHED);
+    CHECK_TRUE(ruckig_output_new_calculation(output));
+    CHECK_TRUE(!ruckig_output_was_calculation_interrupted(output));
+    CHECK_TRUE(ruckig_trajectory_get_duration(ruckig_output_get_trajectory(output)) != interrupted_duration);
+
+    ruckig_output_pass_to_input(output, input);
+    CHECK_EQ_INT(ruckig_input_set_interrupt_calculation_duration(input, 1.0), RUCKIG_WORKING);
+    result = ruckig_update_under_allocation_guard(otg, input, output);
+    CHECK_TRUE(result == RUCKIG_WORKING || result == RUCKIG_FINISHED);
+    CHECK_TRUE(!otg->waypoint_engine.active);
+
+    ruckig_output_pass_to_input(output, input);
+    ruckig_input_clear_interrupt_calculation_duration(input);
+    result = ruckig_update_under_allocation_guard(otg, input, output);
+    CHECK_TRUE(result == RUCKIG_WORKING || result == RUCKIG_FINISHED);
+    CHECK_TRUE(ruckig_output_new_calculation(output));
+    CHECK_TRUE(!ruckig_output_was_calculation_interrupted(output));
+    CHECK_TRUE(!otg->waypoint_engine.active);
+
+    ruckig_output_destroy(output);
+    ruckig_input_destroy(input);
     ruckig_destroy(otg);
 }
 
@@ -6449,6 +6565,12 @@ void run_interrupt_boundary_audit_tests(void) {
     test_interrupt_boundary_calculate_clears_waypoint_resume();
     test_interrupt_boundary_tracking_ignores_interrupt();
     test_interrupt_boundary_allocation_guard();
+}
+
+void run_no_waypoint_interrupt_audit_tests(void) {
+    test_no_waypoint_interrupt_first_solve_publishes_complete_candidate();
+    test_no_waypoint_interrupt_preserves_incumbent_at_boundary();
+    test_no_waypoint_interrupt_budget_matrix_and_clear();
 }
 
 void run_tracking_api_tests(void) {

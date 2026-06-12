@@ -1,5 +1,6 @@
 #include "ruckig_c/internal.h"
 
+#include "ruckig_c/platform_clock.h"
 #include "ruckig_c/position_first.h"
 #include "ruckig_c/velocity_second.h"
 
@@ -28,6 +29,48 @@ static double calculation_duration_finish(double start) {
     (void)start;
     return 0.0;
 #endif
+}
+
+typedef struct ruckig_interrupt_context {
+    bool enabled;
+    uint64_t start_us;
+    double duration_us;
+} ruckig_interrupt_context_t;
+
+static ruckig_interrupt_context_t ruckig_interrupt_context_start(const ruckig_input_t* input) {
+    ruckig_interrupt_context_t context;
+    context.enabled = input && input->has_interrupt_calculation_duration;
+    context.start_us = context.enabled ? ruckig_platform_monotonic_time_us() : 0u;
+    context.duration_us = context.enabled ? input->interrupt_calculation_duration : 0.0;
+    return context;
+}
+
+static bool ruckig_interrupt_context_elapsed(const ruckig_interrupt_context_t* context) {
+    uint64_t now_us;
+    double elapsed_us;
+    if (!context || !context->enabled) {
+        return false;
+    }
+    now_us = ruckig_platform_monotonic_time_us();
+    elapsed_us = now_us >= context->start_us ? (double)(now_us - context->start_us) : 0.0;
+    return elapsed_us >= context->duration_us;
+}
+
+static ruckig_result_t ruckig_trajectory_copy_internal(
+    ruckig_trajectory_t* dst,
+    const ruckig_trajectory_t* src
+) {
+    if (!dst || !src || dst->dofs != src->dofs || src->section_count > dst->section_capacity) {
+        return RUCKIG_ERROR_INVALID_INPUT;
+    }
+    dst->section_count = src->section_count;
+    dst->duration = src->duration;
+    dst->valid = src->valid;
+    memcpy(dst->profiles, src->profiles, sizeof(ruckig_profile_t) * src->section_count * src->dofs);
+    memcpy(dst->blocks, src->blocks, sizeof(ruckig_block_t) * src->dofs);
+    memcpy(dst->independent_min_durations, src->independent_min_durations, sizeof(double) * src->dofs);
+    memcpy(dst->cumulative_times, src->cumulative_times, sizeof(double) * src->section_count);
+    return RUCKIG_WORKING;
 }
 
 static bool input_is_first_order_position(const ruckig_input_t* input) {
@@ -1245,6 +1288,10 @@ static ruckig_result_t ruckig_create_impl(
         ruckig_destroy(value);
         return RUCKIG_ERROR;
     }
+    if (ruckig_trajectory_create(&value->no_waypoint_scratch_trajectory, dofs) != RUCKIG_WORKING) {
+        ruckig_destroy(value);
+        return RUCKIG_ERROR;
+    }
     if (ruckig_input_create(&value->waypoint_section_input, dofs) != RUCKIG_WORKING) {
         ruckig_destroy(value);
         return RUCKIG_ERROR;
@@ -1303,6 +1350,7 @@ RUCKIG_C_API void ruckig_destroy(ruckig_t* otg) {
         return;
     }
     ruckig_input_destroy(otg->current_input);
+    ruckig_trajectory_destroy(otg->no_waypoint_scratch_trajectory);
     ruckig_input_destroy(otg->waypoint_section_input);
     ruckig_input_destroy(otg->waypoint_engine.identity_input);
     ruckig_trajectory_destroy(otg->waypoint_section_trajectory);
@@ -1355,6 +1403,41 @@ ruckig_result_t ruckig_calculate_target(
     return RUCKIG_ERROR_INVALID_INPUT;
 }
 
+static ruckig_result_t ruckig_calculate_target_interruptible(
+    ruckig_t* otg,
+    const ruckig_input_t* input,
+    ruckig_trajectory_t* trajectory,
+    bool* was_interrupted,
+    bool* published
+) {
+    ruckig_result_t result;
+    ruckig_interrupt_context_t interrupt_context;
+    const bool has_incumbent = trajectory && trajectory->valid
+        && otg && otg->current_input_initialized && otg->current_input->waypoint_count == 0;
+    if (!otg || !input || !trajectory || !otg->no_waypoint_scratch_trajectory || !was_interrupted || !published) {
+        return RUCKIG_ERROR_INVALID_INPUT;
+    }
+
+    *was_interrupted = false;
+    *published = false;
+    interrupt_context = ruckig_interrupt_context_start(input);
+    result = ruckig_calculate_target(otg, input, otg->no_waypoint_scratch_trajectory);
+    if (result != RUCKIG_WORKING) {
+        return result;
+    }
+    if (has_incumbent && ruckig_interrupt_context_elapsed(&interrupt_context)) {
+        *was_interrupted = true;
+        return RUCKIG_WORKING;
+    }
+
+    result = ruckig_trajectory_copy_internal(trajectory, otg->no_waypoint_scratch_trajectory);
+    if (result != RUCKIG_WORKING) {
+        return result;
+    }
+    *published = true;
+    return RUCKIG_WORKING;
+}
+
 RUCKIG_C_API ruckig_result_t ruckig_calculate(
     ruckig_t* otg,
     const ruckig_input_t* input,
@@ -1395,9 +1478,26 @@ RUCKIG_C_API ruckig_result_t ruckig_update(
     if (!output->trajectory->valid
         || !otg->current_input_initialized
         || !input_matches_current) {
-        ruckig_result_t result = input->waypoint_count > 0 && input->has_interrupt_calculation_duration
-            ? ruckig_calculate_waypoints_interruptible(otg, input, output->trajectory, &output->was_calculation_interrupted)
-            : ruckig_calculate(otg, input, output->trajectory);
+        bool published = true;
+        ruckig_result_t result;
+        if (input->waypoint_count > 0 && input->has_interrupt_calculation_duration) {
+            result = ruckig_calculate_waypoints_interruptible(
+                otg,
+                input,
+                output->trajectory,
+                &output->was_calculation_interrupted
+            );
+        } else if (input->waypoint_count == 0 && input->has_interrupt_calculation_duration) {
+            result = ruckig_calculate_target_interruptible(
+                otg,
+                input,
+                output->trajectory,
+                &output->was_calculation_interrupted,
+                &published
+            );
+        } else {
+            result = ruckig_calculate(otg, input, output->trajectory);
+        }
         if (result != RUCKIG_WORKING) {
             output->calculation_duration = calculation_duration_finish(calculation_start);
             return result;
@@ -1405,12 +1505,14 @@ RUCKIG_C_API ruckig_result_t ruckig_update(
         if (!(input->waypoint_count > 0 && input->has_interrupt_calculation_duration)) {
             ruckig_waypoint_resume_clear(otg);
         }
-        ruckig_input_copy_state(input, otg->current_input);
-        otg->current_input_initialized = true;
-        output->time = 0.0;
-        output->new_section = 0;
-        output->did_section_change = false;
-        output->new_calculation = true;
+        if (published) {
+            ruckig_input_copy_state(input, otg->current_input);
+            otg->current_input_initialized = true;
+            output->time = 0.0;
+            output->new_section = 0;
+            output->did_section_change = false;
+            output->new_calculation = true;
+        }
     } else if (input->waypoint_count > 0 && input->has_interrupt_calculation_duration) {
         bool published = false;
         const double incumbent_remaining_duration = output->trajectory->duration > output->time
