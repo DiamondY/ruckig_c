@@ -1,21 +1,35 @@
 # Changelog
 
-## 0.14.0-design - Unreleased
+## 0.14.0 - 2026-06-12
 
-Post-`v0.13.0` mainline planning is open on `main`. `v0.13.0` is the current
-stable release, and `0.13.1` is reserved for emergency patch fixes only.
+`0.14.0` is the stable API-neutral interrupt surface release. It keeps the
+`v0.13.0` 172-symbol public C ABI unchanged while stabilizing the
+`0.14.0-alpha.1` through `0.14.0-alpha.5` interrupt evidence reviewed during
+`0.14.0-readiness`.
 
-- No `0.14.0` public C API, public ABI, exported-symbol, enum numeric, or
-  result-code numeric change is accepted yet.
+Release focus:
+
+- Waypoint `ruckig_update` true-resume behavior remains the existing private
+  waypoint engine behavior from the `v0.12.0`/`v0.13.0` line.
+- No-waypoint `ruckig_update` now supports complete-trajectory-boundary
+  interruption through the existing interrupt field and output flag, without
+  no-waypoint true-resume or public API expansion.
+- Optimized online tracking update and lookahead update now support
+  best-so-far complete-candidate-boundary interruption through the existing
+  interrupt field and output flag.
+- Public `ruckig_calculate` remains complete and ignores interruption budgets.
+- `ruckig_tracking_calculate_sequence` remains deferred.
+- No `0.14.0` public C API, public ABI, exported-symbol, enum numeric, public
+  diagnostics, runtime clock hook, or result-code numeric change is part of
+  the release.
 - Package-manager recipes, formal Python/Rust publication, cloud/remote
   calculation, Pro/cloud equivalence claims, hard real-time guarantees,
   runtime clock public hooks, public interrupt diagnostics, tracking sequence
   interruption, formal global optimality proof, and upstream baseline upgrades
   remain deferred unless separately accepted.
-- `v0.13.0` release evidence, including release-candidate local gates,
-  ordinary push CI, candidate manual release-random, annotated tag, tag push
-  CI, tag manual release-random, and GitHub Release publication, is recorded in
-  `docs/release/checklists/0.13.0.md`.
+
+Release evidence:
+
 - `0.14.0-alpha.1` local evidence adds the API-neutral
   `--interrupt-boundary-audit` selector and `ruckig_c_interrupt_boundary_audit`
   CTest. The audit proved the then-active boundary:
@@ -62,6 +76,13 @@ stable release, and `0.13.1` is reserved for emergency patch fixes only.
   clock, visualization, wrapper, coverage, and boundary gates for alpha.1
   through alpha.5. This readiness slice does not bump version, create a tag,
   publish a GitHub Release, push, or trigger manual `release-random`.
+- `0.14.0-readiness` ordinary remote push CI succeeded on commit
+  `85b48b86db8a97f1284a6868501b1c72a06db6d9`, run `27393309247`.
+- `v0.14.0` stable closeout moves ABI artifact output paths to
+  `artifacts/abi/0.14.0`, keeps public additions/removals at `0`, and records
+  local release gates, ordinary CI, manual release-random workflow evidence,
+  annotated tag publication, and GitHub Release publication in
+  `docs/release/checklists/0.14.0.md`.
 
 ## 0.13.0 - 2026-06-11
 

@@ -18,16 +18,18 @@ install, pkg-config, static/DLL, shared install-tree, and CI consumer paths
 remain maintained; vcpkg, Conan, Homebrew, and similar recipes are reopened
 only after a separate user or release demand decision.
 
-## 0.14.0 Design Line
+## 0.14.0 Release Closeout
 
-Current `main` is `0.14.0-design - Unreleased` after the published
-`v0.13.0` stable release.
+Current `main` is in `v0.14.0` stable release closeout after the published
+`v0.13.0` stable release and completed `0.14.0-readiness` remote CI evidence.
 
 - `v0.13.0` is the current stable release.
 - `0.13.1` is reserved for emergency `v0.13.0` patch fixes only.
 - `0.12.1` remains reserved for emergency `v0.12.0` patch fixes only.
-- No `0.14.0` public C API, public ABI, exported-symbol, enum numeric, or
-  result-code numeric change is accepted yet.
+- `v0.14.0` is the current release-candidate closeout target.
+- No `0.14.0` public C API, public ABI, exported-symbol, enum numeric,
+  public diagnostics, runtime clock hook, or result-code numeric change is
+  accepted for the release.
 - `0.13.0-alpha.1` waypoint true-resume stress and quality evidence is
   complete. It added focused multi-DoF, multi-waypoint, per-section,
   budget-matrix, fresh-solve quality-reference, long online-loop, and
@@ -79,9 +81,13 @@ Current `main` is `0.14.0-design - Unreleased` after the published
   expansion deferred.
 - Alpha.3 through alpha.5 cumulative ordinary remote push CI evidence
   succeeded on head commit `4e0e2fb`, run `27391043296`, conclusion `success`.
-- Current priority is `0.14.0-readiness` local stable-review audit. Do not
-  enter `v0.14.0` stable closeout, tag, release, version bump, or manual
-  release-random until readiness evidence is recorded and reviewed.
+- `0.14.0-readiness` passed the full local stable-review gate and ordinary
+  remote push CI on head commit
+  `85b48b86db8a97f1284a6868501b1c72a06db6d9`, run `27393309247`, conclusion
+  `success`.
+- Current priority is `v0.14.0` stable release closeout. Do not create the
+  `v0.14.0` tag or GitHub Release until release-candidate local gates,
+  candidate ordinary push CI, and candidate manual release-random all pass.
 - Keep the `v0.9.0` 172-symbol public C ABI baseline unless a separate public
   API decision is accepted.
 - Package-manager recipes and package publication remain frozen unless

@@ -40,9 +40,9 @@ does not require a strict automated ABI diff yet.
 
 ## v0.13.0 Stable ABI Baseline
 
-`v0.13.0` is the current stable release after completed `0.13.0-readiness`,
-release-candidate, tag, and GitHub Release evidence. Current `main` is
-`0.14.0-design - Unreleased`; no `0.14.0` public ABI change is accepted yet.
+`v0.13.0` is the current stable release before `v0.14.0` closeout. Current
+`main` is in `v0.14.0` release-candidate closeout; no `0.14.0` public ABI
+change is accepted.
 The `v0.13.0` release changed only version metadata and ABI artifact output
 paths:
 
@@ -65,13 +65,17 @@ Compatibility rules for the `v0.13.0` stable release:
   baseline.
 - Public header diff against `v0.12.0` is limited to version macros/string.
 
-## 0.14.0-readiness ABI Review
+## v0.14.0 Release Candidate ABI Review
 
-`0.14.0-readiness` reviews the post-`v0.13.0` interrupt-surface work on
-`main`. It is not a stable release closeout and does not bump version metadata,
-create a tag, publish a GitHub Release, or trigger manual `release-random`.
+`v0.14.0` release-candidate closeout reviews the post-`v0.13.0`
+interrupt-surface work on `main`. The release candidate bumps only version
+metadata and ABI artifact output paths:
 
-The active `0.14.0-design` interrupt changes reuse existing public API:
+- `CMakeLists.txt` project version is `0.14.0`.
+- `RUCKIG_C_VERSION_*` macros and string are `0.14.0`.
+- ABI artifact output paths use `artifacts/abi/0.14.0`.
+
+The `0.14.0` interrupt changes reuse existing public API:
 
 - Waypoint `ruckig_update` keeps the existing private true-resume behavior.
 - No-waypoint `ruckig_update` now uses the existing
@@ -86,15 +90,15 @@ The active `0.14.0-design` interrupt changes reuse existing public API:
 - `ruckig_tracking_calculate_sequence` remains deferred because the public
   sequence output has no API-neutral interruption carrier.
 
-Compatibility rules for `0.14.0-readiness`:
+Compatibility rules for `v0.14.0`:
 
 - Public C symbol count remains `172`.
-- Public additions in `0.14.0-readiness`: `0`.
-- Public removals in `0.14.0-readiness`: `0`.
+- Public additions in `v0.14.0`: `0`.
+- Public removals in `v0.14.0`: `0`.
 - Unapproved exported symbols: `0`.
-- `include/ruckig_c/ruckig.h`, `docs/abi/public-symbols.txt`,
-  `docs/abi/public-symbol-exceptions.txt`, and `docs/abi/exceptions.md` remain
-  unchanged.
+- `docs/abi/public-symbols.txt`, `docs/abi/public-symbol-exceptions.txt`, and
+  `docs/abi/exceptions.md` remain unchanged.
+- Public header diff against `v0.13.0` is limited to version macros/string.
 - No public function signature, public struct layout, enum numeric value, or
   result-code numeric value changes.
 

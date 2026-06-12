@@ -12,7 +12,8 @@ state into an internal waypoint engine and adds deterministic quality-baseline
 evidence. `0.13.0-readiness` reruns the full local stable-review audit for
 that post-release evidence line, and the published `v0.13.0` stable release
 adopts that evidence without changing the public API, public ABI, or runtime
-semantics described below. Current `main` is `0.14.0-design - Unreleased`;
+semantics described below. Current `main` is in `v0.14.0` stable release
+closeout;
 `0.14.0-alpha.1` adds an API-neutral interrupt boundary audit for these same
 semantics. It proves the field remains limited to waypoint `ruckig_update`
 with intermediate waypoints and does not extend interruption to public
@@ -33,7 +34,9 @@ for Optimized `ruckig_tracking_update` and
 `ruckig_tracking_update_with_lookahead`, while leaving
 `ruckig_tracking_calculate_sequence` deferred. `0.14.0-readiness` reruns the
 full local stable-review gate set for the waypoint, no-waypoint, and online
-tracking interrupt surfaces without changing public ABI.
+tracking interrupt surfaces without changing public ABI. The `v0.14.0`
+release candidate adopts these semantics with only version metadata and ABI
+artifact path changes.
 
 This is not a hard real-time guarantee. The budget is checked at safe waypoint
 candidate boundaries, so the actual elapsed time can exceed the configured
@@ -115,6 +118,10 @@ The optimizer is still advanced only at complete-candidate boundaries:
 - `0.14.0-alpha.5` implements Optimized online tracking candidate-boundary
   interruption for update and lookahead update. It publishes only complete
   best-so-far candidates and keeps sequence interruption deferred.
+- `v0.14.0` release-candidate gates validate the combined waypoint,
+  no-waypoint, and online tracking interrupt semantics through focused
+  interrupt, duration-enabled, allocation, coverage, ABI/export, oracle,
+  performance, wrapper, and visualization gates without adding public API.
 
 ## No-Waypoint Complete-Trajectory Boundary
 

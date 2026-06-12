@@ -7,7 +7,7 @@ Historical rewrite plans and release evidence are retained for traceability.
 ## Current Maintainer Entry Points
 
 - `current/roadmap.md` - shipped scope, maintenance queues, current stable
-  release scope, the post-`v0.13.0` `0.14.0-design` line, and future design
+  release scope, the `v0.14.0` release closeout line, and future design
   boundaries.
 - `current/api_compatibility.md` - patch-release API/ABI policy and
   exported-symbol review.
@@ -108,7 +108,8 @@ Historical rewrite plans and release evidence are retained for traceability.
   local online tracking best-so-far candidate-boundary interruption evidence.
   `release/checklists/0.14.0-readiness.md` records the full local
   stable-review readiness audit for alpha.1 through alpha.5 without creating a
-  tag or GitHub Release.
+  tag or GitHub Release. `release/checklists/0.14.0.md` records the stable
+  API-neutral interrupt surface release closeout.
 - `release/evidence/verification_report.md` - local and CI verification
   history.
 - `release/evidence/performance_report.md` - performance procedure and release
@@ -118,19 +119,18 @@ Historical rewrite plans and release evidence are retained for traceability.
   tracking quality/stability evidence release notes, the stable `0.10.0`
   Visualization v2 evidence release notes, the stable `0.11.0` waypoint
   soft-interruption and platform-clock evidence release notes, the stable
-  `0.12.0` waypoint soft-interruption true-resume release notes, and the
-  stable `0.13.0` waypoint true-resume stress/private-engine release notes.
+  `0.12.0` waypoint soft-interruption true-resume release notes, the stable
+  `0.13.0` waypoint true-resume stress/private-engine release notes, and the
+  stable `0.14.0` API-neutral interrupt surface release notes.
 
-`v0.13.0` is the current stable release after completed `0.13.0-readiness`,
-release-candidate, tag, and manual release-random evidence. Current `main` is
-`0.14.0-design - Unreleased`; the current local evidence step is
-`0.14.0-readiness` after cumulative remote CI succeeded for alpha.1/alpha.2
-and alpha.3 through alpha.5. Alpha.4 added no-waypoint interruption and
+`v0.13.0` is the current stable release before `v0.14.0` publication. Current
+`main` is in `v0.14.0` stable release closeout after completed local and
+remote `0.14.0-readiness` evidence. Alpha.4 added no-waypoint interruption and
 alpha.5 added online tracking interruption without expanding the public C ABI.
-`v0.13.0` stabilizes
-post-`v0.12.0` waypoint
-true-resume stress coverage and the private waypoint optimizer engine rewrite
-without expanding the 172-symbol public C ABI. `v0.12.0` stabilizes waypoint
+`v0.14.0` stabilizes the API-neutral interrupt surfaces without expanding the
+172-symbol public C ABI. `v0.13.0` stabilizes post-`v0.12.0` waypoint
+true-resume stress coverage and the private waypoint optimizer engine rewrite.
+`v0.12.0` stabilizes waypoint
 `ruckig_update` soft-interruption true-resume and the unified private waypoint
 optimizer engine. `v0.11.0` stabilizes
 waypoint `ruckig_update` soft-interruption V1 and the internal platform clock
