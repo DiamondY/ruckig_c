@@ -4587,6 +4587,8 @@ static void test_tracking_api_lifecycle_and_accessors(void) {
     ruckig_target_state_t* target = NULL;
     ruckig_target_state_sequence_t* target_sequence = NULL;
     ruckig_tracking_output_sequence_t* output_sequence = NULL;
+    ruckig_tracking_sequence_continuation_t* continuation = NULL;
+    ruckig_input_t* sequence_input = NULL;
     ruckig_tracking_diagnostics_t diagnostics;
 
     CHECK_EQ_INT(ruckig_tracking_create(NULL, 1, 0.01), RUCKIG_ERROR_INVALID_INPUT);
@@ -4661,10 +4663,54 @@ static void test_tracking_api_lifecycle_and_accessors(void) {
     CHECK_TRUE(ruckig_tracking_output_sequence_result_const_data(output_sequence) != NULL);
     ruckig_tracking_output_sequence_clear(output_sequence);
 
+    CHECK_EQ_INT(ruckig_tracking_sequence_continuation_create(NULL, 2, 4), RUCKIG_ERROR_INVALID_INPUT);
+    CHECK_EQ_INT(ruckig_tracking_sequence_continuation_create(&continuation, 0, 4), RUCKIG_ERROR_INVALID_INPUT);
+    CHECK_EQ_INT(ruckig_tracking_sequence_continuation_create(&continuation, 2, 0), RUCKIG_ERROR_INVALID_INPUT);
+    CHECK_EQ_INT(ruckig_tracking_sequence_continuation_create(&continuation, 2, 4), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_tracking_sequence_continuation_get_dof_count(continuation), 2);
+    CHECK_EQ_INT(ruckig_tracking_sequence_continuation_get_capacity(continuation), 4);
+    CHECK_TRUE(!ruckig_tracking_sequence_continuation_is_active(continuation));
+    CHECK_TRUE(!ruckig_tracking_sequence_continuation_was_interrupted(continuation));
+    CHECK_TRUE(!ruckig_tracking_sequence_continuation_is_complete(continuation));
+    CHECK_EQ_INT(ruckig_tracking_sequence_continuation_get_completed_count(continuation), 0);
+    CHECK_EQ_INT(ruckig_tracking_sequence_continuation_get_target_count(continuation), 0);
+    CHECK_EQ_INT(ruckig_tracking_sequence_continuation_get_dof_count(NULL), 0);
+    CHECK_EQ_INT(ruckig_tracking_sequence_continuation_get_capacity(NULL), 0);
+    CHECK_TRUE(!ruckig_tracking_sequence_continuation_is_active(NULL));
+    CHECK_TRUE(!ruckig_tracking_sequence_continuation_was_interrupted(NULL));
+    CHECK_TRUE(!ruckig_tracking_sequence_continuation_is_complete(NULL));
+    CHECK_EQ_INT(ruckig_tracking_sequence_continuation_get_completed_count(NULL), 0);
+    CHECK_EQ_INT(ruckig_tracking_sequence_continuation_get_target_count(NULL), 0);
+
+    CHECK_EQ_INT(ruckig_input_create(&sequence_input, 2), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_target_state_sequence_set_count(target_sequence, 1), RUCKIG_WORKING);
+    CHECK_EQ_INT(
+        ruckig_tracking_calculate_sequence_interruptible(
+            tracking,
+            target_sequence,
+            sequence_input,
+            output_sequence,
+            continuation
+        ),
+        RUCKIG_ERROR_UNSUPPORTED
+    );
+    CHECK_TRUE(!ruckig_tracking_sequence_continuation_is_active(continuation));
+    CHECK_TRUE(!ruckig_tracking_sequence_continuation_is_complete(continuation));
+    CHECK_EQ_INT(ruckig_tracking_sequence_continuation_get_completed_count(continuation), 0);
+    CHECK_EQ_INT(ruckig_tracking_sequence_continuation_get_target_count(continuation), 1);
+    CHECK_EQ_INT(ruckig_tracking_resume_sequence(tracking, continuation, output_sequence), RUCKIG_ERROR_UNSUPPORTED);
+    ruckig_tracking_sequence_continuation_reset(continuation);
+    CHECK_EQ_INT(ruckig_tracking_sequence_continuation_get_target_count(continuation), 0);
+    CHECK_EQ_INT(ruckig_tracking_sequence_continuation_get_completed_count(continuation), 0);
+    CHECK_TRUE(!ruckig_tracking_sequence_continuation_is_active(continuation));
+
+    ruckig_input_destroy(sequence_input);
+    ruckig_tracking_sequence_continuation_destroy(continuation);
     ruckig_tracking_output_sequence_destroy(output_sequence);
     ruckig_target_state_sequence_destroy(target_sequence);
     ruckig_target_state_destroy(target);
     ruckig_tracking_destroy(tracking);
+    ruckig_tracking_sequence_continuation_destroy(NULL);
     ruckig_tracking_output_sequence_destroy(NULL);
     ruckig_target_state_sequence_destroy(NULL);
     ruckig_target_state_destroy(NULL);
@@ -6850,6 +6896,10 @@ void run_interrupt_post_release_quality_tests(void) {
 void run_tracking_api_tests(void) {
     test_tracking_api_lifecycle_and_accessors();
     test_tracking_diagnostics_snapshots();
+}
+
+void run_tracking_sequence_continuation_api_tests(void) {
+    test_tracking_api_lifecycle_and_accessors();
 }
 
 void run_tracking_validation_tests(void) {

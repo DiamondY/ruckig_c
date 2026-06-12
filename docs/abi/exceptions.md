@@ -123,3 +123,29 @@ in `docs/abi/public-symbols.txt`, and listed as an `allow-add` entry in
 `docs/abi/public-symbol-exceptions.txt`. Existing `v0.6.0` and
 `0.7.0-alpha` public symbols, signatures, enum values, and result-code numeric
 values remain frozen.
+
+## 0.15.0-alpha.4 Tracking Sequence Continuation API Expansion
+
+`0.15.0-alpha.4` starts an explicit public C ABI expansion for interruptible
+tracking sequence calculation with an opaque continuation handle. It adds
+twelve public symbols:
+
+- `ruckig_tracking_sequence_continuation_create`
+- `ruckig_tracking_sequence_continuation_destroy`
+- `ruckig_tracking_sequence_continuation_reset`
+- `ruckig_tracking_sequence_continuation_get_dof_count`
+- `ruckig_tracking_sequence_continuation_get_capacity`
+- `ruckig_tracking_sequence_continuation_is_active`
+- `ruckig_tracking_sequence_continuation_was_interrupted`
+- `ruckig_tracking_sequence_continuation_is_complete`
+- `ruckig_tracking_sequence_continuation_get_completed_count`
+- `ruckig_tracking_sequence_continuation_get_target_count`
+- `ruckig_tracking_calculate_sequence_interruptible`
+- `ruckig_tracking_resume_sequence`
+
+The addition is approved by `docs/design/tracking_sequence_interruption_api.md`,
+tracked in `docs/abi/public-symbols.txt`, and listed in
+`docs/abi/public-symbol-exceptions.txt`. It does not add result-code or enum
+numeric values and does not change `ruckig_tracking_diagnostics_t` layout.
+Alpha.4 provides the public handle scaffold; Fast and Optimized behavior
+implementation is split into later alpha slices.

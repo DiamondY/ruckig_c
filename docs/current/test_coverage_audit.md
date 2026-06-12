@@ -77,6 +77,24 @@ Added coverage:
 
 The local checklist is `docs/release/checklists/0.15.0-alpha.3.md`.
 
+## 0.15.0-alpha.4 Tracking Sequence Continuation API Scaffold
+
+`0.15.0-alpha.4` starts the public tracking sequence continuation ABI
+expansion. It adds the opaque continuation handle, lifecycle/status accessors,
+and interruptible/resume entry point declarations while leaving Fast and
+Optimized behavior implementation to later slices.
+
+Coverage impact:
+
+| Area | Evidence |
+| --- | --- |
+| Focused selector | Adds `--tracking-sequence-continuation-api` and CTest `ruckig_c_tracking_sequence_continuation_api`. |
+| Lifecycle/accessors | Covers create/destroy/reset, dof/capacity, active/interrupted/complete, completed count, and target count accessors. |
+| Behavior boundary | Start/resume entry points return `RUCKIG_ERROR_UNSUPPORTED` in alpha.4 after scaffold validation. |
+| ABI/export boundary | Public symbol baseline moves from 172 to 184 with 12 approved additions and no removals. |
+
+The local checklist is `docs/release/checklists/0.15.0-alpha.4.md`.
+
 ## 0.14.0-alpha.1 Interrupt Boundary API-Neutral Audit
 
 `0.14.0-alpha.1` adds a focused local audit for the existing

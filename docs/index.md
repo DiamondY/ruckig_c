@@ -115,7 +115,8 @@ Historical rewrite plans and release evidence are retained for traceability.
   `release/checklists/0.15.0-alpha.2.md` records the docs-only tracking
   sequence interruption API draft evidence.
   `release/checklists/0.15.0-alpha.3.md` records the consumer and wrapper
-  interrupt smoke evidence.
+  interrupt smoke evidence. `release/checklists/0.15.0-alpha.4.md` records
+  the tracking sequence continuation public API scaffold evidence.
 - `release/evidence/verification_report.md` - local and CI verification
   history.
 - `release/evidence/performance_report.md` - performance procedure and release

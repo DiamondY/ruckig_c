@@ -124,6 +124,7 @@ typedef struct ruckig_c_tracking_handle ruckig_tracking_t;
 typedef struct ruckig_c_target_state_handle ruckig_target_state_t;
 typedef struct ruckig_c_target_state_sequence_handle ruckig_target_state_sequence_t;
 typedef struct ruckig_c_tracking_output_sequence_handle ruckig_tracking_output_sequence_t;
+typedef struct ruckig_c_tracking_sequence_continuation_handle ruckig_tracking_sequence_continuation_t;
 #else
 typedef struct ruckig_input ruckig_input_t;
 typedef struct ruckig_output ruckig_output_t;
@@ -133,6 +134,7 @@ typedef struct ruckig_tracking ruckig_tracking_t;
 typedef struct ruckig_target_state ruckig_target_state_t;
 typedef struct ruckig_target_state_sequence ruckig_target_state_sequence_t;
 typedef struct ruckig_tracking_output_sequence ruckig_tracking_output_sequence_t;
+typedef struct ruckig_tracking_sequence_continuation ruckig_tracking_sequence_continuation_t;
 #endif
 
 /*
@@ -546,6 +548,18 @@ RUCKIG_C_API ruckig_result_t ruckig_tracking_calculate_sequence(
     const ruckig_input_t* input,
     ruckig_tracking_output_sequence_t* output_sequence
 );
+RUCKIG_C_API ruckig_result_t ruckig_tracking_calculate_sequence_interruptible(
+    ruckig_tracking_t* tracking,
+    const ruckig_target_state_sequence_t* target_sequence,
+    const ruckig_input_t* input,
+    ruckig_tracking_output_sequence_t* output_sequence,
+    ruckig_tracking_sequence_continuation_t* continuation
+);
+RUCKIG_C_API ruckig_result_t ruckig_tracking_resume_sequence(
+    ruckig_tracking_t* tracking,
+    ruckig_tracking_sequence_continuation_t* continuation,
+    ruckig_tracking_output_sequence_t* output_sequence
+);
 
 RUCKIG_C_API ruckig_result_t ruckig_target_state_create(ruckig_target_state_t** target_state, size_t dofs);
 RUCKIG_C_API void ruckig_target_state_destroy(ruckig_target_state_t* target_state);
@@ -592,6 +606,39 @@ RUCKIG_C_API const double* ruckig_tracking_output_sequence_new_jerk_const_data(c
 RUCKIG_C_API const double* ruckig_tracking_output_sequence_time_const_data(const ruckig_tracking_output_sequence_t* sequence);
 RUCKIG_C_API const size_t* ruckig_tracking_output_sequence_section_const_data(const ruckig_tracking_output_sequence_t* sequence);
 RUCKIG_C_API const ruckig_result_t* ruckig_tracking_output_sequence_result_const_data(const ruckig_tracking_output_sequence_t* sequence);
+
+RUCKIG_C_API ruckig_result_t ruckig_tracking_sequence_continuation_create(
+    ruckig_tracking_sequence_continuation_t** continuation,
+    size_t dofs,
+    size_t capacity
+);
+RUCKIG_C_API void ruckig_tracking_sequence_continuation_destroy(
+    ruckig_tracking_sequence_continuation_t* continuation
+);
+RUCKIG_C_API void ruckig_tracking_sequence_continuation_reset(
+    ruckig_tracking_sequence_continuation_t* continuation
+);
+RUCKIG_C_API size_t ruckig_tracking_sequence_continuation_get_dof_count(
+    const ruckig_tracking_sequence_continuation_t* continuation
+);
+RUCKIG_C_API size_t ruckig_tracking_sequence_continuation_get_capacity(
+    const ruckig_tracking_sequence_continuation_t* continuation
+);
+RUCKIG_C_API bool ruckig_tracking_sequence_continuation_is_active(
+    const ruckig_tracking_sequence_continuation_t* continuation
+);
+RUCKIG_C_API bool ruckig_tracking_sequence_continuation_was_interrupted(
+    const ruckig_tracking_sequence_continuation_t* continuation
+);
+RUCKIG_C_API bool ruckig_tracking_sequence_continuation_is_complete(
+    const ruckig_tracking_sequence_continuation_t* continuation
+);
+RUCKIG_C_API size_t ruckig_tracking_sequence_continuation_get_completed_count(
+    const ruckig_tracking_sequence_continuation_t* continuation
+);
+RUCKIG_C_API size_t ruckig_tracking_sequence_continuation_get_target_count(
+    const ruckig_tracking_sequence_continuation_t* continuation
+);
 
 #ifdef __cplusplus
 }

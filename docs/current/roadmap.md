@@ -28,9 +28,11 @@ CI.
 - `0.14.1` is reserved for emergency `v0.14.0` patch fixes only.
 - `0.13.1` remains reserved for emergency `v0.13.0` patch fixes only.
 - `0.12.1` remains reserved for emergency `v0.12.0` patch fixes only.
-- No `0.15.0` public C API, public ABI, exported-symbol, enum numeric,
-  public diagnostics, runtime clock hook, or result-code numeric change is
-  accepted for the design line.
+- `0.15.0-alpha.4` accepts a public C ABI expansion for tracking sequence
+  interruption continuation. The design-line public symbol baseline is now
+  184 symbols. No enum numeric, result-code numeric, public diagnostics struct
+  layout, runtime clock hook, package-manager, tag, release, push, or manual
+  workflow change is accepted for alpha.4.
 - `0.13.0-alpha.1` waypoint true-resume stress and quality evidence is
   complete. It added focused multi-DoF, multi-waypoint, per-section,
   budget-matrix, fresh-solve quality-reference, long online-loop, and
@@ -104,15 +106,21 @@ CI.
   examples for the `v0.14.0` no-waypoint and Optimized online tracking
   interrupt surfaces without making wrapper publication or package-manager
   commitments.
-- Keep the `v0.9.0` 172-symbol public C ABI baseline unless a separate public
-  API decision is accepted.
+- `0.15.0-alpha.4` tracking sequence continuation API scaffold is complete
+  locally. It adds an opaque continuation handle, compact lifecycle/status
+  accessors, and interruptible/resume sequence entry points while keeping
+  behavior entry points unsupported until alpha.5 and alpha.6.
+- Next implementation priority is `0.15.0-alpha.5` Fast tracking sequence
+  continuation, followed by `0.15.0-alpha.6` Optimized tracking sequence
+  continuation and `0.15.0-alpha.7` wrapper/documentation smoke coverage.
+- Keep the 184-symbol `0.15.0-alpha.4` public C ABI baseline unless a later
+  separate public API decision is accepted.
 - Package-manager recipes and package publication remain frozen unless
   separately accepted.
 - Cloud/remote runtime, proprietary Pro equivalence claims, hard real-time
   guarantees, formal global optimality proof, runtime platform clock public
-  hooks, public interrupt diagnostics, tracking sequence interruption, formal
-  Python/Rust API publication, and upstream baseline upgrades remain deferred
-  unless separately accepted.
+  hooks, public interrupt diagnostics, formal Python/Rust API publication, and
+  upstream baseline upgrades remain deferred unless separately accepted.
 
 ## 0.12.0 Waypoint Soft Interruption True-Resume Release
 

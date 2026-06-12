@@ -1,7 +1,7 @@
 # Tracking Sequence Interruption API Draft
 
-Status: `0.15.0-alpha.2` docs-only draft. Not implemented and not approved for
-release.
+Status: `0.15.0-alpha.4` public API scaffold accepted. Fast and Optimized
+continuation behavior is still split into later alpha implementation slices.
 
 This document evaluates whether `ruckig_tracking_calculate_sequence` can support
 interruption without public API changes. The current answer is no: online
@@ -49,7 +49,8 @@ The sequence API is different:
 
 ## Candidate Public API Shapes
 
-These are design options only. None is accepted in `0.15.0-alpha.2`.
+These were evaluated in `0.15.0-alpha.2`. `0.15.0-alpha.4` accepts the
+explicit continuation carrier.
 
 ### Sequence-Level Interruption Flag
 
@@ -103,6 +104,15 @@ Impact:
 - Adds exported symbols and a new lifecycle contract; this should not be hidden
   inside an API-neutral alpha slice.
 
+`0.15.0-alpha.4` accepts this shape with an opaque
+`ruckig_tracking_sequence_continuation_t` handle. The handle owns its target
+sequence and input snapshots, exposes compact active/interrupted/complete and
+count accessors, and keeps `ruckig_tracking_calculate_sequence` unchanged.
+The first scaffold adds the public lifecycle and status API plus
+`ruckig_tracking_calculate_sequence_interruptible` and
+`ruckig_tracking_resume_sequence`. Behavior implementation is intentionally
+split into Fast and Optimized follow-up slices.
+
 ## Risk Review
 
 - ABI risk: any public query, public enum, public result code, public struct
@@ -117,18 +127,16 @@ Impact:
 - Release risk: this is larger than a local evidence-only alpha and should be
   isolated from current post-release hardening.
 
-## Recommended Go/No-Go
+## Current Go/No-Go
 
-Go for documentation only in `0.15.0-alpha.2`.
+Go for the continuation public API scaffold in `0.15.0-alpha.4`.
 
-No-go for implementation in this slice:
+No-go for alpha.4 implementation beyond scaffold:
 
-- Do not modify `include/ruckig_c/ruckig.h`.
-- Do not add public symbols or exported symbols.
 - Do not add enum or result-code numeric values.
 - Do not change `ruckig_tracking_diagnostics_t` layout.
-- Do not implement sequence interruption behavior.
+- Do not implement Fast or Optimized interruption/resume behavior until the
+  dedicated alpha.5 and alpha.6 slices.
 
-If tracking sequence interruption is accepted later, use a separate
-`0.15.0-alpha.4` or later plan with an explicit public API/ABI decision before
-implementation.
+Fast sequence continuation is assigned to `0.15.0-alpha.5`. Optimized
+solver-internal sequence continuation is assigned to `0.15.0-alpha.6`.

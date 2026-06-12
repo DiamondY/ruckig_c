@@ -44,16 +44,18 @@ Current `main` is in `0.15.0-design - Unreleased` after the published
 `v0.14.0` stable release. `v0.14.0` is the current stable release, and
 `0.14.1` is reserved for emergency patch fixes only.
 
-No `0.15.0` public C API, public ABI, exported-symbol, public diagnostics,
-enum numeric, result-code numeric, or runtime clock public hook change has
-been accepted. The current stable ABI remains the 172-symbol public C ABI.
-Project version metadata remains `0.14.0` until a separate release-candidate
-plan accepts a version bump.
+`0.15.0-alpha.4` accepts a public C ABI expansion for interruptible tracking
+sequence continuation. The design-line public symbol baseline moves from 172 to
+184 symbols by adding an opaque continuation handle, lifecycle/status accessors,
+and interruptible/resume sequence entry points. Project version metadata
+remains `0.14.0` until a separate release-candidate plan accepts a version
+bump.
 
-`0.15.0-alpha.2` adds only a docs draft for possible future
-`ruckig_tracking_calculate_sequence` interruption. That draft explicitly does
-not approve public header changes, public struct layout changes, enum or
-result-code expansion, new exported symbols, or ABI allowlist changes.
+The alpha.4 API expansion does not add enum numeric values, result-code numeric
+values, public diagnostics struct fields, runtime clock public hooks, package
+manager recipes, tags, releases, pushes, or manual workflows. The old
+`ruckig_tracking_calculate_sequence` entry point keeps complete-solve
+semantics.
 
 ## v0.13.0 Stable ABI Baseline
 

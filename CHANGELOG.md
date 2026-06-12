@@ -6,14 +6,19 @@ Current `main` is now the `0.15.0-design - Unreleased` line after the
 published `v0.14.0` stable release. `v0.14.0` is the current stable release,
 and `0.14.1` is reserved for emergency patch fixes only.
 
-- No `0.15.0` public C API, public ABI, exported-symbol, enum numeric,
-  public diagnostics, runtime clock hook, or result-code numeric change has
-  been accepted.
+- `0.15.0-alpha.4` accepts a public C ABI expansion for tracking sequence
+  interruption continuation. It adds an opaque
+  `ruckig_tracking_sequence_continuation_t` handle, lifecycle/status accessors,
+  and interruptible/resume sequence entry points. The public symbol baseline
+  moves from 172 to 184 symbols. No enum numeric, result-code numeric,
+  diagnostics struct layout, runtime clock hook, version metadata, tag,
+  release, push, or manual workflow change is included.
 - Package-manager recipes, formal Python/Rust publication, cloud/remote
   calculation, Pro/cloud equivalence claims, hard real-time guarantees,
-  runtime clock public hooks, public interrupt diagnostics, tracking sequence
-  interruption, formal global optimality proof, and upstream baseline upgrades
-  remain deferred unless separately accepted.
+  runtime clock public hooks, public interrupt diagnostics, formal global
+  optimality proof, and upstream baseline upgrades remain deferred unless
+  separately accepted. Tracking sequence interruption is now reopened through
+  the alpha.4 continuation API scaffold.
 - `v0.14.0` release evidence, annotated tag evidence, GitHub Release
   publication, and post-tag ordinary push CI are recorded in
   `docs/release/checklists/0.14.0.md`.
@@ -36,6 +41,10 @@ and `0.14.1` is reserved for emergency patch fixes only.
   prototype smoke tests, Rust wrapper smoke tests, and Rust examples. The
   wrappers remain prototype-only; no public C ABI, package-manager, version,
   tag, release, push, or manual workflow change is included.
+- `0.15.0-alpha.4` adds the tracking sequence continuation public API
+  scaffold. Lifecycle and compact status accessors are implemented; the
+  behavior entry points are deliberately stubbed as `RUCKIG_ERROR_UNSUPPORTED`
+  until the Fast and Optimized sequence continuation implementation slices.
 
 ## 0.14.0 - 2026-06-12
 

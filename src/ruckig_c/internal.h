@@ -192,6 +192,22 @@ struct ruckig_tracking_output_sequence {
     ruckig_result_t* result;
 };
 
+struct ruckig_tracking_sequence_continuation {
+    size_t dofs;
+    size_t capacity;
+    size_t target_count;
+    size_t completed_count;
+    bool active;
+    bool was_interrupted;
+    bool complete;
+    ruckig_tracking_mode_t mode;
+    ruckig_tracking_optimized_strategy_t optimized_strategy;
+    struct ruckig_input* input;
+    struct ruckig_target_state_sequence* target_sequence;
+    struct ruckig_tracking_output_sequence* output_prefix;
+    ruckig_tracking_diagnostics_t diagnostics;
+};
+
 struct ruckig_tracking {
     size_t dofs;
     double delta_time;

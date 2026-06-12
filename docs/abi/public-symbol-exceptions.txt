@@ -118,3 +118,17 @@ allow-add ruckig_tracking_set_optimized_strategy
 
 # 0.7.0-alpha.2 tracking diagnostics public API addition.
 allow-add ruckig_tracking_get_last_diagnostics
+
+# 0.15.0-alpha.4 tracking sequence continuation public API additions.
+allow-add ruckig_tracking_calculate_sequence_interruptible
+allow-add ruckig_tracking_resume_sequence
+allow-add ruckig_tracking_sequence_continuation_create
+allow-add ruckig_tracking_sequence_continuation_destroy
+allow-add ruckig_tracking_sequence_continuation_get_capacity
+allow-add ruckig_tracking_sequence_continuation_get_completed_count
+allow-add ruckig_tracking_sequence_continuation_get_dof_count
+allow-add ruckig_tracking_sequence_continuation_get_target_count
+allow-add ruckig_tracking_sequence_continuation_is_active
+allow-add ruckig_tracking_sequence_continuation_is_complete
+allow-add ruckig_tracking_sequence_continuation_reset
+allow-add ruckig_tracking_sequence_continuation_was_interrupted
