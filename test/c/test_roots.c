@@ -109,6 +109,7 @@ void run_solver_branch_coverage_tests(void);
 void run_tracking_api_tests(void);
 void run_tracking_sequence_continuation_api_tests(void);
 void run_tracking_sequence_fast_continuation_tests(void);
+void run_tracking_sequence_optimized_continuation_tests(void);
 void run_tracking_validation_tests(void);
 void run_tracking_online_tests(void);
 void run_tracking_interrupt_audit_tests(void);
@@ -191,6 +192,10 @@ int main(int argc, char** argv) {
         }
         if (strcmp(argv[1], "--tracking-sequence-fast-continuation") == 0) {
             run_tracking_sequence_fast_continuation_tests();
+            return ruckig_c_test_failures == 0 ? 0 : 1;
+        }
+        if (strcmp(argv[1], "--tracking-sequence-optimized-continuation") == 0) {
+            run_tracking_sequence_optimized_continuation_tests();
             return ruckig_c_test_failures == 0 ? 0 : 1;
         }
         if (strcmp(argv[1], "--tracking-validation") == 0) {

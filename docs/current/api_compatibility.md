@@ -64,6 +64,12 @@ values, and `ruckig_tracking_diagnostics_t` layout. Optimized sequence
 continuation remains assigned to alpha.6, and wrapper smoke coverage remains
 assigned to alpha.7.
 
+`0.15.0-alpha.6` implements Optimized sequence continuation on the same public
+API. The public ABI remains the 184-symbol alpha.4 baseline: no new public
+functions, enum numeric values, result-code numeric values, diagnostics fields,
+or public struct layouts are added by alpha.6. Wrapper smoke coverage remains
+assigned to alpha.7.
+
 ## v0.13.0 Stable ABI Baseline
 
 `v0.13.0` was the current stable release before `v0.14.0` closeout. The

@@ -71,6 +71,17 @@ typedef enum tracking_candidate_family {
     TRACKING_CANDIDATE_LEAD_LAG
 } tracking_candidate_family_t;
 
+typedef enum tracking_sequence_optimized_phase {
+    TRACKING_SEQUENCE_OPTIMIZED_IDLE = 0,
+    TRACKING_SEQUENCE_OPTIMIZED_FAST,
+    TRACKING_SEQUENCE_OPTIMIZED_INSTANTANEOUS,
+    TRACKING_SEQUENCE_OPTIMIZED_HORIZON,
+    TRACKING_SEQUENCE_OPTIMIZED_LEAD_LAG,
+    TRACKING_SEQUENCE_OPTIMIZED_TERMINAL_BLEND,
+    TRACKING_SEQUENCE_OPTIMIZED_DERIVATIVE_DAMPED,
+    TRACKING_SEQUENCE_OPTIMIZED_FINISH_STEP
+} tracking_sequence_optimized_phase_t;
+
 static const tracking_strategy_config_t tracking_strategy_configs[] = {
     {
         RUCKIG_TRACKING_OPTIMIZED_STABLE,
@@ -575,12 +586,27 @@ static void tracking_sequence_continuation_clear_state(ruckig_tracking_sequence_
     continuation->active = false;
     continuation->was_interrupted = false;
     continuation->complete = false;
+    continuation->optimized_step_active = false;
+    continuation->optimized_improved = false;
     continuation->mode = RUCKIG_TRACKING_FAST;
     continuation->optimized_strategy = RUCKIG_TRACKING_OPTIMIZED_BALANCED;
+    continuation->reactiveness = 1.0;
+    continuation->look_ahead_cycles = 1;
+    continuation->max_optimized_candidates = RUCKIG_TRACKING_DEFAULT_OPTIMIZED_CANDIDATES;
+    continuation->optimized_phase = TRACKING_SEQUENCE_OPTIMIZED_IDLE;
+    continuation->optimized_index = 0;
+    continuation->optimized_window_count = 0;
+    continuation->optimized_fast_score = 0.0;
+    continuation->optimized_fast_terminal_position_error = 0.0;
+    continuation->optimized_best_score = 0.0;
     memset(&continuation->diagnostics, 0, sizeof(continuation->diagnostics));
+    memset(&continuation->optimized_step_diagnostics, 0, sizeof(continuation->optimized_step_diagnostics));
     continuation->diagnostics.calculation_status = RUCKIG_TRACKING_CALCULATION_NONE;
     continuation->diagnostics.mode = continuation->mode;
     continuation->diagnostics.optimized_strategy = continuation->optimized_strategy;
+    continuation->optimized_step_diagnostics.calculation_status = RUCKIG_TRACKING_CALCULATION_NONE;
+    continuation->optimized_step_diagnostics.mode = continuation->mode;
+    continuation->optimized_step_diagnostics.optimized_strategy = continuation->optimized_strategy;
     if (continuation->target_sequence) {
         ruckig_target_state_sequence_clear(continuation->target_sequence);
     }
@@ -611,6 +637,13 @@ RUCKIG_C_API ruckig_result_t ruckig_tracking_sequence_continuation_create(
         ruckig_tracking_sequence_continuation_destroy(value);
         return RUCKIG_ERROR;
     }
+    value->optimized_best_position = allocate_double_vector(dofs);
+    value->optimized_best_velocity = allocate_double_vector(dofs);
+    value->optimized_best_acceleration = allocate_double_vector(dofs);
+    if (!value->optimized_best_position || !value->optimized_best_velocity || !value->optimized_best_acceleration) {
+        ruckig_tracking_sequence_continuation_destroy(value);
+        return RUCKIG_ERROR;
+    }
     tracking_sequence_continuation_clear_state(value);
     *continuation = value;
     return RUCKIG_WORKING;
@@ -625,6 +658,9 @@ RUCKIG_C_API void ruckig_tracking_sequence_continuation_destroy(
     ruckig_input_destroy(continuation->input);
     ruckig_target_state_sequence_destroy(continuation->target_sequence);
     ruckig_tracking_output_sequence_destroy(continuation->output_prefix);
+    ruckig_free(continuation->optimized_best_position);
+    ruckig_free(continuation->optimized_best_velocity);
+    ruckig_free(continuation->optimized_best_acceleration);
     ruckig_free(continuation);
 }
 
@@ -1691,9 +1727,15 @@ static ruckig_result_t tracking_sequence_continuation_capture_start(
     continuation->complete = false;
     continuation->mode = tracking->mode;
     continuation->optimized_strategy = tracking->optimized_strategy;
+    continuation->reactiveness = tracking->reactiveness;
+    continuation->look_ahead_cycles = tracking->look_ahead_cycles;
+    continuation->max_optimized_candidates = tracking->max_optimized_candidates;
     continuation->diagnostics.calculation_status = RUCKIG_TRACKING_CALCULATION_NONE;
     continuation->diagnostics.mode = tracking->mode;
     continuation->diagnostics.optimized_strategy = tracking->optimized_strategy;
+    continuation->optimized_step_diagnostics.calculation_status = RUCKIG_TRACKING_CALCULATION_NONE;
+    continuation->optimized_step_diagnostics.mode = tracking->mode;
+    continuation->optimized_step_diagnostics.optimized_strategy = tracking->optimized_strategy;
     ruckig_tracking_output_sequence_clear(output_sequence);
     return RUCKIG_WORKING;
 }
@@ -1828,6 +1870,549 @@ static ruckig_result_t tracking_sequence_process_fast(
     return RUCKIG_WORKING;
 }
 
+static void tracking_sequence_copy_best_to_continuation(
+    ruckig_tracking_sequence_continuation_t* continuation,
+    const ruckig_tracking_t* tracking
+) {
+    memcpy(continuation->optimized_best_position, tracking->optimized_best_position, sizeof(double) * tracking->dofs);
+    memcpy(continuation->optimized_best_velocity, tracking->optimized_best_velocity, sizeof(double) * tracking->dofs);
+    memcpy(continuation->optimized_best_acceleration, tracking->optimized_best_acceleration, sizeof(double) * tracking->dofs);
+}
+
+static void tracking_sequence_copy_best_to_tracking(
+    ruckig_tracking_t* tracking,
+    const ruckig_tracking_sequence_continuation_t* continuation
+) {
+    memcpy(tracking->optimized_best_position, continuation->optimized_best_position, sizeof(double) * tracking->dofs);
+    memcpy(tracking->optimized_best_velocity, continuation->optimized_best_velocity, sizeof(double) * tracking->dofs);
+    memcpy(tracking->optimized_best_acceleration, continuation->optimized_best_acceleration, sizeof(double) * tracking->dofs);
+}
+
+static void tracking_sequence_publish_optimized_diagnostics(
+    ruckig_tracking_t* tracking,
+    const ruckig_tracking_sequence_continuation_t* continuation,
+    bool include_step
+) {
+    ruckig_tracking_diagnostics_t diagnostics = continuation->diagnostics;
+    if (include_step) {
+        tracking_accumulate_diagnostics(&diagnostics, &continuation->optimized_step_diagnostics);
+    }
+    if (diagnostics.calculation_status == RUCKIG_TRACKING_CALCULATION_NONE && include_step) {
+        diagnostics.calculation_status = continuation->optimized_step_diagnostics.calculation_status;
+    }
+    diagnostics.mode = RUCKIG_TRACKING_OPTIMIZED;
+    diagnostics.optimized_strategy = continuation->optimized_strategy;
+    if (diagnostics.fast_score > 0.0) {
+        diagnostics.improvement_ratio = (diagnostics.fast_score - diagnostics.best_score) / diagnostics.fast_score;
+    } else {
+        diagnostics.improvement_ratio = 0.0;
+    }
+    tracking->diagnostics = diagnostics;
+    tracking_sync_legacy_diagnostics(tracking);
+}
+
+static void tracking_sequence_reset_optimized_step(
+    ruckig_tracking_sequence_continuation_t* continuation
+) {
+    continuation->optimized_step_active = false;
+    continuation->optimized_improved = false;
+    continuation->optimized_phase = TRACKING_SEQUENCE_OPTIMIZED_IDLE;
+    continuation->optimized_index = 0;
+    continuation->optimized_window_count = 0;
+    continuation->optimized_fast_score = DBL_MAX;
+    continuation->optimized_fast_terminal_position_error = DBL_MAX;
+    continuation->optimized_best_score = DBL_MAX;
+    memset(&continuation->optimized_step_diagnostics, 0, sizeof(continuation->optimized_step_diagnostics));
+    continuation->optimized_step_diagnostics.calculation_status = RUCKIG_TRACKING_CALCULATION_NONE;
+    continuation->optimized_step_diagnostics.mode = RUCKIG_TRACKING_OPTIMIZED;
+    continuation->optimized_step_diagnostics.optimized_strategy = continuation->optimized_strategy;
+}
+
+static ruckig_result_t tracking_sequence_begin_optimized_step(
+    ruckig_tracking_t* tracking,
+    ruckig_tracking_sequence_continuation_t* continuation
+) {
+    const size_t remaining = continuation->target_count - continuation->completed_count;
+    const size_t offset = continuation->completed_count * tracking->dofs;
+    const tracking_strategy_config_t* config = tracking_strategy_config(continuation->optimized_strategy);
+    ruckig_result_t result;
+    tracking_sequence_reset_optimized_step(continuation);
+    continuation->optimized_window_count = min_size(remaining, continuation->look_ahead_cycles);
+    if (!config || continuation->optimized_window_count == 0
+        || !finite_vector(&continuation->target_sequence->position[offset], continuation->optimized_window_count * tracking->dofs)
+        || !finite_vector(&continuation->target_sequence->velocity[offset], continuation->optimized_window_count * tracking->dofs)
+        || !finite_vector(&continuation->target_sequence->acceleration[offset], continuation->optimized_window_count * tracking->dofs)) {
+        return RUCKIG_ERROR_INVALID_INPUT;
+    }
+    if (ruckig_input_copy_state(continuation->input, tracking->work_input) != RUCKIG_WORKING) {
+        return RUCKIG_ERROR_INVALID_INPUT;
+    }
+    ruckig_reset(tracking->otg);
+    tracking_reset_diagnostics(tracking);
+    result = prepare_tracking_base(tracking, tracking->work_input);
+    if (result != RUCKIG_WORKING) {
+        return result;
+    }
+    continuation->optimized_step_active = true;
+    continuation->optimized_phase = TRACKING_SEQUENCE_OPTIMIZED_FAST;
+    continuation->optimized_index = 0;
+    continuation->optimized_fast_score = DBL_MAX;
+    continuation->optimized_fast_terminal_position_error = DBL_MAX;
+    continuation->optimized_best_score = DBL_MAX;
+    continuation->optimized_improved = false;
+    continuation->optimized_step_diagnostics = tracking->diagnostics;
+    continuation->optimized_step_diagnostics.mode = RUCKIG_TRACKING_OPTIMIZED;
+    continuation->optimized_step_diagnostics.optimized_strategy = continuation->optimized_strategy;
+    return RUCKIG_WORKING;
+}
+
+static ruckig_result_t tracking_sequence_step_optimized_candidate(
+    ruckig_tracking_t* tracking,
+    ruckig_tracking_sequence_continuation_t* continuation
+) {
+    const size_t step_offset = continuation->completed_count * tracking->dofs;
+    const double* target_position = &continuation->target_sequence->position[step_offset];
+    const double* target_velocity = &continuation->target_sequence->velocity[step_offset];
+    const double* target_acceleration = &continuation->target_sequence->acceleration[step_offset];
+    const size_t window_count = continuation->optimized_window_count;
+    const tracking_strategy_config_t* config = tracking_strategy_config(continuation->optimized_strategy);
+    ruckig_result_t result = RUCKIG_WORKING;
+
+    if (!config) {
+        return RUCKIG_ERROR_INVALID_INPUT;
+    }
+    tracking->diagnostics = continuation->optimized_step_diagnostics;
+    tracking_sync_legacy_diagnostics(tracking);
+    tracking_sequence_copy_best_to_tracking(tracking, continuation);
+
+    switch ((tracking_sequence_optimized_phase_t)continuation->optimized_phase) {
+    case TRACKING_SEQUENCE_OPTIMIZED_FAST:
+        result = set_tracking_candidate_prediction(
+            tracking,
+            target_position,
+            target_velocity,
+            target_acceleration,
+            (double)window_count * tracking->delta_time * tracking->reactiveness
+        );
+        if (result != RUCKIG_WORKING) {
+            return result;
+        }
+        copy_candidate_to_work_input(tracking);
+        tracking_note_candidate_family(tracking, TRACKING_CANDIDATE_FAST);
+        result = score_current_tracking_candidate(
+            tracking,
+            config,
+            target_position,
+            target_velocity,
+            target_acceleration,
+            window_count,
+            &continuation->optimized_fast_score,
+            &continuation->optimized_fast_terminal_position_error
+        );
+        if (result != RUCKIG_WORKING) {
+            tracking_note_rejected_candidate(tracking);
+            return result;
+        }
+        tracking_note_valid_candidate(tracking);
+        continuation->optimized_best_score = continuation->optimized_fast_score;
+        tracking->diagnostics.fast_score = continuation->optimized_fast_score;
+        tracking->diagnostics.best_score = continuation->optimized_best_score;
+        copy_work_input_target_to_best(tracking);
+        tracking_sequence_copy_best_to_continuation(continuation, tracking);
+        continuation->optimized_phase = TRACKING_SEQUENCE_OPTIMIZED_INSTANTANEOUS;
+        continuation->optimized_index = 0;
+        break;
+
+    case TRACKING_SEQUENCE_OPTIMIZED_INSTANTANEOUS:
+        if (continuation->optimized_index >= window_count) {
+            continuation->optimized_phase = TRACKING_SEQUENCE_OPTIMIZED_HORIZON;
+            continuation->optimized_index = 0;
+            break;
+        }
+        {
+            const size_t offset = continuation->optimized_index * tracking->dofs;
+            result = try_tracking_prediction_candidate(
+                tracking,
+                config,
+                TRACKING_CANDIDATE_INSTANTANEOUS,
+                &target_position[offset],
+                &target_velocity[offset],
+                &target_acceleration[offset],
+                0.0,
+                target_position,
+                target_velocity,
+                target_acceleration,
+                window_count,
+                continuation->optimized_fast_score,
+                continuation->optimized_fast_terminal_position_error,
+                &continuation->optimized_best_score,
+                &continuation->optimized_improved
+            );
+        }
+        if (result != RUCKIG_WORKING) {
+            return result;
+        }
+        ++continuation->optimized_index;
+        if (continuation->optimized_index >= window_count) {
+            continuation->optimized_phase = TRACKING_SEQUENCE_OPTIMIZED_HORIZON;
+            continuation->optimized_index = 0;
+        }
+        tracking_sequence_copy_best_to_continuation(continuation, tracking);
+        break;
+
+    case TRACKING_SEQUENCE_OPTIMIZED_HORIZON:
+        if (continuation->optimized_index >= window_count) {
+            continuation->optimized_phase = config->use_lead_lag_horizons
+                ? TRACKING_SEQUENCE_OPTIMIZED_LEAD_LAG
+                : TRACKING_SEQUENCE_OPTIMIZED_TERMINAL_BLEND;
+            continuation->optimized_index = 0;
+            break;
+        }
+        result = try_tracking_prediction_candidate(
+            tracking,
+            config,
+            TRACKING_CANDIDATE_HORIZON,
+            target_position,
+            target_velocity,
+            target_acceleration,
+            (double)(continuation->optimized_index + 1) * tracking->delta_time * tracking->reactiveness,
+            target_position,
+            target_velocity,
+            target_acceleration,
+            window_count,
+            continuation->optimized_fast_score,
+            continuation->optimized_fast_terminal_position_error,
+            &continuation->optimized_best_score,
+            &continuation->optimized_improved
+        );
+        if (result != RUCKIG_WORKING) {
+            return result;
+        }
+        ++continuation->optimized_index;
+        if (continuation->optimized_index >= window_count) {
+            continuation->optimized_phase = config->use_lead_lag_horizons
+                ? TRACKING_SEQUENCE_OPTIMIZED_LEAD_LAG
+                : TRACKING_SEQUENCE_OPTIMIZED_TERMINAL_BLEND;
+            continuation->optimized_index = 0;
+        }
+        tracking_sequence_copy_best_to_continuation(continuation, tracking);
+        break;
+
+    case TRACKING_SEQUENCE_OPTIMIZED_LEAD_LAG:
+        if (!config->use_lead_lag_horizons || continuation->optimized_index >= 4) {
+            continuation->optimized_phase = TRACKING_SEQUENCE_OPTIMIZED_TERMINAL_BLEND;
+            continuation->optimized_index = 0;
+            break;
+        }
+        {
+            const double horizon_values[4] = {
+                0.5 * tracking->delta_time * tracking->reactiveness,
+                ((double)window_count + 0.5) * tracking->delta_time * tracking->reactiveness,
+                ((double)window_count + 1.0) * tracking->delta_time * tracking->reactiveness,
+                ((double)window_count + 2.0) * tracking->delta_time * tracking->reactiveness
+            };
+            result = try_tracking_prediction_candidate(
+                tracking,
+                config,
+                TRACKING_CANDIDATE_LEAD_LAG,
+                target_position,
+                target_velocity,
+                target_acceleration,
+                horizon_values[continuation->optimized_index],
+                target_position,
+                target_velocity,
+                target_acceleration,
+                window_count,
+                continuation->optimized_fast_score,
+                continuation->optimized_fast_terminal_position_error,
+                &continuation->optimized_best_score,
+                &continuation->optimized_improved
+            );
+        }
+        if (result != RUCKIG_WORKING) {
+            return result;
+        }
+        ++continuation->optimized_index;
+        if (continuation->optimized_index >= 4) {
+            continuation->optimized_phase = TRACKING_SEQUENCE_OPTIMIZED_TERMINAL_BLEND;
+            continuation->optimized_index = 0;
+        }
+        tracking_sequence_copy_best_to_continuation(continuation, tracking);
+        break;
+
+    case TRACKING_SEQUENCE_OPTIMIZED_TERMINAL_BLEND:
+        if (!config->use_terminal_blends || continuation->optimized_index >= 4) {
+            continuation->optimized_phase = TRACKING_SEQUENCE_OPTIMIZED_DERIVATIVE_DAMPED;
+            continuation->optimized_index = 0;
+            break;
+        }
+        {
+            static const double blend_values[4] = {0.25, 0.5, 0.75, 1.0};
+            const size_t terminal_offset = (window_count - 1) * tracking->dofs;
+            const double blend = blend_values[continuation->optimized_index];
+            size_t dof;
+            result = set_tracking_candidate_prediction(
+                tracking,
+                target_position,
+                target_velocity,
+                target_acceleration,
+                (double)tracking->look_ahead_cycles * tracking->delta_time * tracking->reactiveness
+            );
+            if (result != RUCKIG_WORKING) {
+                return result;
+            }
+            for (dof = 0; dof < tracking->dofs; ++dof) {
+                tracking->optimized_candidate_position[dof] =
+                    (1.0 - blend) * tracking->optimized_candidate_position[dof]
+                    + blend * target_position[terminal_offset + dof];
+                tracking->optimized_candidate_velocity[dof] =
+                    (1.0 - blend) * tracking->optimized_candidate_velocity[dof]
+                    + blend * target_velocity[terminal_offset + dof];
+                tracking->optimized_candidate_acceleration[dof] =
+                    (1.0 - blend) * tracking->optimized_candidate_acceleration[dof]
+                    + blend * target_acceleration[terminal_offset + dof];
+            }
+            result = try_tracking_candidate(
+                tracking,
+                config,
+                TRACKING_CANDIDATE_TERMINAL_BLEND,
+                target_position,
+                target_velocity,
+                target_acceleration,
+                window_count,
+                continuation->optimized_fast_score,
+                continuation->optimized_fast_terminal_position_error,
+                &continuation->optimized_best_score,
+                &continuation->optimized_improved
+            );
+        }
+        if (result != RUCKIG_WORKING) {
+            return result;
+        }
+        ++continuation->optimized_index;
+        if (continuation->optimized_index >= 4) {
+            continuation->optimized_phase = TRACKING_SEQUENCE_OPTIMIZED_DERIVATIVE_DAMPED;
+            continuation->optimized_index = 0;
+        }
+        tracking_sequence_copy_best_to_continuation(continuation, tracking);
+        break;
+
+    case TRACKING_SEQUENCE_OPTIMIZED_DERIVATIVE_DAMPED:
+        if (!config->use_derivative_damping || continuation->optimized_index >= 3) {
+            continuation->optimized_phase = TRACKING_SEQUENCE_OPTIMIZED_FINISH_STEP;
+            continuation->optimized_index = 0;
+            break;
+        }
+        {
+            const size_t terminal_offset = (window_count - 1) * tracking->dofs;
+            const double scale = continuation->optimized_index == 0 ? 0.75 : (continuation->optimized_index == 1 ? 0.5 : 0.0);
+            size_t dof;
+            result = set_tracking_candidate_prediction(
+                tracking,
+                &target_position[terminal_offset],
+                &target_velocity[terminal_offset],
+                &target_acceleration[terminal_offset],
+                0.0
+            );
+            if (result != RUCKIG_WORKING) {
+                return result;
+            }
+            for (dof = 0; dof < tracking->dofs; ++dof) {
+                tracking->optimized_candidate_velocity[dof] *= scale;
+                tracking->optimized_candidate_acceleration[dof] *= scale;
+            }
+            result = try_tracking_candidate(
+                tracking,
+                config,
+                TRACKING_CANDIDATE_DERIVATIVE_DAMPED,
+                target_position,
+                target_velocity,
+                target_acceleration,
+                window_count,
+                continuation->optimized_fast_score,
+                continuation->optimized_fast_terminal_position_error,
+                &continuation->optimized_best_score,
+                &continuation->optimized_improved
+            );
+        }
+        if (result != RUCKIG_WORKING) {
+            return result;
+        }
+        ++continuation->optimized_index;
+        if (continuation->optimized_index >= 3) {
+            continuation->optimized_phase = TRACKING_SEQUENCE_OPTIMIZED_FINISH_STEP;
+            continuation->optimized_index = 0;
+        }
+        tracking_sequence_copy_best_to_continuation(continuation, tracking);
+        break;
+
+    case TRACKING_SEQUENCE_OPTIMIZED_FINISH_STEP:
+    case TRACKING_SEQUENCE_OPTIMIZED_IDLE:
+    default:
+        break;
+    }
+
+    continuation->optimized_step_diagnostics = tracking->diagnostics;
+    continuation->optimized_step_diagnostics.mode = RUCKIG_TRACKING_OPTIMIZED;
+    continuation->optimized_step_diagnostics.optimized_strategy = continuation->optimized_strategy;
+    return RUCKIG_WORKING;
+}
+
+static ruckig_result_t tracking_sequence_finish_optimized_step(
+    ruckig_tracking_t* tracking,
+    ruckig_tracking_sequence_continuation_t* continuation
+) {
+    ruckig_result_t result;
+    tracking->diagnostics = continuation->optimized_step_diagnostics;
+    tracking_sync_legacy_diagnostics(tracking);
+    tracking_sequence_copy_best_to_tracking(tracking, continuation);
+    copy_best_to_work_input(tracking);
+    if (tracking->audit_best_candidate_family < RUCKIG_TRACKING_AUDIT_FAMILY_COUNT) {
+        ++tracking->audit_family_selected[tracking->audit_best_candidate_family];
+    }
+    tracking->diagnostics.best_score = continuation->optimized_best_score;
+    tracking_finalize_score_diagnostics(tracking);
+    result = run_prepared_tracking_update(
+        tracking,
+        tracking->work_output,
+        continuation->optimized_improved
+            ? RUCKIG_TRACKING_CALCULATION_OPTIMIZED
+            : RUCKIG_TRACKING_CALCULATION_FAST_FALLBACK,
+        true
+    );
+    continuation->optimized_step_diagnostics = tracking->diagnostics;
+    continuation->optimized_step_diagnostics.mode = RUCKIG_TRACKING_OPTIMIZED;
+    continuation->optimized_step_diagnostics.optimized_strategy = continuation->optimized_strategy;
+    return result;
+}
+
+static ruckig_result_t tracking_sequence_process_optimized(
+    ruckig_tracking_t* tracking,
+    ruckig_tracking_sequence_continuation_t* continuation,
+    ruckig_tracking_output_sequence_t* output_sequence
+) {
+    ruckig_result_t result = RUCKIG_WORKING;
+    ruckig_tracking_mode_t saved_mode = tracking->mode;
+    ruckig_tracking_optimized_strategy_t saved_strategy = tracking->optimized_strategy;
+    double saved_reactiveness = tracking->reactiveness;
+    size_t saved_look_ahead_cycles = tracking->look_ahead_cycles;
+    size_t saved_max_optimized_candidates = tracking->max_optimized_candidates;
+    tracking_interrupt_context_t interrupt_context = tracking_interrupt_context_start(continuation->input, true);
+
+    tracking->mode = RUCKIG_TRACKING_OPTIMIZED;
+    tracking->optimized_strategy = continuation->optimized_strategy;
+    tracking->reactiveness = continuation->reactiveness;
+    tracking->look_ahead_cycles = continuation->look_ahead_cycles;
+    tracking->max_optimized_candidates = continuation->max_optimized_candidates;
+    continuation->active = continuation->completed_count < continuation->target_count;
+    continuation->complete = continuation->completed_count == continuation->target_count && continuation->target_count > 0;
+    continuation->was_interrupted = false;
+    output_sequence->count = 0;
+    tracking_sequence_copy_prefix(output_sequence, continuation->output_prefix);
+
+    while (continuation->completed_count < continuation->target_count) {
+        if (!continuation->optimized_step_active) {
+            result = tracking_sequence_begin_optimized_step(tracking, continuation);
+            if (result != RUCKIG_WORKING) {
+                tracking_mark_error(tracking);
+                continuation->active = false;
+                continuation->complete = false;
+                continuation->was_interrupted = false;
+                continuation->diagnostics.calculation_status = RUCKIG_TRACKING_CALCULATION_ERROR;
+                tracking_sequence_publish_optimized_diagnostics(tracking, continuation, true);
+                goto restore_and_return;
+            }
+        }
+
+        while (continuation->optimized_phase != TRACKING_SEQUENCE_OPTIMIZED_FINISH_STEP) {
+            result = tracking_sequence_step_optimized_candidate(tracking, continuation);
+            if (result != RUCKIG_WORKING) {
+                tracking_mark_error(tracking);
+                continuation->active = false;
+                continuation->complete = false;
+                continuation->was_interrupted = false;
+                continuation->optimized_step_diagnostics = tracking->diagnostics;
+                tracking_sequence_publish_optimized_diagnostics(tracking, continuation, true);
+                goto restore_and_return;
+            }
+            if (continuation->optimized_phase != TRACKING_SEQUENCE_OPTIMIZED_FINISH_STEP
+                && tracking_interrupt_check(&interrupt_context)) {
+                ++continuation->optimized_step_diagnostics.budget_exhausted_count;
+                continuation->optimized_step_diagnostics.calculation_status = RUCKIG_TRACKING_CALCULATION_FAST_FALLBACK;
+                continuation->active = true;
+                continuation->complete = false;
+                continuation->was_interrupted = true;
+                tracking_sequence_copy_prefix(output_sequence, continuation->output_prefix);
+                tracking_sequence_publish_optimized_diagnostics(tracking, continuation, true);
+                result = RUCKIG_WORKING;
+                goto restore_and_return;
+            }
+        }
+
+        result = tracking_sequence_finish_optimized_step(tracking, continuation);
+        if (result != RUCKIG_WORKING && result != RUCKIG_FINISHED) {
+            tracking_mark_error(tracking);
+            continuation->active = false;
+            continuation->complete = false;
+            continuation->was_interrupted = false;
+            continuation->optimized_step_diagnostics = tracking->diagnostics;
+            tracking_sequence_publish_optimized_diagnostics(tracking, continuation, true);
+            goto restore_and_return;
+        }
+        tracking_accumulate_diagnostics(&continuation->diagnostics, &continuation->optimized_step_diagnostics);
+        tracking_sequence_store_work_output(
+            continuation->output_prefix,
+            continuation->completed_count,
+            tracking,
+            result
+        );
+        ++continuation->completed_count;
+        ruckig_output_pass_to_input(tracking->work_output, continuation->input);
+        tracking_sequence_reset_optimized_step(continuation);
+        tracking_sequence_copy_prefix(output_sequence, continuation->output_prefix);
+
+        if (continuation->completed_count < continuation->target_count
+            && tracking_interrupt_check(&interrupt_context)) {
+            ++continuation->diagnostics.budget_exhausted_count;
+            continuation->diagnostics.calculation_status = RUCKIG_TRACKING_CALCULATION_FAST_FALLBACK;
+            continuation->diagnostics.mode = RUCKIG_TRACKING_OPTIMIZED;
+            continuation->diagnostics.optimized_strategy = continuation->optimized_strategy;
+            continuation->active = true;
+            continuation->complete = false;
+            continuation->was_interrupted = true;
+            tracking_sequence_publish_optimized_diagnostics(tracking, continuation, false);
+            result = RUCKIG_WORKING;
+            goto restore_and_return;
+        }
+    }
+
+    continuation->diagnostics.calculation_status = RUCKIG_TRACKING_CALCULATION_OPTIMIZED;
+    if (continuation->diagnostics.fallback_step_count > 0
+        || continuation->diagnostics.optimized_step_count != continuation->target_count) {
+        continuation->diagnostics.calculation_status = RUCKIG_TRACKING_CALCULATION_FAST_FALLBACK;
+    }
+    continuation->diagnostics.mode = RUCKIG_TRACKING_OPTIMIZED;
+    continuation->diagnostics.optimized_strategy = continuation->optimized_strategy;
+    if (continuation->diagnostics.fast_score > 0.0) {
+        continuation->diagnostics.improvement_ratio =
+            (continuation->diagnostics.fast_score - continuation->diagnostics.best_score)
+            / continuation->diagnostics.fast_score;
+    }
+    continuation->active = false;
+    continuation->complete = true;
+    continuation->was_interrupted = false;
+    tracking_sequence_publish_optimized_diagnostics(tracking, continuation, false);
+    result = RUCKIG_WORKING;
+
+restore_and_return:
+    tracking->mode = saved_mode;
+    tracking->optimized_strategy = saved_strategy;
+    tracking->reactiveness = saved_reactiveness;
+    tracking->look_ahead_cycles = saved_look_ahead_cycles;
+    tracking->max_optimized_candidates = saved_max_optimized_candidates;
+    return result;
+}
+
 RUCKIG_C_API ruckig_result_t ruckig_tracking_calculate_sequence_interruptible(
     ruckig_tracking_t* tracking,
     const ruckig_target_state_sequence_t* target_sequence,
@@ -1860,6 +2445,9 @@ RUCKIG_C_API ruckig_result_t ruckig_tracking_calculate_sequence_interruptible(
     if (continuation->mode == RUCKIG_TRACKING_FAST) {
         return tracking_sequence_process_fast(tracking, continuation, output_sequence);
     }
+    if (continuation->mode == RUCKIG_TRACKING_OPTIMIZED) {
+        return tracking_sequence_process_optimized(tracking, continuation, output_sequence);
+    }
     return RUCKIG_ERROR_UNSUPPORTED;
 }
 
@@ -1882,6 +2470,13 @@ RUCKIG_C_API ruckig_result_t ruckig_tracking_resume_sequence(
             return RUCKIG_ERROR_INVALID_INPUT;
         }
         return tracking_sequence_process_fast(tracking, continuation, output_sequence);
+    }
+    if (continuation->mode == RUCKIG_TRACKING_OPTIMIZED) {
+        if (continuation->target_count == 0 && !continuation->complete) {
+            tracking_mark_error(tracking);
+            return RUCKIG_ERROR_INVALID_INPUT;
+        }
+        return tracking_sequence_process_optimized(tracking, continuation, output_sequence);
     }
     return RUCKIG_ERROR_UNSUPPORTED;
 }

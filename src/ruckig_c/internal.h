@@ -200,12 +200,27 @@ struct ruckig_tracking_sequence_continuation {
     bool active;
     bool was_interrupted;
     bool complete;
+    bool optimized_step_active;
+    bool optimized_improved;
     ruckig_tracking_mode_t mode;
     ruckig_tracking_optimized_strategy_t optimized_strategy;
+    double reactiveness;
+    size_t look_ahead_cycles;
+    size_t max_optimized_candidates;
+    size_t optimized_phase;
+    size_t optimized_index;
+    size_t optimized_window_count;
+    double optimized_fast_score;
+    double optimized_fast_terminal_position_error;
+    double optimized_best_score;
     struct ruckig_input* input;
     struct ruckig_target_state_sequence* target_sequence;
     struct ruckig_tracking_output_sequence* output_prefix;
     ruckig_tracking_diagnostics_t diagnostics;
+    ruckig_tracking_diagnostics_t optimized_step_diagnostics;
+    double* optimized_best_position;
+    double* optimized_best_velocity;
+    double* optimized_best_acceleration;
 };
 
 struct ruckig_tracking {

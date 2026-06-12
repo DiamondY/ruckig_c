@@ -54,6 +54,14 @@ and `0.14.1` is reserved for emergency patch fixes only.
   `ruckig_c_tracking_sequence_fast_continuation`. No additional public symbols,
   enum values, result-code values, diagnostics fields, version metadata, tag,
   release, push, or manual workflow change is included.
+- `0.15.0-alpha.6` implements Optimized tracking sequence continuation with a
+  private candidate-boundary state machine. Interrupted calls preserve the
+  current step's candidate phase, best-so-far target, input snapshot, and
+  diagnostics inside the continuation handle while exposing only complete
+  output prefixes. The focused selector is
+  `--tracking-sequence-optimized-continuation` /
+  `ruckig_c_tracking_sequence_optimized_continuation`. The public ABI remains
+  the 184-symbol alpha.4 baseline.
 
 ## 0.14.0 - 2026-06-12
 

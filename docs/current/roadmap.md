@@ -116,8 +116,12 @@ CI.
   continuation handle, publishes only complete step prefixes, supports repeated
   resume calls, and adds focused C coverage under
   `ruckig_c_tracking_sequence_fast_continuation` without further ABI expansion.
-- Next implementation priority is `0.15.0-alpha.6` Optimized tracking sequence
-  continuation, followed by `0.15.0-alpha.7` wrapper/documentation smoke
+- `0.15.0-alpha.6` Optimized tracking sequence continuation is complete
+  locally. It stores private candidate-boundary state in the continuation
+  handle, resumes candidate enumeration across calls, keeps output sequences
+  limited to complete prefixes, and proves completed resume output matches
+  non-interruptible complete sequence solves in focused C tests.
+- Next implementation priority is `0.15.0-alpha.7` wrapper/documentation smoke
   coverage.
 - Keep the 184-symbol `0.15.0-alpha.4` public C ABI baseline unless a later
   separate public API decision is accepted.

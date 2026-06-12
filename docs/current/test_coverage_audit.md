@@ -117,6 +117,26 @@ Added coverage:
 
 The local checklist is `docs/release/checklists/0.15.0-alpha.5.md`.
 
+## 0.15.0-alpha.6 Optimized Tracking Sequence Continuation
+
+`0.15.0-alpha.6` implements Optimized-mode behavior for the alpha.4
+interruptible tracking sequence continuation API. It keeps output publication
+at complete sequence-step prefixes while preserving in-progress candidate
+enumeration state privately inside the continuation handle.
+
+Added coverage:
+
+| Area | Evidence |
+| --- | --- |
+| Focused selector | Adds `--tracking-sequence-optimized-continuation` and CTest `ruckig_c_tracking_sequence_optimized_continuation`. |
+| Complete equivalence | Verifies large-budget interruptible Optimized sequence output matches the old complete `ruckig_tracking_calculate_sequence` output. |
+| Resume equivalence | Verifies zero-budget repeated resume reaches the same deterministic output sequence as a complete solve. |
+| Candidate-boundary interruption | Exercises interruption while the current step is still in private candidate enumeration; public output count remains equal to completed prefix count. |
+| Diagnostics consistency | Checks Optimized diagnostics stay self-consistent and record actual candidate/budget evidence. |
+| Duration build | Runs the continuation selectors in the duration-enabled build to keep interruption availability independent from public duration reporting. |
+
+The local checklist is `docs/release/checklists/0.15.0-alpha.6.md`.
+
 ## 0.14.0-alpha.1 Interrupt Boundary API-Neutral Audit
 
 `0.14.0-alpha.1` adds a focused local audit for the existing
