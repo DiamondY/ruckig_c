@@ -31,9 +31,11 @@ Current alpha coverage:
   and calculation-duration accessors;
 - tracking alpha online Fast update, offline sequence smoke, Optimized
   lookahead update, candidate-budget diagnostics, strategy presets,
-  diagnostics snapshots, and fallback status smoke;
+  diagnostics snapshots, fallback status smoke, and interrupt smoke for
+  no-waypoint plus Optimized online tracking update/lookahead;
 - Rust examples for position, offline, velocity, waypoints, per-section
-  minimum duration, tracking Fast, and tracking Optimized alpha.
+  minimum duration, tracking Fast, tracking Optimized alpha, and interrupt
+  smoke.
 
 The build script links an already-built `ruckig_c` static library. By default
 it looks in `out/build/windows-clang-ninja`. Set `RUCKIG_C_LIB_DIR` to override

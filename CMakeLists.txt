@@ -426,6 +426,16 @@ if(BUILD_RUCKIG_C_EXAMPLES)
   endif()
   add_test(NAME example_ruckig_c_20_tracking_offline_optimized_sequence COMMAND example-ruckig-c-20-tracking-offline-optimized-sequence)
 
+  add_executable(example-ruckig-c-21-no-waypoint-interrupt-boundary examples/c/21_no_waypoint_interrupt_boundary.c)
+  target_link_libraries(example-ruckig-c-21-no-waypoint-interrupt-boundary PRIVATE ruckig_c)
+  add_test(NAME example_ruckig_c_21_no_waypoint_interrupt_boundary COMMAND example-ruckig-c-21-no-waypoint-interrupt-boundary)
+  add_test(NAME ruckig_c_examples_no_waypoint_interrupt_boundary COMMAND example-ruckig-c-21-no-waypoint-interrupt-boundary)
+
+  add_executable(example-ruckig-c-22-tracking-interrupt-boundary examples/c/22_tracking_interrupt_boundary.c)
+  target_link_libraries(example-ruckig-c-22-tracking-interrupt-boundary PRIVATE ruckig_c)
+  add_test(NAME example_ruckig_c_22_tracking_interrupt_boundary COMMAND example-ruckig-c-22-tracking-interrupt-boundary)
+  add_test(NAME ruckig_c_examples_tracking_interrupt_boundary COMMAND example-ruckig-c-22-tracking-interrupt-boundary)
+
   add_custom_target(ruckig_c_examples
     DEPENDS
       example-ruckig-c-00-minimal-offline
@@ -449,6 +459,8 @@ if(BUILD_RUCKIG_C_EXAMPLES)
       example-ruckig-c-18-tracking-online-optimized-lookahead
       example-ruckig-c-19-tracking-online-optimized-sinus
       example-ruckig-c-20-tracking-offline-optimized-sequence
+      example-ruckig-c-21-no-waypoint-interrupt-boundary
+      example-ruckig-c-22-tracking-interrupt-boundary
   )
 endif()
 

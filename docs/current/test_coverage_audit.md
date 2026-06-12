@@ -59,6 +59,24 @@ Coverage impact:
 
 The local checklist is `docs/release/checklists/0.15.0-alpha.2.md`.
 
+## 0.15.0-alpha.3 Consumer And Wrapper Interrupt Smoke
+
+`0.15.0-alpha.3` adds user-facing smoke coverage for the `v0.14.0` interrupt
+surfaces. It keeps the C ABI unchanged and keeps Python/Rust wrappers
+prototype-only.
+
+Added coverage:
+
+| Area | Evidence |
+| --- | --- |
+| C examples | Adds `21_no_waypoint_interrupt_boundary.c` and `22_tracking_interrupt_boundary.c`, wired into CMake and focused `ruckig_c_examples_*` CTest names. |
+| Python prototype | Adds no-waypoint interrupt and Optimized tracking update/lookahead interrupt smoke tests over the shared library. |
+| Rust wrapper | Adds no-waypoint interrupt and Optimized tracking update/lookahead interrupt unit tests. |
+| Rust examples | Adds `interrupt_no_waypoint.rs` and `interrupt_tracking.rs` examples. |
+| Boundary | No public C header, ABI allowlist, workflow, package-manager, upstream baseline, or visualization asset change. |
+
+The local checklist is `docs/release/checklists/0.15.0-alpha.3.md`.
+
 ## 0.14.0-alpha.1 Interrupt Boundary API-Neutral Audit
 
 `0.14.0-alpha.1` adds a focused local audit for the existing

@@ -114,6 +114,8 @@ Historical rewrite plans and release evidence are retained for traceability.
   quality baseline selector evidence, and
   `release/checklists/0.15.0-alpha.2.md` records the docs-only tracking
   sequence interruption API draft evidence.
+  `release/checklists/0.15.0-alpha.3.md` records the consumer and wrapper
+  interrupt smoke evidence.
 - `release/evidence/verification_report.md` - local and CI verification
   history.
 - `release/evidence/performance_report.md` - performance procedure and release
@@ -176,6 +178,8 @@ gate. The previous v1 gallery provenance remains available through the
   ABI risks.
 - `../bindings/rust/README.md` - experimental Rust alpha wrapper over the
   public C ABI.
+- `../bindings/python_prototype/README.md` - experimental Python cffi
+  ABI-mode prototype over the public C ABI.
 - `design/python_bindings_feasibility.md` - Python binding feasibility, without
   implementation approval.
 - `design/package_manager_feasibility.md` - frozen package-manager feasibility

@@ -23,7 +23,8 @@ ABI mode and validates the minimum wrapper model:
   first-time-at-position, and local intermediate-position filtering.
 - tracking handles, online Fast tracking, offline target sequences,
   Optimized lookahead update, candidate-budget diagnostics, strategy presets,
-  diagnostics snapshots, and tracking lifecycle checks.
+  diagnostics snapshots, tracking lifecycle checks, and prototype smoke for
+  no-waypoint plus Optimized online tracking interruption.
 
 ## Prerequisites
 

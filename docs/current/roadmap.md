@@ -99,6 +99,11 @@ CI.
   evidence. This is docs-only and keeps `include/ruckig_c/ruckig.h` unchanged;
   any actual sequence interruption implementation requires a later explicit
   public API/ABI decision.
+- Third priority is `0.15.0-alpha.3` consumer and wrapper interrupt smoke
+  evidence. It covers C examples plus Python/Rust prototype wrapper tests and
+  examples for the `v0.14.0` no-waypoint and Optimized online tracking
+  interrupt surfaces without making wrapper publication or package-manager
+  commitments.
 - Keep the `v0.9.0` 172-symbol public C ABI baseline unless a separate public
   API decision is accepted.
 - Package-manager recipes and package publication remain frozen unless

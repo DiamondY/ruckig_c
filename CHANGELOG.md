@@ -31,6 +31,11 @@ and `0.14.1` is reserved for emergency patch fixes only.
   decision, lists candidate API shapes and risks, and rejects implementation,
   public header changes, ABI expansion, tags, releases, pushes, and manual
   workflows for this slice.
+- `0.15.0-alpha.3` adds consumer and wrapper interrupt smoke coverage: C
+  examples for no-waypoint and Optimized tracking interruption, Python
+  prototype smoke tests, Rust wrapper smoke tests, and Rust examples. The
+  wrappers remain prototype-only; no public C ABI, package-manager, version,
+  tag, release, push, or manual workflow change is included.
 
 ## 0.14.0 - 2026-06-12
 

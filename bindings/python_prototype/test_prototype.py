@@ -577,6 +577,63 @@ class PrototypeTests(unittest.TestCase):
             self.assertEqual(diagnostics.error_step_count, 0)
             self.assertGreaterEqual(tracking.last_candidate_count, 4)
 
+    def test_no_waypoint_interrupt_smoke(self) -> None:
+        with Ruckig(1, 0.05) as otg, Input(1) as input_, Output(1) as output:
+            configure_input(input_)
+            input_.set_max_acceleration([2.0])
+            input_.set_max_jerk([5.0])
+            input_.set_interrupt_calculation_duration(1_000_000_000.0)
+
+            self.assertIn(otg.update(input_, output), (Result.WORKING, Result.FINISHED))
+            self.assertTrue(output.new_calculation)
+            self.assertFalse(output.was_calculation_interrupted)
+            incumbent_time = output.time
+
+            output.pass_to_input(input_)
+            input_.set_target_position([1.8])
+            input_.set_interrupt_calculation_duration(0.0)
+            self.assertIn(otg.update(input_, output), (Result.WORKING, Result.FINISHED))
+            self.assertFalse(output.new_calculation)
+            self.assertTrue(output.was_calculation_interrupted)
+            self.assertGreater(output.time, incumbent_time)
+
+    def test_tracking_interrupt_smoke(self) -> None:
+        with (
+            Tracking(1, 0.01) as tracking,
+            TargetState(1) as target,
+            TargetStateSequence(1, 4) as targets,
+            Input(1) as input_,
+            Output(1) as output,
+        ):
+            configure_tracking_input(input_)
+            tracking.set_mode(TrackingMode.OPTIMIZED)
+            tracking.set_optimized_strategy(TrackingOptimizedStrategy.AGGRESSIVE)
+            tracking.set_look_ahead_cycles(4)
+            tracking.set_max_optimized_candidates(16)
+            input_.set_interrupt_calculation_duration(0.0)
+            target.set_position([0.0])
+            target.set_velocity([0.5])
+            target.set_acceleration([0.0])
+
+            self.assertIn(tracking.update(target, input_, output), (Result.WORKING, Result.FINISHED))
+            self.assertTrue(output.was_calculation_interrupted)
+            diagnostics = tracking.last_diagnostics
+            self.assertGreaterEqual(diagnostics.candidate_count, 1)
+            self.assertGreater(diagnostics.budget_exhausted_count, 0)
+
+            output.pass_to_input(input_)
+            targets.set_count(4)
+            for step in range(4):
+                t = (step + 1) * tracking.delta_time
+                targets.set_state(step, [0.5 * t], [0.5], [0.0])
+
+            self.assertIn(tracking.update_with_lookahead(targets, input_, output), (Result.WORKING, Result.FINISHED))
+            self.assertTrue(output.was_calculation_interrupted)
+            diagnostics = tracking.last_diagnostics
+            self.assertGreaterEqual(diagnostics.candidate_count, 1)
+            self.assertGreater(diagnostics.budget_exhausted_count, 0)
+            self.assertEqual(diagnostics.family_candidate_count, diagnostics.candidate_count)
+
     def test_tuple_copy_in_and_list_copy_out(self) -> None:
         with Ruckig(1, 0.1) as otg, Input(1) as input_, Trajectory(1) as trajectory:
             input_.set_current_position((0.0,))

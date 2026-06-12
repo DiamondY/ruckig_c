@@ -2333,4 +2333,74 @@ mod tests {
         assert_eq!(diagnostics.error_step_count, 0);
         Ok(())
     }
+
+    #[test]
+    fn no_waypoint_interrupt_smoke() -> Result<()> {
+        let mut otg = Ruckig::new(1, 0.05)?;
+        let mut input = InputParameter::new(1)?;
+        let mut output = OutputParameter::new(1)?;
+        configure_position(&mut input)?;
+        input.set_max_acceleration(&[2.0])?;
+        input.set_max_jerk(&[5.0])?;
+        input.set_interrupt_calculation_duration(1_000_000_000.0)?;
+
+        let result = otg.update(&input, &mut output)?;
+        assert!(result == RuckigResult::Working || result == RuckigResult::Finished);
+        assert!(output.new_calculation());
+        assert!(!output.was_calculation_interrupted());
+        let incumbent_time = output.time();
+
+        output.pass_to_input(&mut input);
+        input.set_target_position(&[1.8])?;
+        input.set_interrupt_calculation_duration(0.0)?;
+        let result = otg.update(&input, &mut output)?;
+        assert!(result == RuckigResult::Working || result == RuckigResult::Finished);
+        assert!(!output.new_calculation());
+        assert!(output.was_calculation_interrupted());
+        assert!(output.time() > incumbent_time);
+        Ok(())
+    }
+
+    #[test]
+    fn tracking_interrupt_smoke() -> Result<()> {
+        let mut tracking = Tracking::new(1, 0.01)?;
+        let mut target = TargetState::new(1)?;
+        let mut targets = TargetStateSequence::new(1, 4)?;
+        let mut input = InputParameter::new(1)?;
+        let mut output = OutputParameter::new(1)?;
+        configure_tracking_input(&mut input)?;
+        tracking.set_mode(TrackingMode::Optimized)?;
+        tracking.set_optimized_strategy(TrackingOptimizedStrategy::Aggressive)?;
+        tracking.set_look_ahead_cycles(4)?;
+        tracking.set_max_optimized_candidates(16)?;
+        input.set_interrupt_calculation_duration(0.0)?;
+        target.set_position(&[0.0])?;
+        target.set_velocity(&[0.5])?;
+        target.set_acceleration(&[0.0])?;
+
+        let result = tracking.update(&target, &input, &mut output)?;
+        assert!(result == RuckigResult::Working || result == RuckigResult::Finished);
+        assert!(output.was_calculation_interrupted());
+        let diagnostics = tracking.last_diagnostics()?;
+        assert!(diagnostics.candidate_count >= 1);
+        assert!(diagnostics.budget_exhausted_count > 0);
+
+        output.pass_to_input(&mut input);
+        targets.set_count(4)?;
+        for step in 0..4 {
+            let t = (step + 1) as f64 * tracking.delta_time();
+            targets.set_state(step, &[0.5 * t], &[0.5], &[0.0])?;
+        }
+        let result = tracking.update_with_lookahead(&targets, &input, &mut output)?;
+        assert!(result == RuckigResult::Working || result == RuckigResult::Finished);
+        assert!(output.was_calculation_interrupted());
+        let diagnostics = tracking.last_diagnostics()?;
+        assert!(diagnostics.candidate_count >= 1);
+        assert!(diagnostics.budget_exhausted_count > 0);
+        assert_eq!(
+            diagnostics.family_candidate_count(),
+            diagnostics.candidate_count
+        );
+        Ok(())
+    }
 }
