@@ -4384,6 +4384,97 @@ static void test_tracking_interrupt_sequence_remains_deferred(void) {
     ruckig_tracking_destroy(tracking);
 }
 
+static void test_interrupt_post_release_no_waypoint_quality_corpus(void) {
+    const double targets[4] = {0.8, 1.2, 1.7, 2.3};
+    size_t case_id;
+
+    for (case_id = 0; case_id < 4; ++case_id) {
+        ruckig_t* otg = NULL;
+        ruckig_t* reference_otg = NULL;
+        ruckig_input_t* input = NULL;
+        ruckig_output_t* output = NULL;
+        ruckig_trajectory_t* reference = NULL;
+        ruckig_result_t result;
+        double incumbent_duration = 0.0;
+        double reference_duration = 0.0;
+
+        CHECK_EQ_INT(ruckig_create(&otg, 1, 0.02), RUCKIG_WORKING);
+        CHECK_EQ_INT(ruckig_create(&reference_otg, 1, 0.02), RUCKIG_WORKING);
+        CHECK_EQ_INT(ruckig_input_create(&input, 1), RUCKIG_WORKING);
+        CHECK_EQ_INT(ruckig_output_create(&output, 1), RUCKIG_WORKING);
+        CHECK_EQ_INT(ruckig_trajectory_create(&reference, 1), RUCKIG_WORKING);
+
+        configure_interrupt_boundary_no_waypoint_input(input);
+        ruckig_input_target_position_data(input)[0] = targets[case_id];
+        ruckig_input_max_velocity_data(input)[0] = 0.7 + 0.1 * (double)case_id;
+        CHECK_EQ_INT(ruckig_calculate(reference_otg, input, reference), RUCKIG_WORKING);
+        reference_duration = ruckig_trajectory_get_duration(reference);
+        CHECK_TRUE(reference_duration > 0.0);
+
+        CHECK_EQ_INT(ruckig_input_set_interrupt_calculation_duration(input, 0.0), RUCKIG_WORKING);
+        result = ruckig_update_under_allocation_guard(otg, input, output);
+        CHECK_TRUE(result == RUCKIG_WORKING || result == RUCKIG_FINISHED);
+        CHECK_TRUE(ruckig_output_new_calculation(output));
+        CHECK_TRUE(!ruckig_output_was_calculation_interrupted(output));
+        CHECK_NEAR(ruckig_trajectory_get_duration(ruckig_output_get_trajectory(output)), reference_duration, 1e-9);
+        CHECK_TRUE(!otg->waypoint_engine.active);
+
+        incumbent_duration = ruckig_trajectory_get_duration(ruckig_output_get_trajectory(output));
+        ruckig_output_pass_to_input(output, input);
+        ruckig_input_target_position_data(input)[0] = targets[case_id] + 0.45;
+        CHECK_EQ_INT(ruckig_input_set_interrupt_calculation_duration(input, 0.0), RUCKIG_WORKING);
+        result = ruckig_update_under_allocation_guard(otg, input, output);
+        CHECK_TRUE(result == RUCKIG_WORKING || result == RUCKIG_FINISHED);
+        CHECK_TRUE(!ruckig_output_new_calculation(output));
+        CHECK_TRUE(ruckig_output_was_calculation_interrupted(output));
+        CHECK_NEAR(ruckig_trajectory_get_duration(ruckig_output_get_trajectory(output)), incumbent_duration, 0.0);
+        CHECK_TRUE(!otg->waypoint_engine.active);
+
+        ruckig_output_pass_to_input(output, input);
+        CHECK_EQ_INT(ruckig_input_set_interrupt_calculation_duration(input, 1000000000.0), RUCKIG_WORKING);
+        CHECK_EQ_INT(ruckig_calculate(reference_otg, input, reference), RUCKIG_WORKING);
+        reference_duration = ruckig_trajectory_get_duration(reference);
+        CHECK_TRUE(reference_duration > 0.0);
+        result = ruckig_update_under_allocation_guard(otg, input, output);
+        CHECK_TRUE(result == RUCKIG_WORKING || result == RUCKIG_FINISHED);
+        CHECK_TRUE(ruckig_output_new_calculation(output));
+        CHECK_TRUE(!ruckig_output_was_calculation_interrupted(output));
+        CHECK_NEAR(ruckig_trajectory_get_duration(ruckig_output_get_trajectory(output)), reference_duration, 1e-9);
+        CHECK_TRUE(!otg->waypoint_engine.active);
+
+        ruckig_trajectory_destroy(reference);
+        ruckig_output_destroy(output);
+        ruckig_input_destroy(input);
+        ruckig_destroy(reference_otg);
+        ruckig_destroy(otg);
+    }
+}
+
+static void test_interrupt_post_release_calculate_and_sequence_boundaries(void) {
+    {
+        ruckig_t* otg = NULL;
+        ruckig_input_t* input = NULL;
+        ruckig_trajectory_t* reference = NULL;
+
+        CHECK_EQ_INT(ruckig_create(&otg, 1, 0.01), RUCKIG_WORKING);
+        CHECK_EQ_INT(ruckig_input_create(&input, 1), RUCKIG_WORKING);
+        CHECK_EQ_INT(ruckig_trajectory_create(&reference, 1), RUCKIG_WORKING);
+        configure_interrupt_boundary_no_waypoint_input(input);
+        ruckig_input_target_position_data(input)[0] = 1.4;
+        CHECK_EQ_INT(ruckig_input_set_interrupt_calculation_duration(input, 0.0), RUCKIG_WORKING);
+
+        CHECK_EQ_INT(ruckig_calculate(otg, input, reference), RUCKIG_WORKING);
+        CHECK_TRUE(ruckig_trajectory_get_duration(reference) > 0.0);
+        CHECK_TRUE(!otg->waypoint_engine.active);
+
+        ruckig_trajectory_destroy(reference);
+        ruckig_input_destroy(input);
+        ruckig_destroy(otg);
+    }
+
+    test_tracking_interrupt_sequence_remains_deferred();
+}
+
 static void check_tracking_output_sequence(
     const ruckig_tracking_output_sequence_t* outputs,
     size_t dofs,
@@ -6746,6 +6837,14 @@ void run_tracking_interrupt_audit_tests(void) {
     test_tracking_interrupt_optimized_best_so_far_update();
     test_tracking_interrupt_optimized_lookahead();
     test_tracking_interrupt_sequence_remains_deferred();
+}
+
+void run_interrupt_post_release_quality_tests(void) {
+    run_waypoint_resume_quality_audit_tests();
+    test_interrupt_post_release_no_waypoint_quality_corpus();
+    test_tracking_interrupt_optimized_best_so_far_update();
+    test_tracking_interrupt_optimized_lookahead();
+    test_interrupt_post_release_calculate_and_sequence_boundaries();
 }
 
 void run_tracking_api_tests(void) {

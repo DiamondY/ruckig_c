@@ -17,6 +17,14 @@ and `0.14.1` is reserved for emergency patch fixes only.
 - `v0.14.0` release evidence, annotated tag evidence, GitHub Release
   publication, and post-tag ordinary push CI are recorded in
   `docs/release/checklists/0.14.0.md`.
+- `0.15.0-alpha.1` adds a post-release interrupt quality baseline selector,
+  `--interrupt-post-release-quality`, with CTest
+  `ruckig_c_interrupt_post_release_quality`. It covers the stabilized
+  `v0.14.0` waypoint true-resume, no-waypoint complete-trajectory-boundary,
+  and Optimized online tracking candidate-boundary interrupt surfaces while
+  keeping public `ruckig_calculate`, tracking sequence interruption, public
+  ABI, version metadata, tags, releases, pushes, and manual workflows out of
+  scope.
 
 ## 0.14.0 - 2026-06-12
 

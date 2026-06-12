@@ -20,7 +20,26 @@ Current `main` is in `0.15.0-design - Unreleased` after the published
 alpha.1 through alpha.5 boundary audit, design, implementation-readiness,
 no-waypoint interruption, and online tracking interruption slices. `v0.14.0`
 keeps the public C ABI unchanged and records stable release coverage under the
-`0.14.0` label. No `0.15.0` coverage scope has been accepted yet.
+`0.14.0` label.
+
+## 0.15.0-alpha.1 Interrupt Post-Release Quality Baseline
+
+`0.15.0-alpha.1` adds a focused local post-release quality selector for the
+interrupt surfaces stabilized by `v0.14.0`. It does not change public API,
+public ABI, version metadata, tag/release state, or remote workflow state.
+
+Added C coverage:
+
+| Scenario | Evidence |
+| --- | --- |
+| Focused selector | Adds `--interrupt-post-release-quality` and CTest `ruckig_c_interrupt_post_release_quality`. |
+| Waypoint true-resume | Reuses the 128-case `ruckig_c_waypoint_resume_quality_audit` deterministic corpus. |
+| No-waypoint interruption | Adds deterministic first-solve, zero-budget incumbent preservation, and full-budget reference comparison cases for complete-trajectory-boundary interruption. |
+| Optimized online tracking | Reuses update and lookahead best-so-far candidate-boundary interruption checks and diagnostics consistency assertions. |
+| Negative boundaries | Public `ruckig_calculate` still completes normally with an interrupt budget; `ruckig_tracking_calculate_sequence` remains deferred. |
+| Duration build | The same selector is run in the normal and duration-enabled builds to keep interruption availability independent from public duration reporting. |
+
+The local checklist is `docs/release/checklists/0.15.0-alpha.1.md`.
 
 ## 0.14.0-alpha.1 Interrupt Boundary API-Neutral Audit
 

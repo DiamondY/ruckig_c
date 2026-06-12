@@ -37,7 +37,10 @@ full local stable-review gate set for the waypoint, no-waypoint, and online
 tracking interrupt surfaces without changing public ABI. The `v0.14.0`
 stable release adopts these semantics with only version metadata and ABI
 artifact path changes. Current `main` is now `0.15.0-design - Unreleased`;
-no further interrupt surface expansion has been accepted for `0.15.0`.
+`0.15.0-alpha.1` adds a post-release quality baseline selector for the same
+waypoint, no-waypoint, and Optimized online tracking interrupt semantics. It
+does not expand the public API, does not implement tracking sequence
+interruption, and does not change the semantics below.
 
 This is not a hard real-time guarantee. The budget is checked at safe waypoint
 candidate boundaries, so the actual elapsed time can exceed the configured
@@ -123,6 +126,9 @@ The optimizer is still advanced only at complete-candidate boundaries:
   no-waypoint, and online tracking interrupt semantics through focused
   interrupt, duration-enabled, allocation, coverage, ABI/export, oracle,
   performance, wrapper, and visualization gates without adding public API.
+- `0.15.0-alpha.1` adds `--interrupt-post-release-quality` and
+  `ruckig_c_interrupt_post_release_quality` as a post-release regression
+  selector over the stabilized `v0.14.0` interrupt surfaces.
 
 ## No-Waypoint Complete-Trajectory Boundary
 

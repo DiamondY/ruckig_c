@@ -91,9 +91,10 @@ CI.
   tag, tag push CI, tag manual release-random, GitHub Release publication, and
   tag/release evidence push CI. Evidence is recorded in
   `docs/release/checklists/0.14.0.md`.
-- Current priority is `0.15.0-design` planning. No `0.15.0` alpha,
-  readiness, stable closeout, tag, GitHub Release, version bump, or manual
-  workflow is selected until a separate plan accepts it.
+- Current first priority is `0.15.0-alpha.1` post-release interrupt quality
+  baseline evidence. It adds a focused local selector for the `v0.14.0`
+  waypoint, no-waypoint, and Optimized online tracking interrupt surfaces
+  without changing public ABI or entering readiness/stable closeout.
 - Keep the `v0.9.0` 172-symbol public C ABI baseline unless a separate public
   API decision is accepted.
 - Package-manager recipes and package publication remain frozen unless
