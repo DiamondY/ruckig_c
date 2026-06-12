@@ -105,7 +105,7 @@ Implemented and covered by fixed C/oracle tests plus deterministic random oracle
   alpha.5, rerunning build, CTest, oracle, release-random, performance,
   ABI/export, platform-clock, visualization, wrapper, coverage, and boundary
   gates without version bump, tag, release, push, or manual workflow.
-- `v0.14.0` stable release candidate closeout, adopting the waypoint,
+- `v0.14.0` stable release, adopting the waypoint,
   no-waypoint, and online tracking interrupt surface evidence while keeping
   the 172-symbol public C ABI unchanged.
 - `0.10.0-alpha` visualization v2 local gallery evidence, replacing the
@@ -125,13 +125,13 @@ Implemented and covered by fixed C/oracle tests plus deterministic random oracle
   tracking Fast-mode scenarios, and Optimized tracking scenarios.
 
 Release-readiness evidence is tracked under `docs/release/`; see
-`docs/index.md` for the organized documentation map. `v0.13.0` is the current
-stable release after completed `0.13.0-readiness`, release-candidate, tag, and
-manual release-random gates for post-`v0.12.0` waypoint true-resume stress and
-private engine rewrite slices. Current `main` is in `v0.14.0` stable release
-closeout after completed `0.14.0-readiness` local and remote evidence.
-`v0.14.0` keeps the `v0.9.0` 172-symbol public C ABI unchanged while
-stabilizing API-neutral interrupt surfaces. Public `ruckig_calculate` still ignores
+`docs/index.md` for the organized documentation map. `v0.14.0` is the current
+stable release after completed `0.14.0-readiness`, release-candidate, tag, and
+manual release-random gates for the API-neutral interrupt surface line. Current
+`main` is in `0.15.0-design - Unreleased`; no `0.15.0` public API or ABI work
+has been accepted. `v0.14.0` keeps the `v0.9.0` 172-symbol public C ABI
+unchanged while stabilizing API-neutral interrupt surfaces. Public
+`ruckig_calculate` still ignores
 `interrupt_calculation_duration` and runs complete solves. On the `0.14.0`
 design line, no-waypoint `ruckig_update` now supports complete-trajectory
 boundary interruption without true-resume, and Optimized online tracking
@@ -165,8 +165,7 @@ Optimized tracking quality thresholds while keeping the public C ABI unchanged.
 as regression evidence before readiness. `0.9.0-readiness` records full local
 readiness evidence for the tracking quality/stability line, and `v0.9.0`
 stabilizes that evidence without changing the 172-symbol public C ABI.
-`0.9.1`, `0.10.1`, `0.11.1`, `0.12.1`, and `0.13.1` are reserved for
-emergency patch work only. After `v0.14.0` publication, `0.14.1` is reserved
+`0.9.1`, `0.10.1`, `0.11.1`, `0.12.1`, `0.13.1`, and `0.14.1` are reserved
 for emergency patch work only.
 `v0.4.0` added waypoint-aware C ABI entry points, per-section constraints,
 global position bounds, and a local coupled waypoint optimizer; `v0.4.1`

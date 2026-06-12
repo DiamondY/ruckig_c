@@ -38,11 +38,23 @@ Before each patch release:
 The initial `0.2.x` process records exported symbols as release evidence; it
 does not require a strict automated ABI diff yet.
 
+## 0.15.0 Design Line ABI Boundary
+
+Current `main` is in `0.15.0-design - Unreleased` after the published
+`v0.14.0` stable release. `v0.14.0` is the current stable release, and
+`0.14.1` is reserved for emergency patch fixes only.
+
+No `0.15.0` public C API, public ABI, exported-symbol, public diagnostics,
+enum numeric, result-code numeric, or runtime clock public hook change has
+been accepted. The current stable ABI remains the 172-symbol public C ABI.
+Project version metadata remains `0.14.0` until a separate release-candidate
+plan accepts a version bump.
+
 ## v0.13.0 Stable ABI Baseline
 
-`v0.13.0` is the current stable release before `v0.14.0` closeout. Current
-`main` is in `v0.14.0` release-candidate closeout; no `0.14.0` public ABI
-change is accepted.
+`v0.13.0` was the current stable release before `v0.14.0` closeout. The
+published `v0.14.0` release keeps the same 172-symbol public C ABI and makes
+`v0.14.0` the current stable release.
 The `v0.13.0` release changed only version metadata and ABI artifact output
 paths:
 
@@ -65,11 +77,11 @@ Compatibility rules for the `v0.13.0` stable release:
   baseline.
 - Public header diff against `v0.12.0` is limited to version macros/string.
 
-## v0.14.0 Release Candidate ABI Review
+## v0.14.0 Stable ABI Baseline
 
-`v0.14.0` release-candidate closeout reviews the post-`v0.13.0`
-interrupt-surface work on `main`. The release candidate bumps only version
-metadata and ABI artifact output paths:
+`v0.14.0` stable closeout reviews the post-`v0.13.0` interrupt-surface work
+on `main`. The release bumps only version metadata and ABI artifact output
+paths:
 
 - `CMakeLists.txt` project version is `0.14.0`.
 - `RUCKIG_C_VERSION_*` macros and string are `0.14.0`.

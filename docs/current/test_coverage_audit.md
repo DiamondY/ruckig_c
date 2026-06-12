@@ -13,15 +13,14 @@ Coverage is tracked in three different senses:
 - Oracle coverage: frozen C++ differential comparisons against
   `original/ruckig-main`.
 
-## 0.14.0 Release Candidate Baseline
+## 0.15.0 Design Line Baseline
 
-Current `main` is in `v0.14.0` stable release-candidate closeout after the
-published `v0.13.0` stable release and completed `0.14.0-readiness` local and
-remote evidence. The accepted `0.14.0` interrupt evidence includes alpha.1
-through alpha.5 boundary audit, design, implementation-readiness,
+Current `main` is in `0.15.0-design - Unreleased` after the published
+`v0.14.0` stable release. The accepted `0.14.0` interrupt evidence includes
+alpha.1 through alpha.5 boundary audit, design, implementation-readiness,
 no-waypoint interruption, and online tracking interruption slices. `v0.14.0`
-keeps the public C ABI unchanged and records release-candidate coverage under
-the `0.14.0` label.
+keeps the public C ABI unchanged and records stable release coverage under the
+`0.14.0` label. No `0.15.0` coverage scope has been accepted yet.
 
 ## 0.14.0-alpha.1 Interrupt Boundary API-Neutral Audit
 
@@ -178,9 +177,9 @@ example, and original-reference code:
 Coverage artifacts are under `out/coverage/0.14.0-readiness/`. The readiness
 checklist is `docs/release/checklists/0.14.0-readiness.md`.
 
-## v0.14.0 Release-Candidate Coverage
+## v0.14.0 Stable Release Coverage
 
-`v0.14.0` release-candidate local gates rerun the readiness gate after the
+`v0.14.0` stable release local gates rerun the readiness gate after the
 version bump and ABI artifact path update.
 
 Release-candidate gate evidence:

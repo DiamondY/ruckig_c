@@ -18,18 +18,19 @@ install, pkg-config, static/DLL, shared install-tree, and CI consumer paths
 remain maintained; vcpkg, Conan, Homebrew, and similar recipes are reopened
 only after a separate user or release demand decision.
 
-## 0.14.0 Release Closeout
+## 0.15.0 Design Line
 
-Current `main` is in `v0.14.0` stable release closeout after the published
-`v0.13.0` stable release and completed `0.14.0-readiness` remote CI evidence.
+Current `main` is in `0.15.0-design - Unreleased` after the published
+`v0.14.0` stable release, tag, GitHub Release, and tag/release evidence push
+CI.
 
-- `v0.13.0` is the current stable release.
-- `0.13.1` is reserved for emergency `v0.13.0` patch fixes only.
+- `v0.14.0` is the current stable release.
+- `0.14.1` is reserved for emergency `v0.14.0` patch fixes only.
+- `0.13.1` remains reserved for emergency `v0.13.0` patch fixes only.
 - `0.12.1` remains reserved for emergency `v0.12.0` patch fixes only.
-- `v0.14.0` is the current release-candidate closeout target.
-- No `0.14.0` public C API, public ABI, exported-symbol, enum numeric,
+- No `0.15.0` public C API, public ABI, exported-symbol, enum numeric,
   public diagnostics, runtime clock hook, or result-code numeric change is
-  accepted for the release.
+  accepted for the design line.
 - `0.13.0-alpha.1` waypoint true-resume stress and quality evidence is
   complete. It added focused multi-DoF, multi-waypoint, per-section,
   budget-matrix, fresh-solve quality-reference, long online-loop, and
@@ -85,9 +86,14 @@ Current `main` is in `v0.14.0` stable release closeout after the published
   remote push CI on head commit
   `85b48b86db8a97f1284a6868501b1c72a06db6d9`, run `27393309247`, conclusion
   `success`.
-- Current priority is `v0.14.0` stable release closeout. Do not create the
-  `v0.14.0` tag or GitHub Release until release-candidate local gates,
-  candidate ordinary push CI, and candidate manual release-random all pass.
+- `v0.14.0` stable closeout completed release-candidate local gates, ordinary
+  push CI, candidate manual release-random, final evidence commit, annotated
+  tag, tag push CI, tag manual release-random, GitHub Release publication, and
+  tag/release evidence push CI. Evidence is recorded in
+  `docs/release/checklists/0.14.0.md`.
+- Current priority is `0.15.0-design` planning. No `0.15.0` alpha,
+  readiness, stable closeout, tag, GitHub Release, version bump, or manual
+  workflow is selected until a separate plan accepts it.
 - Keep the `v0.9.0` 172-symbol public C ABI baseline unless a separate public
   API decision is accepted.
 - Package-manager recipes and package publication remain frozen unless

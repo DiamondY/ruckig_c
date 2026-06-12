@@ -7,7 +7,7 @@ Historical rewrite plans and release evidence are retained for traceability.
 ## Current Maintainer Entry Points
 
 - `current/roadmap.md` - shipped scope, maintenance queues, current stable
-  release scope, the `v0.14.0` release closeout line, and future design
+  release scope, the `0.15.0-design` line, and future design
   boundaries.
 - `current/api_compatibility.md` - patch-release API/ABI policy and
   exported-symbol review.
@@ -123,9 +123,9 @@ Historical rewrite plans and release evidence are retained for traceability.
   `0.13.0` waypoint true-resume stress/private-engine release notes, and the
   stable `0.14.0` API-neutral interrupt surface release notes.
 
-`v0.13.0` is the current stable release before `v0.14.0` publication. Current
-`main` is in `v0.14.0` stable release closeout after completed local and
-remote `0.14.0-readiness` evidence. Alpha.4 added no-waypoint interruption and
+`v0.14.0` is the current stable release after completed local, remote, tag,
+manual release-random, and GitHub Release evidence. Current `main` is in
+`0.15.0-design - Unreleased`. Alpha.4 added no-waypoint interruption and
 alpha.5 added online tracking interruption without expanding the public C ABI.
 `v0.14.0` stabilizes the API-neutral interrupt surfaces without expanding the
 172-symbol public C ABI. `v0.13.0` stabilizes post-`v0.12.0` waypoint

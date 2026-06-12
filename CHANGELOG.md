@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.15.0-design - Unreleased
+
+Current `main` is now the `0.15.0-design - Unreleased` line after the
+published `v0.14.0` stable release. `v0.14.0` is the current stable release,
+and `0.14.1` is reserved for emergency patch fixes only.
+
+- No `0.15.0` public C API, public ABI, exported-symbol, enum numeric,
+  public diagnostics, runtime clock hook, or result-code numeric change has
+  been accepted.
+- Package-manager recipes, formal Python/Rust publication, cloud/remote
+  calculation, Pro/cloud equivalence claims, hard real-time guarantees,
+  runtime clock public hooks, public interrupt diagnostics, tracking sequence
+  interruption, formal global optimality proof, and upstream baseline upgrades
+  remain deferred unless separately accepted.
+- `v0.14.0` release evidence, annotated tag evidence, GitHub Release
+  publication, and post-tag ordinary push CI are recorded in
+  `docs/release/checklists/0.14.0.md`.
+
 ## 0.14.0 - 2026-06-12
 
 `0.14.0` is the stable API-neutral interrupt surface release. It keeps the
@@ -111,7 +129,7 @@ Release focus:
 
 Release boundary:
 
-- `v0.13.0` is the current stable release.
+- `v0.13.0` became the current stable release at `0.13.0` closeout.
 - Public C ABI expansion is not part of `0.13.0`.
 - `0.13.1` is reserved for emergency patch fixes only.
 - `0.12.1` remains reserved for emergency `v0.12.0` patch fixes only.
