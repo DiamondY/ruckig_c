@@ -52,19 +52,19 @@ Current `main` is `0.14.0-design - Unreleased` after the published
   later covered by cumulative ordinary remote push CI with alpha.2 on head
   commit `ea06684`, run `27387177406`.
   It adds focused local tests and evidence proving
-  `interrupt_calculation_duration` remains limited to waypoint
-  `ruckig_update` with intermediate waypoints. Public `ruckig_calculate`,
-  no-waypoint `ruckig_update`, and tracking remain outside waypoint
-  soft-interruption true-resume semantics.
+  the pre-alpha.4 boundary: `interrupt_calculation_duration` was limited to
+  waypoint `ruckig_update` with intermediate waypoints. Public
+  `ruckig_calculate`, no-waypoint `ruckig_update`, and tracking stayed outside
+  waypoint soft-interruption true-resume semantics at that point.
 - `0.14.0-alpha.2` future interrupt surfaces design is complete. It was
   covered by ordinary remote push CI on head commit `ea06684`, run
   `27387177406`, conclusion `success`. This docs-only quasi-spec covers
   possible future no-waypoint complete-trajectory boundary interruption and
   online tracking candidate-boundary interruption without approving active
   runtime behavior changes.
-- Current priority is `0.14.0-alpha.3` implementation-readiness gap audit.
-  It decides whether the alpha.2 quasi-spec can move into API-neutral
-  no-waypoint and online tracking implementation slices while keeping
+- `0.14.0-alpha.3` implementation-readiness gap audit is complete. It approved
+  moving the alpha.2 quasi-spec into API-neutral no-waypoint and online
+  tracking implementation slices while keeping
   `ruckig_tracking_calculate_sequence` and public diagnostics deferred.
 - `0.14.0-alpha.4` no-waypoint interruption is complete locally. It adds
   complete-trajectory-boundary interruption for no-waypoint `ruckig_update`
@@ -77,18 +77,20 @@ Current `main` is `0.14.0-design - Unreleased` after the published
   candidate evaluated so far when budget expires, and keeps
   `ruckig_tracking_calculate_sequence`, public diagnostics, and public ABI
   expansion deferred.
-- Current priority is a separate alpha.3 through alpha.5 cumulative remote CI
-  evidence step. Do not enter `0.14.0-readiness`, tag, release, version bump,
-  or manual release-random until that ordinary push CI evidence succeeds.
+- Alpha.3 through alpha.5 cumulative ordinary remote push CI evidence
+  succeeded on head commit `4e0e2fb`, run `27391043296`, conclusion `success`.
+- Current priority is `0.14.0-readiness` local stable-review audit. Do not
+  enter `v0.14.0` stable closeout, tag, release, version bump, or manual
+  release-random until readiness evidence is recorded and reviewed.
 - Keep the `v0.9.0` 172-symbol public C ABI baseline unless a separate public
   API decision is accepted.
 - Package-manager recipes and package publication remain frozen unless
   separately accepted.
 - Cloud/remote runtime, proprietary Pro equivalence claims, hard real-time
   guarantees, formal global optimality proof, runtime platform clock public
-  hooks, no-waypoint interruption, tracking interruption, formal Python/Rust
-  API publication, and upstream baseline upgrades remain deferred unless
-  separately accepted.
+  hooks, public interrupt diagnostics, tracking sequence interruption, formal
+  Python/Rust API publication, and upstream baseline upgrades remain deferred
+  unless separately accepted.
 
 ## 0.12.0 Waypoint Soft Interruption True-Resume Release
 

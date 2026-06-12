@@ -1,29 +1,37 @@
 # Future Interrupt Surfaces Design Spec
 
-This document records the `0.14.0-alpha.2` design-only quasi-spec for possible
-future interruption support outside waypoint `ruckig_update`.
+This document records the `0.14.0-alpha.2` design-only quasi-spec that was used
+to review interruption support outside waypoint `ruckig_update`.
 
-It is not implemented. It is not approved as active `0.14.0` runtime behavior.
-It does not change the public C API, public ABI, exported symbols, version
-metadata, or current `interrupt_calculation_duration` semantics.
+The no-waypoint and online tracking update/lookahead subsets described here
+were later implemented by `0.14.0-alpha.4` and `0.14.0-alpha.5` without public
+C API, public ABI, exported-symbol, version metadata, tag, or release changes.
+The remaining deferred surface is `ruckig_tracking_calculate_sequence`
+interruption, which still requires a separate public diagnostics/API decision.
 
 ## Current Boundary
 
 The active behavior remains:
 
-- `interrupt_calculation_duration` only affects `ruckig_update` when the input
-  contains intermediate waypoints.
+- `interrupt_calculation_duration` affects waypoint `ruckig_update` when the
+  input contains intermediate waypoints.
 - Waypoint interruption uses the private waypoint optimizer engine and can
   true-resume across normal online `pass_to_input` cycles.
-- Public `ruckig_calculate`, no-waypoint `ruckig_update`, and tracking do not
-  use interruption or waypoint resume state.
+- No-waypoint `ruckig_update` uses complete-trajectory-boundary interruption
+  without true-resume.
+- Optimized online tracking update and lookahead update use
+  complete-candidate-boundary interruption without waypoint or no-waypoint
+  resume state.
+- Public `ruckig_calculate` ignores the interrupt budget and runs complete
+  solves.
+- `ruckig_tracking_calculate_sequence` does not use interruption.
 - `RUCKIG_C_ENABLE_CALCULATION_DURATION` only controls public reporting of
   `calculation_duration`; it does not control interruption availability.
 
-## Shared Future Rules
+## Shared Rules
 
-Any future extension must keep these rules unless a separate public API
-decision changes them:
+The implemented alpha.4/alpha.5 surfaces and any future extension must keep
+these rules unless a separate public API decision changes them:
 
 - Reuse the existing `interrupt_calculation_duration` input field; do not add a
   public interruption setter, diagnostics handle, result code, enum value, or
@@ -38,9 +46,9 @@ decision changes them:
 - Keep hard real-time, global optimality, Cloud/Pro numerical equivalence, and
   proprietary runtime claims out of public documentation.
 
-## No-Waypoint Update Future Spec
+## No-Waypoint Update Spec
 
-The recommended future no-waypoint policy is complete-trajectory-boundary
+The implemented no-waypoint policy is complete-trajectory-boundary
 interruption, not true-resume.
 
 - Scope is only `ruckig_update` with `input->waypoint_count == 0`.
@@ -73,9 +81,9 @@ Rejected for this policy:
 - Adding public diagnostics for the kept-incumbent case.
 - Claiming hard deadline enforcement from a complete-trajectory-boundary check.
 
-## Online Tracking Future Spec
+## Online Tracking Spec
 
-The recommended future tracking policy is online-only interruption for
+The implemented tracking policy is online-only interruption for
 `ruckig_tracking_update` and `ruckig_tracking_update_with_lookahead`.
 
 - `ruckig_tracking_calculate_sequence` remains deferred. The current public
@@ -110,10 +118,10 @@ Rejected for this policy:
 - Pausing inside target/profile/root solving.
 - Claiming equivalence with proprietary Pro or Cloud tracking behavior.
 
-## Future Acceptance Gates
+## Acceptance Gates
 
-Before either future surface can move from design to implementation, a separate
-plan must define local evidence at least as strict as:
+The alpha.4/alpha.5 implementation plans used local evidence at least as
+strict as:
 
 - Focused C selectors and CTest entries for no-waypoint interrupt boundary and
   online tracking interrupt boundary.

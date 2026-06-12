@@ -24,14 +24,16 @@ readiness gap audit for those future surfaces. It allows later local alpha
 slices to implement no-waypoint complete-trajectory-boundary interruption and
 online tracking best-so-far candidate-boundary interruption if their gates
 pass, while keeping `ruckig_tracking_calculate_sequence`, public diagnostics,
-public ABI changes, version bumps, tags, and releases out of scope. No new
-tracking interrupt semantics are active yet. `0.14.0-alpha.4` implements the
-no-waypoint half of that plan: no-waypoint `ruckig_update` can now preserve a
-valid no-waypoint incumbent when the budget expires at a complete target
-trajectory boundary, but it still does not provide no-waypoint true-resume.
-`0.14.0-alpha.5` implements the online tracking half for Optimized
-`ruckig_tracking_update` and `ruckig_tracking_update_with_lookahead`, while
-leaving `ruckig_tracking_calculate_sequence` deferred.
+public ABI changes, version bumps, tags, and releases out of scope.
+`0.14.0-alpha.4` implements the no-waypoint half of that plan: no-waypoint
+`ruckig_update` can now preserve a valid no-waypoint incumbent when the budget
+expires at a complete target trajectory boundary, but it still does not provide
+no-waypoint true-resume. `0.14.0-alpha.5` implements the online tracking half
+for Optimized `ruckig_tracking_update` and
+`ruckig_tracking_update_with_lookahead`, while leaving
+`ruckig_tracking_calculate_sequence` deferred. `0.14.0-readiness` reruns the
+full local stable-review gate set for the waypoint, no-waypoint, and online
+tracking interrupt surfaces without changing public ABI.
 
 This is not a hard real-time guarantee. The budget is checked at safe waypoint
 candidate boundaries, so the actual elapsed time can exceed the configured
@@ -44,11 +46,12 @@ microsecond value by the duration of the current complete candidate evaluation.
 - `interrupt_calculation_duration = 0.0` enables interruption at the first safe
   candidate boundary after at least one complete candidate evaluation.
 - Negative values and NaN remain invalid input through the existing setter.
-- The feature only affects `ruckig_update` when the input contains intermediate
+- The feature affects `ruckig_update` when the input contains intermediate
   waypoints, plus the post-`0.14.0-alpha.4` no-waypoint
-  complete-trajectory-boundary policy described below.
-- Public `ruckig_calculate`, no-waypoint target solving, and tracking remain
-  unchanged by the field.
+  complete-trajectory-boundary policy and post-`0.14.0-alpha.5` Optimized
+  online tracking candidate-boundary policy described below.
+- Public `ruckig_calculate` remains unchanged by the field: it runs complete
+  solves and ignores the interrupt budget.
 - Public waypoint `ruckig_calculate` uses the same private step-driven
   waypoint optimizer engine, but always runs it to completion, ignores the
   interrupt field, and leaves no active private resume state.
@@ -267,6 +270,11 @@ Routine evidence for this feature should include:
   checks, fresh full-solve quality references, and allocation-guarded resume
   paths.
 - No-allocation checks for the prepared update and background resume paths.
+- No-waypoint first-solve, incumbent-preservation, budget-change, budget-clear,
+  and waypoint-resume-isolation checks.
+- Optimized online tracking update and lookahead best-so-far publish checks,
+  Fast-mode non-interruption checks, diagnostics consistency, and tracking
+  sequence deferred checks.
 - A duration-enabled build proving soft interruption does not depend on
   `RUCKIG_C_ENABLE_CALCULATION_DURATION`.
 
@@ -281,7 +289,8 @@ be rewritten to claim V1 soft interruption.
 The following remain separate design items:
 
 - Finer-grained section or target-solver checkpoints.
-- Cross-cycle continuation for no-waypoint target solving or tracking.
+- Cross-cycle true-resume continuation for no-waypoint target solving.
+- Tracking sequence interruption.
 - Public waypoint optimizer diagnostics.
 - Hard real-time claims, proprietary Pro equivalence claims, or cloud/remote
   fallback behavior.

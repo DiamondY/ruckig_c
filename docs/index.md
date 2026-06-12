@@ -106,6 +106,9 @@ Historical rewrite plans and release evidence are retained for traceability.
   records the local no-waypoint complete-trajectory-boundary interruption
   implementation evidence. `release/checklists/0.14.0-alpha.5.md` records the
   local online tracking best-so-far candidate-boundary interruption evidence.
+  `release/checklists/0.14.0-readiness.md` records the full local
+  stable-review readiness audit for alpha.1 through alpha.5 without creating a
+  tag or GitHub Release.
 - `release/evidence/verification_report.md` - local and CI verification
   history.
 - `release/evidence/performance_report.md` - performance procedure and release
@@ -120,9 +123,10 @@ Historical rewrite plans and release evidence are retained for traceability.
 
 `v0.13.0` is the current stable release after completed `0.13.0-readiness`,
 release-candidate, tag, and manual release-random evidence. Current `main` is
-`0.14.0-design - Unreleased`; the next step is cumulative remote CI evidence
-for the local `0.14.0-alpha.3` through `0.14.0-alpha.5` commits after alpha.4
-added no-waypoint interruption and alpha.5 added online tracking interruption.
+`0.14.0-design - Unreleased`; the current local evidence step is
+`0.14.0-readiness` after cumulative remote CI succeeded for alpha.1/alpha.2
+and alpha.3 through alpha.5. Alpha.4 added no-waypoint interruption and
+alpha.5 added online tracking interruption without expanding the public C ABI.
 `v0.13.0` stabilizes
 post-`v0.12.0` waypoint
 true-resume stress coverage and the private waypoint optimizer engine rewrite
@@ -156,12 +160,13 @@ gate. The previous v1 gallery provenance remains available through the
   possible Fast-only stable `v0.5.0`.
 - `design/tracking_optimized_mode.md` - accepted `v0.6.0` design for bounded
   local `Optimized` tracking.
-- `design/interrupt_calculation_duration.md` - current waypoint
-  `ruckig_update` soft-interruption true-resume semantics and historical
-  `0.4.x` storage-only behavior.
-- `design/future_interrupt_surfaces.md` - design-only quasi-spec for possible
-  future no-waypoint and online tracking interruption surfaces without public
-  ABI changes.
+- `design/interrupt_calculation_duration.md` - current waypoint true-resume,
+  no-waypoint complete-trajectory-boundary, and online tracking
+  candidate-boundary interruption semantics plus historical `0.4.x`
+  storage-only behavior.
+- `design/future_interrupt_surfaces.md` - alpha.2 quasi-spec that later guided
+  alpha.4 no-waypoint and alpha.5 online tracking interruption surfaces
+  without public ABI changes; tracking sequence interruption remains deferred.
 - `../bindings/rust/README.md` - experimental Rust alpha wrapper over the
   public C ABI.
 - `design/python_bindings_feasibility.md` - Python binding feasibility, without

@@ -65,6 +65,39 @@ Compatibility rules for the `v0.13.0` stable release:
   baseline.
 - Public header diff against `v0.12.0` is limited to version macros/string.
 
+## 0.14.0-readiness ABI Review
+
+`0.14.0-readiness` reviews the post-`v0.13.0` interrupt-surface work on
+`main`. It is not a stable release closeout and does not bump version metadata,
+create a tag, publish a GitHub Release, or trigger manual `release-random`.
+
+The active `0.14.0-design` interrupt changes reuse existing public API:
+
+- Waypoint `ruckig_update` keeps the existing private true-resume behavior.
+- No-waypoint `ruckig_update` now uses the existing
+  `ruckig_input_set_interrupt_calculation_duration`,
+  `ruckig_input_clear_interrupt_calculation_duration`, and
+  `ruckig_output_was_calculation_interrupted` surface for
+  complete-trajectory-boundary interruption without true-resume.
+- Optimized online tracking update and lookahead update use the same existing
+  interrupt field and output flag for best-so-far complete-candidate-boundary
+  interruption.
+- Public `ruckig_calculate` remains complete and ignores the interrupt budget.
+- `ruckig_tracking_calculate_sequence` remains deferred because the public
+  sequence output has no API-neutral interruption carrier.
+
+Compatibility rules for `0.14.0-readiness`:
+
+- Public C symbol count remains `172`.
+- Public additions in `0.14.0-readiness`: `0`.
+- Public removals in `0.14.0-readiness`: `0`.
+- Unapproved exported symbols: `0`.
+- `include/ruckig_c/ruckig.h`, `docs/abi/public-symbols.txt`,
+  `docs/abi/public-symbol-exceptions.txt`, and `docs/abi/exceptions.md` remain
+  unchanged.
+- No public function signature, public struct layout, enum numeric value, or
+  result-code numeric value changes.
+
 ## 0.11.0 Stable Soft Interruption
 
 The `v0.11.0` stable release implements V1 soft interruption without expanding

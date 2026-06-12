@@ -61,7 +61,7 @@ Coverage impact:
 | Area | Evidence |
 | --- | --- |
 | Behavioral tests | No new selector or CTest is added by this design-only slice. |
-| Latest interrupt boundary test evidence | `0.14.0-alpha.1` remains the latest local behavioral coverage for active semantics. |
+| Behavioral tests | No behavioral coverage is added by this design-only slice; alpha.1 remains the boundary audit baseline before alpha.4 and alpha.5 implementation. |
 | Future no-waypoint policy | Documented as complete-trajectory-boundary interruption without true-resume or waypoint-engine reuse. |
 | Future tracking policy | Documented as online-only candidate-boundary interruption for `ruckig_tracking_update` and `ruckig_tracking_update_with_lookahead`. |
 | Deferred tracking sequence | `ruckig_tracking_calculate_sequence` remains deferred until a separate public diagnostics/API decision. |
@@ -137,6 +137,45 @@ Added C coverage:
 
 The local implementation checklist is
 `docs/release/checklists/0.14.0-alpha.5.md`.
+
+Alpha.3 through alpha.5 were later covered together by ordinary remote push CI
+on head commit `4e0e2fbf3cf0de9a4deddba672828d6f02f446cd`, run
+`27391043296`, conclusion `success`.
+
+## 0.14.0-readiness Local Stable-Review Audit
+
+`0.14.0-readiness` reruns the full local stable-review gate set for the
+completed alpha.1 through alpha.5 interrupt evidence. It does not change
+implementation, public API, public ABI, version metadata, tag, release, or
+manual workflow state.
+
+Readiness gate evidence:
+
+| Area | Evidence |
+| --- | --- |
+| Baseline | Commit `4e0e2fbf3cf0de9a4deddba672828d6f02f446cd`; latest stable release remains `v0.13.0`. |
+| Remote alpha evidence | Alpha.1/alpha.2 cumulative push CI run `27387177406` passed; alpha.3-alpha.5 cumulative push CI run `27391043296` passed. |
+| Build gates | Main, shared, oracle, performance, and duration builds passed. |
+| Routine CTest | Default, shared, and duration-enabled CTest each passed 51/51. |
+| Focused interrupt gates | Boundary, no-waypoint interrupt, tracking interrupt, waypoint resume stress/quality, tracking, allocation, platform clock, and solver branch selector group passed 12/12. |
+| Oracle gates | Fixed oracle 82 plus waypoint section oracle 4 passed; random 100k seeds 1, 2, 41 passed; per-DoF 100k seed 1 passed; local 1M seed 1 passed. |
+| Performance | No-waypoint average ratio `1.27986` stayed below the `1.5` threshold; waypoint trend recorded with average `3.29673e+06 ns`. |
+| ABI/export | Public symbol count remains `172`; public additions `0`; public removals `0`; unapproved exported symbols `0`. |
+| Wrappers and visualization | Visualization verifier and strict regeneration passed with the shared DLL; Python prototype passed 21/21 with the shared DLL; Rust wrapper tests passed 13/13 and examples built. |
+| Boundary | Public header, ABI docs, workflow, CMake, source implementation, `original/ruckig-main`, and visualization assets remain unchanged. |
+
+Local `0.14.0-readiness` coverage summary after filtering out generated, test,
+example, and original-reference code:
+
+| Metric | Covered | Total | Coverage |
+| --- | ---: | ---: | ---: |
+| Regions | 6691 | 7577 | 88.31% |
+| Functions | 392 | 424 | 92.45% |
+| Lines | 6903 | 7846 | 87.98% |
+| Branches | 3082 | 4397 | 70.09% |
+
+Coverage artifacts are under `out/coverage/0.14.0-readiness/`. The readiness
+checklist is `docs/release/checklists/0.14.0-readiness.md`.
 
 ## v0.13.0 Release-Candidate Coverage
 

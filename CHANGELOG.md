@@ -9,20 +9,21 @@ stable release, and `0.13.1` is reserved for emergency patch fixes only.
   result-code numeric change is accepted yet.
 - Package-manager recipes, formal Python/Rust publication, cloud/remote
   calculation, Pro/cloud equivalence claims, hard real-time guarantees,
-  runtime clock public hooks, no-waypoint interruption, tracking interruption,
-  public resume diagnostics, formal global optimality proof, and upstream
-  baseline upgrades remain deferred unless separately accepted.
+  runtime clock public hooks, public interrupt diagnostics, tracking sequence
+  interruption, formal global optimality proof, and upstream baseline upgrades
+  remain deferred unless separately accepted.
 - `v0.13.0` release evidence, including release-candidate local gates,
   ordinary push CI, candidate manual release-random, annotated tag, tag push
   CI, tag manual release-random, and GitHub Release publication, is recorded in
   `docs/release/checklists/0.13.0.md`.
 - `0.14.0-alpha.1` local evidence adds the API-neutral
   `--interrupt-boundary-audit` selector and `ruckig_c_interrupt_boundary_audit`
-  CTest. The audit proves `interrupt_calculation_duration` still only enables
-  waypoint `ruckig_update` soft interruption when intermediate waypoints are
-  present, while public `ruckig_calculate`, no-waypoint `ruckig_update`, and
-  tracking remain outside waypoint resume semantics. No public ABI, version,
-  tag, GitHub Release, remote CI, or manual `release-random` action is added.
+  CTest. The audit proved the then-active boundary:
+  `interrupt_calculation_duration` only enabled waypoint `ruckig_update` soft
+  interruption when intermediate waypoints were present, while public
+  `ruckig_calculate`, no-waypoint `ruckig_update`, and tracking remained
+  outside waypoint resume semantics. No public ABI, version, tag, GitHub
+  Release, remote CI, or manual `release-random` action is added by that slice.
 - `0.14.0-alpha.2` local design evidence adds
   `docs/design/future_interrupt_surfaces.md`, a quasi-spec for possible future
   no-waypoint complete-trajectory-boundary interruption and online tracking
@@ -53,6 +54,14 @@ stable release, and `0.13.1` is reserved for emergency patch fixes only.
   single-candidate behavior unchanged, leaves
   `ruckig_tracking_calculate_sequence` deferred, and does not add public
   diagnostics or public ABI.
+- `0.14.0-alpha.3` through `0.14.0-alpha.5` were covered together by ordinary
+  remote push CI on head commit `4e0e2fb`, run `27391043296`, conclusion
+  `success`.
+- `0.14.0-readiness` local stable-review audit evidence records full local
+  build, CTest, oracle, release-random, performance, ABI/export, platform
+  clock, visualization, wrapper, coverage, and boundary gates for alpha.1
+  through alpha.5. This readiness slice does not bump version, create a tag,
+  publish a GitHub Release, push, or trigger manual `release-random`.
 
 ## 0.13.0 - 2026-06-11
 

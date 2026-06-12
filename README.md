@@ -88,6 +88,23 @@ Implemented and covered by fixed C/oracle tests plus deterministic random oracle
 - `v0.13.0` stable release, adopting the post-`v0.12.0`
   waypoint true-resume stress coverage and private engine rewrite while
   keeping the 172-symbol public C ABI unchanged.
+- `0.14.0-alpha.1` API-neutral interrupt boundary audit evidence, adding the
+  focused boundary selector without changing public C ABI.
+- `0.14.0-alpha.2` future interrupt surfaces design evidence, documenting
+  no-waypoint and online tracking interruption boundaries without
+  implementation changes.
+- `0.14.0-alpha.3` interrupt implementation-readiness evidence, approving
+  API-neutral no-waypoint and online tracking implementation slices while
+  keeping public diagnostics and tracking sequence interruption deferred.
+- `0.14.0-alpha.4` no-waypoint complete-trajectory-boundary interruption,
+  using the existing interrupt field and output flag without adding public
+  C ABI.
+- `0.14.0-alpha.5` Optimized online tracking candidate-boundary interruption
+  for tracking update and lookahead update, without public C ABI changes.
+- `0.14.0-readiness` local stable-review audit evidence for alpha.1 through
+  alpha.5, rerunning build, CTest, oracle, release-random, performance,
+  ABI/export, platform-clock, visualization, wrapper, coverage, and boundary
+  gates without version bump, tag, release, push, or manual workflow.
 - `0.10.0-alpha` visualization v2 local gallery evidence, replacing the
   current `main` gallery with 30 project-owned `1400x900` PNGs and a strict
   local verifier while keeping the `v0.9.0` stable C ABI unchanged.
@@ -112,9 +129,12 @@ private engine rewrite slices. `v0.13.0` keeps the `v0.9.0` 172-symbol public
 C ABI unchanged while stabilizing the waypoint true-resume stress coverage,
 transaction-style background publish boundary, and private waypoint optimizer
 engine rewrite. Current `main` is `0.14.0-design - Unreleased` for post-release
-planning. Public
-`ruckig_calculate`, no-waypoint target solving, and tracking remain unchanged
-by `interrupt_calculation_duration`.
+planning. Public `ruckig_calculate` still ignores
+`interrupt_calculation_duration` and runs complete solves. On the `0.14.0`
+design line, no-waypoint `ruckig_update` now supports complete-trajectory
+boundary interruption without true-resume, and Optimized online tracking
+update/lookahead now supports best-so-far complete-candidate-boundary
+interruption. `ruckig_tracking_calculate_sequence` remains deferred.
 `v0.10.0` adopts the current gallery as 30 `1400x900` Matplotlib `Agg` and
 NumPy PNG assets under `docs/assets/visualization/`. The gallery covers local
 C ABI equivalents of original examples `01-10` and `14-16`, plus tracking
@@ -179,9 +199,10 @@ Current stable release scope intentionally excludes:
   implementation is a bounded deterministic local evaluator with Fast fallback
   diagnostics, strategy presets, and diagnostics snapshots; these are local
   quality controls, not a global optimality claim.
-- Soft interruption expansion beyond waypoint `ruckig_update` true resume.
-  No-waypoint interruption, tracking interruption, hard real-time guarantees,
-  and runtime platform-clock setters remain deferred.
+- Finer-grained interruption expansion beyond complete candidate boundaries.
+  No-waypoint true-resume, tracking sequence interruption, public interrupt
+  diagnostics, hard real-time guarantees, and runtime platform-clock setters
+  remain deferred.
 - Python/Rust binding publication. The Python `cffi` prototype and Rust alpha
   wrapper remain prototype-only; package publication is frozen until a
   separate demand decision accepts it.
