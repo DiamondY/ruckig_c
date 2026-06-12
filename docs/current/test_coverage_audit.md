@@ -13,14 +13,15 @@ Coverage is tracked in three different senses:
 - Oracle coverage: frozen C++ differential comparisons against
   `original/ruckig-main`.
 
-## 0.15.0 Design Line Baseline
+## 0.15.0 Stable Release Baseline
 
-Current `main` is in `0.15.0-design - Unreleased` after the published
-`v0.14.0` stable release. The accepted `0.14.0` interrupt evidence includes
-alpha.1 through alpha.5 boundary audit, design, implementation-readiness,
-no-waypoint interruption, and online tracking interruption slices. `v0.14.0`
-keeps the public C ABI unchanged and records stable release coverage under the
-`0.14.0` label.
+Current `main` remains on `0.15.0` release evidence after the stable tracking
+sequence continuation closeout. The release promotes alpha.1 through alpha.8
+interrupt and continuation evidence, including the alpha.4 public continuation
+API expansion, Fast and Optimized continuation behavior, wrapper smoke, and
+alpha.8 continuation hardening. `v0.15.0` moves the stable public C ABI
+baseline from the `v0.14.0` 172-symbol interrupt-surface baseline to the
+184-symbol tracking sequence continuation baseline.
 
 ## 0.15.0-alpha.1 Interrupt Post-Release Quality Baseline
 
@@ -205,6 +206,27 @@ example, binding, and output paths:
 
 Coverage artifacts are under `out/coverage/0.15.0-readiness/`. The readiness
 checklist is `docs/release/checklists/0.15.0-readiness.md`.
+
+## v0.15.0 Stable Release Coverage
+
+`v0.15.0` stable closeout reruns the full local release-candidate gate set
+after the version metadata and ABI artifact paths move to `0.15.0`. The
+authoritative command-by-command release evidence is recorded in
+`docs/release/checklists/0.15.0.md`.
+
+Stable release coverage artifacts are generated under `out/coverage/0.15.0/`.
+
+The `0.15.0` coverage run used the same filtered implementation scope as
+readiness, excluding generated, test, example, binding, and output paths.
+
+| Metric | Total | Missed | Coverage |
+| --- | ---: | ---: | ---: |
+| Regions | 7990 | 932 | 88.34% |
+| Functions | 451 | 32 | 92.90% |
+| Lines | 8525 | 1042 | 87.78% |
+| Branches | 4649 | 1400 | 69.89% |
+
+The coverage checklist entry is `docs/release/checklists/0.15.0.md`.
 
 ## 0.14.0-alpha.1 Interrupt Boundary API-Neutral Audit
 

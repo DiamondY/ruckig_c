@@ -38,50 +38,55 @@ Before each patch release:
 The initial `0.2.x` process records exported symbols as release evidence; it
 does not require a strict automated ABI diff yet.
 
-## 0.15.0 Design Line ABI Boundary
+## v0.15.0 Stable ABI Baseline
 
-Current `main` is in `0.15.0-design - Unreleased` after the published
-`v0.14.0` stable release. `v0.14.0` is the current stable release, and
-`0.14.1` is reserved for emergency patch fixes only.
+`v0.15.0` stabilizes the tracking sequence continuation public C ABI reviewed
+on the `0.15.0` design line. Current `main` remains on `0.15.0` release
+evidence after closeout; it does not start `0.16.0-design`.
 
-`0.15.0-alpha.4` accepts a public C ABI expansion for interruptible tracking
-sequence continuation. The design-line public symbol baseline moves from 172 to
-184 symbols by adding an opaque continuation handle, lifecycle/status accessors,
-and interruptible/resume sequence entry points. Project version metadata
-remains `0.14.0` until a separate release-candidate plan accepts a version
-bump.
-
-The alpha.4 API expansion does not add enum numeric values, result-code numeric
-values, public diagnostics struct fields, runtime clock public hooks, package
-manager recipes, tags, releases, pushes, or manual workflows. The old
+The release promotes the `0.15.0-alpha.4` public ABI expansion from the
+published `v0.14.0` 172-symbol baseline to a 184-symbol stable baseline by
+adding an opaque continuation handle, lifecycle/status accessors, and
+interruptible/resume sequence entry points. The old
 `ruckig_tracking_calculate_sequence` entry point keeps complete-solve
 semantics.
 
-`0.15.0-alpha.5` implements Fast-mode behavior for the alpha.4 continuation
-API without adding symbols beyond the 184-symbol design-line baseline. It keeps
-the same public function signatures, result-code numeric values, enum numeric
-values, and `ruckig_tracking_diagnostics_t` layout. Optimized sequence
-continuation remains assigned to alpha.6, and wrapper smoke coverage remains
-assigned to alpha.7.
+Stable `v0.15.0` release metadata:
 
-`0.15.0-alpha.6` implements Optimized sequence continuation on the same public
-API. The public ABI remains the 184-symbol alpha.4 baseline: no new public
-functions, enum numeric values, result-code numeric values, diagnostics fields,
-or public struct layouts are added by alpha.6. Wrapper smoke coverage remains
-assigned to alpha.7.
+- `CMakeLists.txt` project version is `0.15.0`.
+- `RUCKIG_C_VERSION_*` macros and string are `0.15.0`.
+- ABI artifact output paths use `artifacts/abi/0.15.0`.
 
-`0.15.0-alpha.7` adds C example coverage plus Python cffi and Rust prototype
-wrapper smoke for the same continuation API. It does not add public C symbols
-beyond the 184-symbol alpha.4 baseline, does not change public function
-signatures, and does not change enum numeric values, result-code numeric
-values, public diagnostics layout, or version metadata. The wrappers remain
-prototype-only and are not publication commitments.
+Compatibility rules for `v0.15.0`:
 
-Post-alpha.7 continuation hardening keeps the same 184-symbol baseline. It adds
-only a header-only `RUCKIG_RESULT_IS_OK` macro, public comments, documentation,
-and private fields inside opaque implementation structs; no exported symbol,
-function signature, enum numeric value, result-code numeric value, diagnostics
-layout, or version metadata changes are introduced.
+- Public C symbol count is `184`.
+- Public additions in `v0.15.0`: `12`.
+- Public removals in `v0.15.0`: `0`.
+- Existing `v0.14.0` public functions remain exported and are not
+  signature-changed.
+- No enum numeric value, result-code numeric value, public diagnostics layout,
+  or public struct layout changes are part of the release beyond the accepted
+  continuation API additions.
+- Fast and Optimized continuation behavior uses the same public API and does
+  not add symbols beyond the alpha.4 baseline.
+- `RUCKIG_RESULT_IS_OK` is a header-only helper macro and adds no exported
+  dynamic-library symbol.
+- Diagnostics reserved fields and C++ opaque tag guidance are documentation
+  comments only; they do not change public layout or exported symbols.
+- Python `cffi` and Rust wrapper updates remain prototype smoke evidence only;
+  no wheel, crate, or stable wrapper API is published.
+- `0.15.1` is reserved for emergency patch fixes only.
+
+Alpha history retained for ABI traceability:
+
+- `0.15.0-alpha.4` accepted the 12-symbol public continuation API expansion.
+- `0.15.0-alpha.5` implemented Fast-mode behavior without adding symbols.
+- `0.15.0-alpha.6` implemented Optimized sequence continuation on the same
+  public API.
+- `0.15.0-alpha.7` added C example coverage plus Python cffi and Rust
+  prototype wrapper smoke for the same continuation API.
+- `0.15.0-alpha.8` hardened continuation `delta_time` resume semantics and
+  shared the Optimized candidate-step engine without adding exported symbols.
 
 ## v0.13.0 Stable ABI Baseline
 

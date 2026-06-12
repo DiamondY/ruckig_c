@@ -7,8 +7,7 @@ Historical rewrite plans and release evidence are retained for traceability.
 ## Current Maintainer Entry Points
 
 - `current/roadmap.md` - shipped scope, maintenance queues, current stable
-  release scope, the `0.15.0-design` line, and future design
-  boundaries.
+  release scope, the `0.15.0` release line, and future design boundaries.
 - `current/api_compatibility.md` - patch-release API/ABI policy and
   exported-symbol review.
 - `current/api_diagnostics.md` - C API validation and diagnostics behavior.
@@ -126,7 +125,8 @@ Historical rewrite plans and release evidence are retained for traceability.
   continuation hardening evidence, and
   `release/checklists/0.15.0-readiness.md` records the full local
   stable-review audit for alpha.1 through alpha.8 without creating a tag or
-  GitHub Release.
+  GitHub Release. `release/checklists/0.15.0.md` records the stable tracking
+  sequence continuation release closeout.
 - `release/evidence/verification_report.md` - local and CI verification
   history.
 - `release/evidence/performance_report.md` - performance procedure and release
@@ -138,14 +138,15 @@ Historical rewrite plans and release evidence are retained for traceability.
   soft-interruption and platform-clock evidence release notes, the stable
   `0.12.0` waypoint soft-interruption true-resume release notes, the stable
   `0.13.0` waypoint true-resume stress/private-engine release notes, and the
-  stable `0.14.0` API-neutral interrupt surface release notes.
+  stable `0.14.0` API-neutral interrupt surface release notes, and the stable
+  `0.15.0` tracking sequence continuation release notes.
 
-`v0.14.0` is the current stable release after completed local, remote, tag,
-manual release-random, and GitHub Release evidence. Current `main` is in
-`0.15.0-design - Unreleased`. Alpha.4 through alpha.7 add the tracking
-sequence continuation public API, Fast/Optimized sequence continuation
-behavior, and C/Python/Rust prototype smoke coverage on the 184-symbol
-design-line C ABI baseline.
+`v0.15.0` is the current stable release after the tracking sequence
+continuation closeout. It promotes the alpha.4 public continuation API,
+Fast/Optimized sequence continuation behavior, C/Python/Rust prototype smoke
+coverage, and alpha.8 continuation hardening to the stable 184-symbol public C
+ABI baseline. Current `main` remains on `0.15.0` release evidence until a
+separate post-release design-line decision.
 `v0.14.0` stabilizes the API-neutral interrupt surfaces without expanding the
 172-symbol public C ABI. `v0.13.0` stabilizes post-`v0.12.0` waypoint
 true-resume stress coverage and the private waypoint optimizer engine rewrite.

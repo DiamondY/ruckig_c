@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(ruckig_c_rewrite VERSION 0.14.0 LANGUAGES C)
+project(ruckig_c_rewrite VERSION 0.15.0 LANGUAGES C)
 
 include(CTest)
 include(GNUInstallDirs)
@@ -549,7 +549,7 @@ if(BUILD_RUCKIG_C_PERFORMANCE_TESTS)
   add_test(NAME ruckig_c_waypoint_performance_benchmark COMMAND ruckig_c_performance_benchmark --samples 1000 --seed 1 --waypoints)
 endif()
 
-set(RUCKIG_C_ABI_OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/artifacts/abi/0.14.0")
+set(RUCKIG_C_ABI_OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/artifacts/abi/0.15.0")
 set(RUCKIG_C_ABI_PUBLIC_GENERATED_FILE "${RUCKIG_C_ABI_OUTPUT_DIR}/public-symbols-from-header.txt")
 set(RUCKIG_C_ABI_PUBLIC_VERIFY_FILE "${RUCKIG_C_ABI_OUTPUT_DIR}/public-symbols-verify.txt")
 add_custom_command(

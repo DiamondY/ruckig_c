@@ -131,6 +131,10 @@ Implemented and covered by fixed C/oracle tests plus deterministic random oracle
   alpha.8, rerunning build, CTest, oracle, release-random, performance,
   ABI/export, platform-clock, visualization, wrapper, coverage, and boundary
   gates without version bump, tag, release, or manual workflow.
+- `v0.15.0` stable release, adopting the tracking sequence continuation public
+  C ABI, Fast/Optimized continuation behavior, wrapper smoke evidence, and
+  continuation hardening while promoting the public symbol baseline to 184
+  symbols.
 - `0.10.0-alpha` visualization v2 local gallery evidence, replacing the
   current `main` gallery with 30 project-owned `1400x900` PNGs and a strict
   local verifier while keeping the `v0.9.0` stable C ABI unchanged.
@@ -148,17 +152,16 @@ Implemented and covered by fixed C/oracle tests plus deterministic random oracle
   tracking Fast-mode scenarios, and Optimized tracking scenarios.
 
 Release-readiness evidence is tracked under `docs/release/`; see
-`docs/index.md` for the organized documentation map. `v0.14.0` is the current
-stable release after completed `0.14.0-readiness`, release-candidate, tag, and
-manual release-random gates for the API-neutral interrupt surface line. Current
-`main` is in `0.15.0-design - Unreleased`; alpha.4 accepts the tracking
-sequence continuation public API and moves the design-line public C ABI
-baseline to 184 symbols, with alpha.5/alpha.6 behavior and alpha.7
-C/Python/Rust prototype smoke coverage layered on that API. Alpha.8 hardens the
-private continuation contract and `0.15.0-readiness` records the full local
-stable-review audit before any stable closeout decision. `v0.14.0` keeps the
-`v0.9.0` 172-symbol public C ABI unchanged while stabilizing API-neutral
-interrupt surfaces. Public
+`docs/index.md` for the organized documentation map. `v0.15.0` is the current
+stable release after completed `0.15.0-readiness`, release-candidate, tag, and
+manual release-random gates for the tracking sequence continuation line.
+`main` remains on `0.15.0` release evidence until a separate post-release
+design-line decision. `v0.15.0` promotes the tracking sequence continuation
+public API and moves the stable public C ABI baseline to 184 symbols, with
+Fast/Optimized behavior, C/Python/Rust prototype smoke coverage, and
+continuation hardening layered on that API. `v0.14.0` keeps the `v0.9.0`
+172-symbol public C ABI unchanged while stabilizing API-neutral interrupt
+surfaces. Public
 `ruckig_calculate` still ignores
 `interrupt_calculation_duration` and runs complete solves. On the `0.14.0`
 design line, no-waypoint `ruckig_update` now supports complete-trajectory

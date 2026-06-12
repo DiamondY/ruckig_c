@@ -1,10 +1,12 @@
 # Changelog
 
-## 0.15.0-design - Unreleased
+## 0.15.0 - 2026-06-12
 
-Current `main` is now the `0.15.0-design - Unreleased` line after the
-published `v0.14.0` stable release. `v0.14.0` is the current stable release,
-and `0.14.1` is reserved for emergency patch fixes only.
+`0.15.0` is the stable tracking sequence continuation release. It promotes the
+`0.15.0-alpha.4` through `0.15.0-alpha.8` continuation API, behavior, wrapper
+smoke, and hardening evidence reviewed during `0.15.0-readiness`. The public C
+ABI expands from the `v0.14.0` 172-symbol baseline to the 184-symbol
+continuation baseline accepted on the 0.15 design line.
 
 - `0.15.0-alpha.4` accepts a public C ABI expansion for tracking sequence
   interruption continuation. It adds an opaque
@@ -80,6 +82,10 @@ and `0.14.1` is reserved for emergency patch fixes only.
   alpha.8. This readiness slice does not bump version metadata, create a tag,
   publish a GitHub Release, trigger a manual workflow, or make wrapper
   publication claims.
+- `v0.15.0` stable closeout moves ABI artifact output paths to
+  `artifacts/abi/0.15.0`, records local release gates, ordinary CI, manual
+  release-random workflow evidence, annotated tag publication, and GitHub
+  Release publication in `docs/release/checklists/0.15.0.md`.
 
 ## 0.14.0 - 2026-06-12
 

@@ -18,21 +18,23 @@ install, pkg-config, static/DLL, shared install-tree, and CI consumer paths
 remain maintained; vcpkg, Conan, Homebrew, and similar recipes are reopened
 only after a separate user or release demand decision.
 
-## 0.15.0 Design Line
+## 0.15.0 Stable Release Line
 
-Current `main` is in `0.15.0-design - Unreleased` after the published
-`v0.14.0` stable release, tag, GitHub Release, and tag/release evidence push
-CI.
+Current `main` remains on `0.15.0` release evidence after the stable tracking
+sequence continuation closeout. This closeout promotes the 184-symbol public C
+ABI baseline accepted during the 0.15 design line and does not start
+`0.16.0-design`.
 
-- `v0.14.0` is the current stable release.
+- `v0.15.0` is the current stable release.
+- `0.15.1` is reserved for emergency `v0.15.0` patch fixes only.
 - `0.14.1` is reserved for emergency `v0.14.0` patch fixes only.
 - `0.13.1` remains reserved for emergency `v0.13.0` patch fixes only.
 - `0.12.1` remains reserved for emergency `v0.12.0` patch fixes only.
-- `0.15.0-alpha.4` accepts a public C ABI expansion for tracking sequence
-  interruption continuation. The design-line public symbol baseline is now
-  184 symbols. No enum numeric, result-code numeric, public diagnostics struct
-  layout, runtime clock hook, package-manager, tag, release, push, or manual
-  workflow change is accepted for alpha.4.
+- `0.15.0-alpha.4` accepted a public C ABI expansion for tracking sequence
+  interruption continuation. The public symbol baseline is now 184 symbols.
+  No enum numeric, result-code numeric, public diagnostics struct layout,
+  runtime clock hook, package-manager, or wrapper-publication change is part of
+  that expansion.
 - `0.13.0-alpha.1` waypoint true-resume stress and quality evidence is
   complete. It added focused multi-DoF, multi-waypoint, per-section,
   budget-matrix, fresh-solve quality-reference, long online-loop, and
@@ -136,10 +138,13 @@ CI.
   performance, ABI/export, platform clock, visualization, wrapper, coverage,
   and boundary evidence. It does not bump version, create a tag, publish a
   GitHub Release, or trigger a manual workflow.
-- Next project step after readiness is a separate `v0.15.0` stable closeout
-  decision and plan.
-- Keep the 184-symbol `0.15.0-alpha.4` public C ABI baseline unless a later
-  separate public API decision is accepted.
+- `v0.15.0` stable closeout promotes the continuation API and behavior to the
+  stable release baseline, bumps version metadata and ABI artifact paths to
+  `0.15.0`, records release-candidate and tag evidence in
+  `docs/release/checklists/0.15.0.md`, and publishes stable release notes in
+  `docs/release/notes/0.15.0.md`.
+- Keep the 184-symbol `v0.15.0` public C ABI baseline unless a later separate
+  public API decision is accepted.
 - Package-manager recipes and package publication remain frozen unless
   separately accepted.
 - Cloud/remote runtime, proprietary Pro equivalence claims, hard real-time
