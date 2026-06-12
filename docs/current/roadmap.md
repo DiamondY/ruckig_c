@@ -95,6 +95,10 @@ CI.
   baseline evidence. It adds a focused local selector for the `v0.14.0`
   waypoint, no-waypoint, and Optimized online tracking interrupt surfaces
   without changing public ABI or entering readiness/stable closeout.
+- Second priority is `0.15.0-alpha.2` tracking sequence interruption API draft
+  evidence. This is docs-only and keeps `include/ruckig_c/ruckig.h` unchanged;
+  any actual sequence interruption implementation requires a later explicit
+  public API/ABI decision.
 - Keep the `v0.9.0` 172-symbol public C ABI baseline unless a separate public
   API decision is accepted.
 - Package-manager recipes and package publication remain frozen unless

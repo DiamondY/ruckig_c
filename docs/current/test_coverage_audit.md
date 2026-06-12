@@ -41,6 +41,24 @@ Added C coverage:
 
 The local checklist is `docs/release/checklists/0.15.0-alpha.1.md`.
 
+## 0.15.0-alpha.2 Tracking Sequence Interruption API Draft
+
+`0.15.0-alpha.2` is docs-only API draft evidence. It adds
+`docs/design/tracking_sequence_interruption_api.md` to record why
+`ruckig_tracking_calculate_sequence` interruption cannot be implemented cleanly
+through the current API-neutral surface.
+
+Coverage impact:
+
+| Area | Evidence |
+| --- | --- |
+| Behavioral tests | No new selector or CTest is added by this docs-only slice. |
+| API boundary | The draft documents public carrier options and rejects implementation in alpha.2. |
+| Latest behavioral baseline | Alpha.1 remains the latest interrupt post-release quality test evidence. |
+| ABI/export boundary | Public header, ABI allowlist, source implementation, CMake, and workflow remain unchanged. |
+
+The local checklist is `docs/release/checklists/0.15.0-alpha.2.md`.
+
 ## 0.14.0-alpha.1 Interrupt Boundary API-Neutral Audit
 
 `0.14.0-alpha.1` adds a focused local audit for the existing

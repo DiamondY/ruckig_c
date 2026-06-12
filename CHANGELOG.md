@@ -25,6 +25,12 @@ and `0.14.1` is reserved for emergency patch fixes only.
   keeping public `ruckig_calculate`, tracking sequence interruption, public
   ABI, version metadata, tags, releases, pushes, and manual workflows out of
   scope.
+- `0.15.0-alpha.2` adds the docs-only
+  `docs/design/tracking_sequence_interruption_api.md` draft. It records why
+  `ruckig_tracking_calculate_sequence` interruption needs a public carrier
+  decision, lists candidate API shapes and risks, and rejects implementation,
+  public header changes, ABI expansion, tags, releases, pushes, and manual
+  workflows for this slice.
 
 ## 0.14.0 - 2026-06-12
 

@@ -50,6 +50,11 @@ been accepted. The current stable ABI remains the 172-symbol public C ABI.
 Project version metadata remains `0.14.0` until a separate release-candidate
 plan accepts a version bump.
 
+`0.15.0-alpha.2` adds only a docs draft for possible future
+`ruckig_tracking_calculate_sequence` interruption. That draft explicitly does
+not approve public header changes, public struct layout changes, enum or
+result-code expansion, new exported symbols, or ABI allowlist changes.
+
 ## v0.13.0 Stable ABI Baseline
 
 `v0.13.0` was the current stable release before `v0.14.0` closeout. The

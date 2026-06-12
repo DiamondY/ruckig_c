@@ -110,6 +110,10 @@ Historical rewrite plans and release evidence are retained for traceability.
   stable-review readiness audit for alpha.1 through alpha.5 without creating a
   tag or GitHub Release. `release/checklists/0.14.0.md` records the stable
   API-neutral interrupt surface release closeout.
+  `release/checklists/0.15.0-alpha.1.md` records the post-release interrupt
+  quality baseline selector evidence, and
+  `release/checklists/0.15.0-alpha.2.md` records the docs-only tracking
+  sequence interruption API draft evidence.
 - `release/evidence/verification_report.md` - local and CI verification
   history.
 - `release/evidence/performance_report.md` - performance procedure and release
@@ -167,6 +171,9 @@ gate. The previous v1 gallery provenance remains available through the
 - `design/future_interrupt_surfaces.md` - alpha.2 quasi-spec that later guided
   alpha.4 no-waypoint and alpha.5 online tracking interruption surfaces
   without public ABI changes; tracking sequence interruption remains deferred.
+- `design/tracking_sequence_interruption_api.md` - docs-only `0.15.0-alpha.2`
+  draft for possible future tracking sequence interruption public carriers and
+  ABI risks.
 - `../bindings/rust/README.md` - experimental Rust alpha wrapper over the
   public C ABI.
 - `design/python_bindings_feasibility.md` - Python binding feasibility, without

@@ -7,7 +7,9 @@ The no-waypoint and online tracking update/lookahead subsets described here
 were later implemented by `0.14.0-alpha.4` and `0.14.0-alpha.5` without public
 C API, public ABI, exported-symbol, version metadata, tag, or release changes.
 The remaining deferred surface is `ruckig_tracking_calculate_sequence`
-interruption, which still requires a separate public diagnostics/API decision.
+interruption. `0.15.0-alpha.2` adds
+`tracking_sequence_interruption_api.md` to document why that surface requires a
+separate public diagnostics/API decision before implementation.
 
 ## Current Boundary
 
@@ -27,6 +29,9 @@ The active behavior remains:
 - `ruckig_tracking_calculate_sequence` does not use interruption.
 - `RUCKIG_C_ENABLE_CALCULATION_DURATION` only controls public reporting of
   `calculation_duration`; it does not control interruption availability.
+
+See `tracking_sequence_interruption_api.md` for the current docs-only API
+draft. It is not implemented and does not approve public ABI expansion.
 
 ## Shared Rules
 
