@@ -44,6 +44,8 @@ typedef enum ruckig_result {
     RUCKIG_ERROR_UNSUPPORTED = -200
 } ruckig_result_t;
 
+#define RUCKIG_RESULT_IS_OK(result) ((result) >= 0)
+
 typedef enum ruckig_control_interface {
     RUCKIG_CONTROL_POSITION = 0,
     RUCKIG_CONTROL_VELOCITY = 1
@@ -111,11 +113,13 @@ typedef struct ruckig_tracking_diagnostics {
     double best_score;
     double improvement_ratio;
 
+    /* Reserved fields are read-only, currently zeroed, and may gain defined semantics in future releases. */
     size_t reserved_size[4];
     double reserved_value[4];
 } ruckig_tracking_diagnostics_t;
 
 #ifdef __cplusplus
+/* Use only the ruckig_*_t typedef names in user code; struct tag names are intentionally not public API. */
 typedef struct ruckig_c_input_handle ruckig_input_t;
 typedef struct ruckig_c_output_handle ruckig_output_t;
 typedef struct ruckig_c_trajectory_handle ruckig_trajectory_t;

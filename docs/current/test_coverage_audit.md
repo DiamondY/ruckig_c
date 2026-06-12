@@ -155,6 +155,22 @@ Added coverage:
 
 The local checklist is `docs/release/checklists/0.15.0-alpha.7.md`.
 
+## 0.15.0 Tracking Sequence Continuation Hardening
+
+The post-alpha.7 hardening pass tightens the continuation contract without
+adding exported C symbols, enum values, result-code values, public diagnostics
+fields, or version metadata changes.
+
+Added coverage:
+
+| Area | Evidence |
+| --- | --- |
+| Delta-time contract | Fast and Optimized continuation tests reject resume with a same-DoF tracking handle created with a different `delta_time`, keep continuation state intact after the failed resume, and allow resume on a different handle with the same `delta_time`. |
+| Optimized matrix | Optimized continuation equivalence now spans Stable, Balanced, and Aggressive strategies; 1/2/4 DoF cases; disabled DoF; large and zero interrupt budgets; and small/large optimized candidate limits. |
+| Invalid boundaries | Optimized continuation tests cover capacity, DoF mismatch, non-finite targets, diagnostics error marking, and allocation-guarded interruptible start/resume paths. |
+| Candidate engine | Complete Optimized tracking and Optimized sequence continuation share the same internal candidate-step implementation for candidate family order, horizon values, terminal blends, derivative damping, budget behavior, and scoring updates. |
+| API ergonomics | Header compilation covers `RUCKIG_RESULT_IS_OK`, while diagnostics reserved fields and C++ opaque tag usage are documented as source-level API guidance without ABI symbol changes. |
+
 ## 0.14.0-alpha.1 Interrupt Boundary API-Neutral Audit
 
 `0.14.0-alpha.1` adds a focused local audit for the existing

@@ -125,6 +125,12 @@ the in-progress step is completed privately after enough resume calls. The old
 `ruckig_tracking_calculate_sequence` entry point still performs complete
 sequence solves.
 
+Post-alpha.7 hardening also stores the initiating tracking handle's
+`delta_time` in the opaque continuation. Resume is valid on another tracking
+handle only when both DoF count and `delta_time` match; this keeps output
+timestamps and Optimized candidate horizons deterministic across continuation
+calls.
+
 `0.15.0-alpha.7` adds consumer smoke coverage for this API: a C example,
 Python cffi prototype declarations/classes/tests, and Rust wrapper
 declarations/classes/tests/examples. These wrappers remain prototype-only; no

@@ -77,6 +77,12 @@ signatures, and does not change enum numeric values, result-code numeric
 values, public diagnostics layout, or version metadata. The wrappers remain
 prototype-only and are not publication commitments.
 
+Post-alpha.7 continuation hardening keeps the same 184-symbol baseline. It adds
+only a header-only `RUCKIG_RESULT_IS_OK` macro, public comments, documentation,
+and private fields inside opaque implementation structs; no exported symbol,
+function signature, enum numeric value, result-code numeric value, diagnostics
+layout, or version metadata changes are introduced.
+
 ## v0.13.0 Stable ABI Baseline
 
 `v0.13.0` was the current stable release before `v0.14.0` closeout. The

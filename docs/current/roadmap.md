@@ -124,9 +124,14 @@ CI.
   Python/Rust prototype continuation bindings, tests, and examples while
   keeping wrapper APIs prototype-only and making no further public C ABI
   expansion beyond alpha.4.
-- Next project decision after alpha.7 is whether to push alpha.4 through
-  alpha.7 for cumulative ordinary remote CI evidence, or run a local
-  `0.15.0-readiness` audit first.
+- `0.15.0-alpha.8` tracking sequence continuation hardening is complete
+  locally. It tightens the private continuation `delta_time` resume contract,
+  shares the Optimized candidate-step engine between complete and continuation
+  paths, expands continuation matrix coverage, and keeps the public ABI at the
+  184-symbol alpha.4 baseline.
+- Next project step after alpha.8 is ordinary remote push CI evidence for the
+  cumulative alpha.4 through alpha.8 continuation line. If that passes, start a
+  separate local `0.15.0-readiness` audit.
 - Keep the 184-symbol `0.15.0-alpha.4` public C ABI baseline unless a later
   separate public API decision is accepted.
 - Package-manager recipes and package publication remain frozen unless

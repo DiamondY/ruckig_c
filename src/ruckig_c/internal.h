@@ -13,6 +13,8 @@
 #define RUCKIG_TRACKING_AUDIT_FAMILY_COUNT 6u
 #define RUCKIG_WAYPOINT_BRANCH_QUEUE_CAPACITY 64u
 #define RUCKIG_WAYPOINT_BRANCH_ITERATION_BUDGET 256u
+#define RUCKIG_DBL_EPSILON 2.2204460492503131e-16
+#define RUCKIG_TIME_EPS (2.0 * RUCKIG_DBL_EPSILON)
 
 typedef struct ruckig_waypoint_branch {
     size_t index;
@@ -202,6 +204,7 @@ struct ruckig_tracking_sequence_continuation {
     bool complete;
     bool optimized_step_active;
     bool optimized_improved;
+    double delta_time;
     ruckig_tracking_mode_t mode;
     ruckig_tracking_optimized_strategy_t optimized_strategy;
     double reactiveness;

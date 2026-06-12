@@ -292,7 +292,7 @@ static void fill_finite_difference_candidate(
             const double a_max = waypoint_acceleration_max(input, waypoint, dof);
             double direction = (next - prev) * 0.5;
             const size_t index = waypoint * input->dofs + dof;
-            if (fabs(direction) < 2.2204460492503131e-16) {
+            if (fabs(direction) < RUCKIG_DBL_EPSILON) {
                 direction = next - current;
             }
             if (direction > 0.0) {
@@ -426,7 +426,7 @@ static bool accept_if_better(
 
 static double optimistic_branch_lower_bound(double best_duration, double delta, double range) {
     double normalized;
-    if (best_duration == DBL_MAX || range <= 2.2204460492503131e-16) {
+    if (best_duration == DBL_MAX || range <= RUCKIG_DBL_EPSILON) {
         return best_duration;
     }
     normalized = fabs(delta) / range;
@@ -442,7 +442,7 @@ static void insert_branch(
     ruckig_waypoint_branch_t branch
 ) {
     size_t position;
-    if (fabs(branch.delta) <= 2.2204460492503131e-16 || isnan(branch.lower_bound)) {
+    if (fabs(branch.delta) <= RUCKIG_DBL_EPSILON || isnan(branch.lower_bound)) {
         return;
     }
     if (*branch_count == RUCKIG_WAYPOINT_BRANCH_QUEUE_CAPACITY
@@ -1167,7 +1167,7 @@ RUCKIG_C_API ruckig_result_t ruckig_filter_intermediate_positions(
                 if (threshold_distance[dof] < 0.0 || isnan(threshold_distance[dof])) {
                     return RUCKIG_ERROR_INVALID_INPUT;
                 }
-                if (fabs(delta) < 2.2204460492503131e-16) {
+                if (fabs(delta) < RUCKIG_DBL_EPSILON) {
                     if (fabs(pos_current - pos_start) > threshold_distance[dof]) {
                         are_all_below = false;
                         break;

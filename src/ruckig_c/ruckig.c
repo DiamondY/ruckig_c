@@ -130,7 +130,7 @@ static ruckig_synchronization_t effective_synchronization(const ruckig_input_t* 
 }
 
 static double round_up_to_discrete_duration(double duration, double delta_time) {
-    const double eps = 2.2204460492503131e-16;
+    const double eps = RUCKIG_DBL_EPSILON;
     double remainder;
     if (delta_time <= 0.0 || isinf(duration)) {
         return duration;
@@ -143,7 +143,7 @@ static double round_up_to_discrete_duration(double duration, double delta_time) 
 }
 
 static bool should_skip_time_synchronization(const ruckig_input_t* input, size_t dof) {
-    const double eps = 2.2204460492503131e-16;
+    const double eps = RUCKIG_DBL_EPSILON;
     const ruckig_synchronization_t synchronization = effective_synchronization(input, dof);
     if (synchronization == RUCKIG_SYNCHRONIZATION_NONE
         && input->duration_discretization == RUCKIG_DURATION_CONTINUOUS) {
@@ -221,7 +221,7 @@ static void select_limiting_dof_for_duration(
     double duration,
     size_t* limiting_dof
 ) {
-    const double eps = 2.2204460492503131e-16;
+    const double eps = RUCKIG_DBL_EPSILON;
     size_t dof;
 
     if (!input || !trajectory || !limiting_dof || input->duration_discretization != RUCKIG_DURATION_DISCRETE) {
@@ -251,14 +251,14 @@ static double adjust_duration_for_blocks(
     const ruckig_trajectory_t* trajectory
 ) {
     bool changed = true;
-    const double eps = 2.2204460492503131e-16;
+    const double eps = RUCKIG_DBL_EPSILON;
 
     if (!has_synchronized_dof(input)
         && input->duration_discretization == RUCKIG_DURATION_CONTINUOUS) {
         return duration;
     }
 
-    /* Step1 profiles define forbidden synchronization intervals; advance to the next oracle-valid duration. */
+    /* Step1 profiles define forbidden synchronization intervals; advance to the next valid synchronization duration candidate. */
     while (changed) {
         size_t dof;
         changed = false;
@@ -295,7 +295,7 @@ static bool select_block_profile_for_duration(
     const ruckig_block_t* block,
     double duration
 ) {
-    const double eps = 2.2204460492503131e-16;
+    const double eps = RUCKIG_DBL_EPSILON;
     const ruckig_profile_t* base_profile;
 
     if (!profile || !block || !block->valid) {
@@ -445,7 +445,7 @@ static ruckig_result_t calculate_first_order_position(
         const bool skip_time_sync = should_skip_time_synchronization(input, dof);
         const double own_duration = trajectory->independent_min_durations[dof];
 
-        if (!input->enabled[dof] || skip_time_sync || fabs(sync_duration - own_duration) < 2.0 * 2.2204460492503131e-16) {
+        if (!input->enabled[dof] || skip_time_sync || fabs(sync_duration - own_duration) < RUCKIG_TIME_EPS) {
             continue;
         }
 
@@ -486,7 +486,7 @@ static bool calculate_no_jerk_position_phase_sync(
     /* Phase sync scales non-limiting DoFs from the limiting profile; fall back to time sync on any mismatch. */
     limiting_profile = &trajectory->profiles[limiting_dof];
     pd_limiting = limiting_profile->pf - limiting_profile->p[0];
-    if (fabs(pd_limiting) < 2.2204460492503131e-16
+    if (fabs(pd_limiting) < RUCKIG_DBL_EPSILON
         || limiting_profile->brake.duration > 0.0
         || limiting_profile->accel.duration > 0.0
         || isinf(input->max_acceleration[limiting_dof])
@@ -495,7 +495,7 @@ static bool calculate_no_jerk_position_phase_sync(
     }
 
     control_limiting = limiting_profile->a[0];
-    if (fabs(control_limiting) < 2.2204460492503131e-16) {
+    if (fabs(control_limiting) < RUCKIG_DBL_EPSILON) {
         return false;
     }
 
@@ -516,10 +516,10 @@ static bool calculate_no_jerk_position_phase_sync(
             || !isinf(input->max_jerk[dof])
             || profile->brake.duration > 0.0
             || profile->accel.duration > 0.0
-            || fabs(input->current_velocity[dof]) > 2.2204460492503131e-16
-            || fabs(input->current_acceleration[dof]) > 2.2204460492503131e-16
-            || fabs(input->target_velocity[dof]) > 2.2204460492503131e-16
-            || fabs(input->target_acceleration[dof]) > 2.2204460492503131e-16) {
+            || fabs(input->current_velocity[dof]) > RUCKIG_DBL_EPSILON
+            || fabs(input->current_acceleration[dof]) > RUCKIG_DBL_EPSILON
+            || fabs(input->target_velocity[dof]) > RUCKIG_DBL_EPSILON
+            || fabs(input->target_acceleration[dof]) > RUCKIG_DBL_EPSILON) {
             return false;
         }
 
@@ -554,7 +554,7 @@ static bool calculate_position_phase_sync(
     double sync_duration,
     size_t limiting_dof
 ) {
-    const double eps = 2.2204460492503131e-16;
+    const double eps = RUCKIG_DBL_EPSILON;
     ruckig_profile_t* limiting_profile;
     double pd_limiting;
     double control_limiting;
@@ -680,7 +680,7 @@ static bool calculate_velocity_phase_sync(
     double sync_duration,
     size_t limiting_dof
 ) {
-    const double eps = 2.2204460492503131e-16;
+    const double eps = RUCKIG_DBL_EPSILON;
     ruckig_profile_t* limiting_profile;
     double scale_limiting;
     double control_limiting;
@@ -888,7 +888,7 @@ static ruckig_result_t calculate_no_jerk_position(
         const double own_duration = trajectory->independent_min_durations[dof];
         const double t_profile = sync_duration - profile->brake.duration - profile->accel.duration;
 
-        if (!input->enabled[dof] || skip_time_sync || fabs(sync_duration - own_duration) < 2.0 * 2.2204460492503131e-16) {
+        if (!input->enabled[dof] || skip_time_sync || fabs(sync_duration - own_duration) < RUCKIG_TIME_EPS) {
             continue;
         }
 
@@ -971,7 +971,7 @@ static ruckig_result_t calculate_no_jerk_velocity(
         const double own_duration = trajectory->independent_min_durations[dof];
         const double t_profile = sync_duration - profile->brake.duration - profile->accel.duration;
 
-        if (!input->enabled[dof] || skip_time_sync || fabs(sync_duration - own_duration) < 2.0 * 2.2204460492503131e-16) {
+        if (!input->enabled[dof] || skip_time_sync || fabs(sync_duration - own_duration) < RUCKIG_TIME_EPS) {
             continue;
         }
 
@@ -1055,7 +1055,7 @@ static ruckig_result_t calculate_velocity(
         const double own_duration = trajectory->independent_min_durations[dof];
         const double t_profile = sync_duration - profile->brake.duration - profile->accel.duration;
 
-        if (!input->enabled[dof] || skip_time_sync || fabs(sync_duration - own_duration) < 2.0 * 2.2204460492503131e-16) {
+        if (!input->enabled[dof] || skip_time_sync || fabs(sync_duration - own_duration) < RUCKIG_TIME_EPS) {
             continue;
         }
 
@@ -1207,7 +1207,7 @@ static ruckig_result_t calculate_position(
         const double own_duration = trajectory->independent_min_durations[dof];
         const double t_profile = sync_duration - profile->brake.duration - profile->accel.duration;
 
-        if (!input->enabled[dof] || skip_time_sync || fabs(sync_duration - own_duration) < 2.0 * 2.2204460492503131e-16) {
+        if (!input->enabled[dof] || skip_time_sync || fabs(sync_duration - own_duration) < RUCKIG_TIME_EPS) {
             continue;
         }
 

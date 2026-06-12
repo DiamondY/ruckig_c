@@ -124,6 +124,9 @@ Implemented and covered by fixed C/oracle tests plus deterministic random oracle
 - `0.15.0-alpha.7` C/Python/Rust prototype smoke coverage for tracking
   sequence continuation, keeping wrappers prototype-only and adding no further
   public C ABI beyond the 184-symbol alpha.4 baseline.
+- `0.15.0-alpha.8` tracking sequence continuation hardening, tightening the
+  private `delta_time` resume contract, sharing Optimized candidate enumeration,
+  and adding continuation matrix coverage without new exported C symbols.
 - `0.10.0-alpha` visualization v2 local gallery evidence, replacing the
   current `main` gallery with 30 project-owned `1400x900` PNGs and a strict
   local verifier while keeping the `v0.9.0` stable C ABI unchanged.
@@ -368,8 +371,11 @@ The public API exposes opaque handle types:
 - `ruckig_target_state_t`
 - `ruckig_target_state_sequence_t`
 - `ruckig_tracking_output_sequence_t`
+- `ruckig_tracking_sequence_continuation_t`
 
 Handles are created once for a fixed DoF count. Data vectors are accessed through preallocated arrays returned by accessors such as `ruckig_input_current_position_data` and `ruckig_input_max_velocity_data`.
+User code should use only the `ruckig_*_t` typedef names; struct tag names are
+opaque implementation details and are intentionally not part of the public API.
 
 The public functions are annotated with `RUCKIG_C_API` for shared-library
 exports. Define `RUCKIG_C_STATIC_DEFINE` when consuming a manually built static
@@ -453,6 +459,10 @@ candidate-family counters, and aggregate step counts. Balanced is the default
 strategy. See
 `docs/design/tracking_interface.md` for the tracking ABI semantics and
 `docs/design/tracking_optimized_mode.md` for the Optimized tracking design.
+Interruptible tracking sequence continuation stores the initiating tracking
+handle's `delta_time` in the opaque continuation. `ruckig_tracking_resume_sequence`
+may resume on another tracking handle only when the DoF count and `delta_time`
+match the captured continuation contract.
 
 ## Memory Model
 
@@ -481,6 +491,9 @@ The main non-error results are:
 
 - `RUCKIG_WORKING`
 - `RUCKIG_FINISHED`
+
+`RUCKIG_RESULT_IS_OK(result)` is a header-only helper for callers that want to
+treat both non-error results as successful control flow.
 
 Common error results:
 
