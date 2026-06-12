@@ -95,6 +95,28 @@ Coverage impact:
 
 The local checklist is `docs/release/checklists/0.15.0-alpha.4.md`.
 
+## 0.15.0-alpha.5 Fast Tracking Sequence Continuation
+
+`0.15.0-alpha.5` implements the Fast-mode behavior for the alpha.4
+interruptible tracking sequence continuation API. It does not add public
+symbols beyond the 184-symbol alpha.4 baseline and does not change enum values,
+result-code values, public diagnostics layout, version metadata, release state,
+or manual workflow state.
+
+Added coverage:
+
+| Area | Evidence |
+| --- | --- |
+| Focused selector | Adds `--tracking-sequence-fast-continuation` and CTest `ruckig_c_tracking_sequence_fast_continuation`. |
+| Complete solve | Covers unset and large interrupt budgets completing without interruption. |
+| Partial prefix | Covers zero-budget interruption publishing only complete sequence-step prefixes. |
+| Resume | Covers repeated `ruckig_tracking_resume_sequence` calls until `is_complete=true` and `completed_count == target_count`. |
+| Reset/invalid boundary | Covers reset clearing active state and invalid capacity/dof/resume-without-start cases. |
+| Allocation guard | Runs interruptible start/resume paths after handle/input/output construction with allocation forbidden. |
+| Regression | Focused gates include the existing tracking interrupt, online/offline, no-allocation, and post-release quality selectors; default CTest passes with the new CTest entry. |
+
+The local checklist is `docs/release/checklists/0.15.0-alpha.5.md`.
+
 ## 0.14.0-alpha.1 Interrupt Boundary API-Neutral Audit
 
 `0.14.0-alpha.1` adds a focused local audit for the existing

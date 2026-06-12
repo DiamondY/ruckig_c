@@ -1,7 +1,8 @@
 # Tracking Sequence Interruption API Draft
 
-Status: `0.15.0-alpha.4` public API scaffold accepted. Fast and Optimized
-continuation behavior is still split into later alpha implementation slices.
+Status: `0.15.0-alpha.5` Fast continuation implemented. Optimized
+continuation behavior is still assigned to the later alpha.6 implementation
+slice.
 
 This document evaluates whether `ruckig_tracking_calculate_sequence` can support
 interruption without public API changes. The current answer is no: online
@@ -110,8 +111,13 @@ sequence and input snapshots, exposes compact active/interrupted/complete and
 count accessors, and keeps `ruckig_tracking_calculate_sequence` unchanged.
 The first scaffold adds the public lifecycle and status API plus
 `ruckig_tracking_calculate_sequence_interruptible` and
-`ruckig_tracking_resume_sequence`. Behavior implementation is intentionally
-split into Fast and Optimized follow-up slices.
+`ruckig_tracking_resume_sequence`. `0.15.0-alpha.5` implements Fast-mode
+sequence continuation on that API. Fast interruption happens only at complete
+sequence-step boundaries: interrupted calls expose a complete prefix in
+`ruckig_tracking_output_sequence_t`, keep the continuation active, and resume
+from handle-owned target/input snapshots without requiring the caller to resend
+the target sequence or input. The old `ruckig_tracking_calculate_sequence`
+entry point still performs complete sequence solves.
 
 ## Risk Review
 
@@ -129,14 +135,17 @@ split into Fast and Optimized follow-up slices.
 
 ## Current Go/No-Go
 
-Go for the continuation public API scaffold in `0.15.0-alpha.4`.
+Go for the continuation public API scaffold in `0.15.0-alpha.4` and Fast
+sequence continuation behavior in `0.15.0-alpha.5`.
 
-No-go for alpha.4 implementation beyond scaffold:
+Current no-go boundaries:
 
 - Do not add enum or result-code numeric values.
 - Do not change `ruckig_tracking_diagnostics_t` layout.
-- Do not implement Fast or Optimized interruption/resume behavior until the
-  dedicated alpha.5 and alpha.6 slices.
+- Do not implement Optimized interruption/resume behavior until the dedicated
+  alpha.6 slice.
+- Do not publish wrapper/package-manager claims until the dedicated alpha.7
+  wrapper smoke slice.
 
-Fast sequence continuation is assigned to `0.15.0-alpha.5`. Optimized
+Fast sequence continuation is implemented in `0.15.0-alpha.5`. Optimized
 solver-internal sequence continuation is assigned to `0.15.0-alpha.6`.

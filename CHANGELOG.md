@@ -45,6 +45,15 @@ and `0.14.1` is reserved for emergency patch fixes only.
   scaffold. Lifecycle and compact status accessors are implemented; the
   behavior entry points are deliberately stubbed as `RUCKIG_ERROR_UNSUPPORTED`
   until the Fast and Optimized sequence continuation implementation slices.
+- `0.15.0-alpha.5` implements Fast-mode
+  `ruckig_tracking_calculate_sequence_interruptible` and
+  `ruckig_tracking_resume_sequence` behavior on top of the alpha.4 continuation
+  handle. It publishes only complete sequence-step prefixes, supports repeated
+  resume calls, keeps the old `ruckig_tracking_calculate_sequence` complete,
+  and adds `--tracking-sequence-fast-continuation` /
+  `ruckig_c_tracking_sequence_fast_continuation`. No additional public symbols,
+  enum values, result-code values, diagnostics fields, version metadata, tag,
+  release, push, or manual workflow change is included.
 
 ## 0.14.0 - 2026-06-12
 

@@ -4588,7 +4588,6 @@ static void test_tracking_api_lifecycle_and_accessors(void) {
     ruckig_target_state_sequence_t* target_sequence = NULL;
     ruckig_tracking_output_sequence_t* output_sequence = NULL;
     ruckig_tracking_sequence_continuation_t* continuation = NULL;
-    ruckig_input_t* sequence_input = NULL;
     ruckig_tracking_diagnostics_t diagnostics;
 
     CHECK_EQ_INT(ruckig_tracking_create(NULL, 1, 0.01), RUCKIG_ERROR_INVALID_INPUT);
@@ -4682,29 +4681,11 @@ static void test_tracking_api_lifecycle_and_accessors(void) {
     CHECK_EQ_INT(ruckig_tracking_sequence_continuation_get_completed_count(NULL), 0);
     CHECK_EQ_INT(ruckig_tracking_sequence_continuation_get_target_count(NULL), 0);
 
-    CHECK_EQ_INT(ruckig_input_create(&sequence_input, 2), RUCKIG_WORKING);
-    CHECK_EQ_INT(ruckig_target_state_sequence_set_count(target_sequence, 1), RUCKIG_WORKING);
-    CHECK_EQ_INT(
-        ruckig_tracking_calculate_sequence_interruptible(
-            tracking,
-            target_sequence,
-            sequence_input,
-            output_sequence,
-            continuation
-        ),
-        RUCKIG_ERROR_UNSUPPORTED
-    );
-    CHECK_TRUE(!ruckig_tracking_sequence_continuation_is_active(continuation));
-    CHECK_TRUE(!ruckig_tracking_sequence_continuation_is_complete(continuation));
-    CHECK_EQ_INT(ruckig_tracking_sequence_continuation_get_completed_count(continuation), 0);
-    CHECK_EQ_INT(ruckig_tracking_sequence_continuation_get_target_count(continuation), 1);
-    CHECK_EQ_INT(ruckig_tracking_resume_sequence(tracking, continuation, output_sequence), RUCKIG_ERROR_UNSUPPORTED);
     ruckig_tracking_sequence_continuation_reset(continuation);
     CHECK_EQ_INT(ruckig_tracking_sequence_continuation_get_target_count(continuation), 0);
     CHECK_EQ_INT(ruckig_tracking_sequence_continuation_get_completed_count(continuation), 0);
     CHECK_TRUE(!ruckig_tracking_sequence_continuation_is_active(continuation));
 
-    ruckig_input_destroy(sequence_input);
     ruckig_tracking_sequence_continuation_destroy(continuation);
     ruckig_tracking_output_sequence_destroy(output_sequence);
     ruckig_target_state_sequence_destroy(target_sequence);
@@ -4715,6 +4696,208 @@ static void test_tracking_api_lifecycle_and_accessors(void) {
     ruckig_target_state_sequence_destroy(NULL);
     ruckig_target_state_destroy(NULL);
     ruckig_tracking_destroy(NULL);
+}
+
+static ruckig_result_t tracking_calculate_sequence_interruptible_under_allocation_guard(
+    ruckig_tracking_t* tracking,
+    const ruckig_target_state_sequence_t* targets,
+    const ruckig_input_t* input,
+    ruckig_tracking_output_sequence_t* outputs,
+    ruckig_tracking_sequence_continuation_t* continuation
+) {
+    ruckig_result_t result;
+    const size_t allocations_before = ruckig_allocation_count();
+    ruckig_allocation_forbidden_set(true);
+    result = ruckig_tracking_calculate_sequence_interruptible(tracking, targets, input, outputs, continuation);
+    ruckig_allocation_forbidden_set(false);
+    CHECK_EQ_INT(ruckig_allocation_count(), allocations_before);
+    CHECK_EQ_INT(ruckig_allocation_forbidden_count(), 0);
+    return result;
+}
+
+static ruckig_result_t tracking_resume_sequence_under_allocation_guard(
+    ruckig_tracking_t* tracking,
+    ruckig_tracking_sequence_continuation_t* continuation,
+    ruckig_tracking_output_sequence_t* outputs
+) {
+    ruckig_result_t result;
+    const size_t allocations_before = ruckig_allocation_count();
+    ruckig_allocation_forbidden_set(true);
+    result = ruckig_tracking_resume_sequence(tracking, continuation, outputs);
+    ruckig_allocation_forbidden_set(false);
+    CHECK_EQ_INT(ruckig_allocation_count(), allocations_before);
+    CHECK_EQ_INT(ruckig_allocation_forbidden_count(), 0);
+    return result;
+}
+
+static void test_tracking_sequence_fast_continuation_completes_without_budget(void) {
+    ruckig_tracking_t* tracking = NULL;
+    ruckig_target_state_sequence_t* targets = NULL;
+    ruckig_tracking_output_sequence_t* outputs = NULL;
+    ruckig_tracking_sequence_continuation_t* continuation = NULL;
+    ruckig_input_t* input = NULL;
+    ruckig_tracking_diagnostics_t diagnostics;
+    const size_t count = 4;
+
+    CHECK_EQ_INT(ruckig_tracking_create(&tracking, 1, 0.01), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_target_state_sequence_create(&targets, 1, count), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_tracking_output_sequence_create(&outputs, 1, count), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_tracking_sequence_continuation_create(&continuation, 1, count), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_input_create(&input, 1), RUCKIG_WORKING);
+
+    fill_tracking_input_1d(input);
+    CHECK_EQ_INT(ruckig_tracking_set_mode(tracking, RUCKIG_TRACKING_FAST), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_target_state_sequence_set_count(targets, count), RUCKIG_WORKING);
+    set_tracking_sequence_signal(targets, 0, 1, count, 0.01);
+
+    CHECK_EQ_INT(
+        tracking_calculate_sequence_interruptible_under_allocation_guard(tracking, targets, input, outputs, continuation),
+        RUCKIG_WORKING
+    );
+    CHECK_TRUE(!ruckig_tracking_sequence_continuation_is_active(continuation));
+    CHECK_TRUE(!ruckig_tracking_sequence_continuation_was_interrupted(continuation));
+    CHECK_TRUE(ruckig_tracking_sequence_continuation_is_complete(continuation));
+    CHECK_EQ_INT(ruckig_tracking_sequence_continuation_get_completed_count(continuation), count);
+    CHECK_EQ_INT(ruckig_tracking_sequence_continuation_get_target_count(continuation), count);
+    check_tracking_output_sequence(outputs, 1, count, 0.01);
+    CHECK_EQ_INT(ruckig_tracking_get_last_diagnostics(tracking, &diagnostics), RUCKIG_WORKING);
+    CHECK_EQ_INT(diagnostics.calculation_status, RUCKIG_TRACKING_CALCULATION_FAST);
+    CHECK_EQ_INT(diagnostics.candidate_count, count);
+    CHECK_EQ_INT(diagnostics.budget_exhausted_count, 0);
+
+    ruckig_input_destroy(input);
+    ruckig_tracking_sequence_continuation_destroy(continuation);
+    ruckig_tracking_output_sequence_destroy(outputs);
+    ruckig_target_state_sequence_destroy(targets);
+    ruckig_tracking_destroy(tracking);
+}
+
+static void test_tracking_sequence_fast_continuation_resume_budget(void) {
+    ruckig_tracking_t* tracking = NULL;
+    ruckig_target_state_sequence_t* targets = NULL;
+    ruckig_tracking_output_sequence_t* outputs = NULL;
+    ruckig_tracking_sequence_continuation_t* continuation = NULL;
+    ruckig_input_t* input = NULL;
+    ruckig_tracking_diagnostics_t diagnostics;
+    const size_t count = 4;
+    size_t expected_count;
+
+    CHECK_EQ_INT(ruckig_tracking_create(&tracking, 1, 0.01), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_target_state_sequence_create(&targets, 1, count), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_tracking_output_sequence_create(&outputs, 1, count), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_tracking_sequence_continuation_create(&continuation, 1, count), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_input_create(&input, 1), RUCKIG_WORKING);
+
+    fill_tracking_input_1d(input);
+    CHECK_EQ_INT(ruckig_input_set_interrupt_calculation_duration(input, 0.0), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_tracking_set_mode(tracking, RUCKIG_TRACKING_FAST), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_target_state_sequence_set_count(targets, count), RUCKIG_WORKING);
+    set_tracking_sequence_signal(targets, 1, 1, count, 0.01);
+
+    CHECK_EQ_INT(
+        tracking_calculate_sequence_interruptible_under_allocation_guard(tracking, targets, input, outputs, continuation),
+        RUCKIG_WORKING
+    );
+    CHECK_TRUE(ruckig_tracking_sequence_continuation_is_active(continuation));
+    CHECK_TRUE(ruckig_tracking_sequence_continuation_was_interrupted(continuation));
+    CHECK_TRUE(!ruckig_tracking_sequence_continuation_is_complete(continuation));
+    CHECK_EQ_INT(ruckig_tracking_output_sequence_get_count(outputs), 1);
+    CHECK_EQ_INT(ruckig_tracking_sequence_continuation_get_completed_count(continuation), 1);
+
+    for (expected_count = 2; expected_count <= count; ++expected_count) {
+        CHECK_EQ_INT(tracking_resume_sequence_under_allocation_guard(tracking, continuation, outputs), RUCKIG_WORKING);
+        CHECK_EQ_INT(ruckig_tracking_output_sequence_get_count(outputs), expected_count);
+        CHECK_EQ_INT(ruckig_tracking_sequence_continuation_get_completed_count(continuation), expected_count);
+        if (expected_count < count) {
+            CHECK_TRUE(ruckig_tracking_sequence_continuation_is_active(continuation));
+            CHECK_TRUE(ruckig_tracking_sequence_continuation_was_interrupted(continuation));
+            CHECK_TRUE(!ruckig_tracking_sequence_continuation_is_complete(continuation));
+        }
+    }
+
+    CHECK_TRUE(!ruckig_tracking_sequence_continuation_is_active(continuation));
+    CHECK_TRUE(!ruckig_tracking_sequence_continuation_was_interrupted(continuation));
+    CHECK_TRUE(ruckig_tracking_sequence_continuation_is_complete(continuation));
+    check_tracking_output_sequence(outputs, 1, count, 0.01);
+    CHECK_EQ_INT(ruckig_tracking_get_last_diagnostics(tracking, &diagnostics), RUCKIG_WORKING);
+    CHECK_EQ_INT(diagnostics.calculation_status, RUCKIG_TRACKING_CALCULATION_FAST);
+    CHECK_EQ_INT(diagnostics.candidate_count, count);
+    CHECK_EQ_INT(diagnostics.valid_candidate_count, count);
+    CHECK_EQ_INT(diagnostics.budget_exhausted_count, count - 1);
+
+    ruckig_tracking_sequence_continuation_reset(continuation);
+    CHECK_TRUE(!ruckig_tracking_sequence_continuation_is_active(continuation));
+    CHECK_TRUE(!ruckig_tracking_sequence_continuation_was_interrupted(continuation));
+    CHECK_TRUE(!ruckig_tracking_sequence_continuation_is_complete(continuation));
+    CHECK_EQ_INT(ruckig_tracking_sequence_continuation_get_completed_count(continuation), 0);
+    CHECK_EQ_INT(ruckig_tracking_sequence_continuation_get_target_count(continuation), 0);
+
+    ruckig_input_destroy(input);
+    ruckig_tracking_sequence_continuation_destroy(continuation);
+    ruckig_tracking_output_sequence_destroy(outputs);
+    ruckig_target_state_sequence_destroy(targets);
+    ruckig_tracking_destroy(tracking);
+}
+
+static void test_tracking_sequence_fast_continuation_budget_matrix_and_invalid(void) {
+    ruckig_tracking_t* tracking = NULL;
+    ruckig_tracking_t* wrong_tracking = NULL;
+    ruckig_target_state_sequence_t* targets = NULL;
+    ruckig_tracking_output_sequence_t* outputs = NULL;
+    ruckig_tracking_output_sequence_t* small_outputs = NULL;
+    ruckig_tracking_sequence_continuation_t* continuation = NULL;
+    ruckig_input_t* input = NULL;
+    const size_t count = 3;
+
+    CHECK_EQ_INT(ruckig_tracking_create(&tracking, 1, 0.01), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_tracking_create(&wrong_tracking, 2, 0.01), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_target_state_sequence_create(&targets, 1, count), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_tracking_output_sequence_create(&outputs, 1, count), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_tracking_output_sequence_create(&small_outputs, 1, 1), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_tracking_sequence_continuation_create(&continuation, 1, count), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_input_create(&input, 1), RUCKIG_WORKING);
+
+    fill_tracking_input_1d(input);
+    CHECK_EQ_INT(ruckig_target_state_sequence_set_count(targets, count), RUCKIG_WORKING);
+    set_tracking_sequence_signal(targets, 2, 1, count, 0.01);
+    CHECK_EQ_INT(ruckig_tracking_resume_sequence(tracking, continuation, outputs), RUCKIG_ERROR_INVALID_INPUT);
+    CHECK_EQ_INT(
+        ruckig_tracking_calculate_sequence_interruptible(tracking, targets, input, small_outputs, continuation),
+        RUCKIG_ERROR_INVALID_INPUT
+    );
+    CHECK_EQ_INT(
+        ruckig_tracking_calculate_sequence_interruptible(wrong_tracking, targets, input, outputs, continuation),
+        RUCKIG_ERROR_INVALID_INPUT
+    );
+
+    CHECK_EQ_INT(ruckig_input_set_interrupt_calculation_duration(input, 1000000000.0), RUCKIG_WORKING);
+    CHECK_EQ_INT(
+        ruckig_tracking_calculate_sequence_interruptible(tracking, targets, input, outputs, continuation),
+        RUCKIG_WORKING
+    );
+    CHECK_TRUE(ruckig_tracking_sequence_continuation_is_complete(continuation));
+    CHECK_TRUE(!ruckig_tracking_sequence_continuation_was_interrupted(continuation));
+    CHECK_EQ_INT(ruckig_tracking_output_sequence_get_count(outputs), count);
+
+    ruckig_tracking_sequence_continuation_reset(continuation);
+    fill_tracking_input_1d(input);
+    CHECK_EQ_INT(ruckig_input_set_interrupt_calculation_duration(input, 0.01), RUCKIG_WORKING);
+    ruckig_input_clear_interrupt_calculation_duration(input);
+    CHECK_EQ_INT(
+        ruckig_tracking_calculate_sequence_interruptible(tracking, targets, input, outputs, continuation),
+        RUCKIG_WORKING
+    );
+    CHECK_TRUE(ruckig_tracking_sequence_continuation_is_complete(continuation));
+    CHECK_TRUE(!ruckig_tracking_sequence_continuation_was_interrupted(continuation));
+    CHECK_EQ_INT(ruckig_tracking_output_sequence_get_count(outputs), count);
+
+    ruckig_input_destroy(input);
+    ruckig_tracking_sequence_continuation_destroy(continuation);
+    ruckig_tracking_output_sequence_destroy(small_outputs);
+    ruckig_tracking_output_sequence_destroy(outputs);
+    ruckig_target_state_sequence_destroy(targets);
+    ruckig_tracking_destroy(wrong_tracking);
+    ruckig_tracking_destroy(tracking);
 }
 
 static void test_tracking_diagnostics_snapshots(void) {
@@ -6900,6 +7083,12 @@ void run_tracking_api_tests(void) {
 
 void run_tracking_sequence_continuation_api_tests(void) {
     test_tracking_api_lifecycle_and_accessors();
+}
+
+void run_tracking_sequence_fast_continuation_tests(void) {
+    test_tracking_sequence_fast_continuation_completes_without_budget();
+    test_tracking_sequence_fast_continuation_resume_budget();
+    test_tracking_sequence_fast_continuation_budget_matrix_and_invalid();
 }
 
 void run_tracking_validation_tests(void) {

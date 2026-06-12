@@ -110,9 +110,15 @@ CI.
   locally. It adds an opaque continuation handle, compact lifecycle/status
   accessors, and interruptible/resume sequence entry points while keeping
   behavior entry points unsupported until alpha.5 and alpha.6.
-- Next implementation priority is `0.15.0-alpha.5` Fast tracking sequence
-  continuation, followed by `0.15.0-alpha.6` Optimized tracking sequence
-  continuation and `0.15.0-alpha.7` wrapper/documentation smoke coverage.
+- `0.15.0-alpha.5` Fast tracking sequence continuation is complete locally. It
+  implements interruptible start/resume for Fast
+  `ruckig_tracking_calculate_sequence_interruptible` using the alpha.4
+  continuation handle, publishes only complete step prefixes, supports repeated
+  resume calls, and adds focused C coverage under
+  `ruckig_c_tracking_sequence_fast_continuation` without further ABI expansion.
+- Next implementation priority is `0.15.0-alpha.6` Optimized tracking sequence
+  continuation, followed by `0.15.0-alpha.7` wrapper/documentation smoke
+  coverage.
 - Keep the 184-symbol `0.15.0-alpha.4` public C ABI baseline unless a later
   separate public API decision is accepted.
 - Package-manager recipes and package publication remain frozen unless

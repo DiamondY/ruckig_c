@@ -57,6 +57,13 @@ manager recipes, tags, releases, pushes, or manual workflows. The old
 `ruckig_tracking_calculate_sequence` entry point keeps complete-solve
 semantics.
 
+`0.15.0-alpha.5` implements Fast-mode behavior for the alpha.4 continuation
+API without adding symbols beyond the 184-symbol design-line baseline. It keeps
+the same public function signatures, result-code numeric values, enum numeric
+values, and `ruckig_tracking_diagnostics_t` layout. Optimized sequence
+continuation remains assigned to alpha.6, and wrapper smoke coverage remains
+assigned to alpha.7.
+
 ## v0.13.0 Stable ABI Baseline
 
 `v0.13.0` was the current stable release before `v0.14.0` closeout. The
