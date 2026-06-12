@@ -93,19 +93,17 @@ CI.
   tag, tag push CI, tag manual release-random, GitHub Release publication, and
   tag/release evidence push CI. Evidence is recorded in
   `docs/release/checklists/0.14.0.md`.
-- Current first priority is `0.15.0-alpha.1` post-release interrupt quality
-  baseline evidence. It adds a focused local selector for the `v0.14.0`
-  waypoint, no-waypoint, and Optimized online tracking interrupt surfaces
-  without changing public ABI or entering readiness/stable closeout.
-- Second priority is `0.15.0-alpha.2` tracking sequence interruption API draft
-  evidence. This is docs-only and keeps `include/ruckig_c/ruckig.h` unchanged;
-  any actual sequence interruption implementation requires a later explicit
-  public API/ABI decision.
-- Third priority is `0.15.0-alpha.3` consumer and wrapper interrupt smoke
-  evidence. It covers C examples plus Python/Rust prototype wrapper tests and
-  examples for the `v0.14.0` no-waypoint and Optimized online tracking
-  interrupt surfaces without making wrapper publication or package-manager
-  commitments.
+- `0.15.0-alpha.1` post-release interrupt quality baseline evidence is
+  complete. It adds a focused local selector for the `v0.14.0` waypoint,
+  no-waypoint, and Optimized online tracking interrupt surfaces without
+  changing public ABI or entering readiness/stable closeout.
+- `0.15.0-alpha.2` tracking sequence interruption API draft evidence is
+  complete. The draft first rejected API-neutral sequence interruption, then
+  informed the later alpha.4 explicit public continuation handle decision.
+- `0.15.0-alpha.3` consumer and wrapper interrupt smoke evidence is complete.
+  It covers C examples plus Python/Rust prototype wrapper tests and examples
+  for the `v0.14.0` no-waypoint and Optimized online tracking interrupt
+  surfaces without making wrapper publication or package-manager commitments.
 - `0.15.0-alpha.4` tracking sequence continuation API scaffold is complete
   locally. It adds an opaque continuation handle, compact lifecycle/status
   accessors, and interruptible/resume sequence entry points while keeping
@@ -121,8 +119,14 @@ CI.
   handle, resumes candidate enumeration across calls, keeps output sequences
   limited to complete prefixes, and proves completed resume output matches
   non-interruptible complete sequence solves in focused C tests.
-- Next implementation priority is `0.15.0-alpha.7` wrapper/documentation smoke
-  coverage.
+- `0.15.0-alpha.7` wrapper/documentation smoke coverage is complete locally.
+  It adds a C example for interruptible tracking sequence continuation and
+  Python/Rust prototype continuation bindings, tests, and examples while
+  keeping wrapper APIs prototype-only and making no further public C ABI
+  expansion beyond alpha.4.
+- Next project decision after alpha.7 is whether to push alpha.4 through
+  alpha.7 for cumulative ordinary remote CI evidence, or run a local
+  `0.15.0-readiness` audit first.
 - Keep the 184-symbol `0.15.0-alpha.4` public C ABI baseline unless a later
   separate public API decision is accepted.
 - Package-manager recipes and package publication remain frozen unless

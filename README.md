@@ -108,6 +108,22 @@ Implemented and covered by fixed C/oracle tests plus deterministic random oracle
 - `v0.14.0` stable release, adopting the waypoint,
   no-waypoint, and online tracking interrupt surface evidence while keeping
   the 172-symbol public C ABI unchanged.
+- `0.15.0-alpha.1` post-release interrupt quality baseline evidence for the
+  `v0.14.0` waypoint, no-waypoint, and Optimized online tracking interrupt
+  surfaces.
+- `0.15.0-alpha.2` tracking sequence interruption API draft evidence,
+  documenting why sequence interruption needs an explicit public carrier.
+- `0.15.0-alpha.3` consumer and wrapper interrupt smoke coverage for the
+  `v0.14.0` no-waypoint and Optimized online tracking interrupt surfaces.
+- `0.15.0-alpha.4` tracking sequence continuation public API scaffold,
+  accepting a design-line public C ABI expansion from 172 to 184 symbols.
+- `0.15.0-alpha.5` Fast tracking sequence continuation behavior for the
+  alpha.4 interruptible/resume API.
+- `0.15.0-alpha.6` Optimized tracking sequence continuation behavior with
+  private candidate-boundary continuation state.
+- `0.15.0-alpha.7` C/Python/Rust prototype smoke coverage for tracking
+  sequence continuation, keeping wrappers prototype-only and adding no further
+  public C ABI beyond the 184-symbol alpha.4 baseline.
 - `0.10.0-alpha` visualization v2 local gallery evidence, replacing the
   current `main` gallery with 30 project-owned `1400x900` PNGs and a strict
   local verifier while keeping the `v0.9.0` stable C ABI unchanged.
@@ -128,15 +144,23 @@ Release-readiness evidence is tracked under `docs/release/`; see
 `docs/index.md` for the organized documentation map. `v0.14.0` is the current
 stable release after completed `0.14.0-readiness`, release-candidate, tag, and
 manual release-random gates for the API-neutral interrupt surface line. Current
-`main` is in `0.15.0-design - Unreleased`; no `0.15.0` public API or ABI work
-has been accepted. `v0.14.0` keeps the `v0.9.0` 172-symbol public C ABI
-unchanged while stabilizing API-neutral interrupt surfaces. Public
+`main` is in `0.15.0-design - Unreleased`; alpha.4 accepts the tracking
+sequence continuation public API and moves the design-line public C ABI
+baseline to 184 symbols, with alpha.5/alpha.6 behavior and alpha.7
+C/Python/Rust prototype smoke coverage layered on that API. `v0.14.0` keeps
+the `v0.9.0` 172-symbol public C ABI unchanged while stabilizing API-neutral
+interrupt surfaces. Public
 `ruckig_calculate` still ignores
 `interrupt_calculation_duration` and runs complete solves. On the `0.14.0`
 design line, no-waypoint `ruckig_update` now supports complete-trajectory
 boundary interruption without true-resume, and Optimized online tracking
 update/lookahead now supports best-so-far complete-candidate-boundary
-interruption. `ruckig_tracking_calculate_sequence` remains deferred.
+interruption. On the `0.15.0` design line, the old
+`ruckig_tracking_calculate_sequence` entry point remains complete-only, while
+the new interruptible/resume sequence API uses a continuation handle and
+exposes only complete sequence-step prefixes. Python and Rust wrappers remain
+prototype smoke evidence only; no wheel, crate, package-manager recipe, or
+stable wrapper API is claimed.
 `v0.10.0` adopts the current gallery as 30 `1400x900` Matplotlib `Agg` and
 NumPy PNG assets under `docs/assets/visualization/`. The gallery covers local
 C ABI equivalents of original examples `01-10` and `14-16`, plus tracking

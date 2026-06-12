@@ -62,6 +62,12 @@ and `0.14.1` is reserved for emergency patch fixes only.
   `--tracking-sequence-optimized-continuation` /
   `ruckig_c_tracking_sequence_optimized_continuation`. The public ABI remains
   the 184-symbol alpha.4 baseline.
+- `0.15.0-alpha.7` adds consumer and wrapper smoke coverage for the tracking
+  sequence continuation API: C example `23_tracking_sequence_continuation.c`,
+  Python cffi prototype continuation bindings/tests, and Rust wrapper
+  bindings/tests/examples. The wrappers remain prototype-only; no symbols are
+  added beyond the 184-symbol alpha.4 baseline, and no package-manager,
+  version, tag, release, push, or manual workflow change is included.
 
 ## 0.14.0 - 2026-06-12
 

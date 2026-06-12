@@ -15,6 +15,7 @@ The wrapper owns the same opaque C handles as the C API:
 - `TargetState`
 - `TargetStateSequence`
 - `TrackingOutputSequence`
+- `TrackingSequenceContinuation`
 
 Current alpha coverage:
 
@@ -33,9 +34,12 @@ Current alpha coverage:
   lookahead update, candidate-budget diagnostics, strategy presets,
   diagnostics snapshots, fallback status smoke, and interrupt smoke for
   no-waypoint plus Optimized online tracking update/lookahead;
+- tracking sequence continuation smoke for the `0.15.0-alpha.4` continuation
+  handle and the Fast/Optimized interruptible/resume sequence API implemented
+  in alpha.5 and alpha.6;
 - Rust examples for position, offline, velocity, waypoints, per-section
-  minimum duration, tracking Fast, tracking Optimized alpha, and interrupt
-  smoke.
+  minimum duration, tracking Fast, tracking Optimized alpha, interrupt smoke,
+  and tracking sequence continuation.
 
 The build script links an already-built `ruckig_c` static library. By default
 it looks in `out/build/windows-clang-ninja`. Set `RUCKIG_C_LIB_DIR` to override
@@ -58,3 +62,5 @@ Boundaries:
 - No package-manager recipe.
 - No stable Rust tracking API commitment before a deliberate wrapper
   publication decision.
+- No stable Rust tracking sequence continuation API commitment before a
+  deliberate wrapper publication decision.

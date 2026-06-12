@@ -1,7 +1,7 @@
 # Tracking Sequence Interruption API Draft
 
-Status: `0.15.0-alpha.6` Fast and Optimized continuation behavior implemented.
-Wrapper smoke coverage is still assigned to the later alpha.7 slice.
+Status: `0.15.0-alpha.7` Fast and Optimized continuation behavior plus
+C/Python/Rust prototype smoke coverage implemented locally.
 
 This document evaluates whether `ruckig_tracking_calculate_sequence` can support
 interruption without public API changes. The current answer is no: online
@@ -125,6 +125,12 @@ the in-progress step is completed privately after enough resume calls. The old
 `ruckig_tracking_calculate_sequence` entry point still performs complete
 sequence solves.
 
+`0.15.0-alpha.7` adds consumer smoke coverage for this API: a C example,
+Python cffi prototype declarations/classes/tests, and Rust wrapper
+declarations/classes/tests/examples. These wrappers remain prototype-only; no
+wheel, crate publication, package-manager recipe, or stable wrapper API claim
+is made.
+
 ## Risk Review
 
 - ABI risk: any public query, public enum, public result code, public struct
@@ -149,8 +155,9 @@ Current no-go boundaries:
 
 - Do not add enum or result-code numeric values.
 - Do not change `ruckig_tracking_diagnostics_t` layout.
-- Do not publish wrapper/package-manager claims until the dedicated alpha.7
-  wrapper smoke slice.
+- Do not publish wrapper/package-manager claims after alpha.7 smoke coverage;
+  the wrapper coverage is prototype evidence only.
 
 Fast sequence continuation is implemented in `0.15.0-alpha.5`. Optimized
 solver-internal sequence continuation is implemented in `0.15.0-alpha.6`.
+Prototype wrapper smoke coverage is implemented in `0.15.0-alpha.7`.

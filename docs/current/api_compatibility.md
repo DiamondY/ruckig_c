@@ -70,6 +70,13 @@ functions, enum numeric values, result-code numeric values, diagnostics fields,
 or public struct layouts are added by alpha.6. Wrapper smoke coverage remains
 assigned to alpha.7.
 
+`0.15.0-alpha.7` adds C example coverage plus Python cffi and Rust prototype
+wrapper smoke for the same continuation API. It does not add public C symbols
+beyond the 184-symbol alpha.4 baseline, does not change public function
+signatures, and does not change enum numeric values, result-code numeric
+values, public diagnostics layout, or version metadata. The wrappers remain
+prototype-only and are not publication commitments.
+
 ## v0.13.0 Stable ABI Baseline
 
 `v0.13.0` was the current stable release before `v0.14.0` closeout. The

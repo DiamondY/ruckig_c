@@ -137,6 +137,24 @@ Added coverage:
 
 The local checklist is `docs/release/checklists/0.15.0-alpha.6.md`.
 
+## 0.15.0-alpha.7 Tracking Sequence Continuation Wrapper Coverage
+
+`0.15.0-alpha.7` adds consumer-facing smoke coverage for the tracking sequence
+continuation API implemented in alpha.4 through alpha.6. It keeps the public C
+ABI at the 184-symbol alpha.4 baseline and keeps Python/Rust wrappers
+prototype-only.
+
+Added coverage:
+
+| Area | Evidence |
+| --- | --- |
+| C example | Adds `examples/c/23_tracking_sequence_continuation.c`, wired into CMake, the `ruckig_c_examples` target, `example_ruckig_c_23_tracking_sequence_continuation`, and `ruckig_c_examples_tracking_sequence_continuation`. |
+| Python prototype | Adds cffi declarations, `TrackingSequenceContinuation`, interruptible start/resume methods, and an Optimized sequence continuation smoke test over a shared `ruckig_c` library. |
+| Rust wrapper | Adds FFI declarations, `TrackingSequenceContinuation`, interruptible start/resume methods, unit smoke coverage, and `examples/tracking_sequence_continuation.rs`. |
+| Boundary | No new public C symbols, enum/result-code values, diagnostics fields, package-manager recipes, version metadata, tag, release, push, or manual workflow. |
+
+The local checklist is `docs/release/checklists/0.15.0-alpha.7.md`.
+
 ## 0.14.0-alpha.1 Interrupt Boundary API-Neutral Audit
 
 `0.14.0-alpha.1` adds a focused local audit for the existing

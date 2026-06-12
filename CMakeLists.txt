@@ -439,6 +439,14 @@ if(BUILD_RUCKIG_C_EXAMPLES)
   add_test(NAME example_ruckig_c_22_tracking_interrupt_boundary COMMAND example-ruckig-c-22-tracking-interrupt-boundary)
   add_test(NAME ruckig_c_examples_tracking_interrupt_boundary COMMAND example-ruckig-c-22-tracking-interrupt-boundary)
 
+  add_executable(example-ruckig-c-23-tracking-sequence-continuation examples/c/23_tracking_sequence_continuation.c)
+  target_link_libraries(example-ruckig-c-23-tracking-sequence-continuation PRIVATE ruckig_c)
+  if(NOT WIN32)
+    target_link_libraries(example-ruckig-c-23-tracking-sequence-continuation PRIVATE m)
+  endif()
+  add_test(NAME example_ruckig_c_23_tracking_sequence_continuation COMMAND example-ruckig-c-23-tracking-sequence-continuation)
+  add_test(NAME ruckig_c_examples_tracking_sequence_continuation COMMAND example-ruckig-c-23-tracking-sequence-continuation)
+
   add_custom_target(ruckig_c_examples
     DEPENDS
       example-ruckig-c-00-minimal-offline
@@ -464,6 +472,7 @@ if(BUILD_RUCKIG_C_EXAMPLES)
       example-ruckig-c-20-tracking-offline-optimized-sequence
       example-ruckig-c-21-no-waypoint-interrupt-boundary
       example-ruckig-c-22-tracking-interrupt-boundary
+      example-ruckig-c-23-tracking-sequence-continuation
   )
 endif()
 

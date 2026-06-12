@@ -24,6 +24,7 @@ from ruckig_cffi import (
     TrackingMode,
     TrackingOptimizedStrategy,
     TrackingOutputSequence,
+    TrackingSequenceContinuation,
     configure_library,
 )
 
@@ -631,6 +632,60 @@ class PrototypeTests(unittest.TestCase):
             self.assertTrue(output.was_calculation_interrupted)
             diagnostics = tracking.last_diagnostics
             self.assertGreaterEqual(diagnostics.candidate_count, 1)
+            self.assertGreater(diagnostics.budget_exhausted_count, 0)
+            self.assertEqual(diagnostics.family_candidate_count, diagnostics.candidate_count)
+
+    def test_tracking_sequence_continuation_smoke(self) -> None:
+        count = 3
+        with (
+            Tracking(1, 0.01) as tracking,
+            TargetStateSequence(1, count) as targets,
+            TrackingOutputSequence(1, count) as outputs,
+            TrackingSequenceContinuation(1, count) as continuation,
+            Input(1) as input_,
+        ):
+            configure_tracking_input(input_)
+            input_.set_interrupt_calculation_duration(0.0)
+            tracking.set_mode(TrackingMode.OPTIMIZED)
+            tracking.set_optimized_strategy(TrackingOptimizedStrategy.AGGRESSIVE)
+            tracking.set_look_ahead_cycles(count)
+            tracking.set_max_optimized_candidates(8)
+            targets.set_count(count)
+            for step in range(count):
+                t = step * tracking.delta_time
+                targets.set_state(
+                    step,
+                    [0.2 * math.sin(0.45 * t)],
+                    [0.09 * math.cos(0.45 * t)],
+                    [-0.0405 * math.sin(0.45 * t)],
+                )
+
+            self.assertEqual(
+                tracking.calculate_sequence_interruptible(targets, input_, outputs, continuation),
+                Result.WORKING,
+            )
+            iterations = 0
+            while not continuation.complete and iterations < 128:
+                self.assertTrue(continuation.active)
+                self.assertTrue(continuation.was_interrupted)
+                self.assertEqual(outputs.count, continuation.completed_count)
+                self.assertEqual(tracking.resume_sequence(continuation, outputs), Result.WORKING)
+                iterations += 1
+
+            self.assertGreater(iterations, 0)
+            self.assertTrue(continuation.complete)
+            self.assertFalse(continuation.active)
+            self.assertFalse(continuation.was_interrupted)
+            self.assertEqual(continuation.completed_count, count)
+            self.assertEqual(continuation.target_count, count)
+            self.assertEqual(outputs.count, count)
+            self.assertEqual(len(outputs.new_positions()), count)
+            diagnostics = tracking.last_diagnostics
+            self.assertIn(
+                diagnostics.calculation_status,
+                (TrackingCalculationStatus.OPTIMIZED, TrackingCalculationStatus.FAST_FALLBACK),
+            )
+            self.assertGreaterEqual(diagnostics.candidate_count, count)
             self.assertGreater(diagnostics.budget_exhausted_count, 0)
             self.assertEqual(diagnostics.family_candidate_count, diagnostics.candidate_count)
 

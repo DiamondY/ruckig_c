@@ -21,6 +21,7 @@ ffi.cdef(
     typedef struct ruckig_target_state ruckig_target_state_t;
     typedef struct ruckig_target_state_sequence ruckig_target_state_sequence_t;
     typedef struct ruckig_tracking_output_sequence ruckig_tracking_output_sequence_t;
+    typedef struct ruckig_tracking_sequence_continuation ruckig_tracking_sequence_continuation_t;
     typedef int ruckig_result_t;
     typedef _Bool bool;
 
@@ -261,6 +262,18 @@ ffi.cdef(
         const ruckig_input_t* input,
         ruckig_tracking_output_sequence_t* output_sequence
     );
+    ruckig_result_t ruckig_tracking_calculate_sequence_interruptible(
+        ruckig_tracking_t* tracking,
+        const ruckig_target_state_sequence_t* target_sequence,
+        const ruckig_input_t* input,
+        ruckig_tracking_output_sequence_t* output_sequence,
+        ruckig_tracking_sequence_continuation_t* continuation
+    );
+    ruckig_result_t ruckig_tracking_resume_sequence(
+        ruckig_tracking_t* tracking,
+        ruckig_tracking_sequence_continuation_t* continuation,
+        ruckig_tracking_output_sequence_t* output_sequence
+    );
 
     ruckig_result_t ruckig_target_state_create(ruckig_target_state_t** target_state, size_t dofs);
     void ruckig_target_state_destroy(ruckig_target_state_t* target_state);
@@ -299,6 +312,21 @@ ffi.cdef(
     const double* ruckig_tracking_output_sequence_time_const_data(const ruckig_tracking_output_sequence_t* sequence);
     const size_t* ruckig_tracking_output_sequence_section_const_data(const ruckig_tracking_output_sequence_t* sequence);
     const ruckig_result_t* ruckig_tracking_output_sequence_result_const_data(const ruckig_tracking_output_sequence_t* sequence);
+
+    ruckig_result_t ruckig_tracking_sequence_continuation_create(
+        ruckig_tracking_sequence_continuation_t** continuation,
+        size_t dofs,
+        size_t capacity
+    );
+    void ruckig_tracking_sequence_continuation_destroy(ruckig_tracking_sequence_continuation_t* continuation);
+    void ruckig_tracking_sequence_continuation_reset(ruckig_tracking_sequence_continuation_t* continuation);
+    size_t ruckig_tracking_sequence_continuation_get_dof_count(const ruckig_tracking_sequence_continuation_t* continuation);
+    size_t ruckig_tracking_sequence_continuation_get_capacity(const ruckig_tracking_sequence_continuation_t* continuation);
+    bool ruckig_tracking_sequence_continuation_is_active(const ruckig_tracking_sequence_continuation_t* continuation);
+    bool ruckig_tracking_sequence_continuation_was_interrupted(const ruckig_tracking_sequence_continuation_t* continuation);
+    bool ruckig_tracking_sequence_continuation_is_complete(const ruckig_tracking_sequence_continuation_t* continuation);
+    size_t ruckig_tracking_sequence_continuation_get_completed_count(const ruckig_tracking_sequence_continuation_t* continuation);
+    size_t ruckig_tracking_sequence_continuation_get_target_count(const ruckig_tracking_sequence_continuation_t* continuation);
     """
 )
 
@@ -798,6 +826,46 @@ class TrackingOutputSequence(_Handle):
         return [Result(int(ptr[index])) for index in range(self.count)]
 
 
+class TrackingSequenceContinuation(_Handle):
+    _destroy_name = "ruckig_tracking_sequence_continuation_destroy"
+
+    def __init__(self, dofs: int, capacity: int):
+        out = ffi.new("ruckig_tracking_sequence_continuation_t**")
+        _result(
+            _library().ruckig_tracking_sequence_continuation_create(out, dofs, int(capacity)),
+            "ruckig_tracking_sequence_continuation_create",
+        )
+        super().__init__(out[0], dofs)
+        self._capacity = int(capacity)
+
+    @property
+    def capacity(self) -> int:
+        return int(_library().ruckig_tracking_sequence_continuation_get_capacity(self.ptr))
+
+    @property
+    def active(self) -> bool:
+        return bool(_library().ruckig_tracking_sequence_continuation_is_active(self.ptr))
+
+    @property
+    def was_interrupted(self) -> bool:
+        return bool(_library().ruckig_tracking_sequence_continuation_was_interrupted(self.ptr))
+
+    @property
+    def complete(self) -> bool:
+        return bool(_library().ruckig_tracking_sequence_continuation_is_complete(self.ptr))
+
+    @property
+    def completed_count(self) -> int:
+        return int(_library().ruckig_tracking_sequence_continuation_get_completed_count(self.ptr))
+
+    @property
+    def target_count(self) -> int:
+        return int(_library().ruckig_tracking_sequence_continuation_get_target_count(self.ptr))
+
+    def reset(self) -> None:
+        _library().ruckig_tracking_sequence_continuation_reset(self.ptr)
+
+
 class Tracking(_Handle):
     _destroy_name = "ruckig_tracking_destroy"
 
@@ -935,6 +1003,38 @@ class Tracking(_Handle):
                 output_sequence.ptr,
             ),
             "ruckig_tracking_calculate_sequence",
+        )
+
+    def calculate_sequence_interruptible(
+        self,
+        target_sequence: TargetStateSequence,
+        input_: "Input",
+        output_sequence: TrackingOutputSequence,
+        continuation: TrackingSequenceContinuation,
+    ) -> Result:
+        return _result(
+            _library().ruckig_tracking_calculate_sequence_interruptible(
+                self.ptr,
+                target_sequence.ptr,
+                input_.ptr,
+                output_sequence.ptr,
+                continuation.ptr,
+            ),
+            "ruckig_tracking_calculate_sequence_interruptible",
+        )
+
+    def resume_sequence(
+        self,
+        continuation: TrackingSequenceContinuation,
+        output_sequence: TrackingOutputSequence,
+    ) -> Result:
+        return _result(
+            _library().ruckig_tracking_resume_sequence(
+                self.ptr,
+                continuation.ptr,
+                output_sequence.ptr,
+            ),
+            "ruckig_tracking_resume_sequence",
         )
 
 

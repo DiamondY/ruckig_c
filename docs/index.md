@@ -120,6 +120,8 @@ Historical rewrite plans and release evidence are retained for traceability.
   `release/checklists/0.15.0-alpha.5.md` records the Fast tracking sequence
   continuation implementation evidence. `release/checklists/0.15.0-alpha.6.md`
   records the Optimized tracking sequence continuation implementation evidence.
+  `release/checklists/0.15.0-alpha.7.md` records the tracking sequence
+  continuation C/Python/Rust prototype smoke evidence.
 - `release/evidence/verification_report.md` - local and CI verification
   history.
 - `release/evidence/performance_report.md` - performance procedure and release
@@ -135,8 +137,10 @@ Historical rewrite plans and release evidence are retained for traceability.
 
 `v0.14.0` is the current stable release after completed local, remote, tag,
 manual release-random, and GitHub Release evidence. Current `main` is in
-`0.15.0-design - Unreleased`. Alpha.4 added no-waypoint interruption and
-alpha.5 added online tracking interruption without expanding the public C ABI.
+`0.15.0-design - Unreleased`. Alpha.4 through alpha.7 add the tracking
+sequence continuation public API, Fast/Optimized sequence continuation
+behavior, and C/Python/Rust prototype smoke coverage on the 184-symbol
+design-line C ABI baseline.
 `v0.14.0` stabilizes the API-neutral interrupt surfaces without expanding the
 172-symbol public C ABI. `v0.13.0` stabilizes post-`v0.12.0` waypoint
 true-resume stress coverage and the private waypoint optimizer engine rewrite.
@@ -177,9 +181,10 @@ gate. The previous v1 gallery provenance remains available through the
 - `design/future_interrupt_surfaces.md` - alpha.2 quasi-spec that later guided
   alpha.4 no-waypoint and alpha.5 online tracking interruption surfaces
   without public ABI changes; tracking sequence interruption remains deferred.
-- `design/tracking_sequence_interruption_api.md` - docs-only `0.15.0-alpha.2`
-  draft for possible future tracking sequence interruption public carriers and
-  ABI risks.
+- `design/tracking_sequence_interruption_api.md` - `0.15.0` tracking sequence
+  continuation design record, from alpha.2 public-carrier draft through the
+  alpha.4 public API, alpha.5/alpha.6 behavior, and alpha.7 wrapper smoke
+  evidence.
 - `../bindings/rust/README.md` - experimental Rust alpha wrapper over the
   public C ABI.
 - `../bindings/python_prototype/README.md` - experimental Python cffi

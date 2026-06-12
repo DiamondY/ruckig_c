@@ -44,6 +44,11 @@ struct TrackingOutputSequenceRaw {
 }
 
 #[repr(C)]
+struct TrackingSequenceContinuationRaw {
+    _private: [u8; 0],
+}
+
+#[repr(C)]
 #[derive(Clone, Copy)]
 struct CBound {
     min_position: f64,
@@ -496,6 +501,18 @@ unsafe extern "C" {
         input: *const InputRaw,
         output_sequence: *mut TrackingOutputSequenceRaw,
     ) -> i32;
+    fn ruckig_tracking_calculate_sequence_interruptible(
+        tracking: *mut TrackingRaw,
+        target_sequence: *const TargetStateSequenceRaw,
+        input: *const InputRaw,
+        output_sequence: *mut TrackingOutputSequenceRaw,
+        continuation: *mut TrackingSequenceContinuationRaw,
+    ) -> i32;
+    fn ruckig_tracking_resume_sequence(
+        tracking: *mut TrackingRaw,
+        continuation: *mut TrackingSequenceContinuationRaw,
+        output_sequence: *mut TrackingOutputSequenceRaw,
+    ) -> i32;
 
     fn ruckig_target_state_create(target_state: *mut *mut TargetStateRaw, dofs: usize) -> i32;
     fn ruckig_target_state_destroy(target_state: *mut TargetStateRaw);
@@ -558,6 +575,39 @@ unsafe extern "C" {
     fn ruckig_tracking_output_sequence_result_const_data(
         sequence: *const TrackingOutputSequenceRaw,
     ) -> *const i32;
+
+    fn ruckig_tracking_sequence_continuation_create(
+        continuation: *mut *mut TrackingSequenceContinuationRaw,
+        dofs: usize,
+        capacity: usize,
+    ) -> i32;
+    fn ruckig_tracking_sequence_continuation_destroy(
+        continuation: *mut TrackingSequenceContinuationRaw,
+    );
+    fn ruckig_tracking_sequence_continuation_reset(
+        continuation: *mut TrackingSequenceContinuationRaw,
+    );
+    fn ruckig_tracking_sequence_continuation_get_dof_count(
+        continuation: *const TrackingSequenceContinuationRaw,
+    ) -> usize;
+    fn ruckig_tracking_sequence_continuation_get_capacity(
+        continuation: *const TrackingSequenceContinuationRaw,
+    ) -> usize;
+    fn ruckig_tracking_sequence_continuation_is_active(
+        continuation: *const TrackingSequenceContinuationRaw,
+    ) -> bool;
+    fn ruckig_tracking_sequence_continuation_was_interrupted(
+        continuation: *const TrackingSequenceContinuationRaw,
+    ) -> bool;
+    fn ruckig_tracking_sequence_continuation_is_complete(
+        continuation: *const TrackingSequenceContinuationRaw,
+    ) -> bool;
+    fn ruckig_tracking_sequence_continuation_get_completed_count(
+        continuation: *const TrackingSequenceContinuationRaw,
+    ) -> usize;
+    fn ruckig_tracking_sequence_continuation_get_target_count(
+        continuation: *const TrackingSequenceContinuationRaw,
+    ) -> usize;
 }
 
 fn check_code(code: i32, operation: &'static str) -> Result<RuckigResult> {
@@ -1582,6 +1632,64 @@ impl Drop for TrackingOutputSequence {
     }
 }
 
+pub struct TrackingSequenceContinuation {
+    raw: NonNull<TrackingSequenceContinuationRaw>,
+}
+
+impl TrackingSequenceContinuation {
+    pub fn new(dofs: usize, capacity: usize) -> Result<Self> {
+        let mut raw = std::ptr::null_mut();
+        check_code(
+            unsafe { ruckig_tracking_sequence_continuation_create(&mut raw, dofs, capacity) },
+            "ruckig_tracking_sequence_continuation_create",
+        )?;
+        Ok(Self {
+            raw: NonNull::new(raw).ok_or(Error {
+                code: -1,
+                operation: "ruckig_tracking_sequence_continuation_create",
+            })?,
+        })
+    }
+
+    pub fn dofs(&self) -> usize {
+        unsafe { ruckig_tracking_sequence_continuation_get_dof_count(self.raw.as_ptr()) }
+    }
+
+    pub fn capacity(&self) -> usize {
+        unsafe { ruckig_tracking_sequence_continuation_get_capacity(self.raw.as_ptr()) }
+    }
+
+    pub fn is_active(&self) -> bool {
+        unsafe { ruckig_tracking_sequence_continuation_is_active(self.raw.as_ptr()) }
+    }
+
+    pub fn was_interrupted(&self) -> bool {
+        unsafe { ruckig_tracking_sequence_continuation_was_interrupted(self.raw.as_ptr()) }
+    }
+
+    pub fn is_complete(&self) -> bool {
+        unsafe { ruckig_tracking_sequence_continuation_is_complete(self.raw.as_ptr()) }
+    }
+
+    pub fn completed_count(&self) -> usize {
+        unsafe { ruckig_tracking_sequence_continuation_get_completed_count(self.raw.as_ptr()) }
+    }
+
+    pub fn target_count(&self) -> usize {
+        unsafe { ruckig_tracking_sequence_continuation_get_target_count(self.raw.as_ptr()) }
+    }
+
+    pub fn reset(&mut self) {
+        unsafe { ruckig_tracking_sequence_continuation_reset(self.raw.as_ptr()) };
+    }
+}
+
+impl Drop for TrackingSequenceContinuation {
+    fn drop(&mut self) {
+        unsafe { ruckig_tracking_sequence_continuation_destroy(self.raw.as_ptr()) };
+    }
+}
+
 pub struct Tracking {
     raw: NonNull<TrackingRaw>,
     dofs: usize,
@@ -1748,6 +1856,44 @@ impl Tracking {
                 )
             },
             "ruckig_tracking_calculate_sequence",
+        )
+    }
+
+    pub fn calculate_sequence_interruptible(
+        &mut self,
+        target_sequence: &TargetStateSequence,
+        input: &InputParameter,
+        output_sequence: &mut TrackingOutputSequence,
+        continuation: &mut TrackingSequenceContinuation,
+    ) -> Result<RuckigResult> {
+        check_code(
+            unsafe {
+                ruckig_tracking_calculate_sequence_interruptible(
+                    self.raw.as_ptr(),
+                    target_sequence.raw.as_ptr(),
+                    input.raw.as_ptr(),
+                    output_sequence.raw.as_ptr(),
+                    continuation.raw.as_ptr(),
+                )
+            },
+            "ruckig_tracking_calculate_sequence_interruptible",
+        )
+    }
+
+    pub fn resume_sequence(
+        &mut self,
+        continuation: &mut TrackingSequenceContinuation,
+        output_sequence: &mut TrackingOutputSequence,
+    ) -> Result<RuckigResult> {
+        check_code(
+            unsafe {
+                ruckig_tracking_resume_sequence(
+                    self.raw.as_ptr(),
+                    continuation.raw.as_ptr(),
+                    output_sequence.raw.as_ptr(),
+                )
+            },
+            "ruckig_tracking_resume_sequence",
         )
     }
 }
@@ -2401,6 +2547,76 @@ mod tests {
             diagnostics.family_candidate_count(),
             diagnostics.candidate_count
         );
+        Ok(())
+    }
+
+    #[test]
+    fn tracking_sequence_continuation_smoke() -> Result<()> {
+        let count = 3;
+        let mut tracking = Tracking::new(1, 0.01)?;
+        let mut targets = TargetStateSequence::new(1, count)?;
+        let mut outputs = TrackingOutputSequence::new(1, count)?;
+        let mut continuation = TrackingSequenceContinuation::new(1, count)?;
+        let mut input = InputParameter::new(1)?;
+        configure_tracking_input(&mut input)?;
+        input.set_interrupt_calculation_duration(0.0)?;
+        tracking.set_mode(TrackingMode::Optimized)?;
+        tracking.set_optimized_strategy(TrackingOptimizedStrategy::Aggressive)?;
+        tracking.set_look_ahead_cycles(count)?;
+        tracking.set_max_optimized_candidates(8)?;
+        targets.set_count(count)?;
+        for step in 0..count {
+            let t = step as f64 * tracking.delta_time();
+            targets.set_state(
+                step,
+                &[0.2 * (0.45 * t).sin()],
+                &[0.09 * (0.45 * t).cos()],
+                &[-0.0405 * (0.45 * t).sin()],
+            )?;
+        }
+
+        assert_eq!(
+            tracking.calculate_sequence_interruptible(
+                &targets,
+                &input,
+                &mut outputs,
+                &mut continuation
+            )?,
+            RuckigResult::Working
+        );
+        let mut iterations = 0;
+        while !continuation.is_complete() && iterations < 128 {
+            assert!(continuation.is_active());
+            assert!(continuation.was_interrupted());
+            assert_eq!(outputs.count(), continuation.completed_count());
+            assert_eq!(
+                tracking.resume_sequence(&mut continuation, &mut outputs)?,
+                RuckigResult::Working
+            );
+            iterations += 1;
+        }
+        assert!(iterations > 0);
+        assert!(continuation.is_complete());
+        assert!(!continuation.is_active());
+        assert!(!continuation.was_interrupted());
+        assert_eq!(continuation.completed_count(), count);
+        assert_eq!(continuation.target_count(), count);
+        assert_eq!(outputs.count(), count);
+        assert_eq!(outputs.new_positions_flat().len(), count);
+        let diagnostics = tracking.last_diagnostics()?;
+        assert!(
+            diagnostics.calculation_status == TrackingCalculationStatus::Optimized
+                || diagnostics.calculation_status == TrackingCalculationStatus::FastFallback
+        );
+        assert!(diagnostics.candidate_count >= count);
+        assert!(diagnostics.budget_exhausted_count > 0);
+        assert_eq!(
+            diagnostics.family_candidate_count(),
+            diagnostics.candidate_count
+        );
+        continuation.reset();
+        assert_eq!(continuation.completed_count(), 0);
+        assert_eq!(continuation.target_count(), 0);
         Ok(())
     }
 }

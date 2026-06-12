@@ -25,6 +25,9 @@ ABI mode and validates the minimum wrapper model:
   Optimized lookahead update, candidate-budget diagnostics, strategy presets,
   diagnostics snapshots, tracking lifecycle checks, and prototype smoke for
   no-waypoint plus Optimized online tracking interruption.
+- tracking sequence continuation smoke for the `0.15.0-alpha.4` continuation
+  handle and the Fast/Optimized interruptible/resume sequence API implemented
+  in alpha.5 and alpha.6.
 
 ## Prerequisites
 
@@ -52,3 +55,5 @@ macOS, point it at the built `libruckig_c.dylib`.
 - No formal Python package or wheel release.
 - No stable tracking binding API commitment; tracking coverage is prototype
   smoke evidence for the C ABI.
+- No stable tracking sequence continuation binding API commitment; the
+  continuation wrapper is alpha smoke evidence only.
