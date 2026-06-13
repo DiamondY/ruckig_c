@@ -928,9 +928,12 @@ void run_waypoint_section_oracle_cases() {
     }
 }
 
-void print_case_repro(const CaseData& test_case) {
+void print_case_repro(const CaseData& test_case, std::uint64_t seed, size_t sample_index, const char* kind) {
     std::cerr.precision(17);
-    std::cerr << "repro name=" << test_case.name
+    std::cerr << "repro kind=" << kind
+        << " seed=" << seed
+        << " sample=" << sample_index
+        << " name=" << test_case.name
         << " dofs=" << test_case.dofs
         << " dt=" << test_case.delta_time
         << " control=" << static_cast<int>(test_case.control_interface)
@@ -957,6 +960,16 @@ void print_case_repro(const CaseData& test_case) {
         }
         std::cerr << '\n';
     };
+    auto print_bool_vector = [](const char* label, const std::vector<bool>& values) {
+        if (values.empty()) {
+            return;
+        }
+        std::cerr << label << ':';
+        for (bool value: values) {
+            std::cerr << ' ' << (value ? 1 : 0);
+        }
+        std::cerr << '\n';
+    };
     auto print_vector = [](const char* label, const std::vector<double>& values) {
         std::cerr << label << ':';
         for (double value: values) {
@@ -973,6 +986,7 @@ void print_case_repro(const CaseData& test_case) {
     print_vector("max_velocity", test_case.max_velocity);
     print_vector("max_acceleration", test_case.max_acceleration);
     print_vector("max_jerk", test_case.max_jerk);
+    print_bool_vector("enabled", test_case.enabled);
     print_control_vector("per_dof_control_interface", test_case.per_dof_control_interface);
     print_sync_vector("per_dof_synchronization", test_case.per_dof_synchronization);
 }
@@ -1173,7 +1187,7 @@ void run_random_cases(size_t count, std::uint64_t seed) {
         CaseData test_case = make_random_case(rng, i);
         run_case(test_case);
         if (failures != case_failures_before) {
-            print_case_repro(test_case);
+            print_case_repro(test_case, seed, i, "random");
             break;
         }
     }
@@ -1190,7 +1204,7 @@ void run_random_per_dof_cases(size_t count, std::uint64_t seed) {
         CaseData test_case = make_random_per_dof_case(rng, i);
         run_case(test_case, false);
         if (failures != case_failures_before) {
-            print_case_repro(test_case);
+            print_case_repro(test_case, seed, i, "random-per-dof");
             break;
         }
     }

@@ -38,6 +38,16 @@
       }
     },
     {
+      "name": "windows-clang-ninja-internal-asserts",
+      "displayName": "Windows LLVM clang + Ninja internal assertions",
+      "description": "Windows local build with private implementation assertions enabled for focused quality audits.",
+      "inherits": "windows-clang-ninja",
+      "binaryDir": "${sourceDir}/out/build/${presetName}",
+      "cacheVariables": {
+        "RUCKIG_C_ENABLE_INTERNAL_ASSERTS": "ON"
+      }
+    },
+    {
       "name": "windows-clang-ninja-shared",
       "displayName": "Windows LLVM clang + Ninja shared library",
       "description": "Windows shared-library build under out/build/windows-clang-ninja-shared using the verified LLVM clang toolchain and Visual Studio bundled Ninja.",
@@ -166,6 +176,11 @@
       "configuration": "Release"
     },
     {
+      "name": "windows-clang-ninja-internal-asserts",
+      "configurePreset": "windows-clang-ninja-internal-asserts",
+      "configuration": "Release"
+    },
+    {
       "name": "windows-clang-ninja-shared",
       "configurePreset": "windows-clang-ninja-shared",
       "configuration": "Release"
@@ -212,6 +227,14 @@
     {
       "name": "windows-clang-ninja",
       "configurePreset": "windows-clang-ninja",
+      "configuration": "Release",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "windows-clang-ninja-internal-asserts",
+      "configurePreset": "windows-clang-ninja-internal-asserts",
       "configuration": "Release",
       "output": {
         "outputOnFailure": true

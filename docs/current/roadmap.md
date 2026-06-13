@@ -143,8 +143,16 @@ ABI baseline accepted during the 0.15 design line and does not start
   `0.15.0`, records release-candidate and tag evidence in
   `docs/release/checklists/0.15.0.md`, and publishes stable release notes in
   `docs/release/notes/0.15.0.md`.
+- `post-v0.15.0-quality-audit` is implemented locally as a quality/testability
+  slice on top of the stable release evidence. It records a code-quality risk
+  map, adds deterministic property invariants, introduces default-off private
+  internal assertions, improves random failure reproduction context, and keeps
+  large random gates as local/manual evidence.
 - Keep the 184-symbol `v0.15.0` public C ABI baseline unless a later separate
   public API decision is accepted.
+- This quality audit does not start `0.16.0-design`, change version metadata,
+  tag a release, publish wrappers, edit the ABI allowlist, or change the
+  public C ABI baseline.
 - Package-manager recipes and package publication remain frozen unless
   separately accepted.
 - Cloud/remote runtime, proprietary Pro equivalence claims, hard real-time

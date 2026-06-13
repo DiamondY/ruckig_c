@@ -218,6 +218,14 @@ RUCKIG_C_API const bool* ruckig_input_enabled_const_data(const ruckig_input_t* i
     return input ? input->enabled : NULL;
 }
 
+static bool input_has_full_dof_array(const ruckig_input_t* input, const void* values, size_t count) {
+    return input && values && count == input->dofs && count > 0;
+}
+
+static bool input_has_dof_index(const ruckig_input_t* input, size_t dof) {
+    return input && dof < input->dofs;
+}
+
 RUCKIG_C_API ruckig_result_t ruckig_input_set_control_interface(
     ruckig_input_t* input,
     ruckig_control_interface_t control_interface
@@ -246,7 +254,7 @@ RUCKIG_C_API ruckig_result_t ruckig_input_set_per_dof_control_interface(
     size_t count
 ) {
     size_t i;
-    if (!input || !values || count != input->dofs || count == 0) {
+    if (!input_has_full_dof_array(input, values, count)) {
         return RUCKIG_ERROR_INVALID_INPUT;
     }
     for (i = 0; i < count; ++i) {
@@ -271,7 +279,7 @@ RUCKIG_C_API ruckig_result_t ruckig_input_set_per_dof_synchronization(
     size_t count
 ) {
     size_t i;
-    if (!input || !values || count != input->dofs || count == 0) {
+    if (!input_has_full_dof_array(input, values, count)) {
         return RUCKIG_ERROR_INVALID_INPUT;
     }
     for (i = 0; i < count; ++i) {
@@ -306,7 +314,7 @@ RUCKIG_C_API ruckig_result_t ruckig_input_set_dof_enabled(
     size_t dof,
     bool enabled
 ) {
-    if (!input || dof >= input->dofs) {
+    if (!input_has_dof_index(input, dof)) {
         return RUCKIG_ERROR_INVALID_INPUT;
     }
     input->enabled[dof] = enabled;
@@ -318,7 +326,7 @@ RUCKIG_C_API ruckig_result_t ruckig_input_set_min_velocity(
     const double* min_velocity,
     size_t count
 ) {
-    if (!input || !min_velocity || count != input->dofs || count == 0) {
+    if (!input_has_full_dof_array(input, min_velocity, count)) {
         return RUCKIG_ERROR_INVALID_INPUT;
     }
     memcpy(input->min_velocity, min_velocity, sizeof(double) * count);
@@ -337,7 +345,7 @@ RUCKIG_C_API ruckig_result_t ruckig_input_set_min_acceleration(
     const double* min_acceleration,
     size_t count
 ) {
-    if (!input || !min_acceleration || count != input->dofs || count == 0) {
+    if (!input_has_full_dof_array(input, min_acceleration, count)) {
         return RUCKIG_ERROR_INVALID_INPUT;
     }
     memcpy(input->min_acceleration, min_acceleration, sizeof(double) * count);

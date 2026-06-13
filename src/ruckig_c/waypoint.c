@@ -135,6 +135,23 @@ static bool waypoint_planning_identity_equals(const ruckig_input_t* lhs, const r
         && (!lhs->has_per_section_minimum_duration || waypoint_double_arrays_equal(lhs->per_section_minimum_duration, rhs->per_section_minimum_duration, section_count));
 }
 
+static void waypoint_engine_assert_consistent(const ruckig_t* otg) {
+    const ruckig_waypoint_optimizer_engine_t* engine = otg ? &otg->waypoint_engine : NULL;
+    if (!engine) {
+        return;
+    }
+    RUCKIG_C_INTERNAL_ASSERT(!engine->complete || !engine->active);
+    RUCKIG_C_INTERNAL_ASSERT(!engine->active || engine->identity_input != NULL);
+    RUCKIG_C_INTERNAL_ASSERT(!engine->active || engine->branch_queue != NULL);
+    RUCKIG_C_INTERNAL_ASSERT(engine->branch_count <= RUCKIG_WAYPOINT_BRANCH_QUEUE_CAPACITY);
+    RUCKIG_C_INTERNAL_ASSERT(engine->branch_index <= engine->branch_count);
+    RUCKIG_C_INTERNAL_ASSERT(engine->phase <= RUCKIG_WAYPOINT_ENGINE_PHASE_COMPLETE);
+    if (engine->phase == RUCKIG_WAYPOINT_ENGINE_PHASE_IDLE) {
+        RUCKIG_C_INTERNAL_ASSERT(!engine->active);
+        RUCKIG_C_INTERNAL_ASSERT(!engine->complete);
+    }
+}
+
 void ruckig_waypoint_resume_clear(ruckig_t* otg) {
     if (!otg) {
         return;
@@ -162,6 +179,7 @@ void ruckig_waypoint_resume_clear(ruckig_t* otg) {
     otg->waypoint_engine.branch_index = 0;
     otg->waypoint_engine.branch_queue_valid = false;
     otg->waypoint_engine.branch_improved_any = false;
+    waypoint_engine_assert_consistent(otg);
 }
 
 bool ruckig_waypoint_resume_can_continue(const ruckig_t* otg, const ruckig_input_t* input) {
@@ -518,6 +536,7 @@ static void waypoint_engine_mark_complete(ruckig_t* otg) {
     otg->waypoint_engine.phase = RUCKIG_WAYPOINT_ENGINE_PHASE_COMPLETE;
     otg->waypoint_engine.complete = true;
     otg->waypoint_engine.active = false;
+    waypoint_engine_assert_consistent(otg);
 }
 
 static ruckig_result_t waypoint_engine_start(
@@ -555,6 +574,7 @@ static ruckig_result_t waypoint_engine_start(
     otg->waypoint_engine.last_best_lower_bound = DBL_MAX;
     otg->waypoint_engine.last_candidate_evaluations = 0;
     otg->waypoint_engine.last_improved_baseline = false;
+    waypoint_engine_assert_consistent(otg);
     return RUCKIG_WORKING;
 }
 
@@ -1090,6 +1110,7 @@ ruckig_result_t ruckig_waypoint_resume_continue(
         return RUCKIG_ERROR_INVALID_INPUT;
     }
     if (!ruckig_waypoint_resume_can_continue(otg, input)) {
+        waypoint_engine_assert_consistent(otg);
         return RUCKIG_WORKING;
     }
 
@@ -1108,6 +1129,7 @@ ruckig_result_t ruckig_waypoint_resume_continue(
     }
     if (result != RUCKIG_WORKING) {
         ruckig_waypoint_resume_clear(otg);
+        waypoint_engine_assert_consistent(otg);
         return result;
     }
 
@@ -1116,6 +1138,7 @@ ruckig_result_t ruckig_waypoint_resume_continue(
         result = waypoint_engine_publish_best_transaction(otg, input, trajectory);
         if (result != RUCKIG_WORKING) {
             ruckig_waypoint_resume_clear(otg);
+            waypoint_engine_assert_consistent(otg);
             return result == RUCKIG_ERROR ? RUCKIG_WORKING : result;
         }
         otg->waypoint_engine.published_duration = trajectory->duration;
@@ -1123,6 +1146,7 @@ ruckig_result_t ruckig_waypoint_resume_continue(
             *published = true;
         }
     }
+    waypoint_engine_assert_consistent(otg);
     return RUCKIG_WORKING;
 }
 

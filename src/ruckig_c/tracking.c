@@ -616,6 +616,48 @@ static void tracking_sequence_continuation_clear_state(ruckig_tracking_sequence_
     }
 }
 
+static void tracking_sequence_assert_diagnostics_consistent(const ruckig_tracking_diagnostics_t* diagnostics) {
+    const size_t family_count = diagnostics
+        ? diagnostics->fast_candidate_count
+            + diagnostics->instantaneous_candidate_count
+            + diagnostics->horizon_candidate_count
+            + diagnostics->terminal_blend_candidate_count
+            + diagnostics->derivative_damped_candidate_count
+            + diagnostics->lead_lag_candidate_count
+        : 0;
+    if (!diagnostics) {
+        return;
+    }
+    RUCKIG_C_INTERNAL_ASSERT(family_count == diagnostics->candidate_count);
+    RUCKIG_C_INTERNAL_ASSERT(diagnostics->valid_candidate_count + diagnostics->rejected_candidate_count <= diagnostics->candidate_count);
+}
+
+static void tracking_sequence_assert_continuation_consistent(const ruckig_tracking_sequence_continuation_t* continuation) {
+    if (!continuation) {
+        return;
+    }
+    RUCKIG_C_INTERNAL_ASSERT(continuation->dofs > 0);
+    RUCKIG_C_INTERNAL_ASSERT(continuation->capacity > 0);
+    RUCKIG_C_INTERNAL_ASSERT(continuation->target_count <= continuation->capacity);
+    RUCKIG_C_INTERNAL_ASSERT(continuation->completed_count <= continuation->target_count);
+    RUCKIG_C_INTERNAL_ASSERT(!continuation->active || continuation->completed_count < continuation->target_count);
+    RUCKIG_C_INTERNAL_ASSERT(!continuation->complete || (!continuation->active && continuation->completed_count == continuation->target_count));
+    RUCKIG_C_INTERNAL_ASSERT(!continuation->was_interrupted || (continuation->active && !continuation->complete));
+    RUCKIG_C_INTERNAL_ASSERT(!continuation->optimized_step_active || continuation->mode == RUCKIG_TRACKING_OPTIMIZED);
+    if (continuation->target_sequence) {
+        RUCKIG_C_INTERNAL_ASSERT(continuation->target_sequence->dofs == continuation->dofs);
+        RUCKIG_C_INTERNAL_ASSERT(continuation->target_sequence->capacity == continuation->capacity);
+        RUCKIG_C_INTERNAL_ASSERT(continuation->target_sequence->count == continuation->target_count);
+    }
+    if (continuation->output_prefix) {
+        RUCKIG_C_INTERNAL_ASSERT(continuation->output_prefix->dofs == continuation->dofs);
+        RUCKIG_C_INTERNAL_ASSERT(continuation->output_prefix->capacity == continuation->capacity);
+        RUCKIG_C_INTERNAL_ASSERT(continuation->output_prefix->count <= continuation->completed_count);
+    }
+    tracking_sequence_assert_diagnostics_consistent(&continuation->diagnostics);
+    tracking_sequence_assert_diagnostics_consistent(&continuation->optimized_step_diagnostics);
+}
+
 RUCKIG_C_API ruckig_result_t ruckig_tracking_sequence_continuation_create(
     ruckig_tracking_sequence_continuation_t** continuation,
     size_t dofs,
@@ -646,6 +688,7 @@ RUCKIG_C_API ruckig_result_t ruckig_tracking_sequence_continuation_create(
         return RUCKIG_ERROR;
     }
     tracking_sequence_continuation_clear_state(value);
+    tracking_sequence_assert_continuation_consistent(value);
     *continuation = value;
     return RUCKIG_WORKING;
 }
@@ -669,6 +712,7 @@ RUCKIG_C_API void ruckig_tracking_sequence_continuation_reset(
     ruckig_tracking_sequence_continuation_t* continuation
 ) {
     tracking_sequence_continuation_clear_state(continuation);
+    tracking_sequence_assert_continuation_consistent(continuation);
 }
 
 RUCKIG_C_API size_t ruckig_tracking_sequence_continuation_get_dof_count(
@@ -1846,6 +1890,7 @@ static ruckig_result_t tracking_sequence_continuation_capture_start(
     continuation->optimized_step_diagnostics.mode = tracking->mode;
     continuation->optimized_step_diagnostics.optimized_strategy = tracking->optimized_strategy;
     ruckig_tracking_output_sequence_clear(output_sequence);
+    tracking_sequence_assert_continuation_consistent(continuation);
     return RUCKIG_WORKING;
 }
 
@@ -2313,10 +2358,14 @@ RUCKIG_C_API ruckig_result_t ruckig_tracking_calculate_sequence_interruptible(
         return result;
     }
     if (continuation->mode == RUCKIG_TRACKING_FAST) {
-        return tracking_sequence_process_fast(tracking, continuation, output_sequence);
+        result = tracking_sequence_process_fast(tracking, continuation, output_sequence);
+        tracking_sequence_assert_continuation_consistent(continuation);
+        return result;
     }
     if (continuation->mode == RUCKIG_TRACKING_OPTIMIZED) {
-        return tracking_sequence_process_optimized(tracking, continuation, output_sequence);
+        result = tracking_sequence_process_optimized(tracking, continuation, output_sequence);
+        tracking_sequence_assert_continuation_consistent(continuation);
+        return result;
     }
     return RUCKIG_ERROR_UNSUPPORTED;
 }
@@ -2340,14 +2389,22 @@ RUCKIG_C_API ruckig_result_t ruckig_tracking_resume_sequence(
             tracking_mark_error(tracking);
             return RUCKIG_ERROR_INVALID_INPUT;
         }
-        return tracking_sequence_process_fast(tracking, continuation, output_sequence);
+        {
+            const ruckig_result_t result = tracking_sequence_process_fast(tracking, continuation, output_sequence);
+            tracking_sequence_assert_continuation_consistent(continuation);
+            return result;
+        }
     }
     if (continuation->mode == RUCKIG_TRACKING_OPTIMIZED) {
         if (continuation->target_count == 0 && !continuation->complete) {
             tracking_mark_error(tracking);
             return RUCKIG_ERROR_INVALID_INPUT;
         }
-        return tracking_sequence_process_optimized(tracking, continuation, output_sequence);
+        {
+            const ruckig_result_t result = tracking_sequence_process_optimized(tracking, continuation, output_sequence);
+            tracking_sequence_assert_continuation_consistent(continuation);
+            return result;
+        }
     }
     return RUCKIG_ERROR_UNSUPPORTED;
 }

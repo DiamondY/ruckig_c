@@ -4,6 +4,11 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+#ifdef RUCKIG_C_ENABLE_INTERNAL_ASSERTS
+#include <assert.h>
+#include <stdlib.h>
+#endif
+
 #include <ruckig_c/ruckig.h>
 
 #include "ruckig_c/alloc.h"
@@ -15,6 +20,18 @@
 #define RUCKIG_WAYPOINT_BRANCH_ITERATION_BUDGET 256u
 #define RUCKIG_DBL_EPSILON 2.2204460492503131e-16
 #define RUCKIG_TIME_EPS (2.0 * RUCKIG_DBL_EPSILON)
+
+#ifdef RUCKIG_C_ENABLE_INTERNAL_ASSERTS
+#define RUCKIG_C_INTERNAL_ASSERT(expr) \
+    do { \
+        if (!(expr)) { \
+            assert(expr); \
+            abort(); \
+        } \
+    } while (0)
+#else
+#define RUCKIG_C_INTERNAL_ASSERT(expr) ((void)sizeof(expr))
+#endif
 
 typedef struct ruckig_waypoint_branch {
     size_t index;

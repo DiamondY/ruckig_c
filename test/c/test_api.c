@@ -6952,7 +6952,8 @@ static void tracking_audit_maybe_record_fallback(
 
 static void tracking_audit_print_case(
     const char* reason,
-    const tracking_audit_case_result_t* case_result
+    const tracking_audit_case_result_t* case_result,
+    unsigned seed
 ) {
     const tracking_audit_case_config_t* config = &case_result->config;
     const ruckig_tracking_diagnostics_t* diagnostics = &case_result->diagnostics;
@@ -6960,8 +6961,9 @@ static void tracking_audit_print_case(
         ? tracking_audit_family_names[case_result->selected_family]
         : "unknown";
     printf(
-        "tracking random audit fallback_case reason=%s sample=%zu strategy=%s dofs=%zu signal=%s lookahead=%zu reactiveness=%.2f disabled=%s disabled_dof=%s constraints=%s status=%s selected_family=%s selected_near_tie=%s strict_improved=%zu near_tie_accepted=%zu candidates=%zu fast=%zu instantaneous=%zu horizon=%zu terminal_blend=%zu derivative_damped=%zu lead_lag=%zu budget_exhausted=%zu fast_score=%.9g best_score=%.9g improvement=%.9g\n",
+        "tracking random audit fallback_case reason=%s seed=%u sample=%zu strategy=%s dofs=%zu signal=%s lookahead=%zu reactiveness=%.2f disabled=%s disabled_dof=%s constraints=%s status=%s selected_family=%s selected_near_tie=%s strict_improved=%zu near_tie_accepted=%zu candidates=%zu fast=%zu instantaneous=%zu horizon=%zu terminal_blend=%zu derivative_damped=%zu lead_lag=%zu budget_exhausted=%zu fast_score=%.9g best_score=%.9g improvement=%.9g\n",
         reason,
+        seed,
         config->sample_index,
         tracking_strategy_name(config->strategy),
         config->dofs,
@@ -7082,7 +7084,7 @@ static void tracking_audit_print_stats(
     tracking_audit_print_family_summary(&stats->overall);
     tracking_audit_check_thresholds(stats, threshold);
     for (i = 0; i < representatives->count; ++i) {
-        tracking_audit_print_case(representatives->reasons[i], &representatives->cases[i]);
+        tracking_audit_print_case(representatives->reasons[i], &representatives->cases[i], seed);
     }
 }
 
@@ -7102,6 +7104,7 @@ void run_tracking_random_tests(size_t samples, unsigned seed) {
     unsigned state = seed ? seed : 1u;
 
     for (sample = 0; sample < samples; ++sample) {
+        const int sample_failures_before = ruckig_c_test_failures;
         const size_t dofs = dof_values[tracking_random_pick(&state, 4)];
         const size_t lookahead_count = lookahead_values[tracking_random_pick(&state, 4)];
         const int signal = (int)tracking_random_pick(&state, 4);
@@ -7109,6 +7112,8 @@ void run_tracking_random_tests(size_t samples, unsigned seed) {
         const ruckig_tracking_optimized_strategy_t strategy = strategy_values[tracking_random_pick(&state, 3)];
         const double dt = 0.01;
         const double start_time = (double)(sample % 200u) * dt;
+        bool has_disabled_dof = false;
+        size_t disabled_dof = 0;
         ruckig_tracking_t* tracking = NULL;
         ruckig_target_state_sequence_t* lookahead = NULL;
         ruckig_input_t* input = NULL;
@@ -7121,7 +7126,8 @@ void run_tracking_random_tests(size_t samples, unsigned seed) {
         CHECK_EQ_INT(ruckig_output_create(&output, dofs), RUCKIG_WORKING);
         fill_tracking_input_nd(input, dofs);
         if (dofs > 1 && (tracking_random_next(&state) & 1u) != 0u) {
-            const size_t disabled_dof = tracking_random_pick(&state, dofs);
+            has_disabled_dof = true;
+            disabled_dof = tracking_random_pick(&state, dofs);
             CHECK_EQ_INT(ruckig_input_set_dof_enabled(input, disabled_dof, false), RUCKIG_WORKING);
         }
         CHECK_EQ_INT(ruckig_tracking_set_mode(tracking, RUCKIG_TRACKING_OPTIMIZED), RUCKIG_WORKING);
@@ -7156,6 +7162,22 @@ void run_tracking_random_tests(size_t samples, unsigned seed) {
             ++optimized_count;
         } else if (ruckig_tracking_get_last_calculation_status(tracking) == RUCKIG_TRACKING_CALCULATION_FAST_FALLBACK) {
             ++fallback_count;
+        }
+        if (ruckig_c_test_failures != sample_failures_before) {
+            fprintf(
+                stderr,
+                "tracking random stress failure_context seed=%u sample=%zu dofs=%zu signal=%s lookahead=%zu reactiveness=%.2f strategy=%s disabled=%s disabled_dof=%s start_time=%.9g\n",
+                seed,
+                sample,
+                dofs,
+                tracking_signal_name(signal),
+                lookahead_count,
+                reactiveness,
+                tracking_strategy_name(strategy),
+                has_disabled_dof ? "yes" : "no",
+                has_disabled_dof ? tracking_dof_number_name(disabled_dof) : "none",
+                start_time
+            );
         }
 
         ruckig_output_destroy(output);
@@ -7510,6 +7532,179 @@ static void test_tracking_stability_regression_cases(void) {
     CHECK_TRUE(disabled_seen);
     CHECK_TRUE(tight_seen);
     CHECK_TRUE(budget_seen);
+}
+
+static void test_property_no_waypoint_trajectory_invariants(void) {
+    ruckig_t* offline_otg = NULL;
+    ruckig_t* online_otg = NULL;
+    ruckig_input_t* input = NULL;
+    ruckig_output_t* output = NULL;
+    ruckig_trajectory_t* trajectory = NULL;
+    double position[3] = {0.0, 0.0, 0.0};
+    double velocity[3] = {0.0, 0.0, 0.0};
+    double acceleration[3] = {0.0, 0.0, 0.0};
+    double jerk[3] = {0.0, 0.0, 0.0};
+    double independent[3] = {0.0, 0.0, 0.0};
+    double sample_times[5];
+    const double disabled_p0 = 0.60;
+    const double disabled_v0 = 0.20;
+    const double disabled_a0 = -0.05;
+    double duration;
+    size_t sample;
+
+    CHECK_TRUE(RUCKIG_RESULT_IS_OK(RUCKIG_WORKING));
+    CHECK_TRUE(RUCKIG_RESULT_IS_OK(RUCKIG_FINISHED));
+    CHECK_TRUE(!RUCKIG_RESULT_IS_OK(RUCKIG_ERROR));
+
+    CHECK_EQ_INT(ruckig_create(&offline_otg, 3, 0.02), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_create(&online_otg, 3, 0.02), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_input_create(&input, 3), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_output_create(&output, 3), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_trajectory_create(&trajectory, 3), RUCKIG_WORKING);
+
+    ruckig_input_current_position_data(input)[0] = 0.0;
+    ruckig_input_current_position_data(input)[1] = -0.25;
+    ruckig_input_current_position_data(input)[2] = disabled_p0;
+    ruckig_input_current_velocity_data(input)[0] = 0.0;
+    ruckig_input_current_velocity_data(input)[1] = -0.10;
+    ruckig_input_current_velocity_data(input)[2] = disabled_v0;
+    ruckig_input_current_acceleration_data(input)[0] = 0.0;
+    ruckig_input_current_acceleration_data(input)[1] = 0.05;
+    ruckig_input_current_acceleration_data(input)[2] = disabled_a0;
+    ruckig_input_target_position_data(input)[0] = 1.20;
+    ruckig_input_target_position_data(input)[1] = -1.05;
+    ruckig_input_target_position_data(input)[2] = 8.0;
+    ruckig_input_target_velocity_data(input)[0] = 0.0;
+    ruckig_input_target_velocity_data(input)[1] = 0.0;
+    ruckig_input_target_velocity_data(input)[2] = 0.0;
+    ruckig_input_target_acceleration_data(input)[0] = 0.0;
+    ruckig_input_target_acceleration_data(input)[1] = 0.0;
+    ruckig_input_target_acceleration_data(input)[2] = 0.0;
+    ruckig_input_max_velocity_data(input)[0] = 1.30;
+    ruckig_input_max_velocity_data(input)[1] = 1.10;
+    ruckig_input_max_velocity_data(input)[2] = 0.10;
+    ruckig_input_max_acceleration_data(input)[0] = 2.00;
+    ruckig_input_max_acceleration_data(input)[1] = 1.80;
+    ruckig_input_max_acceleration_data(input)[2] = 0.10;
+    ruckig_input_max_jerk_data(input)[0] = 5.00;
+    ruckig_input_max_jerk_data(input)[1] = 4.50;
+    ruckig_input_max_jerk_data(input)[2] = 0.10;
+    CHECK_EQ_INT(ruckig_input_set_dof_enabled(input, 2, false), RUCKIG_WORKING);
+
+    CHECK_EQ_INT(ruckig_calculate(offline_otg, input, trajectory), RUCKIG_WORKING);
+    duration = ruckig_trajectory_get_duration(trajectory);
+    CHECK_TRUE(duration > 0.0);
+    CHECK_EQ_INT(ruckig_trajectory_get_independent_min_durations(trajectory, independent, 3), RUCKIG_WORKING);
+    CHECK_TRUE(independent[0] > 0.0);
+    CHECK_TRUE(independent[1] > 0.0);
+    CHECK_NEAR(independent[2], 0.0, 0.0);
+
+    sample_times[0] = 0.0;
+    sample_times[1] = duration * 0.25;
+    sample_times[2] = duration * 0.50;
+    sample_times[3] = duration * 0.75;
+    sample_times[4] = duration;
+    for (sample = 0; sample < 5; ++sample) {
+        size_t dof;
+        size_t section = 99u;
+        const double t = sample_times[sample];
+        CHECK_EQ_INT(ruckig_trajectory_at_time(trajectory, t, position, velocity, acceleration, jerk, &section), RUCKIG_WORKING);
+        CHECK_TRUE(section < 8);
+        for (dof = 0; dof < 3; ++dof) {
+            CHECK_TRUE(isfinite(position[dof]));
+            CHECK_TRUE(isfinite(velocity[dof]));
+            CHECK_TRUE(isfinite(acceleration[dof]));
+            CHECK_TRUE(isfinite(jerk[dof]));
+        }
+        CHECK_NEAR(position[2], disabled_p0 + disabled_v0 * t + 0.5 * disabled_a0 * t * t, 1e-10);
+        CHECK_NEAR(velocity[2], disabled_v0 + disabled_a0 * t, 1e-10);
+        CHECK_NEAR(acceleration[2], disabled_a0, 1e-12);
+    }
+    CHECK_NEAR(position[0], ruckig_input_target_position_const_data(input)[0], 1e-9);
+    CHECK_NEAR(position[1], ruckig_input_target_position_const_data(input)[1], 1e-9);
+    CHECK_NEAR(velocity[0], 0.0, 1e-9);
+    CHECK_NEAR(velocity[1], 0.0, 1e-9);
+    CHECK_NEAR(acceleration[0], 0.0, 1e-9);
+    CHECK_NEAR(acceleration[1], 0.0, 1e-9);
+
+    CHECK_EQ_INT(ruckig_update(online_otg, input, output), RUCKIG_WORKING);
+    CHECK_NEAR(ruckig_trajectory_get_duration(ruckig_output_get_trajectory(output)), duration, 1e-12);
+    CHECK_NEAR(ruckig_output_get_time(output), 0.02, 1e-12);
+
+    ruckig_trajectory_destroy(trajectory);
+    ruckig_output_destroy(output);
+    ruckig_input_destroy(input);
+    ruckig_destroy(online_otg);
+    ruckig_destroy(offline_otg);
+}
+
+static void test_property_tracking_sequence_continuation_partition_equivalence(void) {
+    test_tracking_sequence_fast_continuation_delta_time_contract();
+    run_tracking_sequence_optimized_continuation_equivalence_case(
+        RUCKIG_TRACKING_OPTIMIZED_BALANCED,
+        2,
+        4,
+        3,
+        8,
+        true,
+        0.0
+    );
+}
+
+static void test_property_waypoint_resume_invariants(void) {
+    ruckig_t* otg = NULL;
+    ruckig_t* fresh_otg = NULL;
+    ruckig_input_t* input = NULL;
+    ruckig_input_t* fresh_input = NULL;
+    ruckig_output_t* output = NULL;
+    ruckig_trajectory_t* fresh_trajectory = NULL;
+    double incumbent_remaining_duration = 0.0;
+
+    CHECK_EQ_INT(ruckig_create_with_waypoints(&otg, 4, 0.01, 3), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_create_with_waypoints(&fresh_otg, 4, 0.01, 3), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_input_create_with_waypoints(&input, 4, 3), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_input_create_with_waypoints(&fresh_input, 4, 3), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_output_create_with_waypoints(&output, 4, 3), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_trajectory_create_with_waypoints(&fresh_trajectory, 4, 3), RUCKIG_WORKING);
+
+    configure_alpha1_resume_stress_input(input);
+    CHECK_EQ_INT(ruckig_input_set_interrupt_calculation_duration(input, 0.0), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_update_under_allocation_guard(otg, input, output), RUCKIG_WORKING);
+    CHECK_TRUE(ruckig_output_new_calculation(output));
+    CHECK_TRUE(ruckig_output_was_calculation_interrupted(output));
+    CHECK_TRUE(otg->waypoint_engine.active);
+    check_alpha1_resume_stress_trajectory(ruckig_output_get_trajectory(output));
+
+    incumbent_remaining_duration =
+        ruckig_trajectory_get_duration(ruckig_output_get_trajectory(output)) - ruckig_output_get_time(output);
+    ruckig_output_pass_to_input(output, input);
+    CHECK_EQ_INT(ruckig_input_copy_state(input, fresh_input), RUCKIG_WORKING);
+    ruckig_input_clear_interrupt_calculation_duration(fresh_input);
+    CHECK_EQ_INT(ruckig_calculate(fresh_otg, fresh_input, fresh_trajectory), RUCKIG_WORKING);
+    CHECK_TRUE(ruckig_trajectory_get_duration(fresh_trajectory) > 0.0);
+    CHECK_EQ_INT(ruckig_input_set_interrupt_calculation_duration(input, 1000000000.0), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_update_under_allocation_guard(otg, input, output), RUCKIG_WORKING);
+    CHECK_TRUE(!ruckig_output_was_calculation_interrupted(output));
+    CHECK_TRUE(!otg->waypoint_engine.active);
+    if (ruckig_output_new_calculation(output)) {
+        CHECK_NEAR(ruckig_output_get_time(output), 0.01, 1e-12);
+        CHECK_TRUE(ruckig_trajectory_get_duration(ruckig_output_get_trajectory(output))
+            < incumbent_remaining_duration - 1e-12);
+    }
+    check_alpha1_resume_stress_trajectory(ruckig_output_get_trajectory(output));
+
+    ruckig_trajectory_destroy(fresh_trajectory);
+    ruckig_output_destroy(output);
+    ruckig_input_destroy(fresh_input);
+    ruckig_input_destroy(input);
+    ruckig_destroy(fresh_otg);
+    ruckig_destroy(otg);
+}
+
+void run_property_invariant_tests(void) {
+    test_property_no_waypoint_trajectory_invariants();
+    test_property_tracking_sequence_continuation_partition_equivalence();
+    test_property_waypoint_resume_invariants();
 }
 
 void run_tracking_quality_hardening_tests(void) {

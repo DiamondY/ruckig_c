@@ -11,6 +11,8 @@ Historical rewrite plans and release evidence are retained for traceability.
 - `current/api_compatibility.md` - patch-release API/ABI policy and
   exported-symbol review.
 - `current/api_diagnostics.md` - C API validation and diagnostics behavior.
+- `current/code_quality_audit.md` - post-`v0.15.0` code-quality and
+  test-quality risk map, local quality gates, and failure reproduction policy.
 - `current/original_parity_coverage.md` - current coverage estimates and gaps
   against the frozen original reference and original product surface.
 - `current/test_coverage_audit.md` - local LLVM coverage summary and original
@@ -127,6 +129,9 @@ Historical rewrite plans and release evidence are retained for traceability.
   stable-review audit for alpha.1 through alpha.8 without creating a tag or
   GitHub Release. `release/checklists/0.15.0.md` records the stable tracking
   sequence continuation release closeout.
+  `release/checklists/post-v0.15.0-quality-audit.md` records the post-release
+  code-quality and test-quality audit slice without changing the stable ABI or
+  release state.
 - `release/evidence/verification_report.md` - local and CI verification
   history.
 - `release/evidence/performance_report.md` - performance procedure and release

@@ -228,6 +228,52 @@ readiness, excluding generated, test, example, binding, and output paths.
 
 The coverage checklist entry is `docs/release/checklists/0.15.0.md`.
 
+## Post-v0.15.0 Quality Audit
+
+The `post-v0.15.0-quality-audit` slice starts after the stable `v0.15.0`
+release evidence. It is a code-quality and test-quality slice only: it does
+not start `0.16.0-design`, change version metadata, expand the 184-symbol
+public C ABI, tag a release, publish wrappers, edit ABI allowlists, or move
+heavy random/coverage gates into default push CI.
+
+Quality-audit coverage goals:
+
+| Area | Evidence |
+| --- | --- |
+| Branch-risk focus | Branch coverage remains the main coverage metric to improve from the `69.89%` stable baseline, but the first priority is risk-relevant fixed cases and invariants rather than raw line-count gains. |
+| Focused selector | Adds `--property-invariants` and CTest `ruckig_c_property_invariants` for deterministic no-waypoint, tracking continuation, and waypoint resume properties. |
+| Internal invariants | Adds default-off `RUCKIG_C_ENABLE_INTERNAL_ASSERTS` and a local `windows-clang-ninja-internal-asserts` preset for private state-machine assertions. |
+| Hotspots | Tracks `tracking.c`, `waypoint.c`, and `input.c` as the first quality-improvement targets, while deferring solver skeleton abstraction and deep `position_*_step*.c` refactors. |
+| Random reproduction | Tracking random stress, tracking random audit representatives, and oracle random repro output now include seed/sample context for turning failures into fixed regression cases. |
+| Coverage artifacts | Local coverage for this slice is stored under `out/coverage/post-v0.15.0-quality-audit/`. |
+
+Remaining uncovered lines and branches are expected to stay concentrated in
+rare invalid-input guards, infeasible candidate alternatives,
+oracle-protected long-tail branches, and defensive paths that are deliberately
+hard to reach through public behavior. Those paths should be documented when
+coverage is regenerated rather than papered over with broad, low-value tests.
+
+The local `post-v0.15.0-quality-audit` coverage run passed 63/63 coverage
+CTest cases and produced:
+
+| Metric | Total | Missed | Coverage |
+| --- | ---: | ---: | ---: |
+| Regions | 8040 | 948 | 88.21% |
+| Functions | 456 | 32 | 92.98% |
+| Lines | 8609 | 1051 | 87.79% |
+| Branches | 4683 | 1427 | 69.53% |
+
+The first-stage `70.5%+` branch-coverage target was not reached in this slice.
+The result is recorded as an honest coverage baseline after adding the property
+selector and internal assertion plumbing. The risk-reduction value comes from
+fixed invariant coverage and better random-failure materialization; the next
+slice should add targeted branch cases before broad random or line-count
+expansion.
+
+The quality baseline and materialization workflow are recorded in
+`docs/current/code_quality_audit.md`; the local checklist is
+`docs/release/checklists/post-v0.15.0-quality-audit.md`.
+
 ## 0.14.0-alpha.1 Interrupt Boundary API-Neutral Audit
 
 `0.14.0-alpha.1` adds a focused local audit for the existing
