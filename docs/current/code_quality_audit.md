@@ -60,6 +60,38 @@ private state checks, and better random failure reproduction. The next quality
 slice should add targeted branch cases for uncovered high-risk paths before
 expanding broad random or line-count-oriented tests.
 
+## State-Machine Branch Coverage Slice
+
+The follow-up `post-v0.15.0-state-machine-branch-coverage` slice adds targeted
+fixed cases for the high-risk state-machine group called out above:
+`tracking.c`, `waypoint.c`, and `input.c`. It keeps the same release boundary:
+no public C ABI change, no version metadata change, no tag, no workflow change,
+no ABI allowlist edit, and no `0.16.0-design` transition.
+
+The slice adds `ruckig_c_state_machine_branch_coverage`, backed by
+`ruckig_c_tests --state-machine-branch-coverage`. The selector covers:
+
+| Area | Added deterministic branch coverage |
+| --- | --- |
+| `input.c` | Per-section setter/getter null/count/capacity boundaries, minimum-duration invalid values, waypoint-count changes clearing per-section flags, and null-tolerant clear helpers. |
+| `waypoint.c` | Interrupted resume identity mismatch for target, waypoint values/count, max/min limits, enabled DoF, synchronization, per-section constraints, and cleared interrupt state. |
+| `tracking.c` | Empty/unstarted continuation, wrong DoF/capacity/delta-time resume rejection, diagnostics error-state marking, and failed-resume state preservation across Fast and Optimized continuation paths. |
+
+Local coverage for this slice is recorded at
+`out/coverage/post-v0.15.0-state-machine-branch-coverage/coverage-summary.txt`.
+It passed 64/64 coverage CTest cases and produced:
+
+| Metric | Total | Missed | Coverage |
+| --- | ---: | ---: | ---: |
+| Regions | 8040 | 914 | 88.63% |
+| Functions | 456 | 30 | 93.42% |
+| Lines | 8609 | 1017 | 88.19% |
+| Branches | 4683 | 1370 | 70.75% |
+
+This reaches the branch target for the slice. Compared with the previous
+quality-audit run, missed branches drop from `1427` to `1370` and branch
+coverage rises from `69.53%` to `70.75%`.
+
 ## Risk Map
 
 | Area | Risk | Current protection | Quality-audit action |
@@ -82,6 +114,7 @@ Existing selectors that remain relevant to this audit:
 | Selector | Purpose |
 | --- | --- |
 | `ruckig_c_property_invariants` | Deterministic property/metamorphic checks for no-waypoint, tracking continuation, and waypoint resume invariants. |
+| `ruckig_c_state_machine_branch_coverage` | Deterministic branch probes for `input.c`, `waypoint.c`, and `tracking.c` state-machine and boundary paths. |
 | `ruckig_c_solver_branch_coverage` | White-box branch probes for selected solver/block paths. |
 | `ruckig_c_tracking_sequence_continuation_api` | Continuation lifecycle and accessor API coverage. |
 | `ruckig_c_tracking_sequence_fast_continuation` | Fast continuation behavior, resume, invalid inputs, allocation guard, and delta-time contract. |
@@ -143,6 +176,7 @@ Coverage evidence:
 
 ```powershell
 .\tools\coverage\run_coverage.ps1 -CoverageLabel post-v0.15.0-quality-audit
+.\tools\coverage\run_coverage.ps1 -CoverageLabel post-v0.15.0-state-machine-branch-coverage
 ```
 
 Heavy random evidence remains local/manual:

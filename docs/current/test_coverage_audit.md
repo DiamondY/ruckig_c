@@ -274,6 +274,44 @@ The quality baseline and materialization workflow are recorded in
 `docs/current/code_quality_audit.md`; the local checklist is
 `docs/release/checklists/post-v0.15.0-quality-audit.md`.
 
+## Post-v0.15.0 State-Machine Branch Coverage
+
+The `post-v0.15.0-state-machine-branch-coverage` slice follows the broader
+quality audit with targeted deterministic branch cases for `input.c`,
+`waypoint.c`, and `tracking.c`. It does not start `0.16.0-design`, change
+version metadata, expand the 184-symbol public C ABI, tag a release, publish
+wrappers, edit ABI allowlists, change workflows, or move heavy random gates
+into default push CI.
+
+Added coverage:
+
+| Area | Evidence |
+| --- | --- |
+| Focused selector | Adds `--state-machine-branch-coverage` and CTest `ruckig_c_state_machine_branch_coverage`. |
+| Input boundaries | Per-section vector count/DoF/null handling, minimum-duration invalid values, per-section flag clearing when waypoint count changes, getter failure after clear, and null-tolerant clear helpers. |
+| Waypoint resume identity | Interrupted waypoint resume rejects stale engine state when target, waypoint values/count, limits, enabled DoF, synchronization, per-section constraints, or interrupt state change. |
+| Tracking continuation invalid states | Empty/unstarted continuation, wrong DoF, wrong output capacity, wrong `delta_time`, diagnostics error marking, and failed-resume state preservation are covered for Fast and Optimized paths. |
+| Coverage artifacts | Local coverage for this slice is stored under `out/coverage/post-v0.15.0-state-machine-branch-coverage/`. |
+
+The local coverage run passed 64/64 coverage CTest cases and produced:
+
+| Metric | Total | Missed | Coverage |
+| --- | ---: | ---: | ---: |
+| Regions | 8040 | 914 | 88.63% |
+| Functions | 456 | 30 | 93.42% |
+| Lines | 8609 | 1017 | 88.19% |
+| Branches | 4683 | 1370 | 70.75% |
+
+The branch-coverage target of `70.0%+` is reached. Compared with the prior
+`post-v0.15.0-quality-audit` run, missed branches drop by `57`, and branch
+coverage rises from `69.53%` to `70.75%`. Remaining branch gaps are still
+mostly solver candidate alternatives, rare invalid-input guards, infeasible
+candidate combinations, platform-clock defensive paths, and oracle-protected
+long-tail branches.
+
+The local checklist is
+`docs/release/checklists/post-v0.15.0-state-machine-branch-coverage.md`.
+
 ## 0.14.0-alpha.1 Interrupt Boundary API-Neutral Audit
 
 `0.14.0-alpha.1` adds a focused local audit for the existing

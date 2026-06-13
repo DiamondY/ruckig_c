@@ -148,6 +148,13 @@ ABI baseline accepted during the 0.15 design line and does not start
   map, adds deterministic property invariants, introduces default-off private
   internal assertions, improves random failure reproduction context, and keeps
   large random gates as local/manual evidence.
+- `post-v0.15.0-state-machine-branch-coverage` is implemented locally as a
+  follow-up quality slice. It adds deterministic branch coverage for
+  `tracking.c`, `waypoint.c`, and `input.c` state-machine and boundary paths
+  through `ruckig_c_state_machine_branch_coverage`, raising implementation
+  branch coverage from the prior quality-audit `69.53%` baseline to `70.75%`
+  without changing public ABI, version metadata, workflow, tag/release state,
+  upstream baseline, or visualization assets.
 - Keep the 184-symbol `v0.15.0` public C ABI baseline unless a later separate
   public API decision is accepted.
 - This quality audit does not start `0.16.0-design`, change version metadata,

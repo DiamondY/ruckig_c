@@ -12,7 +12,8 @@ Historical rewrite plans and release evidence are retained for traceability.
   exported-symbol review.
 - `current/api_diagnostics.md` - C API validation and diagnostics behavior.
 - `current/code_quality_audit.md` - post-`v0.15.0` code-quality and
-  test-quality risk map, local quality gates, and failure reproduction policy.
+  test-quality risk map, state-machine branch coverage evidence, local quality
+  gates, and failure reproduction policy.
 - `current/original_parity_coverage.md` - current coverage estimates and gaps
   against the frozen original reference and original product surface.
 - `current/test_coverage_audit.md` - local LLVM coverage summary and original
@@ -132,6 +133,8 @@ Historical rewrite plans and release evidence are retained for traceability.
   `release/checklists/post-v0.15.0-quality-audit.md` records the post-release
   code-quality and test-quality audit slice without changing the stable ABI or
   release state.
+  `release/checklists/post-v0.15.0-state-machine-branch-coverage.md` records
+  the targeted post-release state-machine branch coverage slice.
 - `release/evidence/verification_report.md` - local and CI verification
   history.
 - `release/evidence/performance_report.md` - performance procedure and release
