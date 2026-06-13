@@ -7867,6 +7867,73 @@ static void test_tracking_stability_regression_cases(void) {
     CHECK_TRUE(budget_seen);
 }
 
+static void test_property_output_and_trajectory_boundaries(void) {
+    ruckig_t* otg = NULL;
+    ruckig_input_t* input = NULL;
+    ruckig_output_t* output = NULL;
+    ruckig_trajectory_t* trajectory = NULL;
+    double waypoint[1] = {0.5};
+    double durations[1] = {0.0};
+    double position[1] = {0.0};
+    size_t section = 99;
+
+    CHECK_EQ_INT(ruckig_output_create(NULL, 1), RUCKIG_ERROR_INVALID_INPUT);
+    CHECK_EQ_INT(ruckig_output_create(&output, 0), RUCKIG_ERROR_INVALID_INPUT);
+    CHECK_TRUE(output == NULL);
+    CHECK_EQ_INT(ruckig_output_create_with_waypoints(NULL, 1, 1), RUCKIG_ERROR_INVALID_INPUT);
+    CHECK_EQ_INT(ruckig_output_create_with_waypoints(&output, 0, 1), RUCKIG_ERROR_INVALID_INPUT);
+    CHECK_TRUE(output == NULL);
+
+    CHECK_TRUE(ruckig_output_new_velocity_data(NULL) == NULL);
+    CHECK_TRUE(ruckig_output_new_acceleration_data(NULL) == NULL);
+    CHECK_TRUE(ruckig_output_new_jerk_data(NULL) == NULL);
+    CHECK_NEAR(ruckig_output_get_time(NULL), 0.0, 0.0);
+    CHECK_EQ_INT(ruckig_output_get_new_section(NULL), 0);
+    CHECK_TRUE(!ruckig_output_did_section_change(NULL));
+    CHECK_TRUE(!ruckig_output_new_calculation(NULL));
+    CHECK_TRUE(!ruckig_output_was_calculation_interrupted(NULL));
+    CHECK_NEAR(ruckig_output_get_calculation_duration(NULL), 0.0, 0.0);
+    CHECK_TRUE(ruckig_output_get_trajectory(NULL) == NULL);
+
+    CHECK_EQ_INT(ruckig_trajectory_create(NULL, 1), RUCKIG_ERROR_INVALID_INPUT);
+    CHECK_EQ_INT(ruckig_trajectory_create(&trajectory, 0), RUCKIG_ERROR_INVALID_INPUT);
+    CHECK_TRUE(trajectory == NULL);
+    CHECK_EQ_INT(ruckig_trajectory_create_with_waypoints(NULL, 1, 1), RUCKIG_ERROR_INVALID_INPUT);
+    CHECK_EQ_INT(ruckig_trajectory_create_with_waypoints(&trajectory, 0, 1), RUCKIG_ERROR_INVALID_INPUT);
+    CHECK_TRUE(trajectory == NULL);
+    CHECK_EQ_INT(ruckig_trajectory_get_section_count(NULL), 0);
+    CHECK_EQ_INT(ruckig_trajectory_get_intermediate_duration_count(NULL), 0);
+
+    CHECK_EQ_INT(ruckig_trajectory_create_with_waypoints(&trajectory, 1, 1), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_trajectory_get_section_count(trajectory), 0);
+    CHECK_EQ_INT(ruckig_trajectory_get_intermediate_duration_count(trajectory), 0);
+    CHECK_EQ_INT(ruckig_trajectory_get_intermediate_durations(trajectory, durations, 0), RUCKIG_ERROR_INVALID_INPUT);
+    ruckig_trajectory_destroy(trajectory);
+    trajectory = NULL;
+
+    CHECK_EQ_INT(ruckig_create_with_waypoints(&otg, 1, 0.01, 1), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_input_create_with_waypoints(&input, 1, 1), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_trajectory_create_with_waypoints(&trajectory, 1, 1), RUCKIG_WORKING);
+    ruckig_input_target_position_data(input)[0] = 1.0;
+    ruckig_input_max_velocity_data(input)[0] = 1.0;
+    ruckig_input_max_acceleration_data(input)[0] = 2.0;
+    ruckig_input_max_jerk_data(input)[0] = 4.0;
+    CHECK_EQ_INT(ruckig_input_set_intermediate_positions(input, waypoint, 1, 1), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_calculate(otg, input, trajectory), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_trajectory_get_intermediate_duration_count(trajectory), 1);
+    CHECK_EQ_INT(ruckig_trajectory_get_intermediate_durations(trajectory, NULL, 1), RUCKIG_ERROR_INVALID_INPUT);
+    CHECK_EQ_INT(ruckig_trajectory_get_intermediate_durations(trajectory, durations, 0), RUCKIG_ERROR_INVALID_INPUT);
+    CHECK_EQ_INT(ruckig_trajectory_get_intermediate_durations(trajectory, durations, 1), RUCKIG_WORKING);
+    CHECK_TRUE(durations[0] > 0.0);
+    CHECK_EQ_INT(ruckig_trajectory_at_time(trajectory, durations[0], position, NULL, NULL, NULL, &section), RUCKIG_WORKING);
+    CHECK_EQ_INT(section, 1);
+    CHECK_NEAR(position[0], waypoint[0], 1e-7);
+
+    ruckig_trajectory_destroy(trajectory);
+    ruckig_input_destroy(input);
+    ruckig_destroy(otg);
+}
+
 static void test_property_no_waypoint_trajectory_invariants(void) {
     ruckig_t* offline_otg = NULL;
     ruckig_t* online_otg = NULL;
@@ -8541,6 +8608,7 @@ void run_state_machine_branch_coverage_tests(void) {
 }
 
 void run_property_invariant_tests(void) {
+    test_property_output_and_trajectory_boundaries();
     test_property_no_waypoint_trajectory_invariants();
     test_property_tracking_sequence_continuation_partition_equivalence();
     test_property_waypoint_resume_invariants();

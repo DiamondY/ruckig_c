@@ -1053,9 +1053,44 @@ Current residual branch candidates:
 | --- | --- |
 | `velocity_third_step2.c` | Low branch coverage remains in analytical timing alternatives; future cases should be oracle-backed or assert only stable timing invariants. |
 | `position_second_step2.c` | Synchronization timing alternatives remain a focused solver candidate. |
-| `output.c` | Public output boundary handling has low branch coverage and can be covered with compact fixed API cases. |
+| `output.c` | Public output boundary handling was a good compact fixed-case candidate and is covered by the residual branch slice below. |
+| `trajectory.c` | Public create/accessor/intermediate-duration boundaries are covered by the residual branch slice below. |
 | `tracking.c`, `tracking_sequence.c`, `waypoint.c` | Important state-machine surfaces, but further additions should be meaningful invariants rather than broad probes. |
 | `platform_clock.h`, `alloc.c`, `utils.c` | Low percentages are mostly defensive, platform-specific, or tiny-denominator paths; platform probes and ABI/export evidence are higher value than forced branch coverage. |
+
+## Post-v0.15.0 Residual Branch Coverage
+
+The `post-v0.15.0-residual-branch-coverage` slice follows the refreshed
+evidence with one compact deterministic public-boundary case. It does not add
+heavy random CI work and does not change production code. The selected files
+are `output.c` and `trajectory.c` because their missing branches are stable
+public API boundary behavior, while the remaining solver step2 gaps are more
+analytical and better left for oracle-backed cases.
+
+Coverage artifacts are stored under
+`out/coverage/post-v0.15.0-residual-branch-coverage/`.
+
+The local coverage run passed 72/72 coverage CTest cases and produced:
+
+| Metric | Total | Missed | Coverage |
+| --- | ---: | ---: | ---: |
+| Regions | 7939 | 758 | 90.45% |
+| Functions | 472 | 30 | 93.64% |
+| Lines | 8590 | 906 | 89.45% |
+| Branches | 4591 | 1198 | 73.91% |
+
+Compared with the quality evidence refresh, missed branches drop from `1219`
+to `1198`, and branch coverage rises from `73.45%` to `73.91%`.
+
+Touched-file movement:
+
+| File | Previous branch coverage | Current branch coverage |
+| --- | ---: | ---: |
+| `src/ruckig_c/output.c` | 60.42% | 85.42% |
+| `src/ruckig_c/trajectory.c` | 76.00% | 82.00% |
+
+The local checklist is
+`docs/release/checklists/post-v0.15.0-residual-branch-coverage.md`.
 
 ## Original Test Mapping
 

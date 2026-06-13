@@ -200,6 +200,13 @@ ABI baseline accepted during the 0.15 design line and does not start
   single-sample smoke tests, without changing public ABI, version metadata,
   workflow, tag/release state, upstream baseline, wrapper publication status,
   or visualization assets.
+- `post-v0.15.0-residual-branch-coverage` is implemented locally as a compact
+  residual coverage slice. It extends the property selector with public
+  `output.c` and `trajectory.c` boundary invariants, records coverage at
+  `out/coverage/post-v0.15.0-residual-branch-coverage/coverage-summary.txt`,
+  and raises the branch baseline from `73.45%` to `73.91%` without changing
+  public ABI, version metadata, workflow, tag/release state, upstream baseline,
+  wrapper publication status, or visualization assets.
 - Keep the 184-symbol `v0.15.0` public C ABI baseline unless a later separate
   public API decision is accepted.
 - This quality audit does not start `0.16.0-design`, change version metadata,

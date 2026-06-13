@@ -226,6 +226,39 @@ new bug is found, does not write a generated fixture file, and does not alter
 random corpus semantics. Full failure-oriented shrinking remains a later
 optional local-tool slice.
 
+## Residual Branch Coverage Slice
+
+The `post-v0.15.0-residual-branch-coverage` slice uses the refreshed coverage
+map to add only high-value deterministic branch coverage. It targets public
+boundary behavior in `output.c` and `trajectory.c` rather than analytical
+solver long-tail branches.
+
+Selection rationale:
+
+| File | Why selected |
+| --- | --- |
+| `src/ruckig_c/output.c` | Branch coverage was `60.42%`, with missing public create/null/default getter paths. These are stable API contracts and low-risk to test. |
+| `src/ruckig_c/trajectory.c` | Branch coverage was `76.00%`, with missing public create/accessor/intermediate-duration boundary paths. |
+
+The coverage run
+`.\tools\coverage\run_coverage.ps1 -CoverageLabel post-v0.15.0-residual-branch-coverage`
+passed 72/72 coverage CTest cases and produced
+`out/coverage/post-v0.15.0-residual-branch-coverage/coverage-summary.txt`.
+
+| Metric | Total | Missed | Coverage |
+| --- | ---: | ---: | ---: |
+| Regions | 7939 | 758 | 90.45% |
+| Functions | 472 | 30 | 93.64% |
+| Lines | 8590 | 906 | 89.45% |
+| Branches | 4591 | 1198 | 73.91% |
+
+Compared with the quality evidence refresh, missed branches drop from `1219`
+to `1198`, and branch coverage rises from `73.45%` to `73.91%`. The `73.5%+`
+target is met. Remaining `velocity_third_step2.c` and
+`position_second_step2.c` gaps are still valid future candidates, but this
+slice deliberately avoids fragile white-box probes that would assert internal
+polynomial alternatives without public or oracle evidence.
+
 ## Risk Map
 
 | Area | Risk | Current protection | Quality-audit action |
@@ -380,7 +413,8 @@ Remaining low-coverage interpretation:
 | Area | Current reading |
 | --- | --- |
 | `velocity_third_step2.c` and `position_second_step2.c` | Still good residual solver candidates, but new cases should be backed by oracle behavior or stable timing invariants. |
-| `output.c` | Low branch coverage is mostly public boundary handling; it is a good small fixed-case candidate if the next slice needs non-solver value. |
+| `output.c` | Public boundary gaps were covered by the residual branch slice; remaining misses are allocation-failure defensive paths. |
+| `trajectory.c` | Public create/accessor/intermediate-duration gaps were covered by the residual branch slice; remaining misses are defensive or hard-to-reach invalid internal state paths. |
 | `tracking.c`, `tracking_sequence.c`, and `waypoint.c` | Still important state-machine surfaces, but broad branch probing is no longer the priority after dedicated state-machine and review-followup slices. |
 | `platform_clock.h`, `alloc.c`, and `utils.c` | Low percentages are mostly defensive, tiny-denominator, or platform-specific paths; platform probes and ABI/export gates are higher-value than forced branch tests. |
 
@@ -425,6 +459,7 @@ Coverage evidence:
 .\tools\coverage\run_coverage.ps1 -CoverageLabel post-v0.15.0-quality-audit
 .\tools\coverage\run_coverage.ps1 -CoverageLabel post-v0.15.0-state-machine-branch-coverage
 .\tools\coverage\run_coverage.ps1 -CoverageLabel post-v0.15.0-quality-evidence-refresh
+.\tools\coverage\run_coverage.ps1 -CoverageLabel post-v0.15.0-residual-branch-coverage
 ```
 
 Random replay and shrink evidence:

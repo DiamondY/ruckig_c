@@ -153,6 +153,9 @@ Historical rewrite plans and release evidence are retained for traceability.
   `release/checklists/post-v0.15.0-random-shrinker-mvp.md` records the
   follow-up local shrink tooling slice for oracle random, oracle per-DoF
   random, and tracking random audit seed/sample reproductions.
+  `release/checklists/post-v0.15.0-residual-branch-coverage.md` records the
+  compact residual coverage slice for public `output.c` and `trajectory.c`
+  boundary invariants.
 - `release/evidence/verification_report.md` - local and CI verification
   history.
 - `release/evidence/performance_report.md` - performance procedure and release
@@ -173,9 +176,9 @@ Fast/Optimized sequence continuation behavior, C/Python/Rust prototype smoke
 coverage, and alpha.8 continuation hardening to the stable 184-symbol public C
 ABI baseline. Current `main` remains on `0.15.0` release evidence until a
 separate post-release design-line decision.
-The latest post-release quality evidence refresh records branch coverage
-`73.45%` at
-`out/coverage/post-v0.15.0-quality-evidence-refresh/coverage-summary.txt`
+The latest post-release residual coverage slice records branch coverage
+`73.91%` at
+`out/coverage/post-v0.15.0-residual-branch-coverage/coverage-summary.txt`
 without changing the stable ABI or release state.
 The follow-up random shrinker MVP adds local deterministic shrink commands for
 seed/sample materialization without changing random corpus semantics or writing
