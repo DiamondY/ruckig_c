@@ -7395,6 +7395,190 @@ void run_tracking_random_audit_replay_tests(size_t sample_index, unsigned seed) 
     tracking_audit_print_fixture(&config, &case_result, seed);
 }
 
+static bool tracking_audit_case_passes(
+    const tracking_audit_case_config_t* config,
+    tracking_audit_case_result_t* case_result
+) {
+    const int failures_before = ruckig_c_test_failures;
+    ruckig_c_test_failures = 0;
+    run_tracking_audit_case(config, case_result);
+    {
+        const bool passed = ruckig_c_test_failures == 0;
+        ruckig_c_test_failures = failures_before;
+        return passed;
+    }
+}
+
+static bool try_tracking_audit_shrink_candidate(
+    tracking_audit_case_config_t* current,
+    const tracking_audit_case_config_t* candidate,
+    const char* label,
+    size_t* accepted_count
+) {
+    tracking_audit_case_result_t case_result;
+    if (tracking_audit_case_passes(candidate, &case_result)) {
+        *current = *candidate;
+        ++*accepted_count;
+        printf("tracking random audit shrink accepted %s\n", label);
+        return true;
+    }
+    return false;
+}
+
+static void shrink_tracking_audit_case(
+    tracking_audit_case_config_t* config,
+    size_t* accepted_count
+) {
+    size_t i;
+    static const size_t dof_targets[] = {1, 2, 4};
+    static const size_t lookahead_targets[] = {1, 2, 5};
+    static const double reactiveness_targets[] = {0.0, 0.25, 0.5};
+
+    for (i = 0; i < sizeof(dof_targets) / sizeof(dof_targets[0]); ++i) {
+        if (dof_targets[i] < config->dofs) {
+            tracking_audit_case_config_t candidate = *config;
+            candidate.dofs = dof_targets[i];
+            if (candidate.has_disabled_dof && candidate.disabled_dof >= candidate.dofs) {
+                candidate.has_disabled_dof = false;
+                candidate.disabled_dof = 0;
+            }
+            if (try_tracking_audit_shrink_candidate(config, &candidate, "dofs", accepted_count)) {
+                break;
+            }
+        }
+    }
+
+    for (i = 0; i < sizeof(lookahead_targets) / sizeof(lookahead_targets[0]); ++i) {
+        if (lookahead_targets[i] < config->lookahead_count) {
+            tracking_audit_case_config_t candidate = *config;
+            candidate.lookahead_count = lookahead_targets[i];
+            if (try_tracking_audit_shrink_candidate(config, &candidate, "lookahead-count", accepted_count)) {
+                break;
+            }
+        }
+    }
+
+    if (config->has_disabled_dof) {
+        tracking_audit_case_config_t candidate = *config;
+        candidate.has_disabled_dof = false;
+        candidate.disabled_dof = 0;
+        try_tracking_audit_shrink_candidate(config, &candidate, "disabled-dof-mask", accepted_count);
+    }
+
+    if (config->tight_constraints) {
+        tracking_audit_case_config_t candidate = *config;
+        candidate.tight_constraints = false;
+        try_tracking_audit_shrink_candidate(config, &candidate, "tight-constraints", accepted_count);
+    }
+
+    if (config->strategy != RUCKIG_TRACKING_OPTIMIZED_STABLE) {
+        tracking_audit_case_config_t candidate = *config;
+        candidate.strategy = RUCKIG_TRACKING_OPTIMIZED_STABLE;
+        try_tracking_audit_shrink_candidate(config, &candidate, "strategy-stable", accepted_count);
+    }
+
+    if (config->signal != 0) {
+        tracking_audit_case_config_t candidate = *config;
+        candidate.signal = 0;
+        try_tracking_audit_shrink_candidate(config, &candidate, "signal-ramp", accepted_count);
+    }
+
+    for (i = 0; i < sizeof(reactiveness_targets) / sizeof(reactiveness_targets[0]); ++i) {
+        if (reactiveness_targets[i] < config->reactiveness) {
+            tracking_audit_case_config_t candidate = *config;
+            candidate.reactiveness = reactiveness_targets[i];
+            if (try_tracking_audit_shrink_candidate(config, &candidate, "reactiveness", accepted_count)) {
+                break;
+            }
+        }
+    }
+
+    if (config->start_time != 0.0) {
+        tracking_audit_case_config_t candidate = *config;
+        candidate.start_time = 0.0;
+        try_tracking_audit_shrink_candidate(config, &candidate, "start-time", accepted_count);
+    }
+}
+
+void run_tracking_random_audit_shrink_tests(size_t sample_index, unsigned seed) {
+    tracking_audit_case_config_t original;
+    tracking_audit_case_config_t reduced;
+    tracking_audit_case_result_t original_result;
+    tracking_audit_case_result_t reduced_result;
+    size_t sample = 0;
+    size_t accepted_count = 0;
+    const int failures_before = ruckig_c_test_failures;
+    unsigned state = seed ? seed : 1u;
+
+    for (;;) {
+        make_tracking_audit_case_config(&state, sample, &original);
+        if (sample == sample_index) {
+            break;
+        }
+        ++sample;
+    }
+
+    run_tracking_audit_case(&original, &original_result);
+    if (ruckig_c_test_failures != failures_before) {
+        fprintf(
+            stderr,
+            "tracking random audit shrink original failed seed=%u sample=%zu dofs=%zu signal=%s lookahead=%zu reactiveness=%.2f strategy=%s disabled=%s disabled_dof=%s constraints=%s start_time=%.9g\n",
+            seed,
+            sample_index,
+            original.dofs,
+            tracking_signal_name(original.signal),
+            original.lookahead_count,
+            original.reactiveness,
+            tracking_strategy_name(original.strategy),
+            original.has_disabled_dof ? "yes" : "no",
+            original.has_disabled_dof ? tracking_dof_number_name(original.disabled_dof) : "none",
+            original.tight_constraints ? "tight_valid" : "default",
+            original.start_time
+        );
+        return;
+    }
+
+    reduced = original;
+    shrink_tracking_audit_case(&reduced, &accepted_count);
+    run_tracking_audit_case(&reduced, &reduced_result);
+
+    printf(
+        "tracking random audit shrink original seed=%u sample=%zu dofs=%zu signal=%s lookahead=%zu reactiveness=%.2f strategy=%s disabled=%s disabled_dof=%s constraints=%s start_time=%.9g\n",
+        seed,
+        sample_index,
+        original.dofs,
+        tracking_signal_name(original.signal),
+        original.lookahead_count,
+        original.reactiveness,
+        tracking_strategy_name(original.strategy),
+        original.has_disabled_dof ? "yes" : "no",
+        original.has_disabled_dof ? tracking_dof_number_name(original.disabled_dof) : "none",
+        original.tight_constraints ? "tight_valid" : "default",
+        original.start_time
+    );
+    printf(
+        "tracking random audit shrink reduced seed=%u sample=%zu accepted=%zu dofs=%zu signal=%s lookahead=%zu reactiveness=%.2f strategy=%s disabled=%s disabled_dof=%s constraints=%s start_time=%.9g\n",
+        seed,
+        sample_index,
+        accepted_count,
+        reduced.dofs,
+        tracking_signal_name(reduced.signal),
+        reduced.lookahead_count,
+        reduced.reactiveness,
+        tracking_strategy_name(reduced.strategy),
+        reduced.has_disabled_dof ? "yes" : "no",
+        reduced.has_disabled_dof ? tracking_dof_number_name(reduced.disabled_dof) : "none",
+        reduced.tight_constraints ? "tight_valid" : "default",
+        reduced.start_time
+    );
+    printf(
+        "tracking random audit shrink replay command: ruckig_c_tests.exe --tracking-random-audit-replay %zu --seed %u\n",
+        sample_index,
+        seed
+    );
+    tracking_audit_print_fixture(&reduced, &reduced_result, seed);
+}
+
 static void test_tracking_random_audit_fixed_cases(void) {
     const tracking_audit_case_config_t cases[] = {
         {6, 2, 1, 1, 0.25, RUCKIG_TRACKING_OPTIMIZED_STABLE, true, 0, true, 0.06},

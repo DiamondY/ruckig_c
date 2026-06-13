@@ -200,6 +200,32 @@ initializer for the matching fixed-case corpus. No generated source file is
 written automatically. The existing random commands keep their output and
 semantics unchanged.
 
+## Random Shrinker MVP Slice
+
+The `post-v0.15.0-random-shrinker-mvp` slice builds on the replay/export
+commands with local pass-preserving shrink tooling. It is a developer aid, not
+a coverage slice and not a default heavy CI gate.
+
+Added shrink commands:
+
+| Area | Shrink command |
+| --- | --- |
+| Oracle random | `ruckig_c_oracle_tests --shrink-random SAMPLE --seed S` |
+| Oracle per-DoF random | `ruckig_c_oracle_tests --shrink-random-per-dof SAMPLE --seed S` |
+| Tracking random audit | `ruckig_c_tests --tracking-random-audit-shrink SAMPLE --seed S` |
+
+The shrinkers first confirm the requested seed/sample still passes the same
+single-case oracle or tracking audit runner. They then accept only
+simplifications that continue to pass: DoF count, masks and overrides,
+tracking lookahead/config flags, and conservative numeric rounding. Output
+includes the original seed/sample, reduced-case summary, a fixture-ready
+initializer, and the replay command for the original generated case.
+
+This MVP does not attempt to preserve a failing predicate automatically once a
+new bug is found, does not write a generated fixture file, and does not alter
+random corpus semantics. Full failure-oriented shrinking remains a later
+optional local-tool slice.
+
 ## Risk Map
 
 | Area | Risk | Current protection | Quality-audit action |
@@ -208,7 +234,7 @@ semantics unchanged.
 | Waypoint resume engine | Active/complete/found/candidate state can drift across interrupted online updates. | Resume stress, quality audit, allocation guard. | Add private engine assertions and focused property checks around interrupted start plus complete resume. |
 | Input API setters | Repeated DoF/count/null checks increase drift risk in boundary behavior. | Public API and validation tests. | Extract private helper checks without changing public behavior or return codes. |
 | No-waypoint trajectory sampling | Core solver is strong but branch-heavy; disabled DoF and duration consistency should stay explicit. | Fixed C tests plus oracle random comparisons. | Add deterministic property tests for boundary samples, duration consistency, and disabled-DoF kinematics. |
-| Random audit failures | Seeded random failures must become fixed regressions without hand-reconstructing generator state. | Failure context output plus replay/export commands for oracle and tracking random corpora. | Keep replay commands covered by small CTest smoke; defer automatic shrinking to a separate local-tool slice. |
+| Random audit failures | Seeded random failures must become fixed regressions without hand-reconstructing generator state. | Failure context output, replay/export commands, and MVP pass-preserving shrink commands for oracle and tracking audit corpora. | Keep replay/shrink commands covered by small CTest smoke; defer full failure-oriented shrinking and generated source-file writing. |
 
 ## Test Selectors
 
@@ -371,9 +397,10 @@ When a random gate fails:
 6. Keep the large random command as local/manual evidence; add only the reduced
    deterministic regression to routine CTest.
 
-Automatic shrinking remains deferred. A later optional local tool can shrink
-DoF count, waypoint/target counts, then numeric state vectors, but it must
-remain outside default push CI.
+The MVP shrink commands can reduce passing seed/sample reproductions into
+smaller fixture-ready initializers. Full automatic failure-oriented shrinking
+and generated source-file writing remain deferred, and any larger shrink run
+must remain outside default push CI.
 
 ## Evidence Commands
 
@@ -398,6 +425,16 @@ Coverage evidence:
 .\tools\coverage\run_coverage.ps1 -CoverageLabel post-v0.15.0-quality-audit
 .\tools\coverage\run_coverage.ps1 -CoverageLabel post-v0.15.0-state-machine-branch-coverage
 .\tools\coverage\run_coverage.ps1 -CoverageLabel post-v0.15.0-quality-evidence-refresh
+```
+
+Random replay and shrink evidence:
+
+```powershell
+out\build\windows-clang-ninja-oracle\ruckig_c_oracle_tests.exe --replay-random 17 --seed 1
+out\build\windows-clang-ninja-oracle\ruckig_c_oracle_tests.exe --replay-random-per-dof 10 --seed 1
+out\build\windows-clang-ninja-oracle\ruckig_c_oracle_tests.exe --shrink-random 17 --seed 1
+out\build\windows-clang-ninja-oracle\ruckig_c_oracle_tests.exe --shrink-random-per-dof 10 --seed 1
+out\build\windows-clang-ninja\ruckig_c_tests.exe --tracking-random-audit-shrink 22 --seed 1
 ```
 
 Heavy random evidence remains local/manual:

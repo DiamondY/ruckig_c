@@ -150,6 +150,9 @@ Historical rewrite plans and release evidence are retained for traceability.
   `release/checklists/post-v0.15.0-quality-evidence-refresh.md` records the
   evidence-only coverage and hotspot refresh after the review-followup
   hardening slice.
+  `release/checklists/post-v0.15.0-random-shrinker-mvp.md` records the
+  follow-up local shrink tooling slice for oracle random, oracle per-DoF
+  random, and tracking random audit seed/sample reproductions.
 - `release/evidence/verification_report.md` - local and CI verification
   history.
 - `release/evidence/performance_report.md` - performance procedure and release
@@ -174,6 +177,9 @@ The latest post-release quality evidence refresh records branch coverage
 `73.45%` at
 `out/coverage/post-v0.15.0-quality-evidence-refresh/coverage-summary.txt`
 without changing the stable ABI or release state.
+The follow-up random shrinker MVP adds local deterministic shrink commands for
+seed/sample materialization without changing random corpus semantics or writing
+generated fixtures automatically.
 `v0.14.0` stabilizes the API-neutral interrupt surfaces without expanding the
 172-symbol public C ABI. `v0.13.0` stabilizes post-`v0.12.0` waypoint
 true-resume stress coverage and the private waypoint optimizer engine rewrite.

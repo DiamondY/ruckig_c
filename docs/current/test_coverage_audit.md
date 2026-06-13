@@ -400,10 +400,32 @@ Added test tooling:
 | Tracking replay | Adds `--tracking-random-replay SAMPLE --seed S` and `--tracking-random-audit-replay SAMPLE --seed S` to run one generated tracking sample and print fixture-ready C initializers. |
 | Routine smoke | Adds `ruckig_c_tracking_random_replay_smoke`, `ruckig_c_tracking_random_audit_replay_smoke`, `ruckig_c_oracle_random_replay_smoke`, and `ruckig_c_oracle_random_per_dof_replay_smoke` as single-sample CTest checks. |
 | Compatibility | Existing `--random`, `--random-per-dof`, `--tracking-random`, and `--tracking-random-audit` behavior remains unchanged. |
-| Deferred | Automatic shrinking and generated source-file writing remain out of scope. |
+| Deferred | Automatic failure-oriented shrinking and generated source-file writing remain out of scope for this replay/export slice. |
 
 The local checklist is
 `docs/release/checklists/post-v0.15.0-random-repro-materialization.md`.
+
+## Post-v0.15.0 Random Shrinker MVP
+
+The `post-v0.15.0-random-shrinker-mvp` slice adds local shrink tooling on top
+of the replay/export commands. It does not target coverage growth and does not
+add heavy random work to default CI. The shrinkers are pass-preserving: each
+candidate simplification is accepted only if the same single-case oracle or
+tracking audit check still passes.
+
+Added test tooling:
+
+| Area | Evidence |
+| --- | --- |
+| Oracle random shrink | Adds `--shrink-random SAMPLE --seed S`, reducing DoF/option vectors/modes/numeric values where the oracle comparison still passes and printing a fixture-ready `CaseData` initializer. |
+| Oracle per-DoF shrink | Adds `--shrink-random-per-dof SAMPLE --seed S`, preserving the existing per-DoF comparison mode while emitting a reduced initializer. |
+| Tracking audit shrink | Adds `--tracking-random-audit-shrink SAMPLE --seed S`, reducing audit config dimensions and flags while preserving diagnostics consistency. |
+| Routine smoke | Adds `ruckig_c_oracle_random_shrink_smoke`, `ruckig_c_oracle_random_per_dof_shrink_smoke`, and `ruckig_c_tracking_random_audit_shrink_smoke` as deterministic single-sample CTest checks. |
+| Compatibility | Existing replay and random commands keep their behavior and output contract. |
+| Deferred | Full failure-predicate-preserving shrinkage and generated source-file writing remain local-tool follow-up work, not default CI behavior. |
+
+The local checklist is
+`docs/release/checklists/post-v0.15.0-random-shrinker-mvp.md`.
 
 ## 0.14.0-alpha.1 Interrupt Boundary API-Neutral Audit
 

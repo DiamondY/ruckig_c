@@ -193,6 +193,13 @@ ABI baseline accepted during the 0.15 design line and does not start
   coverage-bearing branch baseline from `72.94%` to `73.45%` without changing
   public ABI, version metadata, workflow, tag/release state, upstream baseline,
   wrapper publication status, or visualization assets.
+- `post-v0.15.0-random-shrinker-mvp` is implemented locally as a
+  reproducibility follow-up after the evidence refresh. It adds local
+  pass-preserving shrink commands for oracle random, oracle per-DoF random, and
+  tracking random audit seed/sample reproductions, plus deterministic
+  single-sample smoke tests, without changing public ABI, version metadata,
+  workflow, tag/release state, upstream baseline, wrapper publication status,
+  or visualization assets.
 - Keep the 184-symbol `v0.15.0` public C ABI baseline unless a later separate
   public API decision is accepted.
 - This quality audit does not start `0.16.0-design`, change version metadata,
