@@ -207,6 +207,13 @@ ABI baseline accepted during the 0.15 design line and does not start
   and raises the branch baseline from `73.45%` to `73.91%` without changing
   public ABI, version metadata, workflow, tag/release state, upstream baseline,
   wrapper publication status, or visualization assets.
+- `post-v0.15.0-portability-static-audit` is implemented locally as an
+  evidence-only portability and static-audit slice. It records normal/shared
+  full CTest, Windows ABI/export allowlist verification, and corrected
+  `zig cc` platform-clock compile probes for default/private and custom-clock
+  paths without changing public ABI, public header, version metadata, workflow,
+  tag/release state, upstream baseline, wrapper publication status, or
+  visualization assets.
 - Keep the 184-symbol `v0.15.0` public C ABI baseline unless a later separate
   public API decision is accepted.
 - This quality audit does not start `0.16.0-design`, change version metadata,

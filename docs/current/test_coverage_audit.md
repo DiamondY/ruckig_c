@@ -1092,6 +1092,36 @@ Touched-file movement:
 The local checklist is
 `docs/release/checklists/post-v0.15.0-residual-branch-coverage.md`.
 
+## Post-v0.15.0 Portability And Static Audit
+
+The `post-v0.15.0-portability-static-audit` slice is not a coverage-growth
+slice. It records portability, private-linkage, platform-clock, and ABI/export
+evidence after the tracking split, profile context conversion, random shrinker
+MVP, and residual coverage work.
+
+Local evidence:
+
+| Gate | Result |
+| --- | --- |
+| Normal build and full CTest | Passed, 67/67 |
+| Shared build and full CTest | Passed, 67/67 |
+| Oracle build | Passed |
+| Windows ABI/export gates | `ruckig_c_verify_public_symbols` and `ruckig_c_compare_public_exported_symbols` passed against the stable 184-symbol `v0.15.0` allowlist. |
+| Default/private platform-clock compile probe | `zig cc` compiled `src\ruckig_c\waypoint.c` with `RUCKIG_C_STATIC_DEFINE`. |
+| Custom platform-clock compile probe | `zig cc` compiled `test\c\platform_clock_custom_compile.c` with `RUCKIG_C_STATIC_DEFINE` and the test custom-clock provider include path. |
+
+The direct `waypoint.c` source-file probe must use `RUCKIG_C_STATIC_DEFINE`
+or `RUCKIG_C_BUILDING_LIBRARY` on Windows because public function definitions
+are not consumer-side `dllimport` declarations. This is a probe-context
+requirement, not a source portability defect.
+
+Static analysis remains a local/manual activity. No clang-tidy/cppcheck gate,
+formatter rewrite, workflow change, public ABI change, version metadata change,
+upstream baseline change, or visualization asset change is part of this slice.
+
+The local checklist is
+`docs/release/checklists/post-v0.15.0-portability-static-audit.md`.
+
 ## Original Test Mapping
 
 Original source: `original/ruckig-main/test/test_target.cpp`.

@@ -156,6 +156,9 @@ Historical rewrite plans and release evidence are retained for traceability.
   `release/checklists/post-v0.15.0-residual-branch-coverage.md` records the
   compact residual coverage slice for public `output.c` and `trajectory.c`
   boundary invariants.
+  `release/checklists/post-v0.15.0-portability-static-audit.md` records the
+  evidence-only portability and static-audit slice for ABI/export verification
+  and platform-clock compile probes.
 - `release/evidence/verification_report.md` - local and CI verification
   history.
 - `release/evidence/performance_report.md` - performance procedure and release
@@ -180,6 +183,9 @@ The latest post-release residual coverage slice records branch coverage
 `73.91%` at
 `out/coverage/post-v0.15.0-residual-branch-coverage/coverage-summary.txt`
 without changing the stable ABI or release state.
+The latest portability/static audit records normal/shared CTest, Windows
+ABI/export allowlist verification, and corrected platform-clock compile probes
+without adding mandatory static-analysis CI or changing the stable ABI.
 The follow-up random shrinker MVP adds local deterministic shrink commands for
 seed/sample materialization without changing random corpus semantics or writing
 generated fixtures automatically.

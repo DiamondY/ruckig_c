@@ -259,6 +259,36 @@ target is met. Remaining `velocity_third_step2.c` and
 slice deliberately avoids fragile white-box probes that would assert internal
 polynomial alternatives without public or oracle evidence.
 
+## Portability And Static Audit Slice
+
+The `post-v0.15.0-portability-static-audit` slice records portability and
+private-linkage evidence after the residual coverage work. It is evidence-only:
+no production code, public C ABI, public header, version metadata, workflow,
+upstream baseline, wrapper publication status, or visualization asset changed.
+
+Local evidence:
+
+| Area | Result |
+| --- | --- |
+| Normal build and CTest | `cmake --build --preset windows-clang-ninja` passed; normal CTest passed 67/67. |
+| Shared build and CTest | `cmake --build --preset windows-clang-ninja-shared` passed; shared CTest passed 67/67. |
+| Oracle build | `cmake --build --preset windows-clang-ninja-oracle` passed. |
+| ABI/export boundary | `ruckig_c_verify_public_symbols` and `ruckig_c_compare_public_exported_symbols` passed against the `v0.15.0` 184-symbol allowlist. |
+| Default/private compile probe | `zig cc` compiled `src\ruckig_c\waypoint.c` with `RUCKIG_C_STATIC_DEFINE`. |
+| Custom clock compile probe | `zig cc` compiled `test\c\platform_clock_custom_compile.c` with `RUCKIG_C_STATIC_DEFINE` and the custom clock provider include path. |
+
+The raw source-file `waypoint.c` probe requires `RUCKIG_C_STATIC_DEFINE` or
+`RUCKIG_C_BUILDING_LIBRARY` on Windows. Otherwise `RUCKIG_C_API` expands to
+consumer-side `__declspec(dllimport)`, which is invalid on public function
+definitions but not a library source issue.
+
+Static analysis remains local/manual evidence. This slice deliberately avoids
+adding clang-tidy/cppcheck to default push CI, avoids formatter churn, and
+does not perform broad C89-to-C99 declaration-style rewrites.
+
+The local checklist is
+`docs/release/checklists/post-v0.15.0-portability-static-audit.md`.
+
 ## Risk Map
 
 | Area | Risk | Current protection | Quality-audit action |
@@ -460,6 +490,15 @@ Coverage evidence:
 .\tools\coverage\run_coverage.ps1 -CoverageLabel post-v0.15.0-state-machine-branch-coverage
 .\tools\coverage\run_coverage.ps1 -CoverageLabel post-v0.15.0-quality-evidence-refresh
 .\tools\coverage\run_coverage.ps1 -CoverageLabel post-v0.15.0-residual-branch-coverage
+```
+
+Portability/static audit evidence:
+
+```powershell
+cmake --build out\build\windows-clang-ninja-shared --target ruckig_c_verify_public_symbols
+cmake --build out\build\windows-clang-ninja-shared --target ruckig_c_compare_public_exported_symbols
+zig cc -std=c99 -Wall -Wextra -DRUCKIG_C_STATIC_DEFINE -Iinclude -Isrc -c src\ruckig_c\waypoint.c -o $env:TEMP\ruckig_waypoint_posix_probe.o
+zig cc -std=c99 -Wall -Wextra -DRUCKIG_C_STATIC_DEFINE -Iinclude -Isrc -Itest\c -c test\c\platform_clock_custom_compile.c -o $env:TEMP\ruckig_custom_clock_probe.o
 ```
 
 Random replay and shrink evidence:
