@@ -137,7 +137,9 @@ Historical rewrite plans and release evidence are retained for traceability.
   the targeted post-release state-machine branch coverage slice.
   `release/checklists/post-v0.15.0-solver-branch-coverage.md` records the
   targeted solver branch coverage and private calculate skeleton refactor
-  slice.
+  slice. `release/checklists/post-v0.15.0-solver-adjacent-branch-coverage.md`
+  records the follow-up solver-adjacent branch coverage slice for brake and
+  lower-order step paths.
 - `release/evidence/verification_report.md` - local and CI verification
   history.
 - `release/evidence/performance_report.md` - performance procedure and release

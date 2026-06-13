@@ -162,6 +162,14 @@ ABI baseline accepted during the 0.15 design line and does not start
   raises implementation branch coverage from `70.75%` to `71.50%` while
   keeping public ABI, version metadata, workflow, tag/release state, upstream
   baseline, and visualization assets unchanged.
+- `post-v0.15.0-solver-adjacent-branch-coverage` is implemented locally as a
+  follow-up coverage-priority quality slice. It extends the existing solver
+  branch selector with deterministic `brake.c`, first/second-order position,
+  second-order velocity, and third-order velocity edge cases, adds public
+  oracle cases for brake pre-trajectories, and raises implementation branch
+  coverage from `71.50%` to `72.94%` without changing public ABI, version
+  metadata, workflow, tag/release state, upstream baseline, or visualization
+  assets.
 - Keep the 184-symbol `v0.15.0` public C ABI baseline unless a later separate
   public API decision is accepted.
 - This quality audit does not start `0.16.0-design`, change version metadata,

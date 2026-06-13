@@ -349,6 +349,41 @@ callback skeleton instead of copied synchronization/finalization branches.
 The local checklist is
 `docs/release/checklists/post-v0.15.0-solver-branch-coverage.md`.
 
+## Post-v0.15.0 Solver-Adjacent Branch Coverage
+
+The `post-v0.15.0-solver-adjacent-branch-coverage` slice follows the solver
+skeleton refactor with coverage-priority tests for solver-adjacent low-coverage
+paths. It keeps public ABI, version metadata, release state, workflow state,
+ABI allowlists, upstream baseline, visualization assets, and wrapper
+publication status unchanged.
+
+Added coverage and parity protection:
+
+| Area | Evidence |
+| --- | --- |
+| Focused selector | Extends the existing `--solver-branch-coverage` and CTest `ruckig_c_solver_branch_coverage` selector. |
+| Brake pre-trajectories | Direct deterministic cases cover null/no-op paths, zero-limit no-op, acceleration and velocity bound braking in both directions, velocity-control acceleration braking, and finalize no-segment/one-segment/two-segment behavior. |
+| Lower-order step paths | Direct deterministic cases cover first-order position, second-order position, second-order velocity, and extra third-order velocity invalid/synchronized boundaries. |
+| Oracle fixed cases | Adds public no-waypoint oracle cases for second-order position current-velocity braking, third-order position current velocity/acceleration braking, and third-order velocity current-acceleration braking. |
+| Production-code boundary | No production-code refactor is retained; the slice is test/evidence only after no clearly valuable mechanical helper extraction was identified. |
+| Coverage artifacts | Local coverage for this slice is stored under `out/coverage/post-v0.15.0-solver-adjacent-branch-coverage/`. |
+
+The local coverage run passed 64/64 coverage CTest cases and produced:
+
+| Metric | Total | Missed | Coverage |
+| --- | ---: | ---: | ---: |
+| Regions | 7909 | 803 | 89.85% |
+| Functions | 471 | 30 | 93.63% |
+| Lines | 8525 | 919 | 89.22% |
+| Branches | 4579 | 1239 | 72.94% |
+
+The branch-coverage target of `72.5%+` is reached. Compared with the prior
+solver branch coverage run, missed branches drop by `66`, and branch coverage
+rises from `71.50%` to `72.94%`.
+
+The local checklist is
+`docs/release/checklists/post-v0.15.0-solver-adjacent-branch-coverage.md`.
+
 ## 0.14.0-alpha.1 Interrupt Boundary API-Neutral Audit
 
 `0.14.0-alpha.1` adds a focused local audit for the existing

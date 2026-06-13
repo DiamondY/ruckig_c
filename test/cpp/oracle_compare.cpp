@@ -1996,6 +1996,111 @@ int main(int argc, char** argv) {
     });
 
     cases.push_back(CaseData{
+        "position-second-order-brake-current-velocity-high",
+        1,
+        0.02,
+        RUCKIG_CONTROL_POSITION,
+        RUCKIG_SYNCHRONIZATION_TIME,
+        RUCKIG_DURATION_CONTINUOUS,
+        false,
+        0.0,
+        {0.0},
+        {1.4},
+        {0.0},
+        {2.0},
+        {0.0},
+        {0.0},
+        {1.0},
+        {1.0},
+        {inf},
+        {}
+    });
+
+    cases.push_back(CaseData{
+        "position-third-order-brake-current-velocity-high",
+        1,
+        0.02,
+        RUCKIG_CONTROL_POSITION,
+        RUCKIG_SYNCHRONIZATION_TIME,
+        RUCKIG_DURATION_CONTINUOUS,
+        false,
+        0.0,
+        {0.0},
+        {1.4},
+        {0.0},
+        {2.0},
+        {0.0},
+        {0.0},
+        {1.0},
+        {1.0},
+        {2.0},
+        {}
+    });
+
+    cases.push_back(CaseData{
+        "position-third-order-brake-current-velocity-low",
+        1,
+        0.02,
+        RUCKIG_CONTROL_POSITION,
+        RUCKIG_SYNCHRONIZATION_TIME,
+        RUCKIG_DURATION_CONTINUOUS,
+        false,
+        0.0,
+        {0.0},
+        {-1.4},
+        {0.0},
+        {-2.0},
+        {0.0},
+        {0.0},
+        {1.0},
+        {1.0},
+        {2.0},
+        {}
+    });
+
+    cases.push_back(CaseData{
+        "position-third-order-brake-current-acceleration-high",
+        1,
+        0.02,
+        RUCKIG_CONTROL_POSITION,
+        RUCKIG_SYNCHRONIZATION_TIME,
+        RUCKIG_DURATION_CONTINUOUS,
+        false,
+        0.0,
+        {0.0},
+        {0.0},
+        {1.6},
+        {1.2},
+        {0.0},
+        {0.0},
+        {1.0},
+        {1.0},
+        {2.0},
+        {}
+    });
+
+    cases.push_back(CaseData{
+        "position-third-order-brake-current-acceleration-low",
+        1,
+        0.02,
+        RUCKIG_CONTROL_POSITION,
+        RUCKIG_SYNCHRONIZATION_TIME,
+        RUCKIG_DURATION_CONTINUOUS,
+        false,
+        0.0,
+        {0.0},
+        {0.0},
+        {-1.6},
+        {-1.2},
+        {0.0},
+        {0.0},
+        {1.0},
+        {1.0},
+        {2.0},
+        {}
+    });
+
+    cases.push_back(CaseData{
         "position-second-order-disabled-dof",
         2,
         0.1,
@@ -2273,6 +2378,48 @@ int main(int argc, char** argv) {
         {0.0, 0.0},
         {1.2, 0.95},
         {1.4, 1.1},
+        {}
+    });
+
+    cases.push_back(CaseData{
+        "velocity-third-order-brake-current-acceleration-high",
+        1,
+        0.01,
+        RUCKIG_CONTROL_VELOCITY,
+        RUCKIG_SYNCHRONIZATION_TIME,
+        RUCKIG_DURATION_CONTINUOUS,
+        false,
+        0.0,
+        {0.0},
+        {0.1},
+        {1.6},
+        {0.0},
+        {-0.4},
+        {0.0},
+        {0.0},
+        {1.0},
+        {2.0},
+        {}
+    });
+
+    cases.push_back(CaseData{
+        "velocity-third-order-brake-current-acceleration-low",
+        1,
+        0.01,
+        RUCKIG_CONTROL_VELOCITY,
+        RUCKIG_SYNCHRONIZATION_TIME,
+        RUCKIG_DURATION_CONTINUOUS,
+        false,
+        0.0,
+        {0.0},
+        {-0.1},
+        {-1.6},
+        {0.0},
+        {0.4},
+        {0.0},
+        {0.0},
+        {1.0},
+        {2.0},
         {}
     });
 

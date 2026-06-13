@@ -137,6 +137,45 @@ Hotspot movement:
 | `src/ruckig_c/position_third_step1.c` | 65.97% | 69.10% |
 | `src/ruckig_c/position_third_step2.c` | 79.15% | 80.40% |
 
+## Solver-Adjacent Branch Coverage Slice
+
+The `post-v0.15.0-solver-adjacent-branch-coverage` slice continues the
+coverage-priority work without expanding the public ABI or release state. It
+keeps the existing `ruckig_c_solver_branch_coverage` selector, adds fixed
+direct probes for brake and lower-order step paths, and adds public oracle
+cases for brake pre-trajectories. No production-code refactor was retained:
+the tests reached the target, and no solver-adjacent helper extraction was
+clearly worth the added churn.
+
+Local coverage for this slice is recorded at
+`out/coverage/post-v0.15.0-solver-adjacent-branch-coverage/coverage-summary.txt`.
+It passed 64/64 coverage CTest cases and produced:
+
+| Metric | Total | Missed | Coverage |
+| --- | ---: | ---: | ---: |
+| Regions | 7909 | 803 | 89.85% |
+| Functions | 471 | 30 | 93.63% |
+| Lines | 8525 | 919 | 89.22% |
+| Branches | 4579 | 1239 | 72.94% |
+
+This reaches the `72.5%+` branch target for the slice. Compared with the
+previous solver branch coverage run, missed branches drop from `1305` to
+`1239`, and branch coverage rises from `71.50%` to `72.94%`.
+
+Hotspot movement:
+
+| File | Previous branch coverage | Current branch coverage |
+| --- | ---: | ---: |
+| `src/ruckig_c/brake.c` | 59.38% | 85.42% |
+| `src/ruckig_c/position_first_step1.c` | 62.50% | 87.50% |
+| `src/ruckig_c/position_first_step2.c` | 50.00% | 100.00% |
+| `src/ruckig_c/position_second_step1.c` | 80.77% | 90.38% |
+| `src/ruckig_c/position_second_step2.c` | 50.00% | 68.75% |
+| `src/ruckig_c/velocity_second_step1.c` | 57.14% | 85.71% |
+| `src/ruckig_c/velocity_second_step2.c` | 50.00% | 100.00% |
+| `src/ruckig_c/velocity_third_step1.c` | 81.25% | 89.58% |
+| `src/ruckig_c/velocity_third_step2.c` | 58.70% | 60.87% |
+
 ## Risk Map
 
 | Area | Risk | Current protection | Quality-audit action |
