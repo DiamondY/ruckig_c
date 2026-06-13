@@ -1927,6 +1927,75 @@ int main(int argc, char** argv) {
     });
 
     cases.push_back(CaseData{
+        "position-third-order-per-dof-synchronization-mixed",
+        3,
+        0.02,
+        RUCKIG_CONTROL_POSITION,
+        RUCKIG_SYNCHRONIZATION_TIME,
+        RUCKIG_DURATION_CONTINUOUS,
+        false,
+        0.0,
+        {0.0, -0.25, 0.4},
+        {0.05, -0.18, 0.12},
+        {0.02, 0.0, -0.04},
+        {1.1, -0.9, 0.65},
+        {0.0, 0.05, 0.0},
+        {0.0, -0.02, 0.0},
+        {1.4, 1.2, 1.1},
+        {1.3, 1.0, 1.2},
+        {1.7, 1.4, 1.5},
+        {},
+        {},
+        {},
+        {},
+        {RUCKIG_SYNCHRONIZATION_TIME, RUCKIG_SYNCHRONIZATION_NONE, RUCKIG_SYNCHRONIZATION_TIME_IF_NECESSARY}
+    });
+
+    cases.push_back(CaseData{
+        "position-third-order-phase-fallback-nonproportional-state",
+        2,
+        0.01,
+        RUCKIG_CONTROL_POSITION,
+        RUCKIG_SYNCHRONIZATION_PHASE,
+        RUCKIG_DURATION_CONTINUOUS,
+        false,
+        0.0,
+        {0.0, 0.0},
+        {0.12, -0.03},
+        {0.0, 0.05},
+        {1.0, 1.7},
+        {0.0, 0.0},
+        {0.0, 0.0},
+        {1.6, 1.4},
+        {1.2, 1.1},
+        {1.8, 1.5},
+        {}
+    });
+
+    cases.push_back(CaseData{
+        "position-third-order-directional-min-limits-2d",
+        2,
+        0.015,
+        RUCKIG_CONTROL_POSITION,
+        RUCKIG_SYNCHRONIZATION_TIME,
+        RUCKIG_DURATION_CONTINUOUS,
+        false,
+        0.0,
+        {0.25, -0.15},
+        {-0.05, 0.08},
+        {0.03, -0.04},
+        {-0.9, 0.95},
+        {0.0, -0.02},
+        {0.0, 0.01},
+        {1.4, 1.3},
+        {1.2, 1.1},
+        {1.6, 1.5},
+        {},
+        {-0.75, -0.9},
+        {-0.65, -0.7}
+    });
+
+    cases.push_back(CaseData{
         "position-second-order-disabled-dof",
         2,
         0.1,

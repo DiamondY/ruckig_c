@@ -155,6 +155,13 @@ ABI baseline accepted during the 0.15 design line and does not start
   branch coverage from the prior quality-audit `69.53%` baseline to `70.75%`
   without changing public ABI, version metadata, workflow, tag/release state,
   upstream baseline, or visualization assets.
+- `post-v0.15.0-solver-branch-coverage` is implemented locally as a follow-up
+  quality slice. It adds deterministic third-order position solver branch
+  cases and fixed oracle coverage, then extracts the duplicated `ruckig.c`
+  calculate synchronization skeleton into private static callbacks. The slice
+  raises implementation branch coverage from `70.75%` to `71.50%` while
+  keeping public ABI, version metadata, workflow, tag/release state, upstream
+  baseline, and visualization assets unchanged.
 - Keep the 184-symbol `v0.15.0` public C ABI baseline unless a later separate
   public API decision is accepted.
 - This quality audit does not start `0.16.0-design`, change version metadata,

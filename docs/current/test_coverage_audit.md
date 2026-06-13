@@ -312,6 +312,43 @@ long-tail branches.
 The local checklist is
 `docs/release/checklists/post-v0.15.0-state-machine-branch-coverage.md`.
 
+## Post-v0.15.0 Solver Branch Coverage
+
+The `post-v0.15.0-solver-branch-coverage` slice follows the state-machine
+branch work with targeted solver fixed cases and a conservative internal
+refactor of the repeated `ruckig.c` calculate skeleton. It keeps public ABI,
+version metadata, release state, workflow state, ABI allowlists, upstream
+baseline, visualization assets, and wrapper publication status unchanged.
+
+Added coverage and parity protection:
+
+| Area | Evidence |
+| --- | --- |
+| Focused selector | Extends the existing `--solver-branch-coverage` and CTest `ruckig_c_solver_branch_coverage` selector. |
+| Third-order step1 | Direct deterministic cases cover null arguments, zero-duration no-motion, jerk-limited motion, reverse direction, zero-jerk single-step behavior, zero-limit failure, and block interval publication. |
+| Third-order step2 | Direct deterministic cases cover invalid and too-small durations, zero-jerk rejection, valid stretched synchronization, and reverse-direction synchronization. |
+| Oracle fixed cases | Adds third-order no-waypoint oracle cases for per-DoF synchronization mix, Phase fallback, and directional min velocity/acceleration limits. |
+| Calculate skeleton parity | Full normal/shared CTest, fixed oracle, 100k random oracle seeds 1/2/41, per-DoF 100k seed 1, performance, ABI/export, Python prototype, and Rust wrapper gates passed after the private callback refactor. |
+| Coverage artifacts | Local coverage for this slice is stored under `out/coverage/post-v0.15.0-solver-branch-coverage/`. |
+
+The local coverage run passed 64/64 coverage CTest cases and produced:
+
+| Metric | Total | Missed | Coverage |
+| --- | ---: | ---: | ---: |
+| Regions | 7909 | 839 | 89.39% |
+| Functions | 471 | 30 | 93.63% |
+| Lines | 8525 | 957 | 88.77% |
+| Branches | 4579 | 1305 | 71.50% |
+
+The branch-coverage target of `71.5%+` is reached. Compared with the prior
+state-machine branch coverage run, missed branches drop by `65`, and branch
+coverage rises from `70.75%` to `71.50%`. The total branch count drops by
+`104` because the repeated `ruckig.c` calculate loops are now one private
+callback skeleton instead of copied synchronization/finalization branches.
+
+The local checklist is
+`docs/release/checklists/post-v0.15.0-solver-branch-coverage.md`.
+
 ## 0.14.0-alpha.1 Interrupt Boundary API-Neutral Audit
 
 `0.14.0-alpha.1` adds a focused local audit for the existing

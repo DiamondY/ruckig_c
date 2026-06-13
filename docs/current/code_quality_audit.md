@@ -92,6 +92,51 @@ This reaches the branch target for the slice. Compared with the previous
 quality-audit run, missed branches drop from `1427` to `1370` and branch
 coverage rises from `69.53%` to `70.75%`.
 
+## Solver Branch Coverage And Calculate Skeleton Slice
+
+The `post-v0.15.0-solver-branch-coverage` slice follows the state-machine
+coverage work with deterministic fixed cases for the solver branch group and a
+conservative internal refactor of the repeated `ruckig.c` calculate skeleton.
+It keeps the same release boundary: no public C ABI change, no version
+metadata change, no tag, no workflow change, no ABI allowlist edit, no
+upstream baseline change, no visualization asset change, and no
+`0.16.0-design` transition.
+
+The slice keeps the existing `ruckig_c_solver_branch_coverage` selector and
+adds:
+
+| Area | Added deterministic coverage or quality change |
+| --- | --- |
+| `position_third_step1.c` | Direct branch cases for null argument rejection, zero-duration no-motion, jerk-limited rest-to-rest, reverse-direction motion, zero-jerk single-step behavior, zero-limit failure, and block interval publication. |
+| `position_third_step2.c` | Direct branch cases for invalid duration rejection, zero-jerk rejection, too-small synchronization duration, valid stretched synchronization, and reverse-direction synchronization. |
+| Oracle fixed cases | Third-order no-waypoint cases for mixed per-DoF synchronization, Phase fallback on non-proportional state, and directional min velocity/acceleration limits. |
+| `ruckig.c` | Private `static` callback skeleton for shared calculate synchronization/finalization while keeping candidate order, tolerances, disabled-DoF behavior, block selection, result codes, and public ABI unchanged. |
+
+Local coverage for this slice is recorded at
+`out/coverage/post-v0.15.0-solver-branch-coverage/coverage-summary.txt`. It
+passed 64/64 coverage CTest cases and produced:
+
+| Metric | Total | Missed | Coverage |
+| --- | ---: | ---: | ---: |
+| Regions | 7909 | 839 | 89.39% |
+| Functions | 471 | 30 | 93.63% |
+| Lines | 8525 | 957 | 88.77% |
+| Branches | 4579 | 1305 | 71.50% |
+
+This reaches the `71.5%+` branch target for the slice. Compared with the
+state-machine coverage run, missed branches drop from `1370` to `1305` and
+branch coverage rises from `70.75%` to `71.50%`. The total branch count drops
+from `4683` to `4579` because duplicated `ruckig.c` calculate skeleton
+branches were collapsed into one private callback skeleton.
+
+Hotspot movement:
+
+| File | Previous branch coverage | Current branch coverage |
+| --- | ---: | ---: |
+| `src/ruckig_c/ruckig.c` | 69.52% | 72.35% |
+| `src/ruckig_c/position_third_step1.c` | 65.97% | 69.10% |
+| `src/ruckig_c/position_third_step2.c` | 79.15% | 80.40% |
+
 ## Risk Map
 
 | Area | Risk | Current protection | Quality-audit action |

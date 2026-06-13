@@ -175,6 +175,99 @@ static void test_position_second_step_direct_branches(void) {
     CHECK_TRUE(!ruckig_position_second_step2_get_profile(&output, -1.0, 0.0, 0.0, 1.0, 0.0, 1.0, -1.0, 1.0, -1.0));
 }
 
+static void expect_position_profile_end(
+    const ruckig_profile_t* profile,
+    double pf,
+    double vf,
+    double af
+) {
+    CHECK_TRUE(profile != NULL);
+    if (!profile) {
+        return;
+    }
+
+    CHECK_NEAR(profile->p[7], pf, 1e-8);
+    CHECK_NEAR(profile->v[7], vf, 1e-8);
+    CHECK_NEAR(profile->a[7], af, 1e-10);
+    CHECK_TRUE(profile->t_sum[6] >= 0.0);
+}
+
+static void init_position_boundary(
+    ruckig_profile_t* profile,
+    double p0,
+    double v0,
+    double a0,
+    double pf,
+    double vf,
+    double af
+) {
+    ruckig_profile_init(profile);
+    ruckig_profile_set_boundary(profile, p0, v0, a0, pf, vf, af);
+}
+
+static void test_position_third_step_direct_branches(void) {
+    ruckig_profile_t input;
+    ruckig_profile_t output;
+    ruckig_profile_t sync_profile;
+    ruckig_block_t block;
+    double duration = -1.0;
+    double stretched_duration = 0.0;
+
+    init_position_boundary(&input, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+    CHECK_TRUE(!ruckig_position_third_step1_get_profile(NULL, &output, &block, &duration, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, -1.0, 1.0, -1.0, 1.0));
+    CHECK_TRUE(!ruckig_position_third_step1_get_profile(&input, NULL, &block, &duration, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, -1.0, 1.0, -1.0, 1.0));
+    CHECK_TRUE(!ruckig_position_third_step1_get_profile(&input, &output, NULL, &duration, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, -1.0, 1.0, -1.0, 1.0));
+    CHECK_TRUE(!ruckig_position_third_step1_get_profile(&input, &output, &block, NULL, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, -1.0, 1.0, -1.0, 1.0));
+
+    CHECK_TRUE(ruckig_position_third_step1_get_profile(&input, &output, &block, &duration, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, -1.0, 1.0, -1.0, 1.0));
+    CHECK_TRUE(block.valid);
+    CHECK_TRUE(!block.a.valid);
+    CHECK_NEAR(duration, 0.0, 1e-12);
+    expect_position_profile_end(&output, 0.0, 0.0, 0.0);
+
+    init_position_boundary(&input, 0.0, 0.0, 0.0, 1.25, 0.0, 0.0);
+    CHECK_TRUE(ruckig_position_third_step1_get_profile(&input, &output, &block, &duration, 0.0, 0.0, 0.0, 1.25, 0.0, 0.0, 2.0, -2.0, 1.5, -1.5, 2.0));
+    CHECK_TRUE(block.valid);
+    CHECK_TRUE(duration > 0.0);
+    expect_position_profile_end(&output, 1.25, 0.0, 0.0);
+
+    init_position_boundary(&input, 1.0, -0.15, 0.05, -0.75, 0.0, 0.0);
+    CHECK_TRUE(ruckig_position_third_step1_get_profile(&input, &output, &block, &duration, 1.0, -0.15, 0.05, -0.75, 0.0, 0.0, 1.6, -1.2, 1.4, -0.9, 1.7));
+    CHECK_TRUE(block.valid);
+    CHECK_TRUE(duration > 0.0);
+    expect_position_profile_end(&output, -0.75, 0.0, 0.0);
+
+    init_position_boundary(&input, 0.0, 0.5, 0.0, 1.0, 0.5, 0.0);
+    CHECK_TRUE(ruckig_position_third_step1_get_profile(&input, &output, &block, &duration, 0.0, 0.5, 0.0, 1.0, 0.5, 0.0, 2.0, -2.0, 1.0, -1.0, 0.0));
+    CHECK_TRUE(block.valid);
+    CHECK_TRUE(block.a.valid);
+    CHECK_NEAR(duration, 2.0, 1e-12);
+    expect_position_profile_end(&output, 1.0, 0.5, 0.0);
+
+    init_position_boundary(&input, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0);
+    CHECK_TRUE(!ruckig_position_third_step1_get_profile(&input, &output, &block, &duration, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, -1.0, 0.0));
+    CHECK_TRUE(!ruckig_position_third_step1_get_profile(&input, &output, &block, &duration, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, -1.0, 0.0, 0.0, 1.0));
+
+    CHECK_TRUE(!ruckig_position_third_step2_get_profile(NULL, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 2.0, -2.0, 1.5, -1.5, 2.0));
+    init_position_boundary(&sync_profile, 0.0, 0.0, 0.0, 1.25, 0.0, 0.0);
+    CHECK_TRUE(!ruckig_position_third_step2_get_profile(&sync_profile, -1.0, 0.0, 0.0, 0.0, 1.25, 0.0, 0.0, 2.0, -2.0, 1.5, -1.5, 2.0));
+    CHECK_TRUE(!ruckig_position_third_step2_get_profile(&sync_profile, INFINITY, 0.0, 0.0, 0.0, 1.25, 0.0, 0.0, 2.0, -2.0, 1.5, -1.5, 2.0));
+    CHECK_TRUE(!ruckig_position_third_step2_get_profile(&sync_profile, 0.25, 0.0, 0.0, 0.0, 1.25, 0.0, 0.0, 2.0, -2.0, 1.5, -1.5, 2.0));
+    CHECK_TRUE(!ruckig_position_third_step2_get_profile(&sync_profile, 4.0, 0.0, 0.0, 0.0, 1.25, 0.0, 0.0, 2.0, -2.0, 1.5, -1.5, 0.0));
+
+    init_position_boundary(&sync_profile, 0.0, 0.0, 0.0, 1.25, 0.0, 0.0);
+    stretched_duration = duration + 0.75;
+    if (stretched_duration < 4.0) {
+        stretched_duration = 4.0;
+    }
+    CHECK_TRUE(ruckig_position_third_step2_get_profile(&sync_profile, stretched_duration, 0.0, 0.0, 0.0, 1.25, 0.0, 0.0, 2.0, -2.0, 1.5, -1.5, 2.0));
+    expect_position_profile_end(&sync_profile, 1.25, 0.0, 0.0);
+
+    init_position_boundary(&sync_profile, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0);
+    CHECK_TRUE(ruckig_position_third_step2_get_profile(&sync_profile, 4.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 1.5, -1.5, 1.2, -1.2, 1.6));
+    expect_position_profile_end(&sync_profile, -1.0, 0.0, 0.0);
+}
+
 static void test_velocity_third_step_direct_branches(void) {
     ruckig_profile_t input;
     ruckig_profile_t output;
@@ -208,5 +301,6 @@ void run_solver_branch_coverage_tests(void) {
     test_block_four_profile_duplicate_removal();
     test_block_five_profile_interval_pairing();
     test_position_second_step_direct_branches();
+    test_position_third_step_direct_branches();
     test_velocity_third_step_direct_branches();
 }

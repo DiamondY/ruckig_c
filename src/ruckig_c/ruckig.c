@@ -379,10 +379,412 @@ static bool calculate_position_phase_sync(
     size_t limiting_dof
 );
 
-static ruckig_result_t calculate_first_order_position(
+static bool calculate_no_jerk_position_phase_sync(
+    const ruckig_input_t* input,
+    ruckig_trajectory_t* trajectory,
+    double sync_duration,
+    size_t limiting_dof
+);
+
+static bool calculate_velocity_phase_sync(
+    const ruckig_input_t* input,
+    ruckig_trajectory_t* trajectory,
+    double sync_duration,
+    size_t limiting_dof
+);
+
+typedef void (*ruckig_calculate_prepare_profile_fn)(
+    const ruckig_input_t* input,
+    size_t dof,
+    ruckig_profile_t* profile
+);
+
+typedef ruckig_result_t (*ruckig_calculate_step1_fn)(
+    const ruckig_input_t* input,
+    ruckig_trajectory_t* trajectory,
+    size_t dof,
+    double* duration
+);
+
+typedef ruckig_result_t (*ruckig_calculate_step2_fn)(
+    const ruckig_input_t* input,
+    ruckig_trajectory_t* trajectory,
+    size_t dof,
+    double sync_duration
+);
+
+typedef bool (*ruckig_calculate_phase_sync_fn)(
+    const ruckig_input_t* input,
+    ruckig_trajectory_t* trajectory,
+    double sync_duration,
+    size_t limiting_dof
+);
+
+typedef struct ruckig_calculate_ops {
+    ruckig_calculate_prepare_profile_fn prepare_profile;
+    ruckig_calculate_step1_fn step1;
+    ruckig_calculate_step2_fn step2;
+    ruckig_calculate_phase_sync_fn phase_sync;
+    bool adjust_duration_for_blocks;
+} ruckig_calculate_ops_t;
+
+static void prepare_position_profile(const ruckig_input_t* input, size_t dof, ruckig_profile_t* profile) {
+    ruckig_profile_set_boundary(
+        profile,
+        input->current_position[dof],
+        input->current_velocity[dof],
+        input->current_acceleration[dof],
+        input->target_position[dof],
+        input->target_velocity[dof],
+        input->target_acceleration[dof]
+    );
+}
+
+static void prepare_velocity_profile(const ruckig_input_t* input, size_t dof, ruckig_profile_t* profile) {
+    ruckig_profile_set_boundary_for_velocity(
+        profile,
+        input->current_position[dof],
+        input->current_velocity[dof],
+        input->current_acceleration[dof],
+        input->target_velocity[dof],
+        input->target_acceleration[dof]
+    );
+}
+
+static void prepare_mixed_profile(const ruckig_input_t* input, size_t dof, ruckig_profile_t* profile) {
+    if (effective_control_interface(input, dof) == RUCKIG_CONTROL_POSITION) {
+        prepare_position_profile(input, dof, profile);
+    } else {
+        prepare_velocity_profile(input, dof, profile);
+    }
+}
+
+static void finalize_calculated_trajectory(ruckig_trajectory_t* trajectory, double sync_duration) {
+    trajectory->duration = sync_duration;
+    trajectory->cumulative_times[0] = sync_duration;
+    trajectory->valid = true;
+}
+
+static ruckig_result_t calculate_first_order_position_step1(
+    const ruckig_input_t* input,
+    ruckig_trajectory_t* trajectory,
+    size_t dof,
+    double* duration
+) {
+    ruckig_profile_t* profile = &trajectory->profiles[dof];
+    const double v_min = input->has_min_velocity ? input->min_velocity[dof] : -input->max_velocity[dof];
+
+    if (!ruckig_position_first_step1_get_profile(
+            profile,
+            profile,
+            &trajectory->blocks[dof],
+            duration,
+            profile->p[0],
+            profile->pf,
+            input->max_velocity[dof],
+            v_min
+        )) {
+        return input->max_velocity[dof] == 0.0 || v_min == 0.0 ? RUCKIG_ERROR_ZERO_LIMITS : RUCKIG_ERROR_EXECUTION_TIME_CALCULATION;
+    }
+    return RUCKIG_WORKING;
+}
+
+static ruckig_result_t calculate_first_order_position_step2(
+    const ruckig_input_t* input,
+    ruckig_trajectory_t* trajectory,
+    size_t dof,
+    double sync_duration
+) {
+    ruckig_profile_t* profile = &trajectory->profiles[dof];
+    const double v_min = input->has_min_velocity ? input->min_velocity[dof] : -input->max_velocity[dof];
+
+    if (!ruckig_position_first_step2_get_profile(
+            profile,
+            sync_duration,
+            profile->p[0],
+            profile->pf,
+            input->max_velocity[dof],
+            v_min
+        )) {
+        return RUCKIG_ERROR_SYNCHRONIZATION_CALCULATION;
+    }
+    return RUCKIG_WORKING;
+}
+
+static ruckig_result_t calculate_no_jerk_position_step1(
+    const ruckig_input_t* input,
+    ruckig_trajectory_t* trajectory,
+    size_t dof,
+    double* duration
+) {
+    ruckig_profile_t* profile = &trajectory->profiles[dof];
+    const double v_min = input->has_min_velocity ? input->min_velocity[dof] : -input->max_velocity[dof];
+    const bool first_order = isinf(input->max_acceleration[dof]);
+
+    if (first_order) {
+        return calculate_first_order_position_step1(input, trajectory, dof, duration);
+    }
+
+    {
+        const double a_min = input->has_min_acceleration ? input->min_acceleration[dof] : -input->max_acceleration[dof];
+        ruckig_brake_get_second_order_position_trajectory(
+            &profile->brake,
+            input->current_velocity[dof],
+            input->max_velocity[dof],
+            v_min,
+            input->max_acceleration[dof],
+            a_min
+        );
+        ruckig_brake_finalize_second_order(&profile->brake, &profile->p[0], &profile->v[0], &profile->a[0]);
+        if (!ruckig_position_second_step1_get_profile(
+                profile,
+                profile,
+                &trajectory->blocks[dof],
+                duration,
+                profile->p[0],
+                profile->v[0],
+                profile->pf,
+                profile->vf,
+                input->max_velocity[dof],
+                v_min,
+                input->max_acceleration[dof],
+                a_min
+            )) {
+            return input->max_acceleration[dof] == 0.0 || a_min == 0.0 ? RUCKIG_ERROR_ZERO_LIMITS : RUCKIG_ERROR_EXECUTION_TIME_CALCULATION;
+        }
+    }
+
+    return RUCKIG_WORKING;
+}
+
+static ruckig_result_t calculate_no_jerk_position_step2(
+    const ruckig_input_t* input,
+    ruckig_trajectory_t* trajectory,
+    size_t dof,
+    double sync_duration
+) {
+    ruckig_profile_t* profile = &trajectory->profiles[dof];
+    const double v_min = input->has_min_velocity ? input->min_velocity[dof] : -input->max_velocity[dof];
+    const bool first_order = isinf(input->max_acceleration[dof]);
+    const double t_profile = sync_duration - profile->brake.duration - profile->accel.duration;
+
+    if (first_order) {
+        if (!ruckig_position_first_step2_get_profile(profile, t_profile, profile->p[0], profile->pf, input->max_velocity[dof], v_min)) {
+            return RUCKIG_ERROR_SYNCHRONIZATION_CALCULATION;
+        }
+    } else {
+        const double a_min = input->has_min_acceleration ? input->min_acceleration[dof] : -input->max_acceleration[dof];
+        if (select_block_profile_for_duration(profile, &trajectory->blocks[dof], sync_duration)) {
+            return RUCKIG_WORKING;
+        }
+        if (!ruckig_position_second_step2_get_profile(profile, t_profile, profile->p[0], profile->v[0], profile->pf, profile->vf, input->max_velocity[dof], v_min, input->max_acceleration[dof], a_min)) {
+            return RUCKIG_ERROR_SYNCHRONIZATION_CALCULATION;
+        }
+    }
+
+    return RUCKIG_WORKING;
+}
+
+static ruckig_result_t calculate_no_jerk_velocity_step1(
+    const ruckig_input_t* input,
+    ruckig_trajectory_t* trajectory,
+    size_t dof,
+    double* duration
+) {
+    ruckig_profile_t* profile = &trajectory->profiles[dof];
+    const double a_min = input->has_min_acceleration ? input->min_acceleration[dof] : -input->max_acceleration[dof];
+
+    ruckig_brake_get_second_order_velocity_trajectory(&profile->brake);
+    if (!ruckig_velocity_second_step1_get_profile(profile, profile, duration, profile->v[0], profile->vf, input->max_acceleration[dof], a_min)) {
+        return input->max_acceleration[dof] == 0.0 || a_min == 0.0 ? RUCKIG_ERROR_ZERO_LIMITS : RUCKIG_ERROR_EXECUTION_TIME_CALCULATION;
+    }
+    return RUCKIG_WORKING;
+}
+
+static ruckig_result_t calculate_no_jerk_velocity_step2(
+    const ruckig_input_t* input,
+    ruckig_trajectory_t* trajectory,
+    size_t dof,
+    double sync_duration
+) {
+    ruckig_profile_t* profile = &trajectory->profiles[dof];
+    const double a_min = input->has_min_acceleration ? input->min_acceleration[dof] : -input->max_acceleration[dof];
+    const double t_profile = sync_duration - profile->brake.duration - profile->accel.duration;
+
+    if (!ruckig_velocity_second_step2_get_profile(profile, t_profile, profile->v[0], profile->vf, input->max_acceleration[dof], a_min)) {
+        return RUCKIG_ERROR_SYNCHRONIZATION_CALCULATION;
+    }
+    return RUCKIG_WORKING;
+}
+
+static ruckig_result_t calculate_velocity_step1(
+    const ruckig_input_t* input,
+    ruckig_trajectory_t* trajectory,
+    size_t dof,
+    double* duration
+) {
+    ruckig_profile_t* profile = &trajectory->profiles[dof];
+    const double a_min = input->has_min_acceleration ? input->min_acceleration[dof] : -input->max_acceleration[dof];
+    const bool second_order = isinf(input->max_jerk[dof]);
+
+    if (second_order) {
+        return calculate_no_jerk_velocity_step1(input, trajectory, dof, duration);
+    }
+
+    ruckig_brake_get_velocity_trajectory(&profile->brake, input->current_acceleration[dof], input->max_acceleration[dof], a_min, input->max_jerk[dof]);
+    ruckig_brake_finalize(&profile->brake, &profile->p[0], &profile->v[0], &profile->a[0]);
+    if (!ruckig_velocity_third_step1_get_profile(
+            profile,
+            profile,
+            &trajectory->blocks[dof],
+            duration,
+            profile->v[0],
+            profile->a[0],
+            profile->vf,
+            profile->af,
+            input->max_acceleration[dof],
+            a_min,
+            input->max_jerk[dof]
+        )) {
+        return input->max_jerk[dof] == 0.0 ? RUCKIG_ERROR_ZERO_LIMITS : RUCKIG_ERROR_EXECUTION_TIME_CALCULATION;
+    }
+    return RUCKIG_WORKING;
+}
+
+static ruckig_result_t calculate_velocity_step2(
+    const ruckig_input_t* input,
+    ruckig_trajectory_t* trajectory,
+    size_t dof,
+    double sync_duration
+) {
+    ruckig_profile_t* profile = &trajectory->profiles[dof];
+    const double a_min = input->has_min_acceleration ? input->min_acceleration[dof] : -input->max_acceleration[dof];
+    const bool second_order = isinf(input->max_jerk[dof]);
+    const double t_profile = sync_duration - profile->brake.duration - profile->accel.duration;
+
+    if (second_order) {
+        return calculate_no_jerk_velocity_step2(input, trajectory, dof, sync_duration);
+    }
+
+    if (select_block_profile_for_duration(profile, &trajectory->blocks[dof], sync_duration)) {
+        return RUCKIG_WORKING;
+    }
+    if (!ruckig_velocity_third_step2_get_profile(profile, t_profile, profile->v[0], profile->a[0], profile->vf, profile->af, input->max_acceleration[dof], a_min, input->max_jerk[dof])) {
+        return RUCKIG_ERROR_SYNCHRONIZATION_CALCULATION;
+    }
+    return RUCKIG_WORKING;
+}
+
+static ruckig_result_t calculate_position_step1(
+    const ruckig_input_t* input,
+    ruckig_trajectory_t* trajectory,
+    size_t dof,
+    double* duration
+) {
+    ruckig_profile_t* profile = &trajectory->profiles[dof];
+    const ruckig_control_interface_t control_interface = effective_control_interface(input, dof);
+    const double v_min = input->has_min_velocity ? input->min_velocity[dof] : -input->max_velocity[dof];
+    const double a_min = input->has_min_acceleration ? input->min_acceleration[dof] : -input->max_acceleration[dof];
+    const bool first_order = isinf(input->max_acceleration[dof]);
+    const bool second_order = isinf(input->max_jerk[dof]);
+
+    if (control_interface == RUCKIG_CONTROL_POSITION && first_order) {
+        return calculate_first_order_position_step1(input, trajectory, dof, duration);
+    } else if (control_interface == RUCKIG_CONTROL_POSITION && second_order) {
+        return calculate_no_jerk_position_step1(input, trajectory, dof, duration);
+    } else if (control_interface == RUCKIG_CONTROL_POSITION) {
+        ruckig_brake_get_position_trajectory(
+            &profile->brake,
+            input->current_velocity[dof],
+            input->current_acceleration[dof],
+            input->max_velocity[dof],
+            v_min,
+            input->max_acceleration[dof],
+            a_min,
+            input->max_jerk[dof]
+        );
+        ruckig_brake_finalize(&profile->brake, &profile->p[0], &profile->v[0], &profile->a[0]);
+        if (!ruckig_position_third_step1_get_profile(
+                profile,
+                profile,
+                &trajectory->blocks[dof],
+                duration,
+                profile->p[0],
+                profile->v[0],
+                profile->a[0],
+                profile->pf,
+                profile->vf,
+                profile->af,
+                input->max_velocity[dof],
+                v_min,
+                input->max_acceleration[dof],
+                a_min,
+                input->max_jerk[dof]
+            )) {
+            return input->max_jerk[dof] == 0.0 ? RUCKIG_ERROR_ZERO_LIMITS : RUCKIG_ERROR_EXECUTION_TIME_CALCULATION;
+        }
+    } else if (second_order) {
+        return calculate_no_jerk_velocity_step1(input, trajectory, dof, duration);
+    } else {
+        return calculate_velocity_step1(input, trajectory, dof, duration);
+    }
+
+    return RUCKIG_WORKING;
+}
+
+static ruckig_result_t calculate_position_step2(
+    const ruckig_input_t* input,
+    ruckig_trajectory_t* trajectory,
+    size_t dof,
+    double sync_duration
+) {
+    ruckig_profile_t* profile = &trajectory->profiles[dof];
+    const ruckig_control_interface_t control_interface = effective_control_interface(input, dof);
+    const double v_min = input->has_min_velocity ? input->min_velocity[dof] : -input->max_velocity[dof];
+    const double a_min = input->has_min_acceleration ? input->min_acceleration[dof] : -input->max_acceleration[dof];
+    const bool first_order = isinf(input->max_acceleration[dof]);
+    const bool second_order = isinf(input->max_jerk[dof]);
+    const double t_profile = sync_duration - profile->brake.duration - profile->accel.duration;
+
+    if (control_interface == RUCKIG_CONTROL_POSITION && first_order) {
+        return calculate_no_jerk_position_step2(input, trajectory, dof, sync_duration);
+    } else if (control_interface == RUCKIG_CONTROL_POSITION && second_order) {
+        return calculate_no_jerk_position_step2(input, trajectory, dof, sync_duration);
+    } else if (control_interface == RUCKIG_CONTROL_POSITION) {
+        if (select_block_profile_for_duration(profile, &trajectory->blocks[dof], sync_duration)) {
+            return RUCKIG_WORKING;
+        }
+        if (!ruckig_position_third_step2_get_profile(
+                profile,
+                t_profile,
+                profile->p[0],
+                profile->v[0],
+                profile->a[0],
+                profile->pf,
+                profile->vf,
+                profile->af,
+                input->max_velocity[dof],
+                v_min,
+                input->max_acceleration[dof],
+                a_min,
+                input->max_jerk[dof]
+            )) {
+            return RUCKIG_ERROR_SYNCHRONIZATION_CALCULATION;
+        }
+    } else if (second_order) {
+        return calculate_no_jerk_velocity_step2(input, trajectory, dof, sync_duration);
+    } else {
+        return calculate_velocity_step2(input, trajectory, dof, sync_duration);
+    }
+
+    return RUCKIG_WORKING;
+}
+
+static ruckig_result_t calculate_with_ops(
     const ruckig_t* otg,
     const ruckig_input_t* input,
-    ruckig_trajectory_t* trajectory
+    ruckig_trajectory_t* trajectory,
+    const ruckig_calculate_ops_t* ops
 ) {
     size_t dof;
     size_t limiting_dof = 0;
@@ -391,18 +793,10 @@ static ruckig_result_t calculate_first_order_position(
     for (dof = 0; dof < input->dofs; ++dof) {
         ruckig_profile_t* profile = &trajectory->profiles[dof];
         double duration = 0.0;
-        const double v_min = input->has_min_velocity ? input->min_velocity[dof] : -input->max_velocity[dof];
+        ruckig_result_t result;
 
         ruckig_profile_init(profile);
-        ruckig_profile_set_boundary(
-            profile,
-            input->current_position[dof],
-            input->current_velocity[dof],
-            input->current_acceleration[dof],
-            input->target_position[dof],
-            input->target_velocity[dof],
-            input->target_acceleration[dof]
-        );
+        ops->prepare_profile(input, dof, profile);
 
         if (!input->enabled[dof]) {
             set_disabled_profile_state(profile, input, dof);
@@ -410,17 +804,9 @@ static ruckig_result_t calculate_first_order_position(
             continue;
         }
 
-        if (!ruckig_position_first_step1_get_profile(
-                profile,
-                profile,
-                &trajectory->blocks[dof],
-                &duration,
-                profile->p[0],
-                profile->pf,
-                input->max_velocity[dof],
-                v_min
-            )) {
-            return input->max_velocity[dof] == 0.0 || v_min == 0.0 ? RUCKIG_ERROR_ZERO_LIMITS : RUCKIG_ERROR_EXECUTION_TIME_CALCULATION;
+        result = ops->step1(input, trajectory, dof, &duration);
+        if (result != RUCKIG_WORKING) {
+            return result;
         }
 
         trajectory->independent_min_durations[dof] = duration;
@@ -429,42 +815,50 @@ static ruckig_result_t calculate_first_order_position(
 
     sync_duration = finalize_trajectory_duration(otg, input, sync_duration);
     select_limiting_dof_for_duration(otg, input, trajectory, sync_duration, &limiting_dof);
+    if (ops->adjust_duration_for_blocks) {
+        sync_duration = adjust_duration_for_blocks(sync_duration, input, trajectory);
+    }
     apply_none_synchronization_duration(input, trajectory, &sync_duration, &limiting_dof);
 
-    if (calculate_position_phase_sync(input, trajectory, sync_duration, limiting_dof)
+    if (ops->phase_sync
+        && ops->phase_sync(input, trajectory, sync_duration, limiting_dof)
         && all_synchronized_dofs_are_phase_or_none(input)) {
-        trajectory->duration = sync_duration;
-        trajectory->cumulative_times[0] = sync_duration;
-        trajectory->valid = true;
+        finalize_calculated_trajectory(trajectory, sync_duration);
         return RUCKIG_WORKING;
     }
 
     for (dof = 0; dof < input->dofs; ++dof) {
-        ruckig_profile_t* profile = &trajectory->profiles[dof];
-        const double v_min = input->has_min_velocity ? input->min_velocity[dof] : -input->max_velocity[dof];
         const bool skip_time_sync = should_skip_time_synchronization(input, dof);
         const double own_duration = trajectory->independent_min_durations[dof];
+        ruckig_result_t result;
 
         if (!input->enabled[dof] || skip_time_sync || fabs(sync_duration - own_duration) < RUCKIG_TIME_EPS) {
             continue;
         }
 
-        if (!ruckig_position_first_step2_get_profile(
-                profile,
-                sync_duration,
-                profile->p[0],
-                profile->pf,
-                input->max_velocity[dof],
-                v_min
-            )) {
-            return RUCKIG_ERROR_SYNCHRONIZATION_CALCULATION;
+        result = ops->step2(input, trajectory, dof, sync_duration);
+        if (result != RUCKIG_WORKING) {
+            return result;
         }
     }
 
-    trajectory->duration = sync_duration;
-    trajectory->cumulative_times[0] = sync_duration;
-    trajectory->valid = true;
+    finalize_calculated_trajectory(trajectory, sync_duration);
     return RUCKIG_WORKING;
+}
+
+static ruckig_result_t calculate_first_order_position(
+    const ruckig_t* otg,
+    const ruckig_input_t* input,
+    ruckig_trajectory_t* trajectory
+) {
+    static const ruckig_calculate_ops_t ops = {
+        prepare_position_profile,
+        calculate_first_order_position_step1,
+        calculate_first_order_position_step2,
+        calculate_position_phase_sync,
+        false
+    };
+    return calculate_with_ops(otg, input, trajectory, &ops);
 }
 
 static bool calculate_no_jerk_position_phase_sync(
@@ -823,94 +1217,14 @@ static ruckig_result_t calculate_no_jerk_position(
     const ruckig_input_t* input,
     ruckig_trajectory_t* trajectory
 ) {
-    size_t dof;
-    size_t limiting_dof = 0;
-    double sync_duration = 0.0;
-
-    for (dof = 0; dof < input->dofs; ++dof) {
-        ruckig_profile_t* profile = &trajectory->profiles[dof];
-        double duration = 0.0;
-        const double v_min = input->has_min_velocity ? input->min_velocity[dof] : -input->max_velocity[dof];
-        const bool first_order = isinf(input->max_acceleration[dof]);
-
-        ruckig_profile_init(profile);
-        ruckig_profile_set_boundary(
-            profile,
-            input->current_position[dof],
-            input->current_velocity[dof],
-            input->current_acceleration[dof],
-            input->target_position[dof],
-            input->target_velocity[dof],
-            input->target_acceleration[dof]
-        );
-
-        if (!input->enabled[dof]) {
-            set_disabled_profile_state(profile, input, dof);
-            trajectory->independent_min_durations[dof] = 0.0;
-            continue;
-        }
-
-        if (first_order) {
-            if (!ruckig_position_first_step1_get_profile(profile, profile, &trajectory->blocks[dof], &duration, profile->p[0], profile->pf, input->max_velocity[dof], v_min)) {
-                return input->max_velocity[dof] == 0.0 || v_min == 0.0 ? RUCKIG_ERROR_ZERO_LIMITS : RUCKIG_ERROR_EXECUTION_TIME_CALCULATION;
-            }
-        } else {
-            const double a_min = input->has_min_acceleration ? input->min_acceleration[dof] : -input->max_acceleration[dof];
-            ruckig_brake_get_second_order_position_trajectory(&profile->brake, input->current_velocity[dof], input->max_velocity[dof], v_min, input->max_acceleration[dof], a_min);
-            ruckig_brake_finalize_second_order(&profile->brake, &profile->p[0], &profile->v[0], &profile->a[0]);
-            if (!ruckig_position_second_step1_get_profile(profile, profile, &trajectory->blocks[dof], &duration, profile->p[0], profile->v[0], profile->pf, profile->vf, input->max_velocity[dof], v_min, input->max_acceleration[dof], a_min)) {
-                return input->max_acceleration[dof] == 0.0 || a_min == 0.0 ? RUCKIG_ERROR_ZERO_LIMITS : RUCKIG_ERROR_EXECUTION_TIME_CALCULATION;
-            }
-        }
-
-        trajectory->independent_min_durations[dof] = duration;
-        update_sync_duration_candidate(input, dof, duration, &sync_duration, &limiting_dof);
-    }
-
-    sync_duration = finalize_trajectory_duration(otg, input, sync_duration);
-    select_limiting_dof_for_duration(otg, input, trajectory, sync_duration, &limiting_dof);
-    sync_duration = adjust_duration_for_blocks(sync_duration, input, trajectory);
-    apply_none_synchronization_duration(input, trajectory, &sync_duration, &limiting_dof);
-
-    if (calculate_no_jerk_position_phase_sync(input, trajectory, sync_duration, limiting_dof)
-        && all_synchronized_dofs_are_phase_or_none(input)) {
-        trajectory->duration = sync_duration;
-        trajectory->cumulative_times[0] = sync_duration;
-        trajectory->valid = true;
-        return RUCKIG_WORKING;
-    }
-
-    for (dof = 0; dof < input->dofs; ++dof) {
-        ruckig_profile_t* profile = &trajectory->profiles[dof];
-        const double v_min = input->has_min_velocity ? input->min_velocity[dof] : -input->max_velocity[dof];
-        const bool first_order = isinf(input->max_acceleration[dof]);
-        const bool skip_time_sync = should_skip_time_synchronization(input, dof);
-        const double own_duration = trajectory->independent_min_durations[dof];
-        const double t_profile = sync_duration - profile->brake.duration - profile->accel.duration;
-
-        if (!input->enabled[dof] || skip_time_sync || fabs(sync_duration - own_duration) < RUCKIG_TIME_EPS) {
-            continue;
-        }
-
-        if (first_order) {
-            if (!ruckig_position_first_step2_get_profile(profile, t_profile, profile->p[0], profile->pf, input->max_velocity[dof], v_min)) {
-                return RUCKIG_ERROR_SYNCHRONIZATION_CALCULATION;
-            }
-        } else {
-            const double a_min = input->has_min_acceleration ? input->min_acceleration[dof] : -input->max_acceleration[dof];
-            if (select_block_profile_for_duration(profile, &trajectory->blocks[dof], sync_duration)) {
-                continue;
-            }
-            if (!ruckig_position_second_step2_get_profile(profile, t_profile, profile->p[0], profile->v[0], profile->pf, profile->vf, input->max_velocity[dof], v_min, input->max_acceleration[dof], a_min)) {
-                return RUCKIG_ERROR_SYNCHRONIZATION_CALCULATION;
-            }
-        }
-    }
-
-    trajectory->duration = sync_duration;
-    trajectory->cumulative_times[0] = sync_duration;
-    trajectory->valid = true;
-    return RUCKIG_WORKING;
+    static const ruckig_calculate_ops_t ops = {
+        prepare_position_profile,
+        calculate_no_jerk_position_step1,
+        calculate_no_jerk_position_step2,
+        calculate_no_jerk_position_phase_sync,
+        true
+    };
+    return calculate_with_ops(otg, input, trajectory, &ops);
 }
 
 static ruckig_result_t calculate_no_jerk_velocity(
@@ -918,72 +1232,14 @@ static ruckig_result_t calculate_no_jerk_velocity(
     const ruckig_input_t* input,
     ruckig_trajectory_t* trajectory
 ) {
-    size_t dof;
-    size_t limiting_dof = 0;
-    double sync_duration = 0.0;
-
-    for (dof = 0; dof < input->dofs; ++dof) {
-        ruckig_profile_t* profile = &trajectory->profiles[dof];
-        double duration = 0.0;
-        const double a_min = input->has_min_acceleration ? input->min_acceleration[dof] : -input->max_acceleration[dof];
-
-        ruckig_profile_init(profile);
-        ruckig_profile_set_boundary_for_velocity(
-            profile,
-            input->current_position[dof],
-            input->current_velocity[dof],
-            input->current_acceleration[dof],
-            input->target_velocity[dof],
-            input->target_acceleration[dof]
-        );
-
-        if (!input->enabled[dof]) {
-            set_disabled_profile_state(profile, input, dof);
-            trajectory->independent_min_durations[dof] = 0.0;
-            continue;
-        }
-
-        ruckig_brake_get_second_order_velocity_trajectory(&profile->brake);
-        if (!ruckig_velocity_second_step1_get_profile(profile, profile, &duration, profile->v[0], profile->vf, input->max_acceleration[dof], a_min)) {
-            return input->max_acceleration[dof] == 0.0 || a_min == 0.0 ? RUCKIG_ERROR_ZERO_LIMITS : RUCKIG_ERROR_EXECUTION_TIME_CALCULATION;
-        }
-
-        trajectory->independent_min_durations[dof] = duration;
-        update_sync_duration_candidate(input, dof, duration, &sync_duration, &limiting_dof);
-    }
-
-    sync_duration = finalize_trajectory_duration(otg, input, sync_duration);
-    select_limiting_dof_for_duration(otg, input, trajectory, sync_duration, &limiting_dof);
-    apply_none_synchronization_duration(input, trajectory, &sync_duration, &limiting_dof);
-
-    if (calculate_velocity_phase_sync(input, trajectory, sync_duration, limiting_dof)
-        && all_synchronized_dofs_are_phase_or_none(input)) {
-        trajectory->duration = sync_duration;
-        trajectory->cumulative_times[0] = sync_duration;
-        trajectory->valid = true;
-        return RUCKIG_WORKING;
-    }
-
-    for (dof = 0; dof < input->dofs; ++dof) {
-        ruckig_profile_t* profile = &trajectory->profiles[dof];
-        const double a_min = input->has_min_acceleration ? input->min_acceleration[dof] : -input->max_acceleration[dof];
-        const bool skip_time_sync = should_skip_time_synchronization(input, dof);
-        const double own_duration = trajectory->independent_min_durations[dof];
-        const double t_profile = sync_duration - profile->brake.duration - profile->accel.duration;
-
-        if (!input->enabled[dof] || skip_time_sync || fabs(sync_duration - own_duration) < RUCKIG_TIME_EPS) {
-            continue;
-        }
-
-        if (!ruckig_velocity_second_step2_get_profile(profile, t_profile, profile->v[0], profile->vf, input->max_acceleration[dof], a_min)) {
-            return RUCKIG_ERROR_SYNCHRONIZATION_CALCULATION;
-        }
-    }
-
-    trajectory->duration = sync_duration;
-    trajectory->cumulative_times[0] = sync_duration;
-    trajectory->valid = true;
-    return RUCKIG_WORKING;
+    static const ruckig_calculate_ops_t ops = {
+        prepare_velocity_profile,
+        calculate_no_jerk_velocity_step1,
+        calculate_no_jerk_velocity_step2,
+        calculate_velocity_phase_sync,
+        false
+    };
+    return calculate_with_ops(otg, input, trajectory, &ops);
 }
 
 static ruckig_result_t calculate_velocity(
@@ -991,92 +1247,14 @@ static ruckig_result_t calculate_velocity(
     const ruckig_input_t* input,
     ruckig_trajectory_t* trajectory
 ) {
-    size_t dof;
-    size_t limiting_dof = 0;
-    double sync_duration = 0.0;
-
-    for (dof = 0; dof < input->dofs; ++dof) {
-        ruckig_profile_t* profile = &trajectory->profiles[dof];
-        double duration = 0.0;
-        const double a_min = input->has_min_acceleration ? input->min_acceleration[dof] : -input->max_acceleration[dof];
-        const bool second_order = isinf(input->max_jerk[dof]);
-
-        ruckig_profile_init(profile);
-        ruckig_profile_set_boundary_for_velocity(
-            profile,
-            input->current_position[dof],
-            input->current_velocity[dof],
-            input->current_acceleration[dof],
-            input->target_velocity[dof],
-            input->target_acceleration[dof]
-        );
-
-        if (!input->enabled[dof]) {
-            set_disabled_profile_state(profile, input, dof);
-            trajectory->independent_min_durations[dof] = 0.0;
-            continue;
-        }
-
-        if (second_order) {
-            ruckig_brake_get_second_order_velocity_trajectory(&profile->brake);
-            if (!ruckig_velocity_second_step1_get_profile(profile, profile, &duration, profile->v[0], profile->vf, input->max_acceleration[dof], a_min)) {
-                return input->max_acceleration[dof] == 0.0 || a_min == 0.0 ? RUCKIG_ERROR_ZERO_LIMITS : RUCKIG_ERROR_EXECUTION_TIME_CALCULATION;
-            }
-        } else {
-            ruckig_brake_get_velocity_trajectory(&profile->brake, input->current_acceleration[dof], input->max_acceleration[dof], a_min, input->max_jerk[dof]);
-            ruckig_brake_finalize(&profile->brake, &profile->p[0], &profile->v[0], &profile->a[0]);
-            if (!ruckig_velocity_third_step1_get_profile(profile, profile, &trajectory->blocks[dof], &duration, profile->v[0], profile->a[0], profile->vf, profile->af, input->max_acceleration[dof], a_min, input->max_jerk[dof])) {
-                return input->max_jerk[dof] == 0.0 ? RUCKIG_ERROR_ZERO_LIMITS : RUCKIG_ERROR_EXECUTION_TIME_CALCULATION;
-            }
-        }
-
-        trajectory->independent_min_durations[dof] = duration;
-        update_sync_duration_candidate(input, dof, duration, &sync_duration, &limiting_dof);
-    }
-
-    sync_duration = finalize_trajectory_duration(otg, input, sync_duration);
-    select_limiting_dof_for_duration(otg, input, trajectory, sync_duration, &limiting_dof);
-    sync_duration = adjust_duration_for_blocks(sync_duration, input, trajectory);
-    apply_none_synchronization_duration(input, trajectory, &sync_duration, &limiting_dof);
-
-    if (calculate_velocity_phase_sync(input, trajectory, sync_duration, limiting_dof)
-        && all_synchronized_dofs_are_phase_or_none(input)) {
-        trajectory->duration = sync_duration;
-        trajectory->cumulative_times[0] = sync_duration;
-        trajectory->valid = true;
-        return RUCKIG_WORKING;
-    }
-
-    for (dof = 0; dof < input->dofs; ++dof) {
-        ruckig_profile_t* profile = &trajectory->profiles[dof];
-        const double a_min = input->has_min_acceleration ? input->min_acceleration[dof] : -input->max_acceleration[dof];
-        const bool second_order = isinf(input->max_jerk[dof]);
-        const bool skip_time_sync = should_skip_time_synchronization(input, dof);
-        const double own_duration = trajectory->independent_min_durations[dof];
-        const double t_profile = sync_duration - profile->brake.duration - profile->accel.duration;
-
-        if (!input->enabled[dof] || skip_time_sync || fabs(sync_duration - own_duration) < RUCKIG_TIME_EPS) {
-            continue;
-        }
-
-        if (second_order) {
-            if (!ruckig_velocity_second_step2_get_profile(profile, t_profile, profile->v[0], profile->vf, input->max_acceleration[dof], a_min)) {
-                return RUCKIG_ERROR_SYNCHRONIZATION_CALCULATION;
-            }
-        } else {
-            if (select_block_profile_for_duration(profile, &trajectory->blocks[dof], sync_duration)) {
-                continue;
-            }
-            if (!ruckig_velocity_third_step2_get_profile(profile, t_profile, profile->v[0], profile->a[0], profile->vf, profile->af, input->max_acceleration[dof], a_min, input->max_jerk[dof])) {
-                return RUCKIG_ERROR_SYNCHRONIZATION_CALCULATION;
-            }
-        }
-    }
-
-    trajectory->duration = sync_duration;
-    trajectory->cumulative_times[0] = sync_duration;
-    trajectory->valid = true;
-    return RUCKIG_WORKING;
+    static const ruckig_calculate_ops_t ops = {
+        prepare_velocity_profile,
+        calculate_velocity_step1,
+        calculate_velocity_step2,
+        calculate_velocity_phase_sync,
+        true
+    };
+    return calculate_with_ops(otg, input, trajectory, &ops);
 }
 
 static ruckig_result_t calculate_position(
@@ -1084,183 +1262,14 @@ static ruckig_result_t calculate_position(
     const ruckig_input_t* input,
     ruckig_trajectory_t* trajectory
 ) {
-    size_t dof;
-    size_t limiting_dof = 0;
-    double sync_duration = 0.0;
-
-    for (dof = 0; dof < input->dofs; ++dof) {
-        ruckig_profile_t* profile = &trajectory->profiles[dof];
-        double duration = 0.0;
-        const ruckig_control_interface_t control_interface = effective_control_interface(input, dof);
-        const double v_min = input->has_min_velocity ? input->min_velocity[dof] : -input->max_velocity[dof];
-        const double a_min = input->has_min_acceleration ? input->min_acceleration[dof] : -input->max_acceleration[dof];
-        const bool first_order = isinf(input->max_acceleration[dof]);
-        const bool second_order = isinf(input->max_jerk[dof]);
-
-        ruckig_profile_init(profile);
-        if (control_interface == RUCKIG_CONTROL_POSITION) {
-            ruckig_profile_set_boundary(
-                profile,
-                input->current_position[dof],
-                input->current_velocity[dof],
-                input->current_acceleration[dof],
-                input->target_position[dof],
-                input->target_velocity[dof],
-                input->target_acceleration[dof]
-            );
-        } else {
-            ruckig_profile_set_boundary_for_velocity(
-                profile,
-                input->current_position[dof],
-                input->current_velocity[dof],
-                input->current_acceleration[dof],
-                input->target_velocity[dof],
-                input->target_acceleration[dof]
-            );
-        }
-
-        if (!input->enabled[dof]) {
-            set_disabled_profile_state(profile, input, dof);
-            trajectory->independent_min_durations[dof] = 0.0;
-            continue;
-        }
-
-        if (control_interface == RUCKIG_CONTROL_POSITION && first_order) {
-            if (!ruckig_position_first_step1_get_profile(profile, profile, &trajectory->blocks[dof], &duration, profile->p[0], profile->pf, input->max_velocity[dof], v_min)) {
-                return input->max_velocity[dof] == 0.0 || v_min == 0.0 ? RUCKIG_ERROR_ZERO_LIMITS : RUCKIG_ERROR_EXECUTION_TIME_CALCULATION;
-            }
-        } else if (control_interface == RUCKIG_CONTROL_POSITION && second_order) {
-            ruckig_brake_get_second_order_position_trajectory(&profile->brake, input->current_velocity[dof], input->max_velocity[dof], v_min, input->max_acceleration[dof], a_min);
-            ruckig_brake_finalize_second_order(&profile->brake, &profile->p[0], &profile->v[0], &profile->a[0]);
-            if (!ruckig_position_second_step1_get_profile(profile, profile, &trajectory->blocks[dof], &duration, profile->p[0], profile->v[0], profile->pf, profile->vf, input->max_velocity[dof], v_min, input->max_acceleration[dof], a_min)) {
-                return input->max_acceleration[dof] == 0.0 || a_min == 0.0 ? RUCKIG_ERROR_ZERO_LIMITS : RUCKIG_ERROR_EXECUTION_TIME_CALCULATION;
-            }
-        } else if (control_interface == RUCKIG_CONTROL_POSITION) {
-            ruckig_brake_get_position_trajectory(
-                &profile->brake,
-                input->current_velocity[dof],
-                input->current_acceleration[dof],
-                input->max_velocity[dof],
-                v_min,
-                input->max_acceleration[dof],
-                a_min,
-                input->max_jerk[dof]
-            );
-            ruckig_brake_finalize(&profile->brake, &profile->p[0], &profile->v[0], &profile->a[0]);
-            if (!ruckig_position_third_step1_get_profile(
-                    profile,
-                    profile,
-                    &trajectory->blocks[dof],
-                    &duration,
-                    profile->p[0],
-                    profile->v[0],
-                    profile->a[0],
-                    profile->pf,
-                    profile->vf,
-                    profile->af,
-                    input->max_velocity[dof],
-                    v_min,
-                    input->max_acceleration[dof],
-                    a_min,
-                    input->max_jerk[dof]
-                )) {
-                return input->max_jerk[dof] == 0.0 ? RUCKIG_ERROR_ZERO_LIMITS : RUCKIG_ERROR_EXECUTION_TIME_CALCULATION;
-            }
-        } else if (second_order) {
-            ruckig_brake_get_second_order_velocity_trajectory(&profile->brake);
-            if (!ruckig_velocity_second_step1_get_profile(profile, profile, &duration, profile->v[0], profile->vf, input->max_acceleration[dof], a_min)) {
-                return input->max_acceleration[dof] == 0.0 || a_min == 0.0 ? RUCKIG_ERROR_ZERO_LIMITS : RUCKIG_ERROR_EXECUTION_TIME_CALCULATION;
-            }
-        } else {
-            ruckig_brake_get_velocity_trajectory(&profile->brake, input->current_acceleration[dof], input->max_acceleration[dof], a_min, input->max_jerk[dof]);
-            ruckig_brake_finalize(&profile->brake, &profile->p[0], &profile->v[0], &profile->a[0]);
-            if (!ruckig_velocity_third_step1_get_profile(profile, profile, &trajectory->blocks[dof], &duration, profile->v[0], profile->a[0], profile->vf, profile->af, input->max_acceleration[dof], a_min, input->max_jerk[dof])) {
-                return input->max_jerk[dof] == 0.0 ? RUCKIG_ERROR_ZERO_LIMITS : RUCKIG_ERROR_EXECUTION_TIME_CALCULATION;
-            }
-        }
-
-        trajectory->independent_min_durations[dof] = duration;
-        update_sync_duration_candidate(input, dof, duration, &sync_duration, &limiting_dof);
-    }
-
-    sync_duration = finalize_trajectory_duration(otg, input, sync_duration);
-    select_limiting_dof_for_duration(otg, input, trajectory, sync_duration, &limiting_dof);
-    sync_duration = adjust_duration_for_blocks(sync_duration, input, trajectory);
-    apply_none_synchronization_duration(input, trajectory, &sync_duration, &limiting_dof);
-
-    if (calculate_position_phase_sync(input, trajectory, sync_duration, limiting_dof)
-        && all_synchronized_dofs_are_phase_or_none(input)) {
-        trajectory->duration = sync_duration;
-        trajectory->cumulative_times[0] = sync_duration;
-        trajectory->valid = true;
-        return RUCKIG_WORKING;
-    }
-
-    for (dof = 0; dof < input->dofs; ++dof) {
-        ruckig_profile_t* profile = &trajectory->profiles[dof];
-        const ruckig_control_interface_t control_interface = effective_control_interface(input, dof);
-        const double v_min = input->has_min_velocity ? input->min_velocity[dof] : -input->max_velocity[dof];
-        const double a_min = input->has_min_acceleration ? input->min_acceleration[dof] : -input->max_acceleration[dof];
-        const bool first_order = isinf(input->max_acceleration[dof]);
-        const bool second_order = isinf(input->max_jerk[dof]);
-        const bool skip_time_sync = should_skip_time_synchronization(input, dof);
-        const double own_duration = trajectory->independent_min_durations[dof];
-        const double t_profile = sync_duration - profile->brake.duration - profile->accel.duration;
-
-        if (!input->enabled[dof] || skip_time_sync || fabs(sync_duration - own_duration) < RUCKIG_TIME_EPS) {
-            continue;
-        }
-
-        if (control_interface == RUCKIG_CONTROL_POSITION && first_order) {
-            if (!ruckig_position_first_step2_get_profile(profile, t_profile, profile->p[0], profile->pf, input->max_velocity[dof], v_min)) {
-                return RUCKIG_ERROR_SYNCHRONIZATION_CALCULATION;
-            }
-        } else if (control_interface == RUCKIG_CONTROL_POSITION && second_order) {
-            if (select_block_profile_for_duration(profile, &trajectory->blocks[dof], sync_duration)) {
-                continue;
-            }
-            if (!ruckig_position_second_step2_get_profile(profile, t_profile, profile->p[0], profile->v[0], profile->pf, profile->vf, input->max_velocity[dof], v_min, input->max_acceleration[dof], a_min)) {
-                return RUCKIG_ERROR_SYNCHRONIZATION_CALCULATION;
-            }
-        } else if (control_interface == RUCKIG_CONTROL_POSITION) {
-            if (select_block_profile_for_duration(profile, &trajectory->blocks[dof], sync_duration)) {
-                continue;
-            }
-            if (!ruckig_position_third_step2_get_profile(
-                    profile,
-                    t_profile,
-                    profile->p[0],
-                    profile->v[0],
-                    profile->a[0],
-                    profile->pf,
-                    profile->vf,
-                    profile->af,
-                    input->max_velocity[dof],
-                    v_min,
-                    input->max_acceleration[dof],
-                    a_min,
-                    input->max_jerk[dof]
-                )) {
-                return RUCKIG_ERROR_SYNCHRONIZATION_CALCULATION;
-            }
-        } else if (second_order) {
-            if (!ruckig_velocity_second_step2_get_profile(profile, t_profile, profile->v[0], profile->vf, input->max_acceleration[dof], a_min)) {
-                return RUCKIG_ERROR_SYNCHRONIZATION_CALCULATION;
-            }
-        } else {
-            if (select_block_profile_for_duration(profile, &trajectory->blocks[dof], sync_duration)) {
-                continue;
-            }
-            if (!ruckig_velocity_third_step2_get_profile(profile, t_profile, profile->v[0], profile->a[0], profile->vf, profile->af, input->max_acceleration[dof], a_min, input->max_jerk[dof])) {
-                return RUCKIG_ERROR_SYNCHRONIZATION_CALCULATION;
-            }
-        }
-    }
-
-    trajectory->duration = sync_duration;
-    trajectory->cumulative_times[0] = sync_duration;
-    trajectory->valid = true;
-    return RUCKIG_WORKING;
+    static const ruckig_calculate_ops_t ops = {
+        prepare_mixed_profile,
+        calculate_position_step1,
+        calculate_position_step2,
+        calculate_position_phase_sync,
+        true
+    };
+    return calculate_with_ops(otg, input, trajectory, &ops);
 }
 
 static ruckig_result_t ruckig_create_impl(
