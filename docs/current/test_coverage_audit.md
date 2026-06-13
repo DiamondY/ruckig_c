@@ -998,6 +998,43 @@ coverage-percentage target. The prior branch-coverage baseline remains
 `72.94%` from
 `out/coverage/post-v0.15.0-solver-adjacent-branch-coverage/coverage-summary.txt`.
 
+## Post-v0.15.0 Quality Evidence Refresh
+
+The `post-v0.15.0-quality-evidence-refresh` slice reruns coverage after the
+external-review hardening work. It records the new evidence baseline after the
+tracking behavior split, profile context conversion, roots numeric audit, and
+waypoint branch-queue saturation regression. It is evidence-only and keeps
+public ABI, version metadata, release state, workflow state, ABI allowlists,
+upstream baseline, visualization assets, and wrapper publication status
+unchanged.
+
+Coverage artifacts are stored under
+`out/coverage/post-v0.15.0-quality-evidence-refresh/`.
+
+The local coverage run passed 69/69 coverage CTest cases and produced:
+
+| Metric | Total | Missed | Coverage |
+| --- | ---: | ---: | ---: |
+| Regions | 7939 | 773 | 90.26% |
+| Functions | 472 | 30 | 93.64% |
+| Lines | 8590 | 912 | 89.38% |
+| Branches | 4591 | 1219 | 73.45% |
+
+Compared with the previous coverage-bearing solver-adjacent slice, missed
+branches drop from `1239` to `1219`, and branch coverage rises from `72.94%`
+to `73.45%`. The delta is attributed to the review-followup tests and
+refactor shape; this refresh slice adds no implementation behavior.
+
+Current residual branch candidates:
+
+| Area | Interpretation |
+| --- | --- |
+| `velocity_third_step2.c` | Low branch coverage remains in analytical timing alternatives; future cases should be oracle-backed or assert only stable timing invariants. |
+| `position_second_step2.c` | Synchronization timing alternatives remain a focused solver candidate. |
+| `output.c` | Public output boundary handling has low branch coverage and can be covered with compact fixed API cases. |
+| `tracking.c`, `tracking_sequence.c`, `waypoint.c` | Important state-machine surfaces, but further additions should be meaningful invariants rather than broad probes. |
+| `platform_clock.h`, `alloc.c`, `utils.c` | Low percentages are mostly defensive, platform-specific, or tiny-denominator paths; platform probes and ABI/export evidence are higher value than forced branch coverage. |
+
 ## Original Test Mapping
 
 Original source: `original/ruckig-main/test/test_target.cpp`.

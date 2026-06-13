@@ -185,6 +185,14 @@ ABI baseline accepted during the 0.15 design line and does not start
   header, version metadata, workflow, tag/release state, upstream baseline,
   wrapper publication status, and visualization assets unchanged. This slice
   does not start `0.16.0-design`.
+- `post-v0.15.0-quality-evidence-refresh` is implemented locally as an
+  evidence-only follow-up after the external-review hardening slice. It records
+  the refreshed coverage artifact at
+  `out/coverage/post-v0.15.0-quality-evidence-refresh/coverage-summary.txt`,
+  updates the post-split implementation hotspot map, and raises the current
+  coverage-bearing branch baseline from `72.94%` to `73.45%` without changing
+  public ABI, version metadata, workflow, tag/release state, upstream baseline,
+  wrapper publication status, or visualization assets.
 - Keep the 184-symbol `v0.15.0` public C ABI baseline unless a later separate
   public API decision is accepted.
 - This quality audit does not start `0.16.0-design`, change version metadata,

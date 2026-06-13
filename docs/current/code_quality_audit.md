@@ -21,7 +21,8 @@ excluding generated, test, example, binding, and output paths:
 | Lines | 8525 | 1042 | 87.78% |
 | Branches | 4649 | 1400 | 69.89% |
 
-The current largest implementation files are:
+At the `v0.15.0` stable release baseline, the largest implementation files
+were:
 
 | File | Size |
 | --- | ---: |
@@ -307,6 +308,56 @@ Local gate summary for this slice:
 The checklist is
 `docs/release/checklists/post-v0.15.0-review-followup-quality-hardening.md`.
 
+## Quality Evidence Refresh
+
+The `post-v0.15.0-quality-evidence-refresh` slice records the coverage and
+hotspot baseline after the external-review hardening work. It is docs/evidence
+only: no production code, public C ABI, version metadata, workflow, upstream
+baseline, or visualization asset changed.
+
+The refreshed coverage run is recorded at
+`out/coverage/post-v0.15.0-quality-evidence-refresh/coverage-summary.txt`. It
+passed 69/69 coverage CTest cases and produced:
+
+| Metric | Total | Missed | Coverage |
+| --- | ---: | ---: | ---: |
+| Regions | 7939 | 773 | 90.26% |
+| Functions | 472 | 30 | 93.64% |
+| Lines | 8590 | 912 | 89.38% |
+| Branches | 4591 | 1219 | 73.45% |
+
+Compared with the previous coverage-bearing slice,
+`post-v0.15.0-solver-adjacent-branch-coverage`, missed branches drop from
+`1239` to `1219`, and branch coverage rises from `72.94%` to `73.45%`. The
+increase comes from the review-followup tests and refactor shape; this refresh
+slice itself adds evidence only.
+
+Largest implementation `.c` files after the tracking split:
+
+| File | Size |
+| --- | ---: |
+| `src/ruckig_c/position_third_step2.c` | 65914 bytes |
+| `src/ruckig_c/ruckig.c` | 56652 bytes |
+| `src/ruckig_c/waypoint.c` | 51955 bytes |
+| `src/ruckig_c/tracking_sequence.c` | 43040 bytes |
+| `src/ruckig_c/input.c` | 39496 bytes |
+| `src/ruckig_c/position_third_step1.c` | 36634 bytes |
+| `src/ruckig_c/tracking_update.c` | 28464 bytes |
+| `src/ruckig_c/tracking.c` | 24091 bytes |
+| `src/ruckig_c/profile.c` | 21482 bytes |
+| `src/ruckig_c/roots.c` | 10695 bytes |
+| `src/ruckig_c/trajectory.c` | 9682 bytes |
+| `src/ruckig_c/brake.c` | 7286 bytes |
+
+Remaining low-coverage interpretation:
+
+| Area | Current reading |
+| --- | --- |
+| `velocity_third_step2.c` and `position_second_step2.c` | Still good residual solver candidates, but new cases should be backed by oracle behavior or stable timing invariants. |
+| `output.c` | Low branch coverage is mostly public boundary handling; it is a good small fixed-case candidate if the next slice needs non-solver value. |
+| `tracking.c`, `tracking_sequence.c`, and `waypoint.c` | Still important state-machine surfaces, but broad branch probing is no longer the priority after dedicated state-machine and review-followup slices. |
+| `platform_clock.h`, `alloc.c`, and `utils.c` | Low percentages are mostly defensive, tiny-denominator, or platform-specific paths; platform probes and ABI/export gates are higher-value than forced branch tests. |
+
 When a random gate fails:
 
 1. Re-run the same command with the reported seed and sample count large enough
@@ -346,6 +397,7 @@ Coverage evidence:
 ```powershell
 .\tools\coverage\run_coverage.ps1 -CoverageLabel post-v0.15.0-quality-audit
 .\tools\coverage\run_coverage.ps1 -CoverageLabel post-v0.15.0-state-machine-branch-coverage
+.\tools\coverage\run_coverage.ps1 -CoverageLabel post-v0.15.0-quality-evidence-refresh
 ```
 
 Heavy random evidence remains local/manual:

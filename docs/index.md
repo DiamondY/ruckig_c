@@ -147,6 +147,9 @@ Historical rewrite plans and release evidence are retained for traceability.
   records the external-review follow-up quality hardening slice for roots
   numeric audit, waypoint branch-queue saturation, private interrupt context,
   tracking split, profile context conversion, and low-risk cleanup.
+  `release/checklists/post-v0.15.0-quality-evidence-refresh.md` records the
+  evidence-only coverage and hotspot refresh after the review-followup
+  hardening slice.
 - `release/evidence/verification_report.md` - local and CI verification
   history.
 - `release/evidence/performance_report.md` - performance procedure and release
@@ -167,6 +170,10 @@ Fast/Optimized sequence continuation behavior, C/Python/Rust prototype smoke
 coverage, and alpha.8 continuation hardening to the stable 184-symbol public C
 ABI baseline. Current `main` remains on `0.15.0` release evidence until a
 separate post-release design-line decision.
+The latest post-release quality evidence refresh records branch coverage
+`73.45%` at
+`out/coverage/post-v0.15.0-quality-evidence-refresh/coverage-summary.txt`
+without changing the stable ABI or release state.
 `v0.14.0` stabilizes the API-neutral interrupt surfaces without expanding the
 172-symbol public C ABI. `v0.13.0` stabilizes post-`v0.12.0` waypoint
 true-resume stress coverage and the private waypoint optimizer engine rewrite.
