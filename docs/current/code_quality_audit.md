@@ -176,6 +176,29 @@ Hotspot movement:
 | `src/ruckig_c/velocity_third_step1.c` | 81.25% | 89.58% |
 | `src/ruckig_c/velocity_third_step2.c` | 58.70% | 60.87% |
 
+## Random Repro Materialization Slice
+
+The `post-v0.15.0-random-repro-materialization` slice shifts the next quality
+increment from coverage percentage to failure localization. It adds
+single-sample replay/export commands for seeded oracle and tracking random
+corpora while keeping public ABI, version metadata, workflow, tag/release
+state, upstream baseline, and visualization assets unchanged.
+
+Added developer tooling:
+
+| Area | Replay command |
+| --- | --- |
+| Oracle random | `ruckig_c_oracle_tests --replay-random SAMPLE --seed S` |
+| Oracle per-DoF random | `ruckig_c_oracle_tests --replay-random-per-dof SAMPLE --seed S` |
+| Tracking random stress | `ruckig_c_tests --tracking-random-replay SAMPLE --seed S` |
+| Tracking random audit | `ruckig_c_tests --tracking-random-audit-replay SAMPLE --seed S` |
+
+Each replay command fast-forwards the existing generator to the requested
+sample, executes the same single-case checks, and prints a fixture-ready
+initializer for the matching fixed-case corpus. No generated source file is
+written automatically. The existing random commands keep their output and
+semantics unchanged.
+
 ## Risk Map
 
 | Area | Risk | Current protection | Quality-audit action |
@@ -184,7 +207,7 @@ Hotspot movement:
 | Waypoint resume engine | Active/complete/found/candidate state can drift across interrupted online updates. | Resume stress, quality audit, allocation guard. | Add private engine assertions and focused property checks around interrupted start plus complete resume. |
 | Input API setters | Repeated DoF/count/null checks increase drift risk in boundary behavior. | Public API and validation tests. | Extract private helper checks without changing public behavior or return codes. |
 | No-waypoint trajectory sampling | Core solver is strong but branch-heavy; disabled DoF and duration consistency should stay explicit. | Fixed C tests plus oracle random comparisons. | Add deterministic property tests for boundary samples, duration consistency, and disabled-DoF kinematics. |
-| Random audit failures | Existing random tests print summary and representative fallback cases, but not every failing sample in fixture-ready form. | Seeded tracking random/audit and oracle random gates. | Print seed/sample/context on random failures and document materialization steps. |
+| Random audit failures | Seeded random failures must become fixed regressions without hand-reconstructing generator state. | Failure context output plus replay/export commands for oracle and tracking random corpora. | Keep replay commands covered by small CTest smoke; defer automatic shrinking to a separate local-tool slice. |
 
 ## Test Selectors
 
@@ -223,21 +246,36 @@ Oracle random repro output includes kind, seed, sample, DoF count, delta time,
 control interface, synchronization, duration discretization, state vectors,
 limits, enabled vector, and per-DoF override vectors.
 
+Replay/export commands now materialize the same generator state without running
+the full random range:
+
+```powershell
+out\build\windows-clang-ninja-oracle\ruckig_c_oracle_tests.exe --replay-random 17 --seed 1
+out\build\windows-clang-ninja-oracle\ruckig_c_oracle_tests.exe --replay-random-per-dof 10 --seed 1
+out\build\windows-clang-ninja\ruckig_c_tests.exe --tracking-random-replay 22 --seed 1
+out\build\windows-clang-ninja\ruckig_c_tests.exe --tracking-random-audit-replay 22 --seed 1
+```
+
+These commands run one generated sample and print fixture-ready initializer
+text for the fixed oracle or tracking regression corpus. They do not write
+source files automatically.
+
 When a random gate fails:
 
 1. Re-run the same command with the reported seed and sample count large enough
    to include the failing sample.
-2. Copy the reported context into a fixed C or C++ regression case near the
+2. Re-run the matching replay command with the reported seed and sample.
+3. Copy the emitted initializer into a fixed C or C++ regression case near the
    matching selector.
-3. Reduce dimensions manually first: DoF count, waypoint count, target sequence
+4. Reduce dimensions manually first: DoF count, waypoint count, target sequence
    count, disabled DoF, and candidate budget.
-4. Reduce state and limit magnitudes only after the structural shape is fixed.
-5. Keep the large random command as local/manual evidence; add only the reduced
+5. Reduce state and limit magnitudes only after the structural shape is fixed.
+6. Keep the large random command as local/manual evidence; add only the reduced
    deterministic regression to routine CTest.
 
-The first quality slice does not add a full automatic shrinker. A later
-optional local tool can shrink DoF count, waypoint/target counts, then numeric
-state vectors, but it must remain outside default push CI.
+Automatic shrinking remains deferred. A later optional local tool can shrink
+DoF count, waypoint/target counts, then numeric state vectors, but it must
+remain outside default push CI.
 
 ## Evidence Commands
 

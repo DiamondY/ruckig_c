@@ -384,6 +384,27 @@ rises from `71.50%` to `72.94%`.
 The local checklist is
 `docs/release/checklists/post-v0.15.0-solver-adjacent-branch-coverage.md`.
 
+## Post-v0.15.0 Random Repro Materialization
+
+The `post-v0.15.0-random-repro-materialization` slice follows the
+coverage-focused solver-adjacent work with reproducibility tooling. It does
+not target a coverage percentage increase. It keeps public ABI, version
+metadata, release state, workflow state, ABI allowlists, upstream baseline,
+visualization assets, and wrapper publication status unchanged.
+
+Added test tooling:
+
+| Area | Evidence |
+| --- | --- |
+| Oracle replay | Adds `--replay-random SAMPLE --seed S` and `--replay-random-per-dof SAMPLE --seed S` to run one generated oracle sample and print a fixture-ready `CaseData` initializer. |
+| Tracking replay | Adds `--tracking-random-replay SAMPLE --seed S` and `--tracking-random-audit-replay SAMPLE --seed S` to run one generated tracking sample and print fixture-ready C initializers. |
+| Routine smoke | Adds `ruckig_c_tracking_random_replay_smoke`, `ruckig_c_tracking_random_audit_replay_smoke`, `ruckig_c_oracle_random_replay_smoke`, and `ruckig_c_oracle_random_per_dof_replay_smoke` as single-sample CTest checks. |
+| Compatibility | Existing `--random`, `--random-per-dof`, `--tracking-random`, and `--tracking-random-audit` behavior remains unchanged. |
+| Deferred | Automatic shrinking and generated source-file writing remain out of scope. |
+
+The local checklist is
+`docs/release/checklists/post-v0.15.0-random-repro-materialization.md`.
+
 ## 0.14.0-alpha.1 Interrupt Boundary API-Neutral Audit
 
 `0.14.0-alpha.1` adds a focused local audit for the existing

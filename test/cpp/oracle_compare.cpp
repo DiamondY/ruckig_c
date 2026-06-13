@@ -991,6 +991,145 @@ void print_case_repro(const CaseData& test_case, std::uint64_t seed, size_t samp
     print_sync_vector("per_dof_synchronization", test_case.per_dof_synchronization);
 }
 
+const char* control_initializer(ruckig_control_interface_t value) {
+    return value == RUCKIG_CONTROL_VELOCITY ? "RUCKIG_CONTROL_VELOCITY" : "RUCKIG_CONTROL_POSITION";
+}
+
+const char* synchronization_initializer(ruckig_synchronization_t value) {
+    switch (value) {
+        case RUCKIG_SYNCHRONIZATION_TIME:
+            return "RUCKIG_SYNCHRONIZATION_TIME";
+        case RUCKIG_SYNCHRONIZATION_TIME_IF_NECESSARY:
+            return "RUCKIG_SYNCHRONIZATION_TIME_IF_NECESSARY";
+        case RUCKIG_SYNCHRONIZATION_PHASE:
+            return "RUCKIG_SYNCHRONIZATION_PHASE";
+        case RUCKIG_SYNCHRONIZATION_NONE:
+            return "RUCKIG_SYNCHRONIZATION_NONE";
+    }
+    return "RUCKIG_SYNCHRONIZATION_TIME";
+}
+
+const char* discretization_initializer(ruckig_duration_discretization_t value) {
+    return value == RUCKIG_DURATION_DISCRETE ? "RUCKIG_DURATION_DISCRETE" : "RUCKIG_DURATION_CONTINUOUS";
+}
+
+void print_double_initializer(std::ostream& stream, double value) {
+    if (std::isinf(value)) {
+        stream << (value < 0.0 ? "-inf" : "inf");
+        return;
+    }
+    if (std::isnan(value)) {
+        stream << "std::numeric_limits<double>::quiet_NaN()";
+        return;
+    }
+    stream.precision(17);
+    stream << value;
+}
+
+void print_double_vector_initializer(const std::vector<double>& values) {
+    std::cout << "{";
+    for (size_t i = 0; i < values.size(); ++i) {
+        if (i != 0) {
+            std::cout << ", ";
+        }
+        print_double_initializer(std::cout, values[i]);
+    }
+    std::cout << "}";
+}
+
+void print_bool_vector_initializer(const std::vector<bool>& values) {
+    std::cout << "{";
+    for (size_t i = 0; i < values.size(); ++i) {
+        if (i != 0) {
+            std::cout << ", ";
+        }
+        std::cout << (values[i] ? "true" : "false");
+    }
+    std::cout << "}";
+}
+
+void print_control_vector_initializer(const std::vector<ruckig_control_interface_t>& values) {
+    std::cout << "{";
+    for (size_t i = 0; i < values.size(); ++i) {
+        if (i != 0) {
+            std::cout << ", ";
+        }
+        std::cout << control_initializer(values[i]);
+    }
+    std::cout << "}";
+}
+
+void print_sync_vector_initializer(const std::vector<ruckig_synchronization_t>& values) {
+    std::cout << "{";
+    for (size_t i = 0; i < values.size(); ++i) {
+        if (i != 0) {
+            std::cout << ", ";
+        }
+        std::cout << synchronization_initializer(values[i]);
+    }
+    std::cout << "}";
+}
+
+void print_first_time_vector_initializer(const std::vector<FirstTimeQuery>& values) {
+    std::cout << "{";
+    for (size_t i = 0; i < values.size(); ++i) {
+        if (i != 0) {
+            std::cout << ", ";
+        }
+        std::cout << "{";
+        std::cout << values[i].dof << ", ";
+        print_double_initializer(std::cout, values[i].position);
+        std::cout << ", ";
+        print_double_initializer(std::cout, values[i].time_after);
+        std::cout << "}";
+    }
+    std::cout << "}";
+}
+
+void print_case_fixture_initializer(const CaseData& test_case, std::uint64_t seed, size_t sample_index, const char* kind) {
+    std::cout << "oracle random replay fixture kind=" << kind << " seed=" << seed << " sample=" << sample_index << '\n';
+    std::cout << "cases.push_back(CaseData{\n";
+    std::cout << "    \"" << test_case.name << "\",\n";
+    std::cout << "    " << test_case.dofs << ",\n";
+    std::cout << "    ";
+    print_double_initializer(std::cout, test_case.delta_time);
+    std::cout << ",\n";
+    std::cout << "    " << control_initializer(test_case.control_interface) << ",\n";
+    std::cout << "    " << synchronization_initializer(test_case.synchronization) << ",\n";
+    std::cout << "    " << discretization_initializer(test_case.duration_discretization) << ",\n";
+    std::cout << "    " << (test_case.has_minimum_duration ? "true" : "false") << ",\n";
+    std::cout << "    ";
+    print_double_initializer(std::cout, test_case.minimum_duration);
+    std::cout << ",\n";
+    const auto print_field = [](const char* indent, const auto& printer) {
+        std::cout << indent;
+        printer();
+        std::cout << ",\n";
+    };
+    print_field("    ", [&]() { print_double_vector_initializer(test_case.current_position); });
+    print_field("    ", [&]() { print_double_vector_initializer(test_case.current_velocity); });
+    print_field("    ", [&]() { print_double_vector_initializer(test_case.current_acceleration); });
+    print_field("    ", [&]() { print_double_vector_initializer(test_case.target_position); });
+    print_field("    ", [&]() { print_double_vector_initializer(test_case.target_velocity); });
+    print_field("    ", [&]() { print_double_vector_initializer(test_case.target_acceleration); });
+    print_field("    ", [&]() { print_double_vector_initializer(test_case.max_velocity); });
+    print_field("    ", [&]() { print_double_vector_initializer(test_case.max_acceleration); });
+    print_field("    ", [&]() { print_double_vector_initializer(test_case.max_jerk); });
+    print_field("    ", [&]() { print_bool_vector_initializer(test_case.enabled); });
+    print_field("    ", [&]() { print_double_vector_initializer(test_case.min_velocity); });
+    print_field("    ", [&]() { print_double_vector_initializer(test_case.min_acceleration); });
+    print_field("    ", [&]() { print_control_vector_initializer(test_case.per_dof_control_interface); });
+    print_field("    ", [&]() { print_sync_vector_initializer(test_case.per_dof_synchronization); });
+    print_field("    ", [&]() { print_first_time_vector_initializer(test_case.first_time_queries); });
+    print_field("    ", [&]() { print_double_vector_initializer(test_case.extra_sample_times); });
+    std::cout << "    " << (test_case.compare_first_time_queries ? "true" : "false") << ",\n";
+    std::cout << "    " << (test_case.compare_update_loop ? "true" : "false") << ",\n";
+    std::cout << "    ";
+    print_double_initializer(std::cout, test_case.first_time_tolerance);
+    std::cout << "\n";
+    std::cout << "});\n";
+}
+
 CaseData make_random_case(RandomGenerator& rng, size_t index) {
     const double inf = std::numeric_limits<double>::infinity();
     CaseData test_case;
@@ -1213,6 +1352,26 @@ void run_random_per_dof_cases(size_t count, std::uint64_t seed) {
     }
 }
 
+void replay_random_case(size_t sample_index, std::uint64_t seed) {
+    RandomGenerator rng(seed);
+    CaseData test_case;
+    for (size_t i = 0; i <= sample_index; ++i) {
+        test_case = make_random_case(rng, i);
+    }
+    print_case_fixture_initializer(test_case, seed, sample_index, "random");
+    run_case(test_case);
+}
+
+void replay_random_per_dof_case(size_t sample_index, std::uint64_t seed) {
+    RandomGenerator rng(seed);
+    CaseData test_case;
+    for (size_t i = 0; i <= sample_index; ++i) {
+        test_case = make_random_per_dof_case(rng, i);
+    }
+    print_case_fixture_initializer(test_case, seed, sample_index, "random-per-dof");
+    run_case(test_case, false);
+}
+
 } // namespace
 
 int main(int argc, char** argv) {
@@ -1220,7 +1379,12 @@ int main(int argc, char** argv) {
     std::vector<CaseData> cases;
     size_t random_count = 0;
     size_t random_per_dof_count = 0;
+    size_t replay_random_sample = 0;
+    size_t replay_random_per_dof_sample = 0;
     std::uint64_t random_seed = 1;
+    bool replay_random = false;
+    bool replay_random_per_dof = false;
+    bool seed_seen = false;
     bool waypoint_section_oracle_only = false;
 
     for (int i = 1; i < argc; ++i) {
@@ -1229,20 +1393,52 @@ int main(int argc, char** argv) {
             random_count = static_cast<size_t>(std::stoull(argv[++i]));
         } else if (arg == "--random-per-dof" && i + 1 < argc) {
             random_per_dof_count = static_cast<size_t>(std::stoull(argv[++i]));
+        } else if (arg == "--replay-random" && i + 1 < argc) {
+            replay_random = true;
+            replay_random_sample = static_cast<size_t>(std::stoull(argv[++i]));
+        } else if (arg == "--replay-random-per-dof" && i + 1 < argc) {
+            replay_random_per_dof = true;
+            replay_random_per_dof_sample = static_cast<size_t>(std::stoull(argv[++i]));
         } else if (arg == "--seed" && i + 1 < argc) {
             random_seed = static_cast<std::uint64_t>(std::stoull(argv[++i]));
+            seed_seen = true;
         } else if (arg == "--waypoint-section-oracle") {
             waypoint_section_oracle_only = true;
         } else {
-            std::cerr << "usage: " << argv[0] << " [--random N] [--random-per-dof N] [--seed S] [--waypoint-section-oracle]\n";
+            std::cerr << "usage: " << argv[0] << " [--random N] [--random-per-dof N] [--replay-random SAMPLE --seed S] [--replay-random-per-dof SAMPLE --seed S] [--seed S] [--waypoint-section-oracle]\n";
             return 2;
         }
+    }
+
+    if ((replay_random && replay_random_per_dof)
+        || ((replay_random || replay_random_per_dof) && (random_count > 0 || random_per_dof_count > 0 || waypoint_section_oracle_only))
+        || ((replay_random || replay_random_per_dof) && !seed_seen)) {
+        std::cerr << "usage: " << argv[0] << " [--random N] [--random-per-dof N] [--replay-random SAMPLE --seed S] [--replay-random-per-dof SAMPLE --seed S] [--seed S] [--waypoint-section-oracle]\n";
+        return 2;
     }
 
     if (waypoint_section_oracle_only) {
         run_waypoint_section_oracle_cases();
         if (failures != 0) {
             std::cerr << failures << " waypoint section oracle comparison failures\n";
+            return 1;
+        }
+        return 0;
+    }
+
+    if (replay_random) {
+        replay_random_case(replay_random_sample, random_seed);
+        if (failures != 0) {
+            std::cerr << failures << " oracle comparison failures\n";
+            return 1;
+        }
+        return 0;
+    }
+
+    if (replay_random_per_dof) {
+        replay_random_per_dof_case(replay_random_per_dof_sample, random_seed);
+        if (failures != 0) {
+            std::cerr << failures << " oracle comparison failures\n";
             return 1;
         }
         return 0;

@@ -125,6 +125,8 @@ void run_tracking_no_allocation_tests(void);
 void run_tracking_tests(void);
 void run_tracking_random_tests(size_t samples, unsigned seed);
 void run_tracking_random_audit_tests(size_t samples, unsigned seed);
+void run_tracking_random_replay_tests(size_t sample, unsigned seed);
+void run_tracking_random_audit_replay_tests(size_t sample, unsigned seed);
 
 int main(int argc, char** argv) {
     if (argc == 5 && strcmp(argv[1], "--tracking-random") == 0 && strcmp(argv[3], "--seed") == 0) {
@@ -137,6 +139,18 @@ int main(int argc, char** argv) {
         const unsigned long samples = strtoul(argv[2], NULL, 10);
         const unsigned long seed = strtoul(argv[4], NULL, 10);
         run_tracking_random_audit_tests((size_t)samples, (unsigned)seed);
+        return ruckig_c_test_failures == 0 ? 0 : 1;
+    }
+    if (argc == 5 && strcmp(argv[1], "--tracking-random-replay") == 0 && strcmp(argv[3], "--seed") == 0) {
+        const unsigned long sample = strtoul(argv[2], NULL, 10);
+        const unsigned long seed = strtoul(argv[4], NULL, 10);
+        run_tracking_random_replay_tests((size_t)sample, (unsigned)seed);
+        return ruckig_c_test_failures == 0 ? 0 : 1;
+    }
+    if (argc == 5 && strcmp(argv[1], "--tracking-random-audit-replay") == 0 && strcmp(argv[3], "--seed") == 0) {
+        const unsigned long sample = strtoul(argv[2], NULL, 10);
+        const unsigned long seed = strtoul(argv[4], NULL, 10);
+        run_tracking_random_audit_replay_tests((size_t)sample, (unsigned)seed);
         return ruckig_c_test_failures == 0 ? 0 : 1;
     }
     if (argc == 2) {
@@ -252,7 +266,7 @@ int main(int argc, char** argv) {
         return 2;
     }
     if (argc > 2) {
-        fprintf(stderr, "usage: ruckig_c_tests [--waypoint|--per-section|--waypoint-quality|--waypoint-resume-stress|--waypoint-resume-quality-audit|--interrupt-boundary-audit|--no-waypoint-interrupt-audit|--interrupt-post-release-quality|--property-invariants|--state-machine-branch-coverage|--solver-branch-coverage|--tracking|--tracking-api|--tracking-sequence-continuation-api|--tracking-validation|--tracking-online|--tracking-interrupt-audit|--tracking-fixed-corpus|--tracking-offline|--tracking-optimized|--tracking-quality|--tracking-quality-hardening|--tracking-stability|--tracking-no-allocation|--tracking-random N --seed S|--tracking-random-audit N --seed S]\n");
+        fprintf(stderr, "usage: ruckig_c_tests [--waypoint|--per-section|--waypoint-quality|--waypoint-resume-stress|--waypoint-resume-quality-audit|--interrupt-boundary-audit|--no-waypoint-interrupt-audit|--interrupt-post-release-quality|--property-invariants|--state-machine-branch-coverage|--solver-branch-coverage|--tracking|--tracking-api|--tracking-sequence-continuation-api|--tracking-validation|--tracking-online|--tracking-interrupt-audit|--tracking-fixed-corpus|--tracking-offline|--tracking-optimized|--tracking-quality|--tracking-quality-hardening|--tracking-stability|--tracking-no-allocation|--tracking-random N --seed S|--tracking-random-audit N --seed S|--tracking-random-replay SAMPLE --seed S|--tracking-random-audit-replay SAMPLE --seed S]\n");
         return 2;
     }
 

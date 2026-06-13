@@ -13,7 +13,7 @@ Historical rewrite plans and release evidence are retained for traceability.
 - `current/api_diagnostics.md` - C API validation and diagnostics behavior.
 - `current/code_quality_audit.md` - post-`v0.15.0` code-quality and
   test-quality risk map, state-machine and solver branch coverage evidence,
-  local quality gates, and failure reproduction policy.
+  local quality gates, and random replay/materialization policy.
 - `current/original_parity_coverage.md` - current coverage estimates and gaps
   against the frozen original reference and original product surface.
 - `current/test_coverage_audit.md` - local LLVM coverage summary and original
@@ -140,6 +140,8 @@ Historical rewrite plans and release evidence are retained for traceability.
   slice. `release/checklists/post-v0.15.0-solver-adjacent-branch-coverage.md`
   records the follow-up solver-adjacent branch coverage slice for brake and
   lower-order step paths.
+  `release/checklists/post-v0.15.0-random-repro-materialization.md` records
+  the follow-up random replay/export materialization slice.
 - `release/evidence/verification_report.md` - local and CI verification
   history.
 - `release/evidence/performance_report.md` - performance procedure and release

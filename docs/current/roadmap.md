@@ -170,6 +170,12 @@ ABI baseline accepted during the 0.15 design line and does not start
   coverage from `71.50%` to `72.94%` without changing public ABI, version
   metadata, workflow, tag/release state, upstream baseline, or visualization
   assets.
+- `post-v0.15.0-random-repro-materialization` is implemented locally as a
+  follow-up reproducibility quality slice. It adds single-sample replay/export
+  commands for oracle random, oracle per-DoF random, tracking random stress,
+  and tracking random audit samples, plus small CTest smoke coverage, without
+  changing public ABI, version metadata, workflow, tag/release state, upstream
+  baseline, or visualization assets.
 - Keep the 184-symbol `v0.15.0` public C ABI baseline unless a later separate
   public API decision is accepted.
 - This quality audit does not start `0.16.0-design`, change version metadata,
