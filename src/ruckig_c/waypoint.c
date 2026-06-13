@@ -1,40 +1,9 @@
-#include "ruckig_c/platform_clock.h"
 #include "ruckig_c/internal.h"
+#include "ruckig_c/interrupt_context.h"
 
 #include <float.h>
 #include <math.h>
 #include <string.h>
-
-typedef struct waypoint_interrupt_context {
-    bool enabled;
-    bool interrupted;
-    uint64_t start_us;
-    double duration_us;
-} waypoint_interrupt_context_t;
-
-static waypoint_interrupt_context_t waypoint_interrupt_context_start(const ruckig_input_t* input) {
-    waypoint_interrupt_context_t context;
-    context.enabled = input && input->has_interrupt_calculation_duration;
-    context.interrupted = false;
-    context.start_us = context.enabled ? ruckig_platform_monotonic_time_us() : 0u;
-    context.duration_us = context.enabled ? input->interrupt_calculation_duration : 0.0;
-    return context;
-}
-
-static bool waypoint_interrupt_check(waypoint_interrupt_context_t* context) {
-    uint64_t now_us;
-    double elapsed_us;
-    if (!context || !context->enabled || context->interrupted) {
-        return false;
-    }
-    now_us = ruckig_platform_monotonic_time_us();
-    elapsed_us = now_us >= context->start_us ? (double)(now_us - context->start_us) : 0.0;
-    if (elapsed_us >= context->duration_us) {
-        context->interrupted = true;
-        return true;
-    }
-    return false;
-}
 
 static bool waypoint_double_arrays_equal(const double* lhs, const double* rhs, size_t count) {
     size_t i;
@@ -84,15 +53,7 @@ static bool waypoint_synchronization_arrays_equal(
     return true;
 }
 
-static bool waypoint_planning_identity_equals(const ruckig_input_t* lhs, const ruckig_input_t* rhs) {
-    const size_t n = lhs && rhs ? lhs->dofs : 0;
-    const size_t waypoint_values = lhs && rhs ? lhs->waypoint_count * lhs->dofs : 0;
-    const size_t section_values = lhs && rhs ? (lhs->waypoint_count + 1) * lhs->dofs : 0;
-    const size_t section_count = lhs && rhs ? lhs->waypoint_count + 1 : 0;
-    if (!lhs || !rhs || lhs->dofs != rhs->dofs) {
-        return false;
-    }
-
+static bool waypoint_identity_scalar_flags_equal(const ruckig_input_t* lhs, const ruckig_input_t* rhs) {
     return lhs->control_interface == rhs->control_interface
         && lhs->waypoint_count == rhs->waypoint_count
         && lhs->synchronization == rhs->synchronization
@@ -110,8 +71,11 @@ static bool waypoint_planning_identity_equals(const ruckig_input_t* lhs, const r
         && lhs->has_per_section_max_position == rhs->has_per_section_max_position
         && lhs->has_per_section_min_position == rhs->has_per_section_min_position
         && lhs->has_per_section_minimum_duration == rhs->has_per_section_minimum_duration
-        && (!lhs->has_minimum_duration || lhs->minimum_duration == rhs->minimum_duration)
-        && waypoint_double_arrays_equal(lhs->target_position, rhs->target_position, n)
+        && (!lhs->has_minimum_duration || lhs->minimum_duration == rhs->minimum_duration);
+}
+
+static bool waypoint_identity_base_arrays_equal(const ruckig_input_t* lhs, const ruckig_input_t* rhs, size_t n) {
+    return waypoint_double_arrays_equal(lhs->target_position, rhs->target_position, n)
         && waypoint_double_arrays_equal(lhs->target_velocity, rhs->target_velocity, n)
         && waypoint_double_arrays_equal(lhs->target_acceleration, rhs->target_acceleration, n)
         && waypoint_double_arrays_equal(lhs->max_velocity, rhs->max_velocity, n)
@@ -119,13 +83,23 @@ static bool waypoint_planning_identity_equals(const ruckig_input_t* lhs, const r
         && waypoint_double_arrays_equal(lhs->max_jerk, rhs->max_jerk, n)
         && waypoint_double_arrays_equal(lhs->max_position, rhs->max_position, n)
         && waypoint_double_arrays_equal(lhs->min_position, rhs->min_position, n)
-        && waypoint_bool_arrays_equal(lhs->enabled, rhs->enabled, n)
-        && (waypoint_values == 0 || waypoint_double_arrays_equal(lhs->intermediate_positions, rhs->intermediate_positions, waypoint_values))
-        && (!lhs->has_min_velocity || waypoint_double_arrays_equal(lhs->min_velocity, rhs->min_velocity, n))
+        && waypoint_bool_arrays_equal(lhs->enabled, rhs->enabled, n);
+}
+
+static bool waypoint_identity_optional_dof_arrays_equal(const ruckig_input_t* lhs, const ruckig_input_t* rhs, size_t n) {
+    return (!lhs->has_min_velocity || waypoint_double_arrays_equal(lhs->min_velocity, rhs->min_velocity, n))
         && (!lhs->has_min_acceleration || waypoint_double_arrays_equal(lhs->min_acceleration, rhs->min_acceleration, n))
         && (!lhs->has_per_dof_control_interface || waypoint_control_interface_arrays_equal(lhs->per_dof_control_interface, rhs->per_dof_control_interface, n))
-        && (!lhs->has_per_dof_synchronization || waypoint_synchronization_arrays_equal(lhs->per_dof_synchronization, rhs->per_dof_synchronization, n))
-        && (!lhs->has_per_section_max_velocity || waypoint_double_arrays_equal(lhs->per_section_max_velocity, rhs->per_section_max_velocity, section_values))
+        && (!lhs->has_per_dof_synchronization || waypoint_synchronization_arrays_equal(lhs->per_dof_synchronization, rhs->per_dof_synchronization, n));
+}
+
+static bool waypoint_identity_per_section_arrays_equal(
+    const ruckig_input_t* lhs,
+    const ruckig_input_t* rhs,
+    size_t section_values,
+    size_t section_count
+) {
+    return (!lhs->has_per_section_max_velocity || waypoint_double_arrays_equal(lhs->per_section_max_velocity, rhs->per_section_max_velocity, section_values))
         && (!lhs->has_per_section_min_velocity || waypoint_double_arrays_equal(lhs->per_section_min_velocity, rhs->per_section_min_velocity, section_values))
         && (!lhs->has_per_section_max_acceleration || waypoint_double_arrays_equal(lhs->per_section_max_acceleration, rhs->per_section_max_acceleration, section_values))
         && (!lhs->has_per_section_min_acceleration || waypoint_double_arrays_equal(lhs->per_section_min_acceleration, rhs->per_section_min_acceleration, section_values))
@@ -133,6 +107,22 @@ static bool waypoint_planning_identity_equals(const ruckig_input_t* lhs, const r
         && (!lhs->has_per_section_max_position || waypoint_double_arrays_equal(lhs->per_section_max_position, rhs->per_section_max_position, section_values))
         && (!lhs->has_per_section_min_position || waypoint_double_arrays_equal(lhs->per_section_min_position, rhs->per_section_min_position, section_values))
         && (!lhs->has_per_section_minimum_duration || waypoint_double_arrays_equal(lhs->per_section_minimum_duration, rhs->per_section_minimum_duration, section_count));
+}
+
+static bool waypoint_planning_identity_equals(const ruckig_input_t* lhs, const ruckig_input_t* rhs) {
+    const size_t n = lhs && rhs ? lhs->dofs : 0;
+    const size_t waypoint_values = lhs && rhs ? lhs->waypoint_count * lhs->dofs : 0;
+    const size_t section_values = lhs && rhs ? (lhs->waypoint_count + 1) * lhs->dofs : 0;
+    const size_t section_count = lhs && rhs ? lhs->waypoint_count + 1 : 0;
+    if (!lhs || !rhs || lhs->dofs != rhs->dofs) {
+        return false;
+    }
+
+    return waypoint_identity_scalar_flags_equal(lhs, rhs)
+        && waypoint_identity_base_arrays_equal(lhs, rhs, n)
+        && (waypoint_values == 0 || waypoint_double_arrays_equal(lhs->intermediate_positions, rhs->intermediate_positions, waypoint_values))
+        && waypoint_identity_optional_dof_arrays_equal(lhs, rhs, n)
+        && waypoint_identity_per_section_arrays_equal(lhs, rhs, section_values, section_count);
 }
 
 static void waypoint_engine_assert_consistent(const ruckig_t* otg) {
@@ -907,7 +897,7 @@ static ruckig_result_t waypoint_engine_step(
 static ruckig_result_t waypoint_engine_run(
     ruckig_t* otg,
     const ruckig_input_t* input,
-    waypoint_interrupt_context_t* interrupt
+    ruckig_interrupt_context_t* interrupt
 ) {
     while (otg->waypoint_engine.active && !otg->waypoint_engine.complete) {
         bool candidate_evaluated = false;
@@ -916,7 +906,7 @@ static ruckig_result_t waypoint_engine_run(
             waypoint_engine_update_last_diagnostics(otg);
             return result;
         }
-        if (candidate_evaluated && waypoint_interrupt_check(interrupt)) {
+        if (candidate_evaluated && ruckig_interrupt_context_check(interrupt)) {
             break;
         }
     }
@@ -1047,7 +1037,7 @@ ruckig_result_t ruckig_calculate_waypoints_interruptible(
     ruckig_trajectory_t* trajectory,
     bool* was_interrupted
 ) {
-    waypoint_interrupt_context_t interrupt;
+    ruckig_interrupt_context_t interrupt;
     ruckig_result_t result;
     if (was_interrupted) {
         *was_interrupted = false;
@@ -1057,7 +1047,7 @@ ruckig_result_t ruckig_calculate_waypoints_interruptible(
         return RUCKIG_ERROR_INVALID_INPUT;
     }
     trajectory->valid = false;
-    interrupt = waypoint_interrupt_context_start(input);
+    interrupt = ruckig_interrupt_context_start(input, true);
     result = waypoint_engine_start(otg, input, true);
     if (result != RUCKIG_WORKING) {
         if (was_interrupted) {
@@ -1098,7 +1088,7 @@ ruckig_result_t ruckig_waypoint_resume_continue(
     bool* was_interrupted,
     bool* published
 ) {
-    waypoint_interrupt_context_t interrupt;
+    ruckig_interrupt_context_t interrupt;
     ruckig_result_t result;
     if (was_interrupted) {
         *was_interrupted = false;
@@ -1114,7 +1104,7 @@ ruckig_result_t ruckig_waypoint_resume_continue(
         return RUCKIG_WORKING;
     }
 
-    interrupt = waypoint_interrupt_context_start(input);
+    interrupt = ruckig_interrupt_context_start(input, true);
     otg->waypoint_engine.last_candidate_evaluations = 0;
     otg->waypoint_engine.initial_calculation = false;
     otg->waypoint_engine.has_published_candidate = false;

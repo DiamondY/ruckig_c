@@ -153,7 +153,7 @@ int ruckig_solve_resolvent(double x[3], double a, double b, double c) {
             if (r < 0.0) {
                 A = -A;
             }
-            B = (0.0 == A ? 0.0 : q / A);
+            B = (fabs(A) < DBL_EPSILON ? 0.0 : q / A);
 
             x[0] = (A + B) - a;
             x[1] = -(A + B) / 2.0 - a;

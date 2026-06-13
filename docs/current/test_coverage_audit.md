@@ -963,6 +963,41 @@ Lowest line-coverage implementation files in this run:
 | `velocity_third_step1.c` | 66.10% | Some candidate families are long-tail cases in the random corpus. |
 | `position_second_step1.c` | 71.90% | Second-order position setup has uncovered rare branch combinations. |
 
+## Post-v0.15.0 External Review Follow-Up Coverage
+
+The `post-v0.15.0-review-followup-quality-hardening` slice is primarily a
+maintainability and parity-protection slice, not a branch-coverage target
+slice. It keeps the `v0.15.0` 184-symbol public C ABI baseline unchanged and
+adds targeted evidence around the review items that could affect solver,
+state-machine, and numerical behavior.
+
+Added coverage and evidence:
+
+| Area | Added evidence |
+| --- | --- |
+| Roots numerical robustness | New `ruckig_c_roots_numeric_audit` CTest selector and CLI `--roots-numeric-audit`, covering resolvent zero/tiny-A behavior, small-scale cubic/quartic residuals, repeated/near-zero roots, non-negative filtering, sorting, and no-allocation behavior. |
+| Waypoint queue saturation | `ruckig_c_state_machine_branch_coverage` now includes a public interrupted/resume case that reaches a saturated private waypoint branch queue and verifies bounded queue count/index behavior under normal and internal-assert builds. |
+| Tracking refactor parity | After splitting `tracking.c`, normal and shared full CTest passed, and focused tracking online/offline/optimized/interrupt/no-allocation plus Fast/Optimized continuation selectors passed. |
+| Profile context conversion | `test_profile_context_entrypoints` explicitly exercises `_ctx` profile-check entry points for first-order, second-order position, second-order velocity, third-order position, and third-order velocity paths. |
+| Roots guard parity | Fixed oracle 92 plus waypoint section oracle 4 passed; oracle random `100000` seeds `1`, `2`, and `41` passed; per-DoF random `100000` seed `1` passed. |
+
+Local validation summary:
+
+| Gate | Result |
+| --- | --- |
+| Normal full CTest | 66/66 passed |
+| Shared full CTest | 66/66 passed |
+| Internal-assert focused CTest | 5/5 passed |
+| ABI/export comparison | Public exported symbols match the `v0.15.0` allowlist |
+| Rust wrapper smoke | 16/16 tests plus examples passed |
+| Python prototype smoke | 24/24 tests passed against the shared DLL |
+
+No coverage artifact is recorded for this slice because the objective is
+review follow-up hardening and behavior-preserving refactor parity, not a new
+coverage-percentage target. The prior branch-coverage baseline remains
+`72.94%` from
+`out/coverage/post-v0.15.0-solver-adjacent-branch-coverage/coverage-summary.txt`.
+
 ## Original Test Mapping
 
 Original source: `original/ruckig-main/test/test_target.cpp`.

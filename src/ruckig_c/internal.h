@@ -281,7 +281,7 @@ bool ruckig_input_same_dofs(const ruckig_input_t* input, size_t dofs);
 bool ruckig_input_equals(const ruckig_input_t* lhs, const ruckig_input_t* rhs);
 bool ruckig_input_equals_ignoring_interrupt(const ruckig_input_t* lhs, const ruckig_input_t* rhs);
 ruckig_result_t ruckig_calculate_target(
-    ruckig_t* otg,
+    const ruckig_t* otg,
     const ruckig_input_t* input,
     ruckig_trajectory_t* trajectory
 );

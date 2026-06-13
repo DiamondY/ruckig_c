@@ -4,10 +4,6 @@
 #include <math.h>
 #include <string.h>
 
-static double* allocate_double_vector(size_t count) {
-    return (double*)ruckig_calloc(count, sizeof(double));
-}
-
 static double* allocate_optional_double_vector(size_t count) {
     return count == 0 ? NULL : (double*)ruckig_calloc(count, sizeof(double));
 }
@@ -29,31 +25,33 @@ static bool allocate_input_vectors(ruckig_input_t* input) {
     const size_t sections = input->max_number_of_waypoints + 1;
     const size_t section_values = sections * n;
     const size_t waypoint_values = input->max_number_of_waypoints * n;
-    input->current_position = allocate_double_vector(n);
-    input->current_velocity = allocate_double_vector(n);
-    input->current_acceleration = allocate_double_vector(n);
-    input->target_position = allocate_double_vector(n);
-    input->target_velocity = allocate_double_vector(n);
-    input->target_acceleration = allocate_double_vector(n);
-    input->max_velocity = allocate_double_vector(n);
-    input->max_acceleration = allocate_double_vector(n);
-    input->max_jerk = allocate_double_vector(n);
-    input->max_position = allocate_double_vector(n);
-    input->min_position = allocate_double_vector(n);
+    /* On partial failure, ruckig_input_destroy reclaims fields that were
+       already assigned; this relies on the owning input object being calloc-zeroed. */
+    input->current_position = ruckig_allocate_double_vector(n);
+    input->current_velocity = ruckig_allocate_double_vector(n);
+    input->current_acceleration = ruckig_allocate_double_vector(n);
+    input->target_position = ruckig_allocate_double_vector(n);
+    input->target_velocity = ruckig_allocate_double_vector(n);
+    input->target_acceleration = ruckig_allocate_double_vector(n);
+    input->max_velocity = ruckig_allocate_double_vector(n);
+    input->max_acceleration = ruckig_allocate_double_vector(n);
+    input->max_jerk = ruckig_allocate_double_vector(n);
+    input->max_position = ruckig_allocate_double_vector(n);
+    input->min_position = ruckig_allocate_double_vector(n);
     input->enabled = allocate_bool_vector(n);
-    input->min_velocity = allocate_double_vector(n);
-    input->min_acceleration = allocate_double_vector(n);
+    input->min_velocity = ruckig_allocate_double_vector(n);
+    input->min_acceleration = ruckig_allocate_double_vector(n);
     input->per_dof_control_interface = allocate_control_interface_vector(n);
     input->per_dof_synchronization = allocate_synchronization_vector(n);
     input->intermediate_positions = allocate_optional_double_vector(waypoint_values);
-    input->per_section_max_velocity = allocate_double_vector(section_values);
-    input->per_section_min_velocity = allocate_double_vector(section_values);
-    input->per_section_max_acceleration = allocate_double_vector(section_values);
-    input->per_section_min_acceleration = allocate_double_vector(section_values);
-    input->per_section_max_jerk = allocate_double_vector(section_values);
-    input->per_section_max_position = allocate_double_vector(section_values);
-    input->per_section_min_position = allocate_double_vector(section_values);
-    input->per_section_minimum_duration = allocate_double_vector(sections);
+    input->per_section_max_velocity = ruckig_allocate_double_vector(section_values);
+    input->per_section_min_velocity = ruckig_allocate_double_vector(section_values);
+    input->per_section_max_acceleration = ruckig_allocate_double_vector(section_values);
+    input->per_section_min_acceleration = ruckig_allocate_double_vector(section_values);
+    input->per_section_max_jerk = ruckig_allocate_double_vector(section_values);
+    input->per_section_max_position = ruckig_allocate_double_vector(section_values);
+    input->per_section_min_position = ruckig_allocate_double_vector(section_values);
+    input->per_section_minimum_duration = ruckig_allocate_double_vector(sections);
 
     return input->current_position && input->current_velocity && input->current_acceleration
         && input->target_position && input->target_velocity && input->target_acceleration

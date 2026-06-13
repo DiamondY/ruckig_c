@@ -62,6 +62,8 @@ set(RUCKIG_C_SOURCES
   src/ruckig_c/roots.c
   src/ruckig_c/ruckig.c
   src/ruckig_c/tracking.c
+  src/ruckig_c/tracking_sequence.c
+  src/ruckig_c/tracking_update.c
   src/ruckig_c/trajectory.c
   src/ruckig_c/utils.c
   src/ruckig_c/velocity_second_step1.c
@@ -212,6 +214,7 @@ if(BUILD_RUCKIG_C_TESTS)
   add_test(NAME ruckig_c_no_waypoint_interrupt_audit COMMAND ruckig_c_tests --no-waypoint-interrupt-audit)
   add_test(NAME ruckig_c_interrupt_post_release_quality COMMAND ruckig_c_tests --interrupt-post-release-quality)
   add_test(NAME ruckig_c_property_invariants COMMAND ruckig_c_tests --property-invariants)
+  add_test(NAME ruckig_c_roots_numeric_audit COMMAND ruckig_c_tests --roots-numeric-audit)
   add_test(NAME ruckig_c_state_machine_branch_coverage COMMAND ruckig_c_tests --state-machine-branch-coverage)
   add_test(NAME ruckig_c_solver_branch_coverage COMMAND ruckig_c_tests --solver-branch-coverage)
   add_test(NAME ruckig_c_tracking_api COMMAND ruckig_c_tests --tracking-api)

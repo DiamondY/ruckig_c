@@ -2,10 +2,6 @@
 
 #include <string.h>
 
-static double* allocate_double_vector(size_t count) {
-    return (double*)ruckig_calloc(count, sizeof(double));
-}
-
 static ruckig_result_t ruckig_output_create_impl(
     ruckig_output_t** output,
     size_t dofs,
@@ -23,10 +19,10 @@ static ruckig_result_t ruckig_output_create_impl(
     }
 
     value->dofs = dofs;
-    value->new_position = allocate_double_vector(dofs);
-    value->new_velocity = allocate_double_vector(dofs);
-    value->new_acceleration = allocate_double_vector(dofs);
-    value->new_jerk = allocate_double_vector(dofs);
+    value->new_position = ruckig_allocate_double_vector(dofs);
+    value->new_velocity = ruckig_allocate_double_vector(dofs);
+    value->new_acceleration = ruckig_allocate_double_vector(dofs);
+    value->new_jerk = ruckig_allocate_double_vector(dofs);
     if (!value->new_position || !value->new_velocity || !value->new_acceleration || !value->new_jerk) {
         ruckig_output_destroy(value);
         return RUCKIG_ERROR;

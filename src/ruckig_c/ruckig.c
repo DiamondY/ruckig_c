@@ -1,6 +1,6 @@
 #include "ruckig_c/internal.h"
 
-#include "ruckig_c/platform_clock.h"
+#include "ruckig_c/interrupt_context.h"
 #include "ruckig_c/position_first.h"
 #include "ruckig_c/velocity_second.h"
 
@@ -29,31 +29,6 @@ static double calculation_duration_finish(double start) {
     (void)start;
     return 0.0;
 #endif
-}
-
-typedef struct ruckig_interrupt_context {
-    bool enabled;
-    uint64_t start_us;
-    double duration_us;
-} ruckig_interrupt_context_t;
-
-static ruckig_interrupt_context_t ruckig_interrupt_context_start(const ruckig_input_t* input) {
-    ruckig_interrupt_context_t context;
-    context.enabled = input && input->has_interrupt_calculation_duration;
-    context.start_us = context.enabled ? ruckig_platform_monotonic_time_us() : 0u;
-    context.duration_us = context.enabled ? input->interrupt_calculation_duration : 0.0;
-    return context;
-}
-
-static bool ruckig_interrupt_context_elapsed(const ruckig_interrupt_context_t* context) {
-    uint64_t now_us;
-    double elapsed_us;
-    if (!context || !context->enabled) {
-        return false;
-    }
-    now_us = ruckig_platform_monotonic_time_us();
-    elapsed_us = now_us >= context->start_us ? (double)(now_us - context->start_us) : 0.0;
-    return elapsed_us >= context->duration_us;
 }
 
 static ruckig_result_t ruckig_trajectory_copy_internal(
@@ -1379,7 +1354,7 @@ RUCKIG_C_API size_t ruckig_get_max_number_of_waypoints(const ruckig_t* otg) {
 }
 
 ruckig_result_t ruckig_calculate_target(
-    ruckig_t* otg,
+    const ruckig_t* otg,
     const ruckig_input_t* input,
     ruckig_trajectory_t* trajectory
 ) {
@@ -1429,7 +1404,7 @@ static ruckig_result_t ruckig_calculate_target_interruptible(
 
     *was_interrupted = false;
     *published = false;
-    interrupt_context = ruckig_interrupt_context_start(input);
+    interrupt_context = ruckig_interrupt_context_start(input, true);
     result = ruckig_calculate_target(otg, input, otg->no_waypoint_scratch_trajectory);
     if (result != RUCKIG_WORKING) {
         return result;
@@ -1466,24 +1441,25 @@ RUCKIG_C_API ruckig_result_t ruckig_calculate(
     return ruckig_calculate_target(otg, input, trajectory);
 }
 
-RUCKIG_C_API ruckig_result_t ruckig_update(
+static void publish_new_trajectory_to_output(
     ruckig_t* otg,
     const ruckig_input_t* input,
     ruckig_output_t* output
 ) {
-    const double calculation_start = calculation_duration_start();
-    if (!otg || !input || !output || otg->dofs != input->dofs || output->dofs != otg->dofs) {
-        return RUCKIG_ERROR_INVALID_INPUT;
-    }
-    output->new_calculation = false;
-    output->was_calculation_interrupted = false;
-    if (input->waypoint_count == 0 || !input->has_interrupt_calculation_duration) {
-        ruckig_waypoint_resume_clear(otg);
-    }
-    const bool input_matches_current = otg->current_input_initialized
-        && ((input->waypoint_count > 0 || otg->current_input->waypoint_count > 0)
-            ? ruckig_input_equals_ignoring_interrupt(input, otg->current_input)
-            : ruckig_input_equals(input, otg->current_input));
+    ruckig_input_copy_state(input, otg->current_input);
+    otg->current_input_initialized = true;
+    output->time = 0.0;
+    output->new_section = 0;
+    output->did_section_change = false;
+    output->new_calculation = true;
+}
+
+static ruckig_result_t calculate_or_resume_output_trajectory(
+    ruckig_t* otg,
+    const ruckig_input_t* input,
+    ruckig_output_t* output,
+    bool input_matches_current
+) {
     if (!output->trajectory->valid
         || !otg->current_input_initialized
         || !input_matches_current) {
@@ -1508,19 +1484,13 @@ RUCKIG_C_API ruckig_result_t ruckig_update(
             result = ruckig_calculate(otg, input, output->trajectory);
         }
         if (result != RUCKIG_WORKING) {
-            output->calculation_duration = calculation_duration_finish(calculation_start);
             return result;
         }
         if (!(input->waypoint_count > 0 && input->has_interrupt_calculation_duration)) {
             ruckig_waypoint_resume_clear(otg);
         }
         if (published) {
-            ruckig_input_copy_state(input, otg->current_input);
-            otg->current_input_initialized = true;
-            output->time = 0.0;
-            output->new_section = 0;
-            output->did_section_change = false;
-            output->new_calculation = true;
+            publish_new_trajectory_to_output(otg, input, output);
         }
     } else if (input->waypoint_count > 0 && input->has_interrupt_calculation_duration) {
         bool published = false;
@@ -1536,38 +1506,69 @@ RUCKIG_C_API ruckig_result_t ruckig_update(
             &published
         );
         if (result != RUCKIG_WORKING) {
-            output->calculation_duration = calculation_duration_finish(calculation_start);
             return result;
         }
         if (published) {
-            ruckig_input_copy_state(input, otg->current_input);
-            otg->current_input_initialized = true;
-            output->time = 0.0;
-            output->new_section = 0;
-            output->did_section_change = false;
-            output->new_calculation = true;
+            publish_new_trajectory_to_output(otg, input, output);
         }
     }
+    return RUCKIG_WORKING;
+}
+
+static ruckig_result_t sample_output_at_next_time(ruckig_t* otg, ruckig_output_t* output) {
+    const size_t old_section = output->new_section;
+    ruckig_result_t sample_result;
 
     output->time += otg->delta_time;
-    {
-        const size_t old_section = output->new_section;
-        ruckig_result_t sample_result = ruckig_trajectory_at_time(
-            output->trajectory,
-            output->time,
-            output->new_position,
-            output->new_velocity,
-            output->new_acceleration,
-            output->new_jerk,
-            &output->new_section
-        );
-        if (sample_result != RUCKIG_WORKING) {
-            output->calculation_duration = calculation_duration_finish(calculation_start);
-            return sample_result;
-        }
-        output->did_section_change = output->new_section > old_section;
+    sample_result = ruckig_trajectory_at_time(
+        output->trajectory,
+        output->time,
+        output->new_position,
+        output->new_velocity,
+        output->new_acceleration,
+        output->new_jerk,
+        &output->new_section
+    );
+    if (sample_result != RUCKIG_WORKING) {
+        return sample_result;
     }
+    output->did_section_change = output->new_section > old_section;
     ruckig_output_pass_to_input(output, otg->current_input);
+    return RUCKIG_WORKING;
+}
+
+RUCKIG_C_API ruckig_result_t ruckig_update(
+    ruckig_t* otg,
+    const ruckig_input_t* input,
+    ruckig_output_t* output
+) {
+    const double calculation_start = calculation_duration_start();
+    if (!otg || !input || !output || otg->dofs != input->dofs || output->dofs != otg->dofs) {
+        return RUCKIG_ERROR_INVALID_INPUT;
+    }
+    output->new_calculation = false;
+    output->was_calculation_interrupted = false;
+    if (input->waypoint_count == 0 || !input->has_interrupt_calculation_duration) {
+        ruckig_waypoint_resume_clear(otg);
+    }
+    const bool input_matches_current = otg->current_input_initialized
+        && ((input->waypoint_count > 0 || otg->current_input->waypoint_count > 0)
+            ? ruckig_input_equals_ignoring_interrupt(input, otg->current_input)
+            : ruckig_input_equals(input, otg->current_input));
+    {
+        ruckig_result_t result = calculate_or_resume_output_trajectory(otg, input, output, input_matches_current);
+        if (result != RUCKIG_WORKING) {
+            output->calculation_duration = calculation_duration_finish(calculation_start);
+            return result;
+        }
+    }
+    {
+        ruckig_result_t result = sample_output_at_next_time(otg, output);
+        if (result != RUCKIG_WORKING) {
+            output->calculation_duration = calculation_duration_finish(calculation_start);
+            return result;
+        }
+    }
     output->calculation_duration = calculation_duration_finish(calculation_start);
 
     return output->time > output->trajectory->duration ? RUCKIG_FINISHED : RUCKIG_WORKING;

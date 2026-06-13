@@ -260,6 +260,53 @@ These commands run one generated sample and print fixture-ready initializer
 text for the fixed oracle or tracking regression corpus. They do not write
 source files automatically.
 
+## External Review Follow-Up Quality Hardening
+
+The `post-v0.15.0-review-followup-quality-hardening` slice addresses the
+accepted external review items after the random replay/export materialization
+work. It remains a post-release quality slice: no `0.16.0-design`, no public C
+ABI change, no public header change, no version metadata change, no workflow
+change, no tag or release action, no wrapper publication claim, no upstream
+baseline change, and no visualization asset change.
+
+Review triage:
+
+| Review item | Disposition |
+| --- | --- |
+| Partial `allocate_input_vectors` cleanup invariant | Reasonable maintainability concern; documented the calloc-zeroed owner invariant and unified repeated private double-vector allocation helpers. |
+| Waypoint branch queue overflow | The production overflow claim is false: `insert_branch` saturates `branch_count` at `RUCKIG_WAYPOINT_BRANCH_QUEUE_CAPACITY` and discards worse branches once full. Added a saturation regression to keep that private invariant explicit. |
+| `roots.c` exact `0.0 == A` check | Accepted as a numerical robustness cleanup. The implemented direct `fabs(A) < DBL_EPSILON` guard passed roots, oracle fixed, oracle random, and performance gates, so the scale-aware fallback was not needed. |
+| `tracking.c` file size and mixed responsibilities | Accepted. Split into lifecycle/config/diagnostics, online update/candidate scoring, and sequence/continuation compilation units with private `tracking_internal.h` declarations only. |
+| Repeated interrupt context | Accepted. Replaced no-waypoint, waypoint, and tracking private contexts with header-only `interrupt_context.h`; no exported symbol added. |
+| `profile_check` parameter explosion | Accepted with a low-risk implementation shape: private context structs and `_ctx` implementations are now the single implementation entry points; old long-parameter names are private macro shims expanding to context compound literals. |
+| `waypoint_planning_identity_equals` long boolean chain | Accepted. Split into scalar/flag, base array, optional per-DoF, and per-section helpers without changing exact equality semantics. |
+| `ruckig_update` length | Accepted as a local readability cleanup. Extracted publish, calculate/resume, and sample helpers without changing public API or state publication behavior. |
+| C89-style declaration churn | Deferred. Broad style-only churn remains lower value than targeted risk reduction. |
+
+Added or changed protection:
+
+| Area | Evidence |
+| --- | --- |
+| Roots numeric audit | New `ruckig_c_roots_numeric_audit` selector covers resolvent/cubic/quartic small-scale and repeated-root behavior with no heap allocation. |
+| Waypoint branch queue saturation | `ruckig_c_state_machine_branch_coverage` now drives a 5-waypoint, 4-DoF interrupted/resume case that saturates the private branch queue and verifies bounded indices. |
+| Tracking split | Normal full CTest, shared full CTest, tracking online/offline/optimized/interrupt/no-allocation, and sequence continuation gates passed after the split. |
+| Profile context conversion | Explicit `_ctx` smoke covers first-order, second-order position, second-order velocity, third-order position, and third-order velocity profile checks. |
+| ABI/export boundary | Shared-library exported public symbols still match the `v0.15.0` allowlist. |
+
+Local gate summary for this slice:
+
+| Gate | Result |
+| --- | --- |
+| Normal build and full CTest | Passed, 66/66 |
+| Shared build and full CTest | Passed, 66/66 |
+| Internal-asserts focused CTest | Passed, 5/5 |
+| Oracle fixed and random | Fixed oracle 92 plus waypoint oracle 4 passed; 100k random seeds 1/2/41 and per-DoF seed 1 passed |
+| Performance | No-waypoint ratio `1.03447` under `1.5`; waypoint C-only alpha corpus passed |
+| Wrappers | Rust 16/16 plus examples; Python prototype 24/24 against shared DLL |
+
+The checklist is
+`docs/release/checklists/post-v0.15.0-review-followup-quality-hardening.md`.
+
 When a random gate fails:
 
 1. Re-run the same command with the reported seed and sample count large enough

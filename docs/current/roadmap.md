@@ -176,6 +176,15 @@ ABI baseline accepted during the 0.15 design line and does not start
   and tracking random audit samples, plus small CTest smoke coverage, without
   changing public ABI, version metadata, workflow, tag/release state, upstream
   baseline, or visualization assets.
+- `post-v0.15.0-review-followup-quality-hardening` is implemented locally as a
+  follow-up external-review adoption slice. It adds roots numerical audit
+  coverage, waypoint branch-queue saturation regression coverage, private
+  interrupt-context unification, private profile-check context entry points,
+  `tracking.c` behavior-boundary splitting, `ruckig_update` helper extraction,
+  and low-risk allocation/identity cleanup while keeping public ABI, public
+  header, version metadata, workflow, tag/release state, upstream baseline,
+  wrapper publication status, and visualization assets unchanged. This slice
+  does not start `0.16.0-design`.
 - Keep the 184-symbol `v0.15.0` public C ABI baseline unless a later separate
   public API decision is accepted.
 - This quality audit does not start `0.16.0-design`, change version metadata,

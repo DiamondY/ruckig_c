@@ -3,6 +3,7 @@
 #include "ruckig_c/alloc.h"
 #include "ruckig_c/roots.h"
 
+#include <float.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -85,6 +86,88 @@ static void test_roots_do_not_allocate(void) {
     ruckig_allocation_forbidden_set(false);
 }
 
+static void check_resolvent_root(double a, double b, double c, double root, double tolerance) {
+    CHECK_NEAR(((root + a) * root + b) * root + c, 0.0, tolerance);
+}
+
+static void check_cubic_roots_residual(double a, double b, double c, double d, double tolerance) {
+    ruckig_root_set3_t roots = ruckig_solve_cubic(a, b, c, d);
+    size_t i;
+    for (i = 0; i < roots.count; ++i) {
+        CHECK_TRUE(roots.values[i] >= 0.0);
+        CHECK_NEAR(cubic_eval(a, b, c, d, roots.values[i]), 0.0, tolerance);
+        if (i > 0) {
+            CHECK_TRUE(roots.values[i - 1] <= roots.values[i]);
+        }
+    }
+}
+
+static void check_quartic_roots_residual(double a, double b, double c, double d, double tolerance) {
+    ruckig_root_set4_t roots = ruckig_solve_quart_monic(a, b, c, d);
+    size_t i;
+    for (i = 0; i < roots.count; ++i) {
+        CHECK_TRUE(roots.values[i] >= 0.0);
+        CHECK_NEAR(quartic_eval(a, b, c, d, roots.values[i]), 0.0, tolerance);
+        if (i > 0) {
+            CHECK_TRUE(roots.values[i - 1] <= roots.values[i]);
+        }
+    }
+}
+
+static void test_roots_numeric_resolvent_edges(void) {
+    double roots[3] = {0.0, 0.0, 0.0};
+    int count;
+
+    count = ruckig_solve_resolvent(roots, 0.0, 0.0, 0.0);
+    CHECK_TRUE(count >= 1);
+    CHECK_NEAR(roots[0], 0.0, 0.0);
+    check_resolvent_root(0.0, 0.0, 0.0, roots[0], 0.0);
+
+    count = ruckig_solve_resolvent(roots, -3.0e-8, 3.0e-16, -1.0e-24);
+    CHECK_TRUE(count >= 1);
+    check_resolvent_root(-3.0e-8, 3.0e-16, -1.0e-24, roots[0], 1e-36);
+
+    count = ruckig_solve_resolvent(roots, 0.0, -3.0e-12, 2.0e-18);
+    CHECK_TRUE(count >= 1);
+    check_resolvent_root(0.0, -3.0e-12, 2.0e-18, roots[0], 1e-24);
+    if (count > 1) {
+        check_resolvent_root(0.0, -3.0e-12, 2.0e-18, roots[1], 1e-24);
+    }
+}
+
+static void test_roots_numeric_cubic_quartic_edges(void) {
+    ruckig_root_set3_t cubic_roots;
+    ruckig_root_set4_t quartic_roots;
+
+    check_cubic_roots_residual(1.0, -3.0e-8, 3.0e-16, -1.0e-24, 1e-22);
+    check_cubic_roots_residual(1.0, -1.0, -2.0, 0.0, 1e-12);
+    cubic_roots = ruckig_solve_cubic(1.0, -1.0, -2.0, 0.0);
+    CHECK_EQ_INT(cubic_roots.count, 2);
+    CHECK_NEAR(cubic_roots.values[0], 0.0, 1e-14);
+    CHECK_NEAR(cubic_roots.values[1], 2.0, 1e-12);
+
+    check_quartic_roots_residual(-4.0e-6, 6.0e-12, -4.0e-18, 1.0e-24, 1e-22);
+    check_quartic_roots_residual(-2.0, -1.0, 2.0, 0.0, 1e-10);
+    quartic_roots = ruckig_solve_quart_monic(-2.0, -1.0, 2.0, 0.0);
+    CHECK_TRUE(quartic_roots.count >= 2);
+    CHECK_NEAR(quartic_roots.values[0], 0.0, 1e-14);
+}
+
+static void test_roots_numeric_audit_does_not_allocate(void) {
+    size_t allocations_before;
+
+    ruckig_allocation_counters_reset();
+    allocations_before = ruckig_allocation_count();
+    ruckig_allocation_forbidden_set(true);
+
+    test_roots_numeric_resolvent_edges();
+    test_roots_numeric_cubic_quartic_edges();
+
+    CHECK_EQ_INT(ruckig_allocation_count(), allocations_before);
+    CHECK_EQ_INT(ruckig_allocation_forbidden_count(), 0);
+    ruckig_allocation_forbidden_set(false);
+}
+
 void run_roots_tests(void) {
     test_cubic();
     test_quartic();
@@ -92,9 +175,16 @@ void run_roots_tests(void) {
     test_roots_do_not_allocate();
 }
 
+void run_roots_numeric_audit_tests(void) {
+    test_roots_numeric_resolvent_edges();
+    test_roots_numeric_cubic_quartic_edges();
+    test_roots_numeric_audit_does_not_allocate();
+}
+
 void run_api_tests(void);
 void run_brake_tests(void);
 void run_profile_tests(void);
+void run_roots_numeric_audit_tests(void);
 void run_utils_tests(void);
 void run_waypoint_tests(void);
 void run_waypoint_per_section_tests(void);
@@ -194,6 +284,10 @@ int main(int argc, char** argv) {
             run_property_invariant_tests();
             return ruckig_c_test_failures == 0 ? 0 : 1;
         }
+        if (strcmp(argv[1], "--roots-numeric-audit") == 0) {
+            run_roots_numeric_audit_tests();
+            return ruckig_c_test_failures == 0 ? 0 : 1;
+        }
         if (strcmp(argv[1], "--state-machine-branch-coverage") == 0) {
             run_state_machine_branch_coverage_tests();
             return ruckig_c_test_failures == 0 ? 0 : 1;
@@ -266,7 +360,7 @@ int main(int argc, char** argv) {
         return 2;
     }
     if (argc > 2) {
-        fprintf(stderr, "usage: ruckig_c_tests [--waypoint|--per-section|--waypoint-quality|--waypoint-resume-stress|--waypoint-resume-quality-audit|--interrupt-boundary-audit|--no-waypoint-interrupt-audit|--interrupt-post-release-quality|--property-invariants|--state-machine-branch-coverage|--solver-branch-coverage|--tracking|--tracking-api|--tracking-sequence-continuation-api|--tracking-validation|--tracking-online|--tracking-interrupt-audit|--tracking-fixed-corpus|--tracking-offline|--tracking-optimized|--tracking-quality|--tracking-quality-hardening|--tracking-stability|--tracking-no-allocation|--tracking-random N --seed S|--tracking-random-audit N --seed S|--tracking-random-replay SAMPLE --seed S|--tracking-random-audit-replay SAMPLE --seed S]\n");
+        fprintf(stderr, "usage: ruckig_c_tests [--waypoint|--per-section|--waypoint-quality|--waypoint-resume-stress|--waypoint-resume-quality-audit|--interrupt-boundary-audit|--no-waypoint-interrupt-audit|--interrupt-post-release-quality|--property-invariants|--roots-numeric-audit|--state-machine-branch-coverage|--solver-branch-coverage|--tracking|--tracking-api|--tracking-sequence-continuation-api|--tracking-validation|--tracking-online|--tracking-interrupt-audit|--tracking-fixed-corpus|--tracking-offline|--tracking-optimized|--tracking-quality|--tracking-quality-hardening|--tracking-stability|--tracking-no-allocation|--tracking-random N --seed S|--tracking-random-audit N --seed S|--tracking-random-replay SAMPLE --seed S|--tracking-random-audit-replay SAMPLE --seed S]\n");
         return 2;
     }
 

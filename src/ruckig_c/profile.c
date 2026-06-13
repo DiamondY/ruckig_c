@@ -126,26 +126,35 @@ static void integrate_third_order_segments(ruckig_profile_t* profile) {
     }
 }
 
-bool ruckig_profile_check(
+bool ruckig_profile_check_ctx(
     ruckig_profile_t* profile,
-    ruckig_profile_control_signs_t signs,
-    ruckig_profile_reached_limits_t limits,
-    bool set_limits,
-    double jf,
-    double v_max,
-    double v_min,
-    double a_max,
-    double a_min
+    const ruckig_profile_third_order_check_t* check
 ) {
     size_t i;
+    ruckig_profile_control_signs_t signs;
+    ruckig_profile_reached_limits_t limits;
     double v_upp_lim;
     double v_low_lim;
     double a_upp_lim;
     double a_low_lim;
+    bool set_limits;
+    double jf;
+    double v_max;
+    double v_min;
+    double a_max;
+    double a_min;
 
-    if (!profile || !calculate_t_sum(profile)) {
+    if (!profile || !check || !calculate_t_sum(profile)) {
         return false;
     }
+    signs = check->signs;
+    limits = check->limits;
+    set_limits = check->set_limits;
+    jf = check->jf;
+    v_max = check->v_max;
+    v_min = check->v_min;
+    a_max = check->a_max;
+    a_min = check->a_min;
     if (limits_require_velocity_segment(limits) && profile->t[3] < DBL_EPSILON) {
         return false;
     }
@@ -206,30 +215,43 @@ bool ruckig_profile_check(
         && profile->v[3] >= v_low_lim && profile->v[4] >= v_low_lim && profile->v[5] >= v_low_lim && profile->v[6] >= v_low_lim;
 }
 
-bool ruckig_profile_check_with_timing(ruckig_profile_t* profile, ruckig_profile_control_signs_t signs, ruckig_profile_reached_limits_t limits, double tf, double jf, double v_max, double v_min, double a_max, double a_min) {
-    (void)tf;
-    return ruckig_profile_check(profile, signs, limits, false, jf, v_max, v_min, a_max, a_min);
+bool ruckig_profile_check_with_timing_ctx(ruckig_profile_t* profile, const ruckig_profile_third_order_check_t* check) {
+    ruckig_profile_third_order_check_t timing_check;
+    if (!check) {
+        return false;
+    }
+    timing_check = *check;
+    timing_check.set_limits = false;
+    (void)timing_check.tf;
+    return ruckig_profile_check_ctx(profile, &timing_check);
 }
 
-bool ruckig_profile_check_with_timing_guarded(ruckig_profile_t* profile, ruckig_profile_control_signs_t signs, ruckig_profile_reached_limits_t limits, double tf, double jf, double v_max, double v_min, double a_max, double a_min, double j_max) {
-    return fabs(jf) < fabs(j_max) + profile_j_eps
-        && ruckig_profile_check_with_timing(profile, signs, limits, tf, jf, v_max, v_min, a_max, a_min);
+bool ruckig_profile_check_with_timing_guarded_ctx(ruckig_profile_t* profile, const ruckig_profile_third_order_check_t* check) {
+    return check
+        && fabs(check->jf) < fabs(check->j_max) + profile_j_eps
+        && ruckig_profile_check_with_timing_ctx(profile, check);
 }
 
-bool ruckig_profile_check_for_velocity(
+bool ruckig_profile_check_for_velocity_ctx(
     ruckig_profile_t* profile,
-    ruckig_profile_control_signs_t signs,
-    ruckig_profile_reached_limits_t limits,
-    double jf,
-    double a_max,
-    double a_min
+    const ruckig_profile_third_order_velocity_check_t* check
 ) {
     double a_upp_lim;
     double a_low_lim;
+    ruckig_profile_control_signs_t signs;
+    ruckig_profile_reached_limits_t limits;
+    double jf;
+    double a_max;
+    double a_min;
 
-    if (!profile || !calculate_t_sum(profile)) {
+    if (!profile || !check || !calculate_t_sum(profile)) {
         return false;
     }
+    signs = check->signs;
+    limits = check->limits;
+    jf = check->jf;
+    a_max = check->a_max;
+    a_min = check->a_min;
     if (limits == RUCKIG_PROFILE_LIMITS_ACC0 && profile->t[1] < DBL_EPSILON) {
         return false;
     }
@@ -248,32 +270,48 @@ bool ruckig_profile_check_for_velocity(
         && profile->a[1] <= a_upp_lim && profile->a[3] <= a_upp_lim && profile->a[5] <= a_upp_lim;
 }
 
-bool ruckig_profile_check_for_velocity_with_timing(ruckig_profile_t* profile, ruckig_profile_control_signs_t signs, ruckig_profile_reached_limits_t limits, double tf, double jf, double a_max, double a_min) {
-    (void)tf;
-    return ruckig_profile_check_for_velocity(profile, signs, limits, jf, a_max, a_min);
-}
-
-bool ruckig_profile_check_for_velocity_with_timing_guarded(ruckig_profile_t* profile, ruckig_profile_control_signs_t signs, ruckig_profile_reached_limits_t limits, double tf, double jf, double a_max, double a_min, double j_max) {
-    return fabs(jf) < fabs(j_max) + profile_j_eps
-        && ruckig_profile_check_for_velocity_with_timing(profile, signs, limits, tf, jf, a_max, a_min);
-}
-
-bool ruckig_profile_check_for_second_order(
+bool ruckig_profile_check_for_velocity_with_timing_ctx(
     ruckig_profile_t* profile,
-    ruckig_profile_control_signs_t signs,
-    ruckig_profile_reached_limits_t limits,
-    double a_up,
-    double a_down,
-    double v_max,
-    double v_min
+    const ruckig_profile_third_order_velocity_check_t* check
+) {
+    if (check) {
+        (void)check->tf;
+    }
+    return ruckig_profile_check_for_velocity_ctx(profile, check);
+}
+
+bool ruckig_profile_check_for_velocity_with_timing_guarded_ctx(
+    ruckig_profile_t* profile,
+    const ruckig_profile_third_order_velocity_check_t* check
+) {
+    return check
+        && fabs(check->jf) < fabs(check->j_max) + profile_j_eps
+        && ruckig_profile_check_for_velocity_with_timing_ctx(profile, check);
+}
+
+bool ruckig_profile_check_for_second_order_ctx(
+    ruckig_profile_t* profile,
+    const ruckig_profile_second_order_check_t* check
 ) {
     size_t i;
+    ruckig_profile_control_signs_t signs;
+    ruckig_profile_reached_limits_t limits;
     double v_upp_lim;
     double v_low_lim;
+    double a_up;
+    double a_down;
+    double v_max;
+    double v_min;
 
-    if (!profile || !calculate_t_sum(profile)) {
+    if (!profile || !check || !calculate_t_sum(profile)) {
         return false;
     }
+    signs = check->signs;
+    limits = check->limits;
+    a_up = check->a_up;
+    a_down = check->a_down;
+    v_max = check->v_max;
+    v_min = check->v_min;
 
     memset(profile->j, 0, sizeof(profile->j));
     if (signs == RUCKIG_PROFILE_SIGNS_UDDU) {
@@ -310,24 +348,42 @@ bool ruckig_profile_check_for_second_order(
         && profile->v[2] >= v_low_lim && profile->v[3] >= v_low_lim && profile->v[4] >= v_low_lim && profile->v[5] >= v_low_lim && profile->v[6] >= v_low_lim;
 }
 
-bool ruckig_profile_check_for_second_order_with_timing(ruckig_profile_t* profile, ruckig_profile_control_signs_t signs, ruckig_profile_reached_limits_t limits, double tf, double a_up, double a_down, double v_max, double v_min) {
-    (void)tf;
-    return ruckig_profile_check_for_second_order(profile, signs, limits, a_up, a_down, v_max, v_min);
+bool ruckig_profile_check_for_second_order_with_timing_ctx(
+    ruckig_profile_t* profile,
+    const ruckig_profile_second_order_check_t* check
+) {
+    if (check) {
+        (void)check->tf;
+    }
+    return ruckig_profile_check_for_second_order_ctx(profile, check);
 }
 
-bool ruckig_profile_check_for_second_order_with_timing_guarded(ruckig_profile_t* profile, ruckig_profile_control_signs_t signs, ruckig_profile_reached_limits_t limits, double tf, double a_up, double a_down, double v_max, double v_min, double a_max, double a_min) {
-    return (a_min - profile_a_eps < a_up)
-        && (a_up < a_max + profile_a_eps)
-        && (a_min - profile_a_eps < a_down)
-        && (a_down < a_max + profile_a_eps)
-        && ruckig_profile_check_for_second_order_with_timing(profile, signs, limits, tf, a_up, a_down, v_max, v_min);
+bool ruckig_profile_check_for_second_order_with_timing_guarded_ctx(
+    ruckig_profile_t* profile,
+    const ruckig_profile_second_order_check_t* check
+) {
+    return check
+        && (check->a_min - profile_a_eps < check->a_up)
+        && (check->a_up < check->a_max + profile_a_eps)
+        && (check->a_min - profile_a_eps < check->a_down)
+        && (check->a_down < check->a_max + profile_a_eps)
+        && ruckig_profile_check_for_second_order_with_timing_ctx(profile, check);
 }
 
-bool ruckig_profile_check_for_second_order_velocity(ruckig_profile_t* profile, ruckig_profile_control_signs_t signs, ruckig_profile_reached_limits_t limits, double a_up) {
+bool ruckig_profile_check_for_second_order_velocity_ctx(
+    ruckig_profile_t* profile,
+    const ruckig_profile_second_order_velocity_check_t* check
+) {
     size_t i;
-    if (!profile || profile->t[1] < 0.0) {
+    ruckig_profile_control_signs_t signs;
+    ruckig_profile_reached_limits_t limits;
+    double a_up;
+    if (!profile || !check || profile->t[1] < 0.0) {
         return false;
     }
+    signs = check->signs;
+    limits = check->limits;
+    a_up = check->a_up;
 
     profile->t_sum[0] = 0.0;
     profile->t_sum[1] = profile->t[1];
@@ -355,22 +411,40 @@ bool ruckig_profile_check_for_second_order_velocity(ruckig_profile_t* profile, r
     return fabs(profile->v[7] - profile->vf) < profile_v_precision;
 }
 
-bool ruckig_profile_check_for_second_order_velocity_with_timing(ruckig_profile_t* profile, ruckig_profile_control_signs_t signs, ruckig_profile_reached_limits_t limits, double tf, double a_up) {
-    (void)tf;
-    return ruckig_profile_check_for_second_order_velocity(profile, signs, limits, a_up);
+bool ruckig_profile_check_for_second_order_velocity_with_timing_ctx(
+    ruckig_profile_t* profile,
+    const ruckig_profile_second_order_velocity_check_t* check
+) {
+    if (check) {
+        (void)check->tf;
+    }
+    return ruckig_profile_check_for_second_order_velocity_ctx(profile, check);
 }
 
-bool ruckig_profile_check_for_second_order_velocity_with_timing_guarded(ruckig_profile_t* profile, ruckig_profile_control_signs_t signs, ruckig_profile_reached_limits_t limits, double tf, double a_up, double a_max, double a_min) {
-    return (a_min - profile_a_eps < a_up)
-        && (a_up < a_max + profile_a_eps)
-        && ruckig_profile_check_for_second_order_velocity_with_timing(profile, signs, limits, tf, a_up);
+bool ruckig_profile_check_for_second_order_velocity_with_timing_guarded_ctx(
+    ruckig_profile_t* profile,
+    const ruckig_profile_second_order_velocity_check_t* check
+) {
+    return check
+        && (check->a_min - profile_a_eps < check->a_up)
+        && (check->a_up < check->a_max + profile_a_eps)
+        && ruckig_profile_check_for_second_order_velocity_with_timing_ctx(profile, check);
 }
 
-bool ruckig_profile_check_for_first_order(ruckig_profile_t* profile, ruckig_profile_control_signs_t signs, ruckig_profile_reached_limits_t limits, double v_up) {
+bool ruckig_profile_check_for_first_order_ctx(
+    ruckig_profile_t* profile,
+    const ruckig_profile_first_order_check_t* check
+) {
     size_t i;
-    if (!profile || profile->t[3] < 0.0) {
+    ruckig_profile_control_signs_t signs;
+    ruckig_profile_reached_limits_t limits;
+    double v_up;
+    if (!profile || !check || profile->t[3] < 0.0) {
         return false;
     }
+    signs = check->signs;
+    limits = check->limits;
+    v_up = check->v_up;
 
     memset(profile->t_sum, 0, sizeof(profile->t_sum));
     profile->t_sum[3] = profile->t[3];
@@ -397,15 +471,24 @@ bool ruckig_profile_check_for_first_order(ruckig_profile_t* profile, ruckig_prof
     return fabs(profile->p[7] - profile->pf) < profile_p_precision;
 }
 
-bool ruckig_profile_check_for_first_order_with_timing(ruckig_profile_t* profile, ruckig_profile_control_signs_t signs, ruckig_profile_reached_limits_t limits, double tf, double v_up) {
-    (void)tf;
-    return ruckig_profile_check_for_first_order(profile, signs, limits, v_up);
+bool ruckig_profile_check_for_first_order_with_timing_ctx(
+    ruckig_profile_t* profile,
+    const ruckig_profile_first_order_check_t* check
+) {
+    if (check) {
+        (void)check->tf;
+    }
+    return ruckig_profile_check_for_first_order_ctx(profile, check);
 }
 
-bool ruckig_profile_check_for_first_order_with_timing_guarded(ruckig_profile_t* profile, ruckig_profile_control_signs_t signs, ruckig_profile_reached_limits_t limits, double tf, double v_up, double v_max, double v_min) {
-    return (v_min - profile_v_eps < v_up)
-        && (v_up < v_max + profile_v_eps)
-        && ruckig_profile_check_for_first_order_with_timing(profile, signs, limits, tf, v_up);
+bool ruckig_profile_check_for_first_order_with_timing_guarded_ctx(
+    ruckig_profile_t* profile,
+    const ruckig_profile_first_order_check_t* check
+) {
+    return check
+        && (check->v_min - profile_v_eps < check->v_up)
+        && (check->v_up < check->v_max + profile_v_eps)
+        && ruckig_profile_check_for_first_order_with_timing_ctx(profile, check);
 }
 
 static void check_position_extremum(double t_ext, double t_sum, double t, double p, double v, double a, double j, ruckig_bound_t* ext) {

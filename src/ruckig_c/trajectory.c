@@ -4,10 +4,6 @@
 
 #include <math.h>
 
-static double* allocate_double_vector(size_t count) {
-    return (double*)ruckig_calloc(count, sizeof(double));
-}
-
 static ruckig_result_t ruckig_trajectory_create_impl(
     ruckig_trajectory_t** trajectory,
     size_t dofs,
@@ -31,8 +27,8 @@ static ruckig_result_t ruckig_trajectory_create_impl(
     value->section_count = 1;
     value->profiles = (ruckig_profile_t*)ruckig_calloc(section_capacity * dofs, sizeof(ruckig_profile_t));
     value->blocks = (ruckig_block_t*)ruckig_calloc(dofs, sizeof(ruckig_block_t));
-    value->independent_min_durations = allocate_double_vector(dofs);
-    value->cumulative_times = allocate_double_vector(section_capacity);
+    value->independent_min_durations = ruckig_allocate_double_vector(dofs);
+    value->cumulative_times = ruckig_allocate_double_vector(section_capacity);
     if (!value->profiles || !value->blocks || !value->independent_min_durations || !value->cumulative_times) {
         ruckig_trajectory_destroy(value);
         return RUCKIG_ERROR;

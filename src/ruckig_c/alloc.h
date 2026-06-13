@@ -13,4 +13,8 @@ void ruckig_allocation_counters_reset(void);
 void ruckig_allocation_forbidden_set(bool forbidden);
 size_t ruckig_allocation_forbidden_count(void);
 
+static inline double* ruckig_allocate_double_vector(size_t count) {
+    return (double*)ruckig_calloc(count, sizeof(double));
+}
+
 #endif

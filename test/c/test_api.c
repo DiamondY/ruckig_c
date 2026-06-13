@@ -8114,6 +8114,74 @@ static void test_state_machine_waypoint_identity_mismatches(void) {
     check_state_machine_waypoint_identity_mismatch(STATE_MACHINE_WAYPOINT_MUTATE_CLEAR_INTERRUPT);
 }
 
+static void configure_state_machine_waypoint_branch_saturation_input(ruckig_input_t* input) {
+    double min_velocity[4] = {-2.0, -2.0, -2.0, -2.0};
+    double min_acceleration[4] = {-3.0, -3.0, -3.0, -3.0};
+    double waypoints[20] = {
+        0.20, -0.10, 0.15, -0.20,
+        0.55, -0.30, 0.40, -0.55,
+        0.95, -0.55, 0.68, -0.92,
+        1.35, -0.82, 0.95, -1.24,
+        1.62, -1.05, 1.18, -1.48
+    };
+    size_t dof;
+
+    for (dof = 0; dof < 4; ++dof) {
+        ruckig_input_max_velocity_data(input)[dof] = 2.0;
+        ruckig_input_max_acceleration_data(input)[dof] = 3.0;
+        ruckig_input_max_jerk_data(input)[dof] = 8.0;
+    }
+    ruckig_input_target_position_data(input)[0] = 1.90;
+    ruckig_input_target_position_data(input)[1] = -1.30;
+    ruckig_input_target_position_data(input)[2] = 1.45;
+    ruckig_input_target_position_data(input)[3] = -1.78;
+    CHECK_EQ_INT(ruckig_input_set_min_velocity(input, min_velocity, 4), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_input_set_min_acceleration(input, min_acceleration, 4), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_input_set_intermediate_positions(input, waypoints, 5, 4), RUCKIG_WORKING);
+}
+
+static void test_state_machine_waypoint_branch_queue_saturation(void) {
+    ruckig_t* otg = NULL;
+    ruckig_input_t* input = NULL;
+    ruckig_output_t* output = NULL;
+    bool reached_branch_queue = false;
+    size_t iteration;
+
+    CHECK_EQ_INT(ruckig_create_with_waypoints(&otg, 4, 0.02, 5), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_input_create_with_waypoints(&input, 4, 5), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_output_create_with_waypoints(&output, 4, 5), RUCKIG_WORKING);
+    configure_state_machine_waypoint_branch_saturation_input(input);
+    CHECK_EQ_INT(ruckig_input_set_interrupt_calculation_duration(input, 0.0), RUCKIG_WORKING);
+
+    for (iteration = 0; iteration < 256; ++iteration) {
+        CHECK_EQ_INT(ruckig_update_under_allocation_guard(otg, input, output), RUCKIG_WORKING);
+        CHECK_TRUE(otg->waypoint_engine.branch_count <= RUCKIG_WAYPOINT_BRANCH_QUEUE_CAPACITY);
+        CHECK_TRUE(otg->waypoint_engine.branch_index <= otg->waypoint_engine.branch_count);
+        if (otg->waypoint_engine.branch_queue_valid && otg->waypoint_engine.branch_count > 0) {
+            reached_branch_queue = true;
+            break;
+        }
+        CHECK_TRUE(otg->waypoint_engine.active);
+        CHECK_TRUE(ruckig_output_was_calculation_interrupted(output));
+        ruckig_output_pass_to_input(output, input);
+    }
+
+    CHECK_TRUE(reached_branch_queue);
+    CHECK_EQ_INT(otg->waypoint_engine.branch_count, RUCKIG_WAYPOINT_BRANCH_QUEUE_CAPACITY);
+    CHECK_TRUE(otg->waypoint_engine.branch_index <= otg->waypoint_engine.branch_count);
+
+    ruckig_output_pass_to_input(output, input);
+    CHECK_EQ_INT(ruckig_input_set_interrupt_calculation_duration(input, 1000000000.0), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_update_under_allocation_guard(otg, input, output), RUCKIG_WORKING);
+    CHECK_TRUE(!ruckig_output_was_calculation_interrupted(output));
+    CHECK_TRUE(!otg->waypoint_engine.active);
+    CHECK_TRUE(otg->waypoint_engine.complete || otg->waypoint_engine.phase == RUCKIG_WAYPOINT_ENGINE_PHASE_IDLE);
+
+    ruckig_output_destroy(output);
+    ruckig_input_destroy(input);
+    ruckig_destroy(otg);
+}
+
 static void check_state_machine_tracking_error_diagnostics(ruckig_tracking_t* tracking) {
     ruckig_tracking_diagnostics_t diagnostics;
     CHECK_EQ_INT(ruckig_tracking_get_last_diagnostics(tracking, &diagnostics), RUCKIG_WORKING);
@@ -8282,6 +8350,7 @@ void run_state_machine_branch_coverage_tests(void) {
     test_state_machine_input_per_section_boundaries();
     test_state_machine_waypoint_rich_identity_resume();
     test_state_machine_waypoint_identity_mismatches();
+    test_state_machine_waypoint_branch_queue_saturation();
     test_state_machine_tracking_empty_continuation_errors();
     test_state_machine_tracking_fast_resume_failure_preserves_state();
     test_state_machine_tracking_optimized_resume_failure_preserves_state();
