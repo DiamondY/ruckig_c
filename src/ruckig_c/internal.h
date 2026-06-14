@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 #include <stddef.h>
+#include <string.h>
 
 #ifdef RUCKIG_C_ENABLE_INTERNAL_ASSERTS
 #include <assert.h>
@@ -32,6 +33,85 @@
 #else
 #define RUCKIG_C_INTERNAL_ASSERT(expr) ((void)sizeof(expr))
 #endif
+
+static inline size_t ruckig_diagnostics_stable_prefix_size(void) {
+    return offsetof(ruckig_diagnostics_t, reserved_size);
+}
+
+static inline size_t ruckig_diagnostics_min_size(size_t lhs, size_t rhs) {
+    return lhs < rhs ? lhs : rhs;
+}
+
+static inline ruckig_result_t ruckig_diagnostics_validate_or_null(const ruckig_diagnostics_t* diagnostics) {
+    if (!diagnostics) {
+        return RUCKIG_WORKING;
+    }
+    return diagnostics->struct_size >= ruckig_diagnostics_stable_prefix_size()
+        ? RUCKIG_WORKING
+        : RUCKIG_ERROR_INVALID_INPUT;
+}
+
+static inline void ruckig_diagnostics_clear(
+    ruckig_diagnostics_t* diagnostics,
+    ruckig_result_t result,
+    ruckig_diagnostic_scope_t scope
+) {
+    const size_t caller_size = diagnostics ? diagnostics->struct_size : 0u;
+    if (ruckig_diagnostics_validate_or_null(diagnostics) != RUCKIG_WORKING) {
+        return;
+    }
+    if (!diagnostics) {
+        return;
+    }
+    memset(diagnostics, 0, ruckig_diagnostics_min_size(caller_size, sizeof(*diagnostics)));
+    diagnostics->struct_size = caller_size;
+    diagnostics->result = result;
+    diagnostics->scope = scope;
+    diagnostics->code = RUCKIG_DIAGNOSTIC_NONE;
+}
+
+static inline void ruckig_diagnostics_record(
+    ruckig_diagnostics_t* diagnostics,
+    ruckig_result_t result,
+    ruckig_diagnostic_scope_t scope,
+    ruckig_diagnostic_code_t code,
+    size_t dof,
+    size_t section,
+    size_t expected_count,
+    size_t actual_count,
+    double value,
+    double limit
+) {
+    if (ruckig_diagnostics_validate_or_null(diagnostics) != RUCKIG_WORKING || !diagnostics) {
+        return;
+    }
+    ruckig_diagnostics_clear(diagnostics, result, scope);
+    diagnostics->code = code;
+    diagnostics->dof = dof;
+    diagnostics->section = section;
+    diagnostics->expected_count = expected_count;
+    diagnostics->actual_count = actual_count;
+    diagnostics->value = value;
+    diagnostics->limit = limit;
+}
+
+static inline ruckig_diagnostic_code_t ruckig_diagnostic_code_from_result(ruckig_result_t result) {
+    switch (result) {
+    case RUCKIG_WORKING:
+    case RUCKIG_FINISHED:
+        return RUCKIG_DIAGNOSTIC_NONE;
+    case RUCKIG_ERROR_ZERO_LIMITS:
+        return RUCKIG_DIAGNOSTIC_ZERO_LIMIT;
+    case RUCKIG_ERROR_TRAJECTORY_DURATION:
+        return RUCKIG_DIAGNOSTIC_TRAJECTORY_DURATION;
+    case RUCKIG_ERROR_SYNCHRONIZATION_CALCULATION:
+        return RUCKIG_DIAGNOSTIC_SYNCHRONIZATION;
+    case RUCKIG_ERROR_UNSUPPORTED:
+        return RUCKIG_DIAGNOSTIC_UNSUPPORTED;
+    default:
+        return RUCKIG_DIAGNOSTIC_UNSUPPORTED;
+    }
+}
 
 typedef struct ruckig_waypoint_branch {
     size_t index;

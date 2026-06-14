@@ -35,6 +35,13 @@ publication status, upstream baseline, or visualization assets.
   `struct_size` compatibility rules, stable coarse diagnostic scope/code
   boundaries, and alpha.3 through alpha.5 implementation boundaries without
   editing the public header or ABI allowlist.
+- `0.16.0-alpha.3` is the first public diagnostics implementation slice. It
+  expands the public C ABI from the `v0.15.0` 184-symbol baseline to 188
+  symbols by adding `ruckig_diagnostics_init` and the
+  validate/calculate/update `_with_diagnostics` entry points. It preserves
+  legacy API return codes and behavior, keeps diagnostics opt-in, and leaves
+  state/resume richer mapping and tracking/continuation getter symbols for
+  alpha.4 and alpha.5.
 
 ## 0.15.0 Stable Release Line
 

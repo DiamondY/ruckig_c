@@ -46,6 +46,49 @@ typedef enum ruckig_result {
 
 #define RUCKIG_RESULT_IS_OK(result) ((result) >= 0)
 
+typedef enum ruckig_diagnostic_scope {
+    RUCKIG_DIAGNOSTIC_SCOPE_NONE = 0,
+    RUCKIG_DIAGNOSTIC_SCOPE_INPUT = 1,
+    RUCKIG_DIAGNOSTIC_SCOPE_CALCULATION = 2,
+    RUCKIG_DIAGNOSTIC_SCOPE_UPDATE = 3,
+    RUCKIG_DIAGNOSTIC_SCOPE_WAYPOINT = 4,
+    RUCKIG_DIAGNOSTIC_SCOPE_TRACKING = 5,
+    RUCKIG_DIAGNOSTIC_SCOPE_TRACKING_SEQUENCE = 6
+} ruckig_diagnostic_scope_t;
+
+typedef enum ruckig_diagnostic_code {
+    RUCKIG_DIAGNOSTIC_NONE = 0,
+    RUCKIG_DIAGNOSTIC_NULL_ARGUMENT = 1,
+    RUCKIG_DIAGNOSTIC_DOF_MISMATCH = 2,
+    RUCKIG_DIAGNOSTIC_CAPACITY_MISMATCH = 3,
+    RUCKIG_DIAGNOSTIC_INVALID_ENUM = 4,
+    RUCKIG_DIAGNOSTIC_NONFINITE_VALUE = 5,
+    RUCKIG_DIAGNOSTIC_NEGATIVE_LIMIT = 6,
+    RUCKIG_DIAGNOSTIC_ZERO_LIMIT = 7,
+    RUCKIG_DIAGNOSTIC_CURRENT_STATE_OUT_OF_LIMITS = 8,
+    RUCKIG_DIAGNOSTIC_TARGET_STATE_OUT_OF_LIMITS = 9,
+    RUCKIG_DIAGNOSTIC_TRAJECTORY_DURATION = 10,
+    RUCKIG_DIAGNOSTIC_SYNCHRONIZATION = 11,
+    RUCKIG_DIAGNOSTIC_INTERRUPTED = 12,
+    RUCKIG_DIAGNOSTIC_RESUME_IDENTITY_MISMATCH = 13,
+    RUCKIG_DIAGNOSTIC_UNSUPPORTED = 14
+} ruckig_diagnostic_code_t;
+
+typedef struct ruckig_diagnostics {
+    size_t struct_size;
+    ruckig_result_t result;
+    ruckig_diagnostic_scope_t scope;
+    ruckig_diagnostic_code_t code;
+    size_t dof;
+    size_t section;
+    size_t expected_count;
+    size_t actual_count;
+    double value;
+    double limit;
+    size_t reserved_size[8];
+    double reserved_value[8];
+} ruckig_diagnostics_t;
+
 typedef enum ruckig_control_interface {
     RUCKIG_CONTROL_POSITION = 0,
     RUCKIG_CONTROL_VELOCITY = 1
@@ -191,11 +234,21 @@ RUCKIG_C_API ruckig_result_t ruckig_trajectory_create_with_waypoints(
 );
 RUCKIG_C_API void ruckig_trajectory_destroy(ruckig_trajectory_t* trajectory);
 
+RUCKIG_C_API void ruckig_diagnostics_init(ruckig_diagnostics_t* diagnostics);
+
 RUCKIG_C_API ruckig_result_t ruckig_validate_input(
     const ruckig_t* otg,
     const ruckig_input_t* input,
     bool check_current_state_within_limits,
     bool check_target_state_within_limits
+);
+
+RUCKIG_C_API ruckig_result_t ruckig_validate_input_with_diagnostics(
+    const ruckig_t* otg,
+    const ruckig_input_t* input,
+    bool check_current_state_within_limits,
+    bool check_target_state_within_limits,
+    ruckig_diagnostics_t* diagnostics
 );
 
 RUCKIG_C_API ruckig_result_t ruckig_calculate(
@@ -204,10 +257,24 @@ RUCKIG_C_API ruckig_result_t ruckig_calculate(
     ruckig_trajectory_t* trajectory
 );
 
+RUCKIG_C_API ruckig_result_t ruckig_calculate_with_diagnostics(
+    ruckig_t* otg,
+    const ruckig_input_t* input,
+    ruckig_trajectory_t* trajectory,
+    ruckig_diagnostics_t* diagnostics
+);
+
 RUCKIG_C_API ruckig_result_t ruckig_update(
     ruckig_t* otg,
     const ruckig_input_t* input,
     ruckig_output_t* output
+);
+
+RUCKIG_C_API ruckig_result_t ruckig_update_with_diagnostics(
+    ruckig_t* otg,
+    const ruckig_input_t* input,
+    ruckig_output_t* output,
+    ruckig_diagnostics_t* diagnostics
 );
 
 RUCKIG_C_API void ruckig_reset(ruckig_t* otg);

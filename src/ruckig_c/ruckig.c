@@ -48,6 +48,19 @@ static ruckig_result_t ruckig_trajectory_copy_internal(
     return RUCKIG_WORKING;
 }
 
+static void record_operation_result_diagnostics(
+    ruckig_diagnostics_t* diagnostics,
+    ruckig_result_t result,
+    ruckig_diagnostic_scope_t scope
+) {
+    const ruckig_diagnostic_code_t code = ruckig_diagnostic_code_from_result(result);
+    if (code == RUCKIG_DIAGNOSTIC_NONE) {
+        ruckig_diagnostics_clear(diagnostics, result, RUCKIG_DIAGNOSTIC_SCOPE_NONE);
+    } else {
+        ruckig_diagnostics_record(diagnostics, result, scope, code, 0u, 0u, 0u, 0u, 0.0, 0.0);
+    }
+}
+
 static bool input_is_first_order_position(const ruckig_input_t* input) {
     size_t i;
     if (!input) {
@@ -1422,23 +1435,101 @@ static ruckig_result_t ruckig_calculate_target_interruptible(
     return RUCKIG_WORKING;
 }
 
-RUCKIG_C_API ruckig_result_t ruckig_calculate(
+static ruckig_result_t ruckig_calculate_impl(
     ruckig_t* otg,
     const ruckig_input_t* input,
-    ruckig_trajectory_t* trajectory
+    ruckig_trajectory_t* trajectory,
+    ruckig_diagnostics_t* diagnostics
 ) {
-    if (!otg || !input || !trajectory || otg->dofs != input->dofs || trajectory->dofs != otg->dofs) {
+    ruckig_result_t result;
+    if (ruckig_diagnostics_validate_or_null(diagnostics) != RUCKIG_WORKING) {
+        return RUCKIG_ERROR_INVALID_INPUT;
+    }
+    if (!otg || !input || !trajectory) {
+        ruckig_diagnostics_record(
+            diagnostics,
+            RUCKIG_ERROR_INVALID_INPUT,
+            RUCKIG_DIAGNOSTIC_SCOPE_CALCULATION,
+            RUCKIG_DIAGNOSTIC_NULL_ARGUMENT,
+            0u,
+            0u,
+            0u,
+            0u,
+            0.0,
+            0.0
+        );
+        return RUCKIG_ERROR_INVALID_INPUT;
+    }
+    if (otg->dofs != input->dofs || trajectory->dofs != otg->dofs) {
+        ruckig_diagnostics_record(
+            diagnostics,
+            RUCKIG_ERROR_INVALID_INPUT,
+            RUCKIG_DIAGNOSTIC_SCOPE_CALCULATION,
+            RUCKIG_DIAGNOSTIC_DOF_MISMATCH,
+            0u,
+            0u,
+            otg->dofs,
+            otg->dofs != input->dofs ? input->dofs : trajectory->dofs,
+            0.0,
+            0.0
+        );
         return RUCKIG_ERROR_INVALID_INPUT;
     }
     ruckig_waypoint_resume_clear(otg);
     if (input->waypoint_count > 0) {
         if (input->waypoint_count > otg->max_number_of_waypoints
             || input->waypoint_count > trajectory->max_number_of_waypoints) {
+            const size_t capacity = otg->max_number_of_waypoints < trajectory->max_number_of_waypoints
+                ? otg->max_number_of_waypoints
+                : trajectory->max_number_of_waypoints;
+            ruckig_diagnostics_record(
+                diagnostics,
+                RUCKIG_ERROR_INVALID_INPUT,
+                RUCKIG_DIAGNOSTIC_SCOPE_CALCULATION,
+                RUCKIG_DIAGNOSTIC_CAPACITY_MISMATCH,
+                0u,
+                0u,
+                capacity,
+                input->waypoint_count,
+                0.0,
+                0.0
+            );
             return RUCKIG_ERROR_INVALID_INPUT;
         }
-        return ruckig_calculate_waypoints(otg, input, trajectory);
+        result = ruckig_calculate_waypoints(otg, input, trajectory);
+        if (result != RUCKIG_WORKING
+            && result == RUCKIG_ERROR_INVALID_INPUT
+            && ruckig_validate_input_with_diagnostics(otg, input, false, true, diagnostics) != RUCKIG_WORKING) {
+            return result;
+        }
+        record_operation_result_diagnostics(diagnostics, result, RUCKIG_DIAGNOSTIC_SCOPE_CALCULATION);
+        return result;
     }
-    return ruckig_calculate_target(otg, input, trajectory);
+    result = ruckig_calculate_target(otg, input, trajectory);
+    if (result != RUCKIG_WORKING
+        && result == RUCKIG_ERROR_INVALID_INPUT
+        && ruckig_validate_input_with_diagnostics(otg, input, false, true, diagnostics) != RUCKIG_WORKING) {
+        return result;
+    }
+    record_operation_result_diagnostics(diagnostics, result, RUCKIG_DIAGNOSTIC_SCOPE_CALCULATION);
+    return result;
+}
+
+RUCKIG_C_API ruckig_result_t ruckig_calculate_with_diagnostics(
+    ruckig_t* otg,
+    const ruckig_input_t* input,
+    ruckig_trajectory_t* trajectory,
+    ruckig_diagnostics_t* diagnostics
+) {
+    return ruckig_calculate_impl(otg, input, trajectory, diagnostics);
+}
+
+RUCKIG_C_API ruckig_result_t ruckig_calculate(
+    ruckig_t* otg,
+    const ruckig_input_t* input,
+    ruckig_trajectory_t* trajectory
+) {
+    return ruckig_calculate_impl(otg, input, trajectory, NULL);
 }
 
 static void publish_new_trajectory_to_output(
@@ -1537,13 +1628,44 @@ static ruckig_result_t sample_output_at_next_time(ruckig_t* otg, ruckig_output_t
     return RUCKIG_WORKING;
 }
 
-RUCKIG_C_API ruckig_result_t ruckig_update(
+static ruckig_result_t ruckig_update_impl(
     ruckig_t* otg,
     const ruckig_input_t* input,
-    ruckig_output_t* output
+    ruckig_output_t* output,
+    ruckig_diagnostics_t* diagnostics
 ) {
     const double calculation_start = calculation_duration_start();
-    if (!otg || !input || !output || otg->dofs != input->dofs || output->dofs != otg->dofs) {
+    if (ruckig_diagnostics_validate_or_null(diagnostics) != RUCKIG_WORKING) {
+        return RUCKIG_ERROR_INVALID_INPUT;
+    }
+    if (!otg || !input || !output) {
+        ruckig_diagnostics_record(
+            diagnostics,
+            RUCKIG_ERROR_INVALID_INPUT,
+            RUCKIG_DIAGNOSTIC_SCOPE_UPDATE,
+            RUCKIG_DIAGNOSTIC_NULL_ARGUMENT,
+            0u,
+            0u,
+            0u,
+            0u,
+            0.0,
+            0.0
+        );
+        return RUCKIG_ERROR_INVALID_INPUT;
+    }
+    if (otg->dofs != input->dofs || output->dofs != otg->dofs) {
+        ruckig_diagnostics_record(
+            diagnostics,
+            RUCKIG_ERROR_INVALID_INPUT,
+            RUCKIG_DIAGNOSTIC_SCOPE_UPDATE,
+            RUCKIG_DIAGNOSTIC_DOF_MISMATCH,
+            0u,
+            0u,
+            otg->dofs,
+            otg->dofs != input->dofs ? input->dofs : output->dofs,
+            0.0,
+            0.0
+        );
         return RUCKIG_ERROR_INVALID_INPUT;
     }
     output->new_calculation = false;
@@ -1559,6 +1681,11 @@ RUCKIG_C_API ruckig_result_t ruckig_update(
         ruckig_result_t result = calculate_or_resume_output_trajectory(otg, input, output, input_matches_current);
         if (result != RUCKIG_WORKING) {
             output->calculation_duration = calculation_duration_finish(calculation_start);
+            if (diagnostics && result == RUCKIG_ERROR_INVALID_INPUT
+                && ruckig_validate_input_with_diagnostics(otg, input, false, true, diagnostics) != RUCKIG_WORKING) {
+                return result;
+            }
+            record_operation_result_diagnostics(diagnostics, result, RUCKIG_DIAGNOSTIC_SCOPE_UPDATE);
             return result;
         }
     }
@@ -1566,12 +1693,49 @@ RUCKIG_C_API ruckig_result_t ruckig_update(
         ruckig_result_t result = sample_output_at_next_time(otg, output);
         if (result != RUCKIG_WORKING) {
             output->calculation_duration = calculation_duration_finish(calculation_start);
+            record_operation_result_diagnostics(diagnostics, result, RUCKIG_DIAGNOSTIC_SCOPE_UPDATE);
             return result;
         }
     }
     output->calculation_duration = calculation_duration_finish(calculation_start);
 
-    return output->time > output->trajectory->duration ? RUCKIG_FINISHED : RUCKIG_WORKING;
+    {
+        const ruckig_result_t result = output->time > output->trajectory->duration ? RUCKIG_FINISHED : RUCKIG_WORKING;
+        if (output->was_calculation_interrupted) {
+            ruckig_diagnostics_record(
+                diagnostics,
+                result,
+                RUCKIG_DIAGNOSTIC_SCOPE_UPDATE,
+                RUCKIG_DIAGNOSTIC_INTERRUPTED,
+                0u,
+                output->new_section,
+                0u,
+                0u,
+                output->time,
+                output->trajectory->duration
+            );
+        } else {
+            ruckig_diagnostics_clear(diagnostics, result, RUCKIG_DIAGNOSTIC_SCOPE_NONE);
+        }
+        return result;
+    }
+}
+
+RUCKIG_C_API ruckig_result_t ruckig_update_with_diagnostics(
+    ruckig_t* otg,
+    const ruckig_input_t* input,
+    ruckig_output_t* output,
+    ruckig_diagnostics_t* diagnostics
+) {
+    return ruckig_update_impl(otg, input, output, diagnostics);
+}
+
+RUCKIG_C_API ruckig_result_t ruckig_update(
+    ruckig_t* otg,
+    const ruckig_input_t* input,
+    ruckig_output_t* output
+) {
+    return ruckig_update_impl(otg, input, output, NULL);
 }
 
 RUCKIG_C_API void ruckig_reset(ruckig_t* otg) {

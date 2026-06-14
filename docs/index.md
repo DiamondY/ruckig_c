@@ -135,6 +135,9 @@ Historical rewrite plans and release evidence are retained for traceability.
   diagnostics design start without implementing API or changing ABI, and
   `release/checklists/0.16.0-alpha.2.md` records the docs-only public
   diagnostics contract freeze before implementation.
+  `release/checklists/0.16.0-alpha.3.md` records the first public diagnostics
+  ABI expansion for `ruckig_diagnostics_init` and the
+  validate/calculate/update `_with_diagnostics` entry points.
   `release/checklists/post-v0.15.0-quality-audit.md` records the post-release
   code-quality and test-quality audit slice without changing the stable ABI or
   release state.
@@ -208,6 +211,9 @@ baseline remains unchanged.
 The `0.16.0-alpha.2` contract freeze locks diagnostics initialization,
 `struct_size` compatibility, staged public API boundaries, and stable
 coarse-grained diagnostic codes before any header or ABI allowlist change.
+The `0.16.0-alpha.3` implementation adds the core opt-in public diagnostics
+API and raises the design-line public symbol count from the `v0.15.0`
+184-symbol baseline to 188 while keeping version/tag/release state unchanged.
 The failure-oriented shrinker prototype adds local oracle random failure
 shrinking for seed/sample debugging without writing generated fixtures or
 changing library API.

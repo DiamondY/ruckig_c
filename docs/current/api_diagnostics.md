@@ -110,29 +110,45 @@ do not contribute an independent minimum duration.
 
 ## Future Public Diagnostics Design
 
-The current public API exposes result codes and queryable output state, but it
-does not expose a stable structured diagnostics channel for explaining why an
-input failed validation, why a resume attempt was rejected, or which tracking
-or waypoint candidate family was selected internally.
+The core public diagnostics API is now available on the `0.16.0` design line.
+It is opt-in and leaves the legacy entry points unchanged:
+
+- `ruckig_diagnostics_init` initializes a caller-owned diagnostics record.
+  Passing `NULL` is a no-op.
+- `ruckig_validate_input_with_diagnostics` explains validation failures with a
+  stable coarse scope/code plus optional DoF, section, count, value, and limit
+  fields.
+- `ruckig_calculate_with_diagnostics` and
+  `ruckig_update_with_diagnostics` preserve the legacy result code while
+  filling diagnostics for invalid handles, DoF/capacity mismatches, validation
+  failures, zero-limit errors, synchronization errors, trajectory-duration
+  errors, unsupported combinations, and observable interruption.
+- Passing `NULL` diagnostics to a `_with_diagnostics` function is defined to
+  behave like the corresponding legacy API.
+
+Callers that pass a non-NULL diagnostics pointer must initialize it with
+`ruckig_diagnostics_init`. A too-small `struct_size` is rejected with
+`RUCKIG_ERROR_INVALID_INPUT` before the main operation runs. Valid records are
+written only within the caller-declared stable prefix, leaving reserved fields
+for future ABI-compatible expansion.
 
 The post-`v0.15.0` readiness audit starts a docs-only
 `0.16.0-design-public-diagnostics` line in
 `docs/design/0.16.0_public_diagnostics.md`. The follow-up
-`0.16.0-alpha.2` contract freeze keeps this line docs-only but locks the
-intended public diagnostics shape for staged implementation:
+`0.16.0-alpha.2` contract freeze locked the intended public diagnostics shape,
+and `0.16.0-alpha.3` implements the core validate/calculate/update API:
 
 - `ruckig_diagnostics_t` is an opt-in output record with `struct_size`,
   result, stable scope/code, location, count, value, limit, and reserved
   fields.
-- Callers that pass a non-NULL diagnostics pointer must initialize it with
-  `ruckig_diagnostics_init`; `NULL` diagnostics is defined to behave like the
-  legacy API.
-- The first implementation slice covers
+- The public ABI expands from the `v0.15.0` 184-symbol baseline to 188 symbols
+  by adding `ruckig_diagnostics_init`,
   `ruckig_validate_input_with_diagnostics`,
   `ruckig_calculate_with_diagnostics`, and
   `ruckig_update_with_diagnostics`.
 - Tracking and continuation diagnostics use getter-style accessors instead of
-  adding `_with_diagnostics` variants to every tracking operation.
+  adding `_with_diagnostics` variants to every tracking operation; those
+  getter symbols remain deferred to alpha.5.
 
 Diagnostics remain stable and coarse-grained. They explain public failure
 classes and locations, but do not expose solver profile branches, candidate

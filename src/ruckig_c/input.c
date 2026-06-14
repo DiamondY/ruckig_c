@@ -567,31 +567,93 @@ static double v_at_a_zero(double v0, double a0, double j) {
     return v0 + (a0 * a0) / (2.0 * j);
 }
 
-RUCKIG_C_API ruckig_result_t ruckig_validate_input(
+RUCKIG_C_API void ruckig_diagnostics_init(ruckig_diagnostics_t* diagnostics) {
+    if (!diagnostics) {
+        return;
+    }
+    memset(diagnostics, 0, sizeof(*diagnostics));
+    diagnostics->struct_size = sizeof(*diagnostics);
+    diagnostics->result = RUCKIG_WORKING;
+    diagnostics->scope = RUCKIG_DIAGNOSTIC_SCOPE_NONE;
+    diagnostics->code = RUCKIG_DIAGNOSTIC_NONE;
+}
+
+#define RUCKIG_VALIDATE_DIAGNOSTIC_FAIL(code, dof_value, section_value, expected_value, actual_value, failed_value, limit_value) \
+    do { \
+        ruckig_diagnostics_record( \
+            diagnostics, \
+            RUCKIG_ERROR_INVALID_INPUT, \
+            RUCKIG_DIAGNOSTIC_SCOPE_INPUT, \
+            (code), \
+            (dof_value), \
+            (section_value), \
+            (expected_value), \
+            (actual_value), \
+            (failed_value), \
+            (limit_value) \
+        ); \
+        return RUCKIG_ERROR_INVALID_INPUT; \
+    } while (0)
+
+RUCKIG_C_API ruckig_result_t ruckig_validate_input_with_diagnostics(
     const ruckig_t* otg,
     const ruckig_input_t* input,
     bool check_current_state_within_limits,
-    bool check_target_state_within_limits
+    bool check_target_state_within_limits,
+    ruckig_diagnostics_t* diagnostics
 ) {
     size_t dof;
-    if (!otg || !input || otg->dofs != input->dofs) {
+    if (ruckig_diagnostics_validate_or_null(diagnostics) != RUCKIG_WORKING) {
         return RUCKIG_ERROR_INVALID_INPUT;
+    }
+    if (!otg || !input) {
+        RUCKIG_VALIDATE_DIAGNOSTIC_FAIL(RUCKIG_DIAGNOSTIC_NULL_ARGUMENT, 0u, 0u, 0u, 0u, 0.0, 0.0);
+    }
+    if (otg->dofs != input->dofs) {
+        RUCKIG_VALIDATE_DIAGNOSTIC_FAIL(
+            RUCKIG_DIAGNOSTIC_DOF_MISMATCH,
+            0u,
+            0u,
+            otg->dofs,
+            input->dofs,
+            0.0,
+            0.0
+        );
     }
 
     if (otg->delta_time <= 0.0 && input->duration_discretization != RUCKIG_DURATION_CONTINUOUS) {
-        return RUCKIG_ERROR_INVALID_INPUT;
+        RUCKIG_VALIDATE_DIAGNOSTIC_FAIL(
+            RUCKIG_DIAGNOSTIC_UNSUPPORTED,
+            0u,
+            0u,
+            0u,
+            0u,
+            otg->delta_time,
+            0.0
+        );
     }
 
     if (input->waypoint_count > 0) {
         if (input->waypoint_count > input->max_number_of_waypoints || input->waypoint_count > otg->max_number_of_waypoints) {
-            return RUCKIG_ERROR_INVALID_INPUT;
+            const size_t input_capacity = input->max_number_of_waypoints < otg->max_number_of_waypoints
+                ? input->max_number_of_waypoints
+                : otg->max_number_of_waypoints;
+            RUCKIG_VALIDATE_DIAGNOSTIC_FAIL(
+                RUCKIG_DIAGNOSTIC_CAPACITY_MISMATCH,
+                0u,
+                0u,
+                input_capacity,
+                input->waypoint_count,
+                0.0,
+                0.0
+            );
         }
         if (input->control_interface != RUCKIG_CONTROL_POSITION
             || input->duration_discretization != RUCKIG_DURATION_CONTINUOUS
             || input->has_minimum_duration
             || input->has_per_dof_control_interface
             || input->has_per_dof_synchronization) {
-            return RUCKIG_ERROR_INVALID_INPUT;
+            RUCKIG_VALIDATE_DIAGNOSTIC_FAIL(RUCKIG_DIAGNOSTIC_UNSUPPORTED, 0u, 0u, 0u, 0u, 0.0, 0.0);
         }
     }
 
@@ -605,29 +667,85 @@ RUCKIG_C_API ruckig_result_t ruckig_validate_input(
         const double vf = input->target_velocity[dof];
         const ruckig_control_interface_t control_interface = effective_control_interface(input, dof);
 
-        if (isnan(j_max) || j_max < 0.0 || isnan(a_max) || a_max < 0.0 || isnan(a_min) || a_min > 0.0) {
-            return RUCKIG_ERROR_INVALID_INPUT;
+        if (isnan(j_max)) {
+            RUCKIG_VALIDATE_DIAGNOSTIC_FAIL(RUCKIG_DIAGNOSTIC_NONFINITE_VALUE, dof, 0u, 0u, 0u, j_max, 0.0);
+        }
+        if (j_max < 0.0) {
+            RUCKIG_VALIDATE_DIAGNOSTIC_FAIL(RUCKIG_DIAGNOSTIC_NEGATIVE_LIMIT, dof, 0u, 0u, 0u, j_max, 0.0);
+        }
+        if (isnan(a_max)) {
+            RUCKIG_VALIDATE_DIAGNOSTIC_FAIL(RUCKIG_DIAGNOSTIC_NONFINITE_VALUE, dof, 0u, 0u, 0u, a_max, 0.0);
+        }
+        if (a_max < 0.0) {
+            RUCKIG_VALIDATE_DIAGNOSTIC_FAIL(RUCKIG_DIAGNOSTIC_NEGATIVE_LIMIT, dof, 0u, 0u, 0u, a_max, 0.0);
+        }
+        if (isnan(a_min)) {
+            RUCKIG_VALIDATE_DIAGNOSTIC_FAIL(RUCKIG_DIAGNOSTIC_NONFINITE_VALUE, dof, 0u, 0u, 0u, a_min, 0.0);
+        }
+        if (a_min > 0.0) {
+            RUCKIG_VALIDATE_DIAGNOSTIC_FAIL(RUCKIG_DIAGNOSTIC_NEGATIVE_LIMIT, dof, 0u, 0u, 0u, a_min, 0.0);
         }
         if (input->waypoint_count > 0 && isinf(j_max)) {
-            return RUCKIG_ERROR_INVALID_INPUT;
+            RUCKIG_VALIDATE_DIAGNOSTIC_FAIL(RUCKIG_DIAGNOSTIC_NONFINITE_VALUE, dof, 0u, 0u, 0u, j_max, 0.0);
         }
-        if (isnan(a0) || isnan(af) || isnan(v0) || isnan(vf)) {
-            return RUCKIG_ERROR_INVALID_INPUT;
+        if (isnan(a0)) {
+            RUCKIG_VALIDATE_DIAGNOSTIC_FAIL(RUCKIG_DIAGNOSTIC_NONFINITE_VALUE, dof, 0u, 0u, 0u, a0, 0.0);
+        }
+        if (isnan(af)) {
+            RUCKIG_VALIDATE_DIAGNOSTIC_FAIL(RUCKIG_DIAGNOSTIC_NONFINITE_VALUE, dof, 0u, 0u, 0u, af, 0.0);
+        }
+        if (isnan(v0)) {
+            RUCKIG_VALIDATE_DIAGNOSTIC_FAIL(RUCKIG_DIAGNOSTIC_NONFINITE_VALUE, dof, 0u, 0u, 0u, v0, 0.0);
+        }
+        if (isnan(vf)) {
+            RUCKIG_VALIDATE_DIAGNOSTIC_FAIL(RUCKIG_DIAGNOSTIC_NONFINITE_VALUE, dof, 0u, 0u, 0u, vf, 0.0);
         }
         if (check_current_state_within_limits && (a0 > a_max || a0 < a_min)) {
-            return RUCKIG_ERROR_INVALID_INPUT;
+            RUCKIG_VALIDATE_DIAGNOSTIC_FAIL(
+                RUCKIG_DIAGNOSTIC_CURRENT_STATE_OUT_OF_LIMITS,
+                dof,
+                0u,
+                0u,
+                0u,
+                a0,
+                a0 > a_max ? a_max : a_min
+            );
         }
         if (check_target_state_within_limits && (af > a_max || af < a_min)) {
-            return RUCKIG_ERROR_INVALID_INPUT;
+            RUCKIG_VALIDATE_DIAGNOSTIC_FAIL(
+                RUCKIG_DIAGNOSTIC_TARGET_STATE_OUT_OF_LIMITS,
+                dof,
+                0u,
+                0u,
+                0u,
+                af,
+                af > a_max ? a_max : a_min
+            );
         }
         if (input->waypoint_count > 0 && !input->enabled[dof]) {
             size_t waypoint;
             if (input->target_position[dof] != input->current_position[dof]) {
-                return RUCKIG_ERROR_INVALID_INPUT;
+                RUCKIG_VALIDATE_DIAGNOSTIC_FAIL(
+                    RUCKIG_DIAGNOSTIC_UNSUPPORTED,
+                    dof,
+                    0u,
+                    0u,
+                    0u,
+                    input->target_position[dof],
+                    input->current_position[dof]
+                );
             }
             for (waypoint = 0; waypoint < input->waypoint_count; ++waypoint) {
                 if (input->intermediate_positions[waypoint * input->dofs + dof] != input->current_position[dof]) {
-                    return RUCKIG_ERROR_INVALID_INPUT;
+                    RUCKIG_VALIDATE_DIAGNOSTIC_FAIL(
+                        RUCKIG_DIAGNOSTIC_UNSUPPORTED,
+                        dof,
+                        waypoint,
+                        0u,
+                        0u,
+                        input->intermediate_positions[waypoint * input->dofs + dof],
+                        input->current_position[dof]
+                    );
                 }
             }
         }
@@ -640,32 +758,118 @@ RUCKIG_C_API ruckig_result_t ruckig_validate_input(
             const double p_max = input->max_position[dof];
             const double p_min = input->min_position[dof];
 
-            if (isnan(p0) || isnan(pf) || isnan(v_max) || v_max < 0.0 || isnan(v_min) || v_min > 0.0
-                || isnan(p_max) || isnan(p_min) || p_min > p_max) {
-                return RUCKIG_ERROR_INVALID_INPUT;
+            if (isnan(p0)) {
+                RUCKIG_VALIDATE_DIAGNOSTIC_FAIL(RUCKIG_DIAGNOSTIC_NONFINITE_VALUE, dof, 0u, 0u, 0u, p0, 0.0);
+            }
+            if (isnan(pf)) {
+                RUCKIG_VALIDATE_DIAGNOSTIC_FAIL(RUCKIG_DIAGNOSTIC_NONFINITE_VALUE, dof, 0u, 0u, 0u, pf, 0.0);
+            }
+            if (isnan(v_max)) {
+                RUCKIG_VALIDATE_DIAGNOSTIC_FAIL(RUCKIG_DIAGNOSTIC_NONFINITE_VALUE, dof, 0u, 0u, 0u, v_max, 0.0);
+            }
+            if (v_max < 0.0) {
+                RUCKIG_VALIDATE_DIAGNOSTIC_FAIL(RUCKIG_DIAGNOSTIC_NEGATIVE_LIMIT, dof, 0u, 0u, 0u, v_max, 0.0);
+            }
+            if (isnan(v_min)) {
+                RUCKIG_VALIDATE_DIAGNOSTIC_FAIL(RUCKIG_DIAGNOSTIC_NONFINITE_VALUE, dof, 0u, 0u, 0u, v_min, 0.0);
+            }
+            if (v_min > 0.0) {
+                RUCKIG_VALIDATE_DIAGNOSTIC_FAIL(RUCKIG_DIAGNOSTIC_NEGATIVE_LIMIT, dof, 0u, 0u, 0u, v_min, 0.0);
+            }
+            if (isnan(p_max) || isnan(p_min)) {
+                RUCKIG_VALIDATE_DIAGNOSTIC_FAIL(
+                    RUCKIG_DIAGNOSTIC_NONFINITE_VALUE,
+                    dof,
+                    0u,
+                    0u,
+                    0u,
+                    isnan(p_max) ? p_max : p_min,
+                    0.0
+                );
+            }
+            if (p_min > p_max) {
+                RUCKIG_VALIDATE_DIAGNOSTIC_FAIL(RUCKIG_DIAGNOSTIC_UNSUPPORTED, dof, 0u, 0u, 0u, p_min, p_max);
             }
             if (check_current_state_within_limits && (v0 > v_max || v0 < v_min)) {
-                return RUCKIG_ERROR_INVALID_INPUT;
+                RUCKIG_VALIDATE_DIAGNOSTIC_FAIL(
+                    RUCKIG_DIAGNOSTIC_CURRENT_STATE_OUT_OF_LIMITS,
+                    dof,
+                    0u,
+                    0u,
+                    0u,
+                    v0,
+                    v0 > v_max ? v_max : v_min
+                );
             }
             if (check_target_state_within_limits && (vf > v_max || vf < v_min)) {
-                return RUCKIG_ERROR_INVALID_INPUT;
+                RUCKIG_VALIDATE_DIAGNOSTIC_FAIL(
+                    RUCKIG_DIAGNOSTIC_TARGET_STATE_OUT_OF_LIMITS,
+                    dof,
+                    0u,
+                    0u,
+                    0u,
+                    vf,
+                    vf > v_max ? v_max : v_min
+                );
             }
             if (check_current_state_within_limits) {
                 if (a0 > 0.0 && j_max > 0.0 && v_at_a_zero(v0, a0, j_max) > v_max) {
-                    return RUCKIG_ERROR_INVALID_INPUT;
+                    RUCKIG_VALIDATE_DIAGNOSTIC_FAIL(
+                        RUCKIG_DIAGNOSTIC_CURRENT_STATE_OUT_OF_LIMITS,
+                        dof,
+                        0u,
+                        0u,
+                        0u,
+                        v_at_a_zero(v0, a0, j_max),
+                        v_max
+                    );
                 }
                 if (a0 < 0.0 && j_max > 0.0 && v_at_a_zero(v0, a0, -j_max) < v_min) {
-                    return RUCKIG_ERROR_INVALID_INPUT;
+                    RUCKIG_VALIDATE_DIAGNOSTIC_FAIL(
+                        RUCKIG_DIAGNOSTIC_CURRENT_STATE_OUT_OF_LIMITS,
+                        dof,
+                        0u,
+                        0u,
+                        0u,
+                        v_at_a_zero(v0, a0, -j_max),
+                        v_min
+                    );
                 }
             }
             if (check_target_state_within_limits) {
                 if (af < 0.0 && j_max > 0.0 && v_at_a_zero(vf, af, j_max) > v_max) {
-                    return RUCKIG_ERROR_INVALID_INPUT;
+                    RUCKIG_VALIDATE_DIAGNOSTIC_FAIL(
+                        RUCKIG_DIAGNOSTIC_TARGET_STATE_OUT_OF_LIMITS,
+                        dof,
+                        0u,
+                        0u,
+                        0u,
+                        v_at_a_zero(vf, af, j_max),
+                        v_max
+                    );
                 }
                 if (af > 0.0 && j_max > 0.0 && v_at_a_zero(vf, af, -j_max) < v_min) {
-                    return RUCKIG_ERROR_INVALID_INPUT;
+                    RUCKIG_VALIDATE_DIAGNOSTIC_FAIL(
+                        RUCKIG_DIAGNOSTIC_TARGET_STATE_OUT_OF_LIMITS,
+                        dof,
+                        0u,
+                        0u,
+                        0u,
+                        v_at_a_zero(vf, af, -j_max),
+                        v_min
+                    );
                 }
             }
+        } else if (control_interface != RUCKIG_CONTROL_VELOCITY) {
+            RUCKIG_VALIDATE_DIAGNOSTIC_FAIL(
+                RUCKIG_DIAGNOSTIC_INVALID_ENUM,
+                dof,
+                0u,
+                0u,
+                0u,
+                (double)control_interface,
+                0.0
+            );
         }
     }
 
@@ -682,25 +886,56 @@ RUCKIG_C_API ruckig_result_t ruckig_validate_input(
                 const double max_jerk = input->has_per_section_max_jerk ? input->per_section_max_jerk[index] : input->max_jerk[dof];
                 const double max_position = input->has_per_section_max_position ? input->per_section_max_position[index] : input->max_position[dof];
                 const double min_position = input->has_per_section_min_position ? input->per_section_min_position[index] : input->min_position[dof];
-                if (isnan(max_velocity) || max_velocity < 0.0
-                    || isnan(min_velocity) || min_velocity > 0.0
-                    || isnan(max_acceleration) || max_acceleration < 0.0
-                    || isnan(min_acceleration) || min_acceleration > 0.0
-                    || isnan(max_jerk) || max_jerk <= 0.0 || isinf(max_jerk)
-                    || isnan(max_position) || isnan(min_position) || min_position > max_position) {
-                    return RUCKIG_ERROR_INVALID_INPUT;
+                if (isnan(max_velocity) || isnan(min_velocity) || isnan(max_acceleration)
+                    || isnan(min_acceleration) || isnan(max_jerk) || isinf(max_jerk)
+                    || isnan(max_position) || isnan(min_position)) {
+                    RUCKIG_VALIDATE_DIAGNOSTIC_FAIL(RUCKIG_DIAGNOSTIC_NONFINITE_VALUE, dof, section, 0u, 0u, 0.0, 0.0);
+                }
+                if (max_velocity < 0.0 || min_velocity > 0.0
+                    || max_acceleration < 0.0 || min_acceleration > 0.0
+                    || max_jerk <= 0.0) {
+                    RUCKIG_VALIDATE_DIAGNOSTIC_FAIL(RUCKIG_DIAGNOSTIC_NEGATIVE_LIMIT, dof, section, 0u, 0u, 0.0, 0.0);
+                }
+                if (min_position > max_position) {
+                    RUCKIG_VALIDATE_DIAGNOSTIC_FAIL(RUCKIG_DIAGNOSTIC_UNSUPPORTED, dof, section, 0u, 0u, min_position, max_position);
                 }
             }
             if (input->has_per_section_minimum_duration) {
                 const double minimum_duration = input->per_section_minimum_duration[section];
                 if (isnan(minimum_duration) || minimum_duration < 0.0) {
-                    return RUCKIG_ERROR_INVALID_INPUT;
+                    RUCKIG_VALIDATE_DIAGNOSTIC_FAIL(
+                        isnan(minimum_duration) ? RUCKIG_DIAGNOSTIC_NONFINITE_VALUE : RUCKIG_DIAGNOSTIC_NEGATIVE_LIMIT,
+                        0u,
+                        section,
+                        0u,
+                        0u,
+                        minimum_duration,
+                        0.0
+                    );
                 }
             }
         }
     }
 
+    ruckig_diagnostics_clear(diagnostics, RUCKIG_WORKING, RUCKIG_DIAGNOSTIC_SCOPE_NONE);
     return RUCKIG_WORKING;
+}
+
+#undef RUCKIG_VALIDATE_DIAGNOSTIC_FAIL
+
+RUCKIG_C_API ruckig_result_t ruckig_validate_input(
+    const ruckig_t* otg,
+    const ruckig_input_t* input,
+    bool check_current_state_within_limits,
+    bool check_target_state_within_limits
+) {
+    return ruckig_validate_input_with_diagnostics(
+        otg,
+        input,
+        check_current_state_within_limits,
+        check_target_state_within_limits,
+        NULL
+    );
 }
 
 ruckig_result_t ruckig_input_copy_state(const ruckig_input_t* src, ruckig_input_t* dst) {

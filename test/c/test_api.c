@@ -537,6 +537,292 @@ static void test_zero_limit_error_paths(void) {
     ruckig_destroy(otg);
 }
 
+static void configure_public_diagnostics_input(ruckig_input_t* input) {
+    ruckig_input_current_position_data(input)[0] = 0.0;
+    ruckig_input_current_velocity_data(input)[0] = 0.0;
+    ruckig_input_current_acceleration_data(input)[0] = 0.0;
+    ruckig_input_target_position_data(input)[0] = 1.0;
+    ruckig_input_target_velocity_data(input)[0] = 0.0;
+    ruckig_input_target_acceleration_data(input)[0] = 0.0;
+    ruckig_input_max_velocity_data(input)[0] = 1.0;
+    ruckig_input_max_acceleration_data(input)[0] = 1.0;
+    ruckig_input_max_jerk_data(input)[0] = 1.0;
+}
+
+static void test_public_diagnostics_init_and_null_parity(void) {
+    ruckig_t* otg = NULL;
+    ruckig_input_t* input = NULL;
+    ruckig_output_t* output = NULL;
+    ruckig_trajectory_t* trajectory = NULL;
+    ruckig_diagnostics_t diagnostics;
+    size_t too_small_size;
+
+    ruckig_diagnostics_init(NULL);
+    ruckig_diagnostics_init(&diagnostics);
+    CHECK_EQ_INT(diagnostics.struct_size, sizeof(ruckig_diagnostics_t));
+    CHECK_EQ_INT(diagnostics.result, RUCKIG_WORKING);
+    CHECK_EQ_INT(diagnostics.scope, RUCKIG_DIAGNOSTIC_SCOPE_NONE);
+    CHECK_EQ_INT(diagnostics.code, RUCKIG_DIAGNOSTIC_NONE);
+
+    CHECK_EQ_INT(ruckig_create(&otg, 1, 0.1), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_input_create(&input, 1), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_output_create(&output, 1), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_trajectory_create(&trajectory, 1), RUCKIG_WORKING);
+    configure_public_diagnostics_input(input);
+
+    CHECK_EQ_INT(
+        ruckig_validate_input_with_diagnostics(otg, input, false, true, NULL),
+        ruckig_validate_input(otg, input, false, true)
+    );
+    CHECK_EQ_INT(
+        ruckig_calculate_with_diagnostics(otg, input, trajectory, NULL),
+        ruckig_calculate(otg, input, trajectory)
+    );
+    ruckig_reset(otg);
+    CHECK_EQ_INT(
+        ruckig_update_with_diagnostics(otg, input, output, NULL),
+        ruckig_update(otg, input, output)
+    );
+
+    ruckig_diagnostics_init(&diagnostics);
+    too_small_size = offsetof(ruckig_diagnostics_t, limit);
+    diagnostics.struct_size = too_small_size;
+    CHECK_EQ_INT(
+        ruckig_validate_input_with_diagnostics(otg, input, false, true, &diagnostics),
+        RUCKIG_ERROR_INVALID_INPUT
+    );
+    CHECK_EQ_INT(diagnostics.struct_size, too_small_size);
+
+    ruckig_diagnostics_init(&diagnostics);
+    CHECK_EQ_INT(
+        ruckig_validate_input_with_diagnostics(otg, input, false, true, &diagnostics),
+        RUCKIG_WORKING
+    );
+    CHECK_EQ_INT(diagnostics.result, RUCKIG_WORKING);
+    CHECK_EQ_INT(diagnostics.scope, RUCKIG_DIAGNOSTIC_SCOPE_NONE);
+    CHECK_EQ_INT(diagnostics.code, RUCKIG_DIAGNOSTIC_NONE);
+
+    ruckig_trajectory_destroy(trajectory);
+    ruckig_output_destroy(output);
+    ruckig_input_destroy(input);
+    ruckig_destroy(otg);
+}
+
+static void test_public_diagnostics_validation_failures(void) {
+    ruckig_t* otg = NULL;
+    ruckig_input_t* input = NULL;
+    ruckig_input_t* mismatched_input = NULL;
+    ruckig_diagnostics_t diagnostics;
+
+    CHECK_EQ_INT(ruckig_create(&otg, 1, 0.1), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_input_create(&input, 1), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_input_create(&mismatched_input, 2), RUCKIG_WORKING);
+    configure_public_diagnostics_input(input);
+
+    ruckig_diagnostics_init(&diagnostics);
+    CHECK_EQ_INT(
+        ruckig_validate_input_with_diagnostics(NULL, input, false, true, &diagnostics),
+        RUCKIG_ERROR_INVALID_INPUT
+    );
+    CHECK_EQ_INT(diagnostics.result, RUCKIG_ERROR_INVALID_INPUT);
+    CHECK_EQ_INT(diagnostics.scope, RUCKIG_DIAGNOSTIC_SCOPE_INPUT);
+    CHECK_EQ_INT(diagnostics.code, RUCKIG_DIAGNOSTIC_NULL_ARGUMENT);
+
+    ruckig_diagnostics_init(&diagnostics);
+    CHECK_EQ_INT(
+        ruckig_validate_input_with_diagnostics(otg, mismatched_input, false, true, &diagnostics),
+        RUCKIG_ERROR_INVALID_INPUT
+    );
+    CHECK_EQ_INT(diagnostics.code, RUCKIG_DIAGNOSTIC_DOF_MISMATCH);
+    CHECK_EQ_INT(diagnostics.expected_count, 1);
+    CHECK_EQ_INT(diagnostics.actual_count, 2);
+
+    ruckig_input_current_position_data(input)[0] = NAN;
+    ruckig_diagnostics_init(&diagnostics);
+    CHECK_EQ_INT(
+        ruckig_validate_input_with_diagnostics(otg, input, true, true, &diagnostics),
+        RUCKIG_ERROR_INVALID_INPUT
+    );
+    CHECK_EQ_INT(diagnostics.code, RUCKIG_DIAGNOSTIC_NONFINITE_VALUE);
+    ruckig_input_current_position_data(input)[0] = 0.0;
+
+    ruckig_input_max_velocity_data(input)[0] = -1.0;
+    ruckig_diagnostics_init(&diagnostics);
+    CHECK_EQ_INT(
+        ruckig_validate_input_with_diagnostics(otg, input, true, true, &diagnostics),
+        RUCKIG_ERROR_INVALID_INPUT
+    );
+    CHECK_EQ_INT(diagnostics.code, RUCKIG_DIAGNOSTIC_NEGATIVE_LIMIT);
+    ruckig_input_max_velocity_data(input)[0] = 1.0;
+
+    ruckig_input_target_velocity_data(input)[0] = 2.0;
+    ruckig_diagnostics_init(&diagnostics);
+    CHECK_EQ_INT(
+        ruckig_validate_input_with_diagnostics(otg, input, true, true, &diagnostics),
+        RUCKIG_ERROR_INVALID_INPUT
+    );
+    CHECK_EQ_INT(diagnostics.code, RUCKIG_DIAGNOSTIC_TARGET_STATE_OUT_OF_LIMITS);
+    CHECK_EQ_INT(diagnostics.dof, 0);
+    ruckig_input_target_velocity_data(input)[0] = 0.0;
+
+    ruckig_input_current_velocity_data(input)[0] = 2.0;
+    ruckig_diagnostics_init(&diagnostics);
+    CHECK_EQ_INT(
+        ruckig_validate_input_with_diagnostics(otg, input, true, true, &diagnostics),
+        RUCKIG_ERROR_INVALID_INPUT
+    );
+    CHECK_EQ_INT(diagnostics.code, RUCKIG_DIAGNOSTIC_CURRENT_STATE_OUT_OF_LIMITS);
+    ruckig_input_current_velocity_data(input)[0] = 0.0;
+
+    input->control_interface = (ruckig_control_interface_t)99;
+    ruckig_diagnostics_init(&diagnostics);
+    CHECK_EQ_INT(
+        ruckig_validate_input_with_diagnostics(otg, input, true, true, &diagnostics),
+        RUCKIG_ERROR_INVALID_INPUT
+    );
+    CHECK_EQ_INT(diagnostics.code, RUCKIG_DIAGNOSTIC_INVALID_ENUM);
+
+    ruckig_input_destroy(mismatched_input);
+    ruckig_input_destroy(input);
+    ruckig_destroy(otg);
+}
+
+static void test_public_diagnostics_calculate_failures(void) {
+    ruckig_t* otg = NULL;
+    ruckig_t* no_waypoint_capacity_otg = NULL;
+    ruckig_input_t* input = NULL;
+    ruckig_input_t* waypoint_input = NULL;
+    ruckig_trajectory_t* trajectory = NULL;
+    ruckig_trajectory_t* mismatched_trajectory = NULL;
+    ruckig_trajectory_t* waypoint_trajectory = NULL;
+    ruckig_diagnostics_t diagnostics;
+    double waypoint[1] = {0.5};
+
+    CHECK_EQ_INT(ruckig_create(&otg, 1, 0.1), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_input_create(&input, 1), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_trajectory_create(&trajectory, 1), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_trajectory_create(&mismatched_trajectory, 2), RUCKIG_WORKING);
+    configure_public_diagnostics_input(input);
+
+    ruckig_diagnostics_init(&diagnostics);
+    CHECK_EQ_INT(
+        ruckig_calculate_with_diagnostics(NULL, input, trajectory, &diagnostics),
+        RUCKIG_ERROR_INVALID_INPUT
+    );
+    CHECK_EQ_INT(diagnostics.scope, RUCKIG_DIAGNOSTIC_SCOPE_CALCULATION);
+    CHECK_EQ_INT(diagnostics.code, RUCKIG_DIAGNOSTIC_NULL_ARGUMENT);
+
+    ruckig_diagnostics_init(&diagnostics);
+    CHECK_EQ_INT(
+        ruckig_calculate_with_diagnostics(otg, input, mismatched_trajectory, &diagnostics),
+        RUCKIG_ERROR_INVALID_INPUT
+    );
+    CHECK_EQ_INT(diagnostics.code, RUCKIG_DIAGNOSTIC_DOF_MISMATCH);
+
+    ruckig_input_max_velocity_data(input)[0] = 0.0;
+    ruckig_input_max_acceleration_data(input)[0] = INFINITY;
+    ruckig_input_max_jerk_data(input)[0] = INFINITY;
+    ruckig_diagnostics_init(&diagnostics);
+    CHECK_EQ_INT(
+        ruckig_calculate_with_diagnostics(otg, input, trajectory, &diagnostics),
+        RUCKIG_ERROR_ZERO_LIMITS
+    );
+    CHECK_EQ_INT(diagnostics.result, RUCKIG_ERROR_ZERO_LIMITS);
+    CHECK_EQ_INT(diagnostics.scope, RUCKIG_DIAGNOSTIC_SCOPE_CALCULATION);
+    CHECK_EQ_INT(diagnostics.code, RUCKIG_DIAGNOSTIC_ZERO_LIMIT);
+    ruckig_input_max_velocity_data(input)[0] = 1.0;
+    ruckig_input_max_acceleration_data(input)[0] = 1.0;
+    ruckig_input_max_jerk_data(input)[0] = 1.0;
+
+    ruckig_diagnostics_init(&diagnostics);
+    CHECK_EQ_INT(
+        ruckig_calculate_with_diagnostics(otg, input, trajectory, &diagnostics),
+        RUCKIG_WORKING
+    );
+    CHECK_EQ_INT(diagnostics.scope, RUCKIG_DIAGNOSTIC_SCOPE_NONE);
+    CHECK_EQ_INT(diagnostics.code, RUCKIG_DIAGNOSTIC_NONE);
+
+    CHECK_EQ_INT(ruckig_create(&no_waypoint_capacity_otg, 1, 0.1), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_input_create_with_waypoints(&waypoint_input, 1, 1), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_trajectory_create_with_waypoints(&waypoint_trajectory, 1, 1), RUCKIG_WORKING);
+    configure_public_diagnostics_input(waypoint_input);
+    CHECK_EQ_INT(ruckig_input_set_intermediate_positions(waypoint_input, waypoint, 1, 1), RUCKIG_WORKING);
+    ruckig_diagnostics_init(&diagnostics);
+    CHECK_EQ_INT(
+        ruckig_calculate_with_diagnostics(no_waypoint_capacity_otg, waypoint_input, waypoint_trajectory, &diagnostics),
+        RUCKIG_ERROR_INVALID_INPUT
+    );
+    CHECK_EQ_INT(diagnostics.code, RUCKIG_DIAGNOSTIC_CAPACITY_MISMATCH);
+    CHECK_EQ_INT(diagnostics.expected_count, 0);
+    CHECK_EQ_INT(diagnostics.actual_count, 1);
+
+    ruckig_trajectory_destroy(waypoint_trajectory);
+    ruckig_input_destroy(waypoint_input);
+    ruckig_destroy(no_waypoint_capacity_otg);
+    ruckig_trajectory_destroy(mismatched_trajectory);
+    ruckig_trajectory_destroy(trajectory);
+    ruckig_input_destroy(input);
+    ruckig_destroy(otg);
+}
+
+static void test_public_diagnostics_update_failures_and_success(void) {
+    ruckig_t* otg = NULL;
+    ruckig_input_t* input = NULL;
+    ruckig_output_t* output = NULL;
+    ruckig_output_t* mismatched_output = NULL;
+    ruckig_diagnostics_t diagnostics;
+
+    CHECK_EQ_INT(ruckig_create(&otg, 1, 0.1), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_input_create(&input, 1), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_output_create(&output, 1), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_output_create(&mismatched_output, 2), RUCKIG_WORKING);
+    configure_public_diagnostics_input(input);
+
+    ruckig_diagnostics_init(&diagnostics);
+    CHECK_EQ_INT(
+        ruckig_update_with_diagnostics(NULL, input, output, &diagnostics),
+        RUCKIG_ERROR_INVALID_INPUT
+    );
+    CHECK_EQ_INT(diagnostics.scope, RUCKIG_DIAGNOSTIC_SCOPE_UPDATE);
+    CHECK_EQ_INT(diagnostics.code, RUCKIG_DIAGNOSTIC_NULL_ARGUMENT);
+
+    ruckig_diagnostics_init(&diagnostics);
+    CHECK_EQ_INT(
+        ruckig_update_with_diagnostics(otg, input, mismatched_output, &diagnostics),
+        RUCKIG_ERROR_INVALID_INPUT
+    );
+    CHECK_EQ_INT(diagnostics.code, RUCKIG_DIAGNOSTIC_DOF_MISMATCH);
+
+    ruckig_input_max_velocity_data(input)[0] = 0.0;
+    ruckig_input_max_acceleration_data(input)[0] = INFINITY;
+    ruckig_input_max_jerk_data(input)[0] = INFINITY;
+    ruckig_diagnostics_init(&diagnostics);
+    CHECK_EQ_INT(
+        ruckig_update_with_diagnostics(otg, input, output, &diagnostics),
+        RUCKIG_ERROR_ZERO_LIMITS
+    );
+    CHECK_EQ_INT(diagnostics.result, RUCKIG_ERROR_ZERO_LIMITS);
+    CHECK_EQ_INT(diagnostics.code, RUCKIG_DIAGNOSTIC_ZERO_LIMIT);
+    ruckig_input_max_velocity_data(input)[0] = 1.0;
+    ruckig_input_max_acceleration_data(input)[0] = 1.0;
+    ruckig_input_max_jerk_data(input)[0] = 1.0;
+
+    ruckig_reset(otg);
+    ruckig_diagnostics_init(&diagnostics);
+    CHECK_EQ_INT(
+        ruckig_update_with_diagnostics(otg, input, output, &diagnostics),
+        RUCKIG_WORKING
+    );
+    CHECK_EQ_INT(diagnostics.result, RUCKIG_WORKING);
+    CHECK_EQ_INT(diagnostics.scope, RUCKIG_DIAGNOSTIC_SCOPE_NONE);
+    CHECK_EQ_INT(diagnostics.code, RUCKIG_DIAGNOSTIC_NONE);
+
+    ruckig_output_destroy(mismatched_output);
+    ruckig_output_destroy(output);
+    ruckig_input_destroy(input);
+    ruckig_destroy(otg);
+}
+
 static void test_finite_infinite_limit_semantics(void) {
     ruckig_t* otg = NULL;
     ruckig_input_t* input = NULL;
@@ -8756,6 +9042,13 @@ void run_tracking_tests(void) {
     run_tracking_optimized_tests();
     run_tracking_quality_tests();
     run_tracking_no_allocation_tests();
+}
+
+void run_public_diagnostics_tests(void) {
+    test_public_diagnostics_init_and_null_parity();
+    test_public_diagnostics_validation_failures();
+    test_public_diagnostics_calculate_failures();
+    test_public_diagnostics_update_failures_and_success();
 }
 
 void run_api_tests(void) {
