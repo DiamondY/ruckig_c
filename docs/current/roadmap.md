@@ -244,6 +244,13 @@ design work does not change that stable release baseline.
   keeping implementation, public header edits, ABI allowlist edits, version
   metadata, release/tag actions, wrapper publication, upstream baseline, and
   visualization assets unchanged.
+- `post-v0.15.0-failure-shrinker-prototype` is implemented locally as a
+  test/tooling-only follow-up. It adds oracle random and oracle per-DoF random
+  failure-preserving shrink commands that require the original seed/sample to
+  fail and preserve the same coarse failure class, while keeping tracking
+  failure shrinking, generated fixture writes, public API, public ABI, version
+  metadata, workflows, releases/tags, wrappers, upstream baseline, and
+  visualization assets unchanged.
 - Keep the 184-symbol `v0.15.0` public C ABI baseline unless a later separate
   public API decision is accepted.
 - The closed quality audit did not change version metadata, tag a release,

@@ -165,6 +165,8 @@ Historical rewrite plans and release evidence are retained for traceability.
   post-release quality-series closeout and maintenance conclusion.
   `release/checklists/post-v0.15.0-next-design-readiness.md` records the
   docs-only readiness decision for starting public diagnostics design.
+  `release/checklists/post-v0.15.0-failure-shrinker-prototype.md` records the
+  local failure-preserving oracle shrinker prototype.
 - `release/evidence/verification_report.md` - local and CI verification
   history.
 - `release/evidence/performance_report.md` - performance procedure and release
@@ -201,6 +203,9 @@ package recipes, and release actions deferred.
 The `0.16.0-alpha.1` public diagnostics design is now open as docs-only work;
 `v0.15.0` remains the current stable release and the 184-symbol public C ABI
 baseline remains unchanged.
+The failure-oriented shrinker prototype adds local oracle random failure
+shrinking for seed/sample debugging without writing generated fixtures or
+changing library API.
 The follow-up random shrinker MVP adds local deterministic shrink commands for
 seed/sample materialization without changing random corpus semantics or writing
 generated fixtures automatically.

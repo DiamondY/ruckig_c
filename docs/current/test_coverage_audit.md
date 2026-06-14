@@ -427,6 +427,30 @@ Added test tooling:
 The local checklist is
 `docs/release/checklists/post-v0.15.0-random-shrinker-mvp.md`.
 
+## Post-v0.15.0 Failure Shrinker Prototype
+
+The `post-v0.15.0-failure-shrinker-prototype` slice extends the oracle test
+binary with failure-oriented shrink commands for random and per-DoF random
+seed/sample reproductions. It is test/tooling-only and does not affect library
+runtime behavior or public ABI.
+
+Added commands:
+
+```powershell
+out\build\windows-clang-ninja-oracle\ruckig_c_oracle_tests.exe --shrink-random-failure SAMPLE --seed S
+out\build\windows-clang-ninja-oracle\ruckig_c_oracle_tests.exe --shrink-random-per-dof-failure SAMPLE --seed S
+```
+
+The commands reject non-failing original samples and, for failing samples,
+accept only simplifications that preserve the same coarse oracle failure class.
+Small CTest smoke entries cover the expected non-failing sample rejection path
+with `WILL_FAIL`, while real failure shrinking remains a local/manual debugging
+workflow.
+
+Tracking failure-oriented shrinking and automatic source-file fixture writing
+remain deferred. The local checklist is
+`docs/release/checklists/post-v0.15.0-failure-shrinker-prototype.md`.
+
 ## 0.14.0-alpha.1 Interrupt Boundary API-Neutral Audit
 
 `0.14.0-alpha.1` adds a focused local audit for the existing

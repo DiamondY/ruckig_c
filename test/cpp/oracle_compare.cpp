@@ -58,6 +58,7 @@ struct CaseData {
 };
 
 int failures = 0;
+std::string last_failure_message;
 
 struct RandomGenerator {
     std::uint64_t state {1};
@@ -87,7 +88,11 @@ struct RandomGenerator {
 };
 
 void fail(const std::string& name, const std::string& message) {
-    std::cerr << name << ": " << message << '\n';
+    const std::string full_message = name + ": " + message;
+    if (last_failure_message.empty()) {
+        last_failure_message = full_message;
+    }
+    std::cerr << full_message << '\n';
     ++failures;
 }
 
@@ -1381,13 +1386,54 @@ CaseData random_case_at_sample(size_t sample_index, std::uint64_t seed, bool per
     return test_case;
 }
 
-bool oracle_case_passes(const CaseData& test_case, bool compare_first_time_queries) {
+std::string failure_class_from_message(const std::string& message) {
+    const size_t detail_start = message.find(": ");
+    std::string detail = detail_start == std::string::npos ? message : message.substr(detail_start + 2);
+    const char* markers[] = {
+        ": C=",
+        " at step=",
+        " time=",
+        " dof=",
+        " section=",
+        " query=",
+        " returned "
+    };
+    size_t end = std::string::npos;
+    for (const char* marker: markers) {
+        const size_t found = detail.find(marker);
+        if (found != std::string::npos) {
+            end = std::min(end, found);
+        }
+    }
+    if (end != std::string::npos) {
+        detail.resize(end);
+    }
+    return detail;
+}
+
+struct OracleFailureSignature {
+    int count {0};
+    std::string first_message;
+    std::string failure_class;
+};
+
+OracleFailureSignature oracle_case_failure_signature(const CaseData& test_case, bool compare_first_time_queries) {
     const int failures_before = failures;
+    const std::string last_failure_before = last_failure_message;
     failures = 0;
+    last_failure_message.clear();
     run_case(test_case, compare_first_time_queries);
-    const bool passed = failures == 0;
+    OracleFailureSignature signature;
+    signature.count = failures;
+    signature.first_message = last_failure_message;
+    signature.failure_class = failure_class_from_message(last_failure_message);
     failures = failures_before;
-    return passed;
+    last_failure_message = last_failure_before;
+    return signature;
+}
+
+bool oracle_case_passes(const CaseData& test_case, bool compare_first_time_queries) {
+    return oracle_case_failure_signature(test_case, compare_first_time_queries).count == 0;
 }
 
 template <typename T>
@@ -1471,6 +1517,65 @@ bool try_oracle_shrink(
     return false;
 }
 
+template <typename TryCandidate>
+void shrink_case_by_strategy(CaseData& test_case, TryCandidate&& try_candidate) {
+    if (test_case.dofs > 1) {
+        for (size_t dofs = 1; dofs < test_case.dofs; ++dofs) {
+            CaseData candidate = test_case;
+            truncate_case_dofs(candidate, dofs);
+            if (try_candidate(candidate, "dofs")) {
+                break;
+            }
+        }
+    }
+    if (!test_case.enabled.empty()) {
+        CaseData candidate = test_case;
+        candidate.enabled.clear();
+        try_candidate(candidate, "enabled-mask");
+    }
+    if (!test_case.per_dof_control_interface.empty()) {
+        CaseData candidate = test_case;
+        candidate.per_dof_control_interface.clear();
+        try_candidate(candidate, "per-dof-control-interface");
+    }
+    if (!test_case.per_dof_synchronization.empty()) {
+        CaseData candidate = test_case;
+        candidate.per_dof_synchronization.clear();
+        try_candidate(candidate, "per-dof-synchronization");
+    }
+    if (!test_case.min_velocity.empty()) {
+        CaseData candidate = test_case;
+        candidate.min_velocity.clear();
+        try_candidate(candidate, "min-velocity");
+    }
+    if (!test_case.min_acceleration.empty()) {
+        CaseData candidate = test_case;
+        candidate.min_acceleration.clear();
+        try_candidate(candidate, "min-acceleration");
+    }
+    if (test_case.synchronization != RUCKIG_SYNCHRONIZATION_TIME) {
+        CaseData candidate = test_case;
+        candidate.synchronization = RUCKIG_SYNCHRONIZATION_TIME;
+        try_candidate(candidate, "synchronization-time");
+    }
+    if (test_case.duration_discretization != RUCKIG_DURATION_CONTINUOUS) {
+        CaseData candidate = test_case;
+        candidate.duration_discretization = RUCKIG_DURATION_CONTINUOUS;
+        try_candidate(candidate, "duration-continuous");
+    }
+    if (test_case.has_minimum_duration) {
+        CaseData candidate = test_case;
+        candidate.has_minimum_duration = false;
+        candidate.minimum_duration = 0.0;
+        try_candidate(candidate, "minimum-duration");
+    }
+    {
+        CaseData candidate = test_case;
+        round_case_numbers(candidate);
+        try_candidate(candidate, "numeric-quarter-rounding");
+    }
+}
+
 bool try_oracle_shrink_candidate(
     CaseData& current,
     const CaseData& candidate,
@@ -1487,61 +1592,15 @@ bool try_oracle_shrink_candidate(
 }
 
 void shrink_case(CaseData& test_case, bool compare_first_time_queries, size_t* accepted_count) {
-    if (test_case.dofs > 1) {
-        for (size_t dofs = 1; dofs < test_case.dofs; ++dofs) {
-            CaseData candidate = test_case;
-            truncate_case_dofs(candidate, dofs);
-            if (try_oracle_shrink_candidate(test_case, candidate, "dofs", compare_first_time_queries, accepted_count)) {
-                break;
-            }
-        }
-    }
-    if (!test_case.enabled.empty()) {
-        CaseData candidate = test_case;
-        candidate.enabled.clear();
-        try_oracle_shrink_candidate(test_case, candidate, "enabled-mask", compare_first_time_queries, accepted_count);
-    }
-    if (!test_case.per_dof_control_interface.empty()) {
-        CaseData candidate = test_case;
-        candidate.per_dof_control_interface.clear();
-        try_oracle_shrink_candidate(test_case, candidate, "per-dof-control-interface", compare_first_time_queries, accepted_count);
-    }
-    if (!test_case.per_dof_synchronization.empty()) {
-        CaseData candidate = test_case;
-        candidate.per_dof_synchronization.clear();
-        try_oracle_shrink_candidate(test_case, candidate, "per-dof-synchronization", compare_first_time_queries, accepted_count);
-    }
-    if (!test_case.min_velocity.empty()) {
-        CaseData candidate = test_case;
-        candidate.min_velocity.clear();
-        try_oracle_shrink_candidate(test_case, candidate, "min-velocity", compare_first_time_queries, accepted_count);
-    }
-    if (!test_case.min_acceleration.empty()) {
-        CaseData candidate = test_case;
-        candidate.min_acceleration.clear();
-        try_oracle_shrink_candidate(test_case, candidate, "min-acceleration", compare_first_time_queries, accepted_count);
-    }
-    if (test_case.synchronization != RUCKIG_SYNCHRONIZATION_TIME) {
-        CaseData candidate = test_case;
-        candidate.synchronization = RUCKIG_SYNCHRONIZATION_TIME;
-        try_oracle_shrink_candidate(test_case, candidate, "synchronization-time", compare_first_time_queries, accepted_count);
-    }
-    if (test_case.duration_discretization != RUCKIG_DURATION_CONTINUOUS) {
-        CaseData candidate = test_case;
-        candidate.duration_discretization = RUCKIG_DURATION_CONTINUOUS;
-        try_oracle_shrink_candidate(test_case, candidate, "duration-continuous", compare_first_time_queries, accepted_count);
-    }
-    if (test_case.has_minimum_duration) {
-        CaseData candidate = test_case;
-        candidate.has_minimum_duration = false;
-        candidate.minimum_duration = 0.0;
-        try_oracle_shrink_candidate(test_case, candidate, "minimum-duration", compare_first_time_queries, accepted_count);
-    }
-    {
-        CaseData candidate = test_case;
-        round_case_numbers(candidate);
-        try_oracle_shrink_candidate(test_case, candidate, "numeric-quarter-rounding", compare_first_time_queries, accepted_count);
-    }
+    shrink_case_by_strategy(test_case, [&](const CaseData& candidate, const char* label) {
+        return try_oracle_shrink_candidate(
+            test_case,
+            candidate,
+            label,
+            compare_first_time_queries,
+            accepted_count
+        );
+    });
 }
 
 void print_shrink_summary(
@@ -1609,6 +1668,125 @@ void shrink_random_case(size_t sample_index, std::uint64_t seed, bool per_dof) {
     print_shrink_summary(original, reduced, seed, sample_index, kind, per_dof, accepted_count);
 }
 
+bool try_oracle_failure_shrink_candidate(
+    CaseData& current,
+    const CaseData& candidate,
+    const char* label,
+    bool compare_first_time_queries,
+    const std::string& required_failure_class,
+    size_t* accepted_count
+) {
+    CaseData trial = candidate;
+    const OracleFailureSignature signature = oracle_case_failure_signature(trial, compare_first_time_queries);
+    if (signature.count > 0 && signature.failure_class == required_failure_class) {
+        ++*accepted_count;
+        std::cout << "oracle failure shrink accepted " << label
+            << " class=\"" << signature.failure_class << "\"\n";
+        current = trial;
+        return true;
+    }
+    return false;
+}
+
+void print_failure_shrink_summary(
+    const CaseData& original,
+    const CaseData& reduced,
+    const OracleFailureSignature& original_signature,
+    const OracleFailureSignature& reduced_signature,
+    std::uint64_t seed,
+    size_t sample_index,
+    const char* kind,
+    bool per_dof,
+    size_t accepted_count
+) {
+    std::cout << "oracle failure shrink original kind=" << kind
+        << " seed=" << seed
+        << " sample=" << sample_index
+        << " name=" << original.name
+        << " dofs=" << original.dofs
+        << " failure_class=\"" << original_signature.failure_class << "\""
+        << " failure_count=" << original_signature.count
+        << '\n';
+    std::cout << "oracle failure shrink original failure: "
+        << original_signature.first_message << '\n';
+    std::cout << "oracle failure shrink reduced kind=" << kind
+        << " accepted=" << accepted_count
+        << " dofs=" << reduced.dofs
+        << " control=" << control_initializer(reduced.control_interface)
+        << " sync=" << synchronization_initializer(reduced.synchronization)
+        << " discrete=" << discretization_initializer(reduced.duration_discretization)
+        << " failure_class=\"" << reduced_signature.failure_class << "\""
+        << " failure_count=" << reduced_signature.count
+        << '\n';
+    std::cout << "oracle failure shrink reduced failure: "
+        << reduced_signature.first_message << '\n';
+    std::cout << "oracle failure shrink original replay command: ruckig_c_oracle_tests.exe "
+        << (per_dof ? "--replay-random-per-dof " : "--replay-random ")
+        << sample_index << " --seed " << seed << '\n';
+    std::cout << "oracle failure shrink reduced replay: paste the initializer below into the fixed oracle corpus\n";
+    print_case_fixture_initializer(reduced, seed, sample_index, kind);
+}
+
+void shrink_random_failure_case(size_t sample_index, std::uint64_t seed, bool per_dof) {
+    const char* kind = per_dof ? "random-per-dof" : "random";
+    const bool compare_first_time_queries = !per_dof;
+    const CaseData original = random_case_at_sample(sample_index, seed, per_dof);
+    CaseData reduced = original;
+    size_t accepted_count = 0;
+
+    const OracleFailureSignature original_signature =
+        oracle_case_failure_signature(original, compare_first_time_queries);
+    if (original_signature.count == 0) {
+        ++failures;
+        std::cerr << "oracle failure shrink original case did not fail kind=" << kind
+            << " seed=" << seed
+            << " sample=" << sample_index
+            << "; use --shrink-random"
+            << (per_dof ? "-per-dof" : "")
+            << " for pass-preserving simplification\n";
+        std::cerr << "oracle failure shrink replay command: ruckig_c_oracle_tests.exe "
+            << (per_dof ? "--replay-random-per-dof " : "--replay-random ")
+            << sample_index << " --seed " << seed << '\n';
+        return;
+    }
+
+    shrink_case_by_strategy(reduced, [&](const CaseData& candidate, const char* label) {
+        return try_oracle_failure_shrink_candidate(
+            reduced,
+            candidate,
+            label,
+            compare_first_time_queries,
+            original_signature.failure_class,
+            &accepted_count
+        );
+    });
+
+    const OracleFailureSignature reduced_signature =
+        oracle_case_failure_signature(reduced, compare_first_time_queries);
+    if (reduced_signature.count == 0 || reduced_signature.failure_class != original_signature.failure_class) {
+        ++failures;
+        std::cerr << "oracle failure shrink reduced case no longer preserves failure class kind=" << kind
+            << " seed=" << seed
+            << " sample=" << sample_index
+            << " original_class=\"" << original_signature.failure_class << "\""
+            << " reduced_class=\"" << reduced_signature.failure_class << "\"\n";
+        print_case_repro(reduced, seed, sample_index, kind);
+        return;
+    }
+
+    print_failure_shrink_summary(
+        original,
+        reduced,
+        original_signature,
+        reduced_signature,
+        seed,
+        sample_index,
+        kind,
+        per_dof,
+        accepted_count
+    );
+}
+
 } // namespace
 
 int main(int argc, char** argv) {
@@ -1620,11 +1798,15 @@ int main(int argc, char** argv) {
     size_t replay_random_per_dof_sample = 0;
     size_t shrink_random_sample = 0;
     size_t shrink_random_per_dof_sample = 0;
+    size_t shrink_random_failure_sample = 0;
+    size_t shrink_random_per_dof_failure_sample = 0;
     std::uint64_t random_seed = 1;
     bool replay_random = false;
     bool replay_random_per_dof = false;
     bool shrink_random = false;
     bool shrink_random_per_dof = false;
+    bool shrink_random_failure = false;
+    bool shrink_random_per_dof_failure = false;
     bool seed_seen = false;
     bool waypoint_section_oracle_only = false;
     const auto print_usage = [&]() {
@@ -1632,6 +1814,7 @@ int main(int argc, char** argv) {
             << " [--random N] [--random-per-dof N]"
             << " [--replay-random SAMPLE --seed S] [--replay-random-per-dof SAMPLE --seed S]"
             << " [--shrink-random SAMPLE --seed S] [--shrink-random-per-dof SAMPLE --seed S]"
+            << " [--shrink-random-failure SAMPLE --seed S] [--shrink-random-per-dof-failure SAMPLE --seed S]"
             << " [--seed S] [--waypoint-section-oracle]\n";
     };
 
@@ -1653,6 +1836,12 @@ int main(int argc, char** argv) {
         } else if (arg == "--shrink-random-per-dof" && i + 1 < argc) {
             shrink_random_per_dof = true;
             shrink_random_per_dof_sample = static_cast<size_t>(std::stoull(argv[++i]));
+        } else if (arg == "--shrink-random-failure" && i + 1 < argc) {
+            shrink_random_failure = true;
+            shrink_random_failure_sample = static_cast<size_t>(std::stoull(argv[++i]));
+        } else if (arg == "--shrink-random-per-dof-failure" && i + 1 < argc) {
+            shrink_random_per_dof_failure = true;
+            shrink_random_per_dof_failure_sample = static_cast<size_t>(std::stoull(argv[++i]));
         } else if (arg == "--seed" && i + 1 < argc) {
             random_seed = static_cast<std::uint64_t>(std::stoull(argv[++i]));
             seed_seen = true;
@@ -1667,7 +1856,9 @@ int main(int argc, char** argv) {
     const int single_sample_modes = (replay_random ? 1 : 0)
         + (replay_random_per_dof ? 1 : 0)
         + (shrink_random ? 1 : 0)
-        + (shrink_random_per_dof ? 1 : 0);
+        + (shrink_random_per_dof ? 1 : 0)
+        + (shrink_random_failure ? 1 : 0)
+        + (shrink_random_per_dof_failure ? 1 : 0);
     if (single_sample_modes > 1
         || (single_sample_modes > 0 && (random_count > 0 || random_per_dof_count > 0 || waypoint_section_oracle_only))
         || (single_sample_modes > 0 && !seed_seen)) {
@@ -1713,6 +1904,24 @@ int main(int argc, char** argv) {
 
     if (shrink_random_per_dof) {
         shrink_random_case(shrink_random_per_dof_sample, random_seed, true);
+        if (failures != 0) {
+            std::cerr << failures << " oracle comparison failures\n";
+            return 1;
+        }
+        return 0;
+    }
+
+    if (shrink_random_failure) {
+        shrink_random_failure_case(shrink_random_failure_sample, random_seed, false);
+        if (failures != 0) {
+            std::cerr << failures << " oracle comparison failures\n";
+            return 1;
+        }
+        return 0;
+    }
+
+    if (shrink_random_per_dof_failure) {
+        shrink_random_failure_case(shrink_random_per_dof_failure_sample, random_seed, true);
         if (failures != 0) {
             std::cerr << failures << " oracle comparison failures\n";
             return 1;

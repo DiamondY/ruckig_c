@@ -226,6 +226,29 @@ new bug is found, does not write a generated fixture file, and does not alter
 random corpus semantics. Full failure-oriented shrinking remains a later
 optional local-tool slice.
 
+## Failure-Oriented Shrinker Prototype
+
+The `post-v0.15.0-failure-shrinker-prototype` slice adds local failure-oriented
+oracle shrink commands:
+
+```powershell
+out\build\windows-clang-ninja-oracle\ruckig_c_oracle_tests.exe --shrink-random-failure SAMPLE --seed S
+out\build\windows-clang-ninja-oracle\ruckig_c_oracle_tests.exe --shrink-random-per-dof-failure SAMPLE --seed S
+```
+
+These commands replay a single random seed/sample and require the original case
+to fail before shrinking begins. Candidate simplifications are accepted only
+when the reduced case still fails with the same coarse oracle failure class,
+such as result mismatch, duration mismatch, or sample/update vector mismatch.
+
+The prototype prints the original seed/sample, original and reduced failure
+summaries, the original replay command, and a fixture-ready `CaseData`
+initializer. It still does not write generated source files automatically and
+does not cover tracking random audit failures.
+
+The local checklist is
+`docs/release/checklists/post-v0.15.0-failure-shrinker-prototype.md`.
+
 ## Residual Branch Coverage Slice
 
 The `post-v0.15.0-residual-branch-coverage` slice uses the refreshed coverage
@@ -534,6 +557,8 @@ out\build\windows-clang-ninja-oracle\ruckig_c_oracle_tests.exe --replay-random 1
 out\build\windows-clang-ninja-oracle\ruckig_c_oracle_tests.exe --replay-random-per-dof 10 --seed 1
 out\build\windows-clang-ninja-oracle\ruckig_c_oracle_tests.exe --shrink-random 17 --seed 1
 out\build\windows-clang-ninja-oracle\ruckig_c_oracle_tests.exe --shrink-random-per-dof 10 --seed 1
+out\build\windows-clang-ninja-oracle\ruckig_c_oracle_tests.exe --shrink-random-failure SAMPLE --seed S
+out\build\windows-clang-ninja-oracle\ruckig_c_oracle_tests.exe --shrink-random-per-dof-failure SAMPLE --seed S
 out\build\windows-clang-ninja\ruckig_c_tests.exe --tracking-random-audit-shrink 22 --seed 1
 ```
 
