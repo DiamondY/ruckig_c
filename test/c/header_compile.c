@@ -7,6 +7,8 @@ int main(void) {
         && diagnostics.struct_size == sizeof(diagnostics)
         && RUCKIG_DIAGNOSTIC_SCOPE_INPUT == 1
         && RUCKIG_DIAGNOSTIC_ZERO_LIMIT == 7
+        && ruckig_tracking_get_last_public_diagnostics(NULL, &diagnostics) == RUCKIG_ERROR_INVALID_INPUT
+        && ruckig_tracking_sequence_continuation_get_last_diagnostics(NULL, &diagnostics) == RUCKIG_ERROR_INVALID_INPUT
         ? 0
         : 1;
 }

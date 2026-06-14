@@ -660,3 +660,39 @@ RUCKIG_C_API ruckig_result_t ruckig_tracking_get_last_diagnostics(
     *diagnostics = tracking->diagnostics;
     return RUCKIG_WORKING;
 }
+
+RUCKIG_C_API ruckig_result_t ruckig_tracking_get_last_public_diagnostics(
+    const ruckig_tracking_t* tracking,
+    ruckig_diagnostics_t* diagnostics
+) {
+    if (!diagnostics) {
+        return RUCKIG_ERROR_INVALID_INPUT;
+    }
+    if (ruckig_diagnostics_validate_or_null(diagnostics) != RUCKIG_WORKING) {
+        return RUCKIG_ERROR_INVALID_INPUT;
+    }
+    if (!tracking) {
+        ruckig_diagnostics_record(
+            diagnostics,
+            RUCKIG_ERROR_INVALID_INPUT,
+            RUCKIG_DIAGNOSTIC_SCOPE_TRACKING,
+            RUCKIG_DIAGNOSTIC_NULL_ARGUMENT,
+            0u,
+            0u,
+            0u,
+            0u,
+            0.0,
+            0.0
+        );
+        return RUCKIG_ERROR_INVALID_INPUT;
+    }
+    tracking_record_public_diagnostics(
+        diagnostics,
+        &tracking->diagnostics,
+        RUCKIG_DIAGNOSTIC_SCOPE_TRACKING,
+        RUCKIG_WORKING,
+        0u,
+        0u
+    );
+    return RUCKIG_WORKING;
+}

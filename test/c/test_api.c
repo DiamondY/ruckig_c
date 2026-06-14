@@ -5940,6 +5940,216 @@ static void test_tracking_diagnostics_snapshots(void) {
     ruckig_tracking_destroy(tracking);
 }
 
+static void test_tracking_public_diagnostics_getter_contract(void) {
+    ruckig_tracking_t* tracking = NULL;
+    ruckig_tracking_sequence_continuation_t* continuation = NULL;
+    ruckig_diagnostics_t diagnostics;
+    size_t too_small_size;
+
+    CHECK_EQ_INT(ruckig_tracking_create(&tracking, 1, 0.01), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_tracking_sequence_continuation_create(&continuation, 1, 2), RUCKIG_WORKING);
+
+    ruckig_diagnostics_init(&diagnostics);
+    CHECK_EQ_INT(
+        ruckig_tracking_get_last_public_diagnostics(NULL, &diagnostics),
+        RUCKIG_ERROR_INVALID_INPUT
+    );
+    CHECK_EQ_INT(diagnostics.result, RUCKIG_ERROR_INVALID_INPUT);
+    CHECK_EQ_INT(diagnostics.scope, RUCKIG_DIAGNOSTIC_SCOPE_TRACKING);
+    CHECK_EQ_INT(diagnostics.code, RUCKIG_DIAGNOSTIC_NULL_ARGUMENT);
+    CHECK_EQ_INT(ruckig_tracking_get_last_public_diagnostics(tracking, NULL), RUCKIG_ERROR_INVALID_INPUT);
+
+    ruckig_diagnostics_init(&diagnostics);
+    too_small_size = offsetof(ruckig_diagnostics_t, limit);
+    diagnostics.struct_size = too_small_size;
+    CHECK_EQ_INT(
+        ruckig_tracking_get_last_public_diagnostics(tracking, &diagnostics),
+        RUCKIG_ERROR_INVALID_INPUT
+    );
+    CHECK_EQ_INT(diagnostics.struct_size, too_small_size);
+
+    ruckig_diagnostics_init(&diagnostics);
+    CHECK_EQ_INT(ruckig_tracking_get_last_public_diagnostics(tracking, &diagnostics), RUCKIG_WORKING);
+    CHECK_EQ_INT(diagnostics.result, RUCKIG_WORKING);
+    CHECK_EQ_INT(diagnostics.scope, RUCKIG_DIAGNOSTIC_SCOPE_TRACKING);
+    CHECK_EQ_INT(diagnostics.code, RUCKIG_DIAGNOSTIC_NONE);
+
+    ruckig_diagnostics_init(&diagnostics);
+    CHECK_EQ_INT(
+        ruckig_tracking_sequence_continuation_get_last_diagnostics(NULL, &diagnostics),
+        RUCKIG_ERROR_INVALID_INPUT
+    );
+    CHECK_EQ_INT(diagnostics.result, RUCKIG_ERROR_INVALID_INPUT);
+    CHECK_EQ_INT(diagnostics.scope, RUCKIG_DIAGNOSTIC_SCOPE_TRACKING_SEQUENCE);
+    CHECK_EQ_INT(diagnostics.code, RUCKIG_DIAGNOSTIC_NULL_ARGUMENT);
+    CHECK_EQ_INT(
+        ruckig_tracking_sequence_continuation_get_last_diagnostics(continuation, NULL),
+        RUCKIG_ERROR_INVALID_INPUT
+    );
+
+    ruckig_diagnostics_init(&diagnostics);
+    diagnostics.struct_size = too_small_size;
+    CHECK_EQ_INT(
+        ruckig_tracking_sequence_continuation_get_last_diagnostics(continuation, &diagnostics),
+        RUCKIG_ERROR_INVALID_INPUT
+    );
+    CHECK_EQ_INT(diagnostics.struct_size, too_small_size);
+
+    ruckig_diagnostics_init(&diagnostics);
+    CHECK_EQ_INT(
+        ruckig_tracking_sequence_continuation_get_last_diagnostics(continuation, &diagnostics),
+        RUCKIG_WORKING
+    );
+    CHECK_EQ_INT(diagnostics.result, RUCKIG_WORKING);
+    CHECK_EQ_INT(diagnostics.scope, RUCKIG_DIAGNOSTIC_SCOPE_TRACKING_SEQUENCE);
+    CHECK_EQ_INT(diagnostics.code, RUCKIG_DIAGNOSTIC_UNSUPPORTED);
+    CHECK_EQ_INT(diagnostics.expected_count, 0);
+    CHECK_EQ_INT(diagnostics.actual_count, 0);
+
+    ruckig_tracking_sequence_continuation_destroy(continuation);
+    ruckig_tracking_destroy(tracking);
+}
+
+static void test_tracking_public_diagnostics_online_states(void) {
+    ruckig_tracking_t* tracking = NULL;
+    ruckig_target_state_t* target = NULL;
+    ruckig_input_t* input = NULL;
+    ruckig_output_t* output = NULL;
+    ruckig_diagnostics_t diagnostics;
+    ruckig_result_t result;
+
+    CHECK_EQ_INT(ruckig_tracking_create(&tracking, 1, 0.01), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_target_state_create(&target, 1), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_input_create(&input, 1), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_output_create(&output, 1), RUCKIG_WORKING);
+
+    fill_tracking_input_1d(input);
+    fill_tracking_target_ramp(target, 0.0);
+    CHECK_EQ_INT(ruckig_tracking_set_mode(tracking, RUCKIG_TRACKING_FAST), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_tracking_update(tracking, target, input, output), RUCKIG_WORKING);
+    ruckig_diagnostics_init(&diagnostics);
+    CHECK_EQ_INT(ruckig_tracking_get_last_public_diagnostics(tracking, &diagnostics), RUCKIG_WORKING);
+    CHECK_EQ_INT(diagnostics.result, RUCKIG_WORKING);
+    CHECK_EQ_INT(diagnostics.scope, RUCKIG_DIAGNOSTIC_SCOPE_TRACKING);
+    CHECK_EQ_INT(diagnostics.code, RUCKIG_DIAGNOSTIC_NONE);
+
+    fill_tracking_input_1d(input);
+    set_tracking_target_signal(target, 2, 1, 0.02);
+    CHECK_EQ_INT(ruckig_tracking_set_mode(tracking, RUCKIG_TRACKING_OPTIMIZED), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_tracking_set_max_optimized_candidates(tracking, 16), RUCKIG_WORKING);
+    result = ruckig_tracking_update(tracking, target, input, output);
+    CHECK_TRUE(result == RUCKIG_WORKING || result == RUCKIG_FINISHED);
+    ruckig_diagnostics_init(&diagnostics);
+    CHECK_EQ_INT(ruckig_tracking_get_last_public_diagnostics(tracking, &diagnostics), RUCKIG_WORKING);
+    CHECK_EQ_INT(diagnostics.scope, RUCKIG_DIAGNOSTIC_SCOPE_TRACKING);
+    CHECK_EQ_INT(diagnostics.code, RUCKIG_DIAGNOSTIC_NONE);
+
+    fill_tracking_input_1d(input);
+    ruckig_target_state_position_data(target)[0] = NAN;
+    CHECK_EQ_INT(ruckig_tracking_update(tracking, target, input, output), RUCKIG_ERROR_INVALID_INPUT);
+    ruckig_diagnostics_init(&diagnostics);
+    CHECK_EQ_INT(ruckig_tracking_get_last_public_diagnostics(tracking, &diagnostics), RUCKIG_WORKING);
+    CHECK_EQ_INT(diagnostics.result, RUCKIG_WORKING);
+    CHECK_EQ_INT(diagnostics.scope, RUCKIG_DIAGNOSTIC_SCOPE_TRACKING);
+    CHECK_EQ_INT(diagnostics.code, RUCKIG_DIAGNOSTIC_UNSUPPORTED);
+
+    ruckig_output_destroy(output);
+    ruckig_input_destroy(input);
+    ruckig_target_state_destroy(target);
+    ruckig_tracking_destroy(tracking);
+}
+
+static void test_tracking_public_diagnostics_sequence_continuation_states(void) {
+    ruckig_tracking_t* tracking = NULL;
+    ruckig_tracking_t* wrong_dt_tracking = NULL;
+    ruckig_target_state_sequence_t* targets = NULL;
+    ruckig_tracking_output_sequence_t* outputs = NULL;
+    ruckig_tracking_sequence_continuation_t* continuation = NULL;
+    ruckig_input_t* input = NULL;
+    ruckig_diagnostics_t diagnostics;
+    const size_t count = 4;
+    size_t completed_before;
+    size_t iteration = 0;
+
+    CHECK_EQ_INT(ruckig_tracking_create(&tracking, 1, 0.01), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_tracking_create(&wrong_dt_tracking, 1, 0.02), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_target_state_sequence_create(&targets, 1, count), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_tracking_output_sequence_create(&outputs, 1, count), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_tracking_sequence_continuation_create(&continuation, 1, count), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_input_create(&input, 1), RUCKIG_WORKING);
+
+    fill_tracking_input_1d(input);
+    CHECK_EQ_INT(ruckig_input_set_interrupt_calculation_duration(input, 0.0), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_tracking_set_mode(tracking, RUCKIG_TRACKING_FAST), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_target_state_sequence_set_count(targets, count), RUCKIG_WORKING);
+    set_tracking_sequence_signal(targets, 1, 1, count, 0.01);
+
+    CHECK_EQ_INT(
+        tracking_calculate_sequence_interruptible_under_allocation_guard(tracking, targets, input, outputs, continuation),
+        RUCKIG_WORKING
+    );
+    CHECK_TRUE(ruckig_tracking_sequence_continuation_is_active(continuation));
+    CHECK_TRUE(ruckig_tracking_sequence_continuation_was_interrupted(continuation));
+    completed_before = ruckig_tracking_sequence_continuation_get_completed_count(continuation);
+
+    ruckig_diagnostics_init(&diagnostics);
+    CHECK_EQ_INT(
+        ruckig_tracking_sequence_continuation_get_last_diagnostics(continuation, &diagnostics),
+        RUCKIG_WORKING
+    );
+    CHECK_EQ_INT(diagnostics.result, RUCKIG_WORKING);
+    CHECK_EQ_INT(diagnostics.scope, RUCKIG_DIAGNOSTIC_SCOPE_TRACKING_SEQUENCE);
+    CHECK_EQ_INT(diagnostics.code, RUCKIG_DIAGNOSTIC_INTERRUPTED);
+    CHECK_EQ_INT(diagnostics.expected_count, count);
+    CHECK_EQ_INT(diagnostics.actual_count, completed_before);
+
+    CHECK_EQ_INT(
+        tracking_resume_sequence_under_allocation_guard(wrong_dt_tracking, continuation, outputs),
+        RUCKIG_ERROR_INVALID_INPUT
+    );
+    CHECK_EQ_INT(ruckig_tracking_sequence_continuation_get_completed_count(continuation), completed_before);
+    ruckig_diagnostics_init(&diagnostics);
+    CHECK_EQ_INT(
+        ruckig_tracking_sequence_continuation_get_last_diagnostics(continuation, &diagnostics),
+        RUCKIG_WORKING
+    );
+    CHECK_EQ_INT(diagnostics.code, RUCKIG_DIAGNOSTIC_INTERRUPTED);
+    CHECK_EQ_INT(diagnostics.actual_count, completed_before);
+
+    while (!ruckig_tracking_sequence_continuation_is_complete(continuation) && iteration < 16) {
+        CHECK_EQ_INT(tracking_resume_sequence_under_allocation_guard(tracking, continuation, outputs), RUCKIG_WORKING);
+        ++iteration;
+    }
+    CHECK_TRUE(ruckig_tracking_sequence_continuation_is_complete(continuation));
+    CHECK_EQ_INT(ruckig_tracking_sequence_continuation_get_completed_count(continuation), count);
+    ruckig_diagnostics_init(&diagnostics);
+    CHECK_EQ_INT(
+        ruckig_tracking_sequence_continuation_get_last_diagnostics(continuation, &diagnostics),
+        RUCKIG_WORKING
+    );
+    CHECK_EQ_INT(diagnostics.result, RUCKIG_WORKING);
+    CHECK_EQ_INT(diagnostics.scope, RUCKIG_DIAGNOSTIC_SCOPE_TRACKING_SEQUENCE);
+    CHECK_EQ_INT(diagnostics.code, RUCKIG_DIAGNOSTIC_NONE);
+    CHECK_EQ_INT(diagnostics.expected_count, count);
+    CHECK_EQ_INT(diagnostics.actual_count, count);
+
+    ruckig_tracking_sequence_continuation_reset(continuation);
+    ruckig_diagnostics_init(&diagnostics);
+    CHECK_EQ_INT(
+        ruckig_tracking_sequence_continuation_get_last_diagnostics(continuation, &diagnostics),
+        RUCKIG_WORKING
+    );
+    CHECK_EQ_INT(diagnostics.scope, RUCKIG_DIAGNOSTIC_SCOPE_TRACKING_SEQUENCE);
+    CHECK_EQ_INT(diagnostics.code, RUCKIG_DIAGNOSTIC_UNSUPPORTED);
+
+    ruckig_input_destroy(input);
+    ruckig_tracking_sequence_continuation_destroy(continuation);
+    ruckig_tracking_output_sequence_destroy(outputs);
+    ruckig_target_state_sequence_destroy(targets);
+    ruckig_tracking_destroy(wrong_dt_tracking);
+    ruckig_tracking_destroy(tracking);
+}
+
 static void test_tracking_validation(void) {
     ruckig_tracking_t* tracking = NULL;
     ruckig_target_state_t* target = NULL;
@@ -9121,6 +9331,12 @@ void run_tracking_api_tests(void) {
     test_tracking_diagnostics_snapshots();
 }
 
+void run_tracking_public_diagnostics_tests(void) {
+    test_tracking_public_diagnostics_getter_contract();
+    test_tracking_public_diagnostics_online_states();
+    test_tracking_public_diagnostics_sequence_continuation_states();
+}
+
 void run_tracking_sequence_continuation_api_tests(void) {
     test_tracking_api_lifecycle_and_accessors();
 }
@@ -9180,6 +9396,7 @@ void run_tracking_no_allocation_tests(void) {
 
 void run_tracking_tests(void) {
     run_tracking_api_tests();
+    run_tracking_public_diagnostics_tests();
     run_tracking_validation_tests();
     run_tracking_online_tests();
     run_tracking_offline_tests();

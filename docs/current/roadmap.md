@@ -48,6 +48,12 @@ publication status, upstream baseline, or visualization assets.
   mismatch, and cleared/stale waypoint resume state to stable coarse public
   diagnostics while keeping waypoint branch queues, candidate ordering, and
   identity internals private.
+- `0.16.0-alpha.5` adds tracking public diagnostics getters. It expands the
+  public C ABI to 190 symbols by adding
+  `ruckig_tracking_get_last_public_diagnostics` and
+  `ruckig_tracking_sequence_continuation_get_last_diagnostics`, keeps the
+  existing specialized tracking diagnostics getter unchanged, and exposes only
+  stable coarse tracking/continuation state.
 
 ## 0.15.0 Stable Release Line
 
@@ -267,6 +273,16 @@ design work does not change that stable release baseline.
   while freezing `ruckig_diagnostics_init`, core `_with_diagnostics` APIs,
   tracking getter-style diagnostics, stable coarse diagnostic codes, and the
   requirement that non-NULL diagnostics records are initialized before use.
+- `0.16.0-alpha.3` is implemented locally as the first public diagnostics ABI
+  expansion. It adds the diagnostics record initializer and
+  validate/calculate/update `_with_diagnostics` entry points, raising the
+  approved public symbol count to 188.
+- `0.16.0-alpha.4` is implemented locally without new public symbols. It
+  maps interruption and waypoint resume state to the stable coarse public
+  diagnostics API.
+- `0.16.0-alpha.5` is implemented locally as the tracking public diagnostics
+  getter slice. It adds the two generic tracking/continuation getter symbols
+  and raises the expected public symbol count to 190.
 - `post-v0.15.0-failure-shrinker-prototype` is implemented locally as a
   test/tooling-only follow-up. It adds oracle random and oracle per-DoF random
   failure-preserving shrink commands that require the original seed/sample to
@@ -274,8 +290,9 @@ design work does not change that stable release baseline.
   failure shrinking, generated fixture writes, public API, public ABI, version
   metadata, workflows, releases/tags, wrappers, upstream baseline, and
   visualization assets unchanged.
-- Keep the 184-symbol `v0.15.0` public C ABI baseline unless a later separate
-  public API decision is accepted.
+- Treat 190 public symbols as the expected `0.16.0` diagnostics design-line
+  count after alpha.5. The stable `v0.15.0` release remains the 184-symbol
+  baseline until a future stable version bump is explicitly accepted.
 - The closed quality audit did not change version metadata, tag a release,
   publish wrappers, edit the ABI allowlist, or change the public C ABI
   baseline. The later `0.16.0-alpha.1` public diagnostics design is docs-only

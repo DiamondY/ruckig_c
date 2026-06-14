@@ -141,6 +141,9 @@ Historical rewrite plans and release evidence are retained for traceability.
   `release/checklists/0.16.0-alpha.4.md` records state-machine diagnostics
   mapping for interruption and waypoint resume state without adding public
   symbols.
+  `release/checklists/0.16.0-alpha.5.md` records the tracking public
+  diagnostics getter ABI expansion for tracking and tracking sequence
+  continuation state.
   `release/checklists/post-v0.15.0-quality-audit.md` records the post-release
   code-quality and test-quality audit slice without changing the stable ABI or
   release state.
@@ -220,6 +223,9 @@ API and raises the design-line public symbol count from the `v0.15.0`
 The `0.16.0-alpha.4` implementation keeps that 188-symbol count and extends
 `ruckig_update_with_diagnostics` with no-waypoint/waypoint interruption and
 waypoint resume mismatch diagnostics.
+The `0.16.0-alpha.5` implementation adds the two tracking public diagnostics
+getter symbols and raises the expected design-line public symbol count to 190
+without changing version/tag/release state.
 The failure-oriented shrinker prototype adds local oracle random failure
 shrinking for seed/sample debugging without writing generated fixtures or
 changing library API.

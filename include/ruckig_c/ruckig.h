@@ -601,6 +601,10 @@ RUCKIG_C_API ruckig_result_t ruckig_tracking_get_last_diagnostics(
     const ruckig_tracking_t* tracking,
     ruckig_tracking_diagnostics_t* diagnostics
 );
+RUCKIG_C_API ruckig_result_t ruckig_tracking_get_last_public_diagnostics(
+    const ruckig_tracking_t* tracking,
+    ruckig_diagnostics_t* diagnostics
+);
 RUCKIG_C_API ruckig_result_t ruckig_tracking_update(
     ruckig_tracking_t* tracking,
     const ruckig_target_state_t* target_state,
@@ -709,6 +713,10 @@ RUCKIG_C_API size_t ruckig_tracking_sequence_continuation_get_completed_count(
 );
 RUCKIG_C_API size_t ruckig_tracking_sequence_continuation_get_target_count(
     const ruckig_tracking_sequence_continuation_t* continuation
+);
+RUCKIG_C_API ruckig_result_t ruckig_tracking_sequence_continuation_get_last_diagnostics(
+    const ruckig_tracking_sequence_continuation_t* continuation,
+    ruckig_diagnostics_t* diagnostics
 );
 
 #ifdef __cplusplus

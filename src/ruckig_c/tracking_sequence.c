@@ -183,6 +183,87 @@ RUCKIG_C_API size_t ruckig_tracking_sequence_continuation_get_target_count(
     return continuation ? continuation->target_count : 0;
 }
 
+RUCKIG_C_API ruckig_result_t ruckig_tracking_sequence_continuation_get_last_diagnostics(
+    const ruckig_tracking_sequence_continuation_t* continuation,
+    ruckig_diagnostics_t* diagnostics
+) {
+    if (!diagnostics) {
+        return RUCKIG_ERROR_INVALID_INPUT;
+    }
+    if (ruckig_diagnostics_validate_or_null(diagnostics) != RUCKIG_WORKING) {
+        return RUCKIG_ERROR_INVALID_INPUT;
+    }
+    if (!continuation) {
+        ruckig_diagnostics_record(
+            diagnostics,
+            RUCKIG_ERROR_INVALID_INPUT,
+            RUCKIG_DIAGNOSTIC_SCOPE_TRACKING_SEQUENCE,
+            RUCKIG_DIAGNOSTIC_NULL_ARGUMENT,
+            0u,
+            0u,
+            0u,
+            0u,
+            0.0,
+            0.0
+        );
+        return RUCKIG_ERROR_INVALID_INPUT;
+    }
+    if (continuation->target_count == 0 && !continuation->complete) {
+        ruckig_diagnostics_record(
+            diagnostics,
+            RUCKIG_WORKING,
+            RUCKIG_DIAGNOSTIC_SCOPE_TRACKING_SEQUENCE,
+            RUCKIG_DIAGNOSTIC_UNSUPPORTED,
+            0u,
+            0u,
+            0u,
+            0u,
+            0.0,
+            0.0
+        );
+        return RUCKIG_WORKING;
+    }
+    if (continuation->active || continuation->was_interrupted) {
+        ruckig_diagnostics_record(
+            diagnostics,
+            RUCKIG_WORKING,
+            RUCKIG_DIAGNOSTIC_SCOPE_TRACKING_SEQUENCE,
+            RUCKIG_DIAGNOSTIC_INTERRUPTED,
+            0u,
+            0u,
+            continuation->target_count,
+            continuation->completed_count,
+            0.0,
+            0.0
+        );
+        return RUCKIG_WORKING;
+    }
+    if (continuation->complete) {
+        ruckig_diagnostics_record(
+            diagnostics,
+            RUCKIG_WORKING,
+            RUCKIG_DIAGNOSTIC_SCOPE_TRACKING_SEQUENCE,
+            RUCKIG_DIAGNOSTIC_NONE,
+            0u,
+            0u,
+            continuation->target_count,
+            continuation->completed_count,
+            0.0,
+            0.0
+        );
+        return RUCKIG_WORKING;
+    }
+    tracking_record_public_diagnostics(
+        diagnostics,
+        &continuation->diagnostics,
+        RUCKIG_DIAGNOSTIC_SCOPE_TRACKING_SEQUENCE,
+        RUCKIG_WORKING,
+        continuation->target_count,
+        continuation->completed_count
+    );
+    return RUCKIG_WORKING;
+}
+
 static void tracking_sequence_copy_prefix(
     ruckig_tracking_output_sequence_t* dst,
     const ruckig_tracking_output_sequence_t* src

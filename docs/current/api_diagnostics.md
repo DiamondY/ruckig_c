@@ -124,6 +124,10 @@ It is opt-in and leaves the legacy entry points unchanged:
   failures, zero-limit errors, synchronization errors, trajectory-duration
   errors, unsupported combinations, observable interruption, and waypoint
   resume identity mismatch.
+- `ruckig_tracking_get_last_public_diagnostics` returns a generic public
+  diagnostics snapshot for the last tracking calculation state.
+- `ruckig_tracking_sequence_continuation_get_last_diagnostics` returns a
+  generic public diagnostics snapshot for a sequence continuation state.
 - Passing `NULL` diagnostics to a `_with_diagnostics` function is defined to
   behave like the corresponding legacy API.
 
@@ -152,9 +156,16 @@ and `0.16.0-alpha.3` implements the core validate/calculate/update API:
   waypoint interruption, waypoint resume identity mismatch, waypoint
   count/capacity mismatch, and cleared/stale waypoint resume state using the
   existing stable coarse codes.
+- `0.16.0-alpha.5` adds 2 tracking getter symbols:
+  `ruckig_tracking_get_last_public_diagnostics` and
+  `ruckig_tracking_sequence_continuation_get_last_diagnostics`. The expected
+  public symbol count is now 190.
 - Tracking and continuation diagnostics use getter-style accessors instead of
-  adding `_with_diagnostics` variants to every tracking operation; those
-  getter symbols remain deferred to alpha.5.
+  adding `_with_diagnostics` variants to every tracking operation. The generic
+  getters map only stable coarse status classes: success, budget/interruption,
+  unstarted continuation, invalid getter arguments, and unsupported/error
+  state. Candidate order, score details, private family attribution, and
+  sequence optimizer phases remain private.
 
 Diagnostics remain stable and coarse-grained. They explain public failure
 classes and locations, but do not expose solver profile branches, candidate

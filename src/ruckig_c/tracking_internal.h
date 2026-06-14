@@ -74,6 +74,41 @@ void tracking_accumulate_diagnostics(
     ruckig_tracking_diagnostics_t* aggregate,
     const ruckig_tracking_diagnostics_t* step
 );
+static inline ruckig_diagnostic_code_t tracking_public_diagnostic_code(
+    const ruckig_tracking_diagnostics_t* diagnostics
+) {
+    if (!diagnostics) {
+        return RUCKIG_DIAGNOSTIC_NONE;
+    }
+    if (diagnostics->budget_exhausted_count > 0) {
+        return RUCKIG_DIAGNOSTIC_INTERRUPTED;
+    }
+    if (diagnostics->calculation_status == RUCKIG_TRACKING_CALCULATION_ERROR) {
+        return RUCKIG_DIAGNOSTIC_UNSUPPORTED;
+    }
+    return RUCKIG_DIAGNOSTIC_NONE;
+}
+static inline void tracking_record_public_diagnostics(
+    ruckig_diagnostics_t* diagnostics,
+    const ruckig_tracking_diagnostics_t* source,
+    ruckig_diagnostic_scope_t scope,
+    ruckig_result_t result,
+    size_t expected_count,
+    size_t actual_count
+) {
+    ruckig_diagnostics_record(
+        diagnostics,
+        result,
+        scope,
+        tracking_public_diagnostic_code(source),
+        0u,
+        0u,
+        expected_count,
+        actual_count,
+        0.0,
+        0.0
+    );
+}
 bool finite_vector(const double* values, size_t count);
 void tracking_mark_error(ruckig_tracking_t* tracking);
 ruckig_result_t prepare_tracking_base(ruckig_tracking_t* tracking, const ruckig_input_t* input);

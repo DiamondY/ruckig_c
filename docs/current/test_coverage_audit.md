@@ -28,7 +28,8 @@ baseline from the `v0.14.0` 172-symbol interrupt-surface baseline to the
 The `0.16.0` public diagnostics line is staged after the `v0.15.0` stable
 release. Alpha.3 expands the public ABI to 188 symbols with the core
 diagnostics API; alpha.4 adds no public symbols and extends update diagnostics
-for interruption and waypoint resume state.
+for interruption and waypoint resume state; alpha.5 adds two tracking public
+diagnostics getter symbols for an expected 190-symbol design-line ABI.
 
 Added coverage:
 
@@ -40,10 +41,12 @@ Added coverage:
 | Validation diagnostics | Covers null arguments, DoF mismatch, non-finite values, negative limits, current-state out-of-limits, target-state out-of-limits, and invalid enum values. |
 | Calculate/update diagnostics | Covers trajectory/output mismatch, waypoint capacity mismatch, zero-limit result mapping, success clearing to `NONE`, and legacy API parity. |
 | State/resume diagnostics | Covers no-waypoint interruption, waypoint interruption, waypoint resume identity mismatch, limit/per-section/enabled-DoF resume mutations, and failed diagnostics preserving later resume state. |
-| Boundary | Alpha.4 keeps the public symbol count at 188 and does not expose solver profile branches, candidate ordering, waypoint queue internals, or random seed/sample state. |
+| Tracking getter diagnostics | Adds `--tracking-public-diagnostics` and CTest `ruckig_c_tracking_public_diagnostics`, covering getter argument validation, too-small `struct_size`, Fast/Optimized success, tracking failure state, continuation empty/interrupted/complete/reset state, and failed resume preserving continuation diagnostics. |
+| Boundary | Alpha.5 raises the expected public symbol count to 190 and does not expose solver profile branches, candidate ordering, waypoint queue internals, tracking score internals, optimizer phases, or random seed/sample state. |
 
 The local checklists are `docs/release/checklists/0.16.0-alpha.3.md` and
-`docs/release/checklists/0.16.0-alpha.4.md`.
+`docs/release/checklists/0.16.0-alpha.4.md` and
+`docs/release/checklists/0.16.0-alpha.5.md`.
 
 ## 0.15.0-alpha.1 Interrupt Post-Release Quality Baseline
 
