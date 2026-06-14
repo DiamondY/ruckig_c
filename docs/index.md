@@ -7,7 +7,7 @@ Historical rewrite plans and release evidence are retained for traceability.
 ## Current Maintainer Entry Points
 
 - `current/roadmap.md` - shipped scope, maintenance queues, current stable
-  release scope, the `0.15.0` release line, and future design boundaries.
+  release scope, the `0.16.0` release line, and future design boundaries.
 - `current/api_compatibility.md` - patch-release API/ABI policy and
   exported-symbol review.
 - `current/api_diagnostics.md` - C API validation and diagnostics behavior.
@@ -145,7 +145,9 @@ Historical rewrite plans and release evidence are retained for traceability.
   diagnostics getter ABI expansion for tracking and tracking sequence
   continuation state.
   `release/checklists/0.16.0-readiness.md` records readiness evidence for the
-  190-symbol public diagnostics design line without publishing a release.
+  190-symbol public diagnostics design line before stable release promotion.
+  `release/checklists/0.16.0.md` records the stable public diagnostics release
+  closeout.
   `release/checklists/post-v0.15.0-quality-audit.md` records the post-release
   code-quality and test-quality audit slice without changing the stable ABI or
   release state.
@@ -191,15 +193,16 @@ Historical rewrite plans and release evidence are retained for traceability.
   soft-interruption and platform-clock evidence release notes, the stable
   `0.12.0` waypoint soft-interruption true-resume release notes, the stable
   `0.13.0` waypoint true-resume stress/private-engine release notes, and the
-  stable `0.14.0` API-neutral interrupt surface release notes, and the stable
-  `0.15.0` tracking sequence continuation release notes.
+  stable `0.14.0` API-neutral interrupt surface release notes, the stable
+  `0.15.0` tracking sequence continuation release notes, and the stable
+  `0.16.0` public diagnostics release notes.
 
-`v0.15.0` is the current stable release after the tracking sequence
-continuation closeout. It promotes the alpha.4 public continuation API,
-Fast/Optimized sequence continuation behavior, C/Python/Rust prototype smoke
-coverage, and alpha.8 continuation hardening to the stable 184-symbol public C
-ABI baseline. Current `main` remains on `0.15.0` release evidence until a
-separate post-release design-line decision.
+`v0.16.0` is the current stable release candidate after the public diagnostics
+readiness audit. It promotes the alpha.3 core diagnostics API, alpha.4
+state/resume diagnostics mapping, and alpha.5 tracking public diagnostics
+getters to the stable 190-symbol public C ABI baseline. `v0.15.0` remains the
+previous stable tracking sequence continuation release with a 184-symbol public
+C ABI baseline.
 The latest post-release residual coverage slice records branch coverage
 `73.91%` at
 `out/coverage/post-v0.15.0-residual-branch-coverage/coverage-summary.txt`
@@ -210,12 +213,10 @@ without adding mandatory static-analysis CI or changing the stable ABI.
 The post-`v0.15.0` quality series is now closed at branch coverage `73.91%`;
 future coverage work is reserved for concrete regressions, oracle-backed cases,
 public-behavior invariants, or separate design decisions.
-The next design-readiness audit recommends public diagnostics as the first
-`0.16.0` design topic while keeping implementation, ABI expansion, wrappers,
-package recipes, and release actions deferred.
-The `0.16.0-alpha.1` public diagnostics design is now open as docs-only work;
-`v0.15.0` remains the current stable release and the 184-symbol public C ABI
-baseline remains unchanged.
+The next design-readiness audit recommended public diagnostics as the first
+`0.16.0` design topic while keeping wrappers, package recipes, and release
+actions deferred until separately accepted.
+The `0.16.0-alpha.1` public diagnostics design opened as docs-only work.
 The `0.16.0-alpha.2` contract freeze locks diagnostics initialization,
 `struct_size` compatibility, staged public API boundaries, and stable
 coarse-grained diagnostic codes before any header or ABI allowlist change.
@@ -229,8 +230,8 @@ The `0.16.0-alpha.5` implementation adds the two tracking public diagnostics
 getter symbols and raises the expected design-line public symbol count to 190
 without changing version/tag/release state.
 The `0.16.0-readiness` evidence confirms the public diagnostics line is ready
-for a future stable-release decision; it does not bump version metadata, tag a
-release, or stabilize wrappers.
+for stable-release promotion. `0.16.0` release candidate work bumps version
+metadata and ABI artifact paths while keeping wrapper stabilization deferred.
 The failure-oriented shrinker prototype adds local oracle random failure
 shrinking for seed/sample debugging without writing generated fixtures or
 changing library API.

@@ -3,6 +3,51 @@
 This document records reproducible performance runs for the pure C rewrite
 against the frozen C++ oracle under `original/ruckig-main`.
 
+## 2026-06-14 0.16.0 Release Candidate Performance Evidence
+
+The `0.16.0` release candidate records a fresh local performance gate after
+promoting the public diagnostics API to stable release metadata. Diagnostics
+are opt-in, legacy calculate/update behavior remains compatible, and the
+release threshold remains unchanged.
+
+Environment:
+
+- OS: Windows
+- Compiler: clang 21.1.8
+- CMake preset: `windows-clang-ninja-performance`
+- Seed: `1`
+- Samples: `10000`
+
+No-waypoint benchmark:
+
+```text
+out\build\windows-clang-ninja-performance\ruckig_c_performance_benchmark.exe --samples 10000 --seed 1 --enforce-threshold
+
+c_average_ns: 678.09
+c_p99_ns: 4900
+c_worst_ns: 24500
+oracle_average_ns: 513.16
+oracle_p99_ns: 3800
+oracle_worst_ns: 28600
+average_ratio_c_over_oracle: 1.3214
+release_threshold_average_ratio: 1.5
+```
+
+Waypoint alpha benchmark:
+
+```text
+out\build\windows-clang-ninja-performance\ruckig_c_performance_benchmark.exe --samples 10000 --seed 1 --waypoints
+
+waypoint_case_count: 10
+waypoint_max_dofs: 8
+waypoint_max_intermediate_positions: 3
+waypoint_c_average_ns: 3.29597e+06
+waypoint_c_p99_ns: 1.21724e+07
+waypoint_c_worst_ns: 1.69419e+07
+waypoint_oracle_ratio: unavailable
+waypoint_benchmark_policy: alpha C-only local optimizer corpus
+```
+
 ## 2026-06-14 0.16.0 Public Diagnostics Readiness Performance Evidence
 
 The public diagnostics readiness slice records a fresh local performance gate

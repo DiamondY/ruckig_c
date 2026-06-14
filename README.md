@@ -135,6 +135,17 @@ Implemented and covered by fixed C/oracle tests plus deterministic random oracle
   C ABI, Fast/Optimized continuation behavior, wrapper smoke evidence, and
   continuation hardening while promoting the public symbol baseline to 184
   symbols.
+- `0.16.0-alpha.3` public diagnostics core API, adding
+  `ruckig_diagnostics_init` and validate/calculate/update
+  `_with_diagnostics` entry points while preserving legacy API behavior.
+- `0.16.0-alpha.4` public diagnostics mapping for interruption and waypoint
+  resume state without adding public symbols.
+- `0.16.0-alpha.5` tracking public diagnostics getters for tracking handles
+  and tracking sequence continuation state, exposing stable coarse diagnostics
+  while keeping solver/profile/candidate/queue internals private.
+- `v0.16.0` stable release, adopting the public diagnostics API and raising
+  the public C ABI baseline to 190 symbols without publishing Python/Rust
+  wrappers or package-manager recipes.
 - `0.10.0-alpha` visualization v2 local gallery evidence, replacing the
   current `main` gallery with 30 project-owned `1400x900` PNGs and a strict
   local verifier while keeping the `v0.9.0` stable C ABI unchanged.
@@ -152,14 +163,13 @@ Implemented and covered by fixed C/oracle tests plus deterministic random oracle
   tracking Fast-mode scenarios, and Optimized tracking scenarios.
 
 Release-readiness evidence is tracked under `docs/release/`; see
-`docs/index.md` for the organized documentation map. `v0.15.0` is the current
-stable release after completed `0.15.0-readiness`, release-candidate, tag, and
-manual release-random gates for the tracking sequence continuation line.
-`main` remains on `0.15.0` release evidence until a separate post-release
-design-line decision. `v0.15.0` promotes the tracking sequence continuation
-public API and moves the stable public C ABI baseline to 184 symbols, with
-Fast/Optimized behavior, C/Python/Rust prototype smoke coverage, and
-continuation hardening layered on that API. `v0.14.0` keeps the `v0.9.0`
+`docs/index.md` for the organized documentation map. `v0.16.0` is the current
+stable release candidate after completed `0.16.0-readiness`, release-candidate
+local gates, and the public diagnostics ABI review. `v0.16.0` promotes the
+public diagnostics API and moves the stable public C ABI baseline to 190
+symbols while preserving legacy API behavior and existing result-code numeric
+values. `v0.15.0` remains the previous stable tracking sequence continuation
+release with a 184-symbol public C ABI baseline. `v0.14.0` keeps the `v0.9.0`
 172-symbol public C ABI unchanged while stabilizing API-neutral interrupt
 surfaces. Public
 `ruckig_calculate` still ignores

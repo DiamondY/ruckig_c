@@ -108,10 +108,10 @@ cycle.
 Disabled DoFs keep their current state with constant acceleration behavior and
 do not contribute an independent minimum duration.
 
-## Public Diagnostics Design Line
+## Public Diagnostics
 
-The core public diagnostics API is now available on the `0.16.0` design line.
-It is opt-in and leaves the legacy entry points unchanged:
+The core public diagnostics API is stable in `v0.16.0`. It is opt-in and
+leaves the legacy entry points unchanged:
 
 - `ruckig_diagnostics_init` initializes a caller-owned diagnostics record.
   Passing `NULL` is a no-op.
@@ -137,17 +137,14 @@ Callers that pass a non-NULL diagnostics pointer must initialize it with
 written only within the caller-declared stable prefix, leaving reserved fields
 for future ABI-compatible expansion.
 
-The post-`v0.15.0` readiness audit starts a docs-only
-`0.16.0-design-public-diagnostics` line in
-`docs/design/0.16.0_public_diagnostics.md`. The follow-up
-`0.16.0-alpha.2` contract freeze locked the intended public diagnostics shape,
-and `0.16.0-alpha.3` implements the core validate/calculate/update API:
+The `0.16.0` release promotes the public diagnostics design line to stable C
+ABI:
 
 - `ruckig_diagnostics_t` is an opt-in output record with `struct_size`,
   result, stable scope/code, location, count, value, limit, and reserved
   fields.
-- The public ABI expands from the `v0.15.0` 184-symbol baseline to 188 symbols
-  by adding `ruckig_diagnostics_init`,
+- The public ABI expands from the `v0.15.0` 184-symbol baseline to 190 symbols.
+- `0.16.0-alpha.3` added `ruckig_diagnostics_init`,
   `ruckig_validate_input_with_diagnostics`,
   `ruckig_calculate_with_diagnostics`, and
   `ruckig_update_with_diagnostics`.
@@ -158,10 +155,9 @@ and `0.16.0-alpha.3` implements the core validate/calculate/update API:
   existing stable coarse codes.
 - `0.16.0-alpha.5` adds 2 tracking getter symbols:
   `ruckig_tracking_get_last_public_diagnostics` and
-  `ruckig_tracking_sequence_continuation_get_last_diagnostics`. The expected
-  public symbol count is now 190.
-- `0.16.0-readiness` records local readiness evidence for the 190-symbol
-  design-line ABI without publishing `v0.16.0` or changing version metadata.
+  `ruckig_tracking_sequence_continuation_get_last_diagnostics`.
+- `v0.16.0` stabilizes the 190-symbol public diagnostics ABI without changing
+  existing result-code numeric values or existing public struct layouts.
 - Tracking and continuation diagnostics use getter-style accessors instead of
   adding `_with_diagnostics` variants to every tracking operation. The generic
   getters map only stable coarse status classes: success, budget/interruption,

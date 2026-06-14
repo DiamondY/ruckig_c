@@ -38,11 +38,64 @@ Before each patch release:
 The initial `0.2.x` process records exported symbols as release evidence; it
 does not require a strict automated ABI diff yet.
 
+## v0.16.0 Stable ABI Baseline
+
+`v0.16.0` stabilizes the public diagnostics C ABI reviewed on the `0.16.0`
+public diagnostics design line. The release promotes the 190-symbol
+diagnostics ABI after `0.16.0-alpha.3` added the core
+validate/calculate/update diagnostics entry points and `0.16.0-alpha.5` added
+tracking and tracking sequence continuation diagnostics getters.
+
+Stable `v0.16.0` release metadata:
+
+- `CMakeLists.txt` project version is `0.16.0`.
+- `RUCKIG_C_VERSION_*` macros and string are `0.16.0`.
+- ABI artifact output paths use `artifacts/abi/0.16.0`.
+
+Compatibility rules for `v0.16.0`:
+
+- Public C symbol count is `190`.
+- Public additions in `v0.16.0`: `6`.
+- Public removals in `v0.16.0`: `0`.
+- Existing `v0.15.0` public functions remain exported and are not
+  signature-changed.
+- Existing enum numeric values, result-code numeric values, and existing
+  public struct layouts are unchanged.
+- `ruckig_diagnostics_t` is a new opt-in caller-owned diagnostics record with
+  a `struct_size` prefix contract and reserved fields for future
+  ABI-compatible expansion.
+- `_with_diagnostics(..., NULL)` behaves like the matching legacy API.
+- Tracking and continuation diagnostics use getter-style accessors and expose
+  only stable coarse public state.
+- Solver profile branches, waypoint branch queues, tracking candidate order,
+  score internals, optimizer phases, and random seed/sample tooling state
+  remain private.
+- Python `cffi` and Rust wrapper updates remain prototype smoke evidence only;
+  no wheel, crate, or stable wrapper API is published.
+- `0.16.1` is reserved for emergency patch fixes only.
+
+Alpha history retained for ABI traceability:
+
+- `0.16.0-alpha.2` froze the public diagnostics contract as docs-only work.
+- `0.16.0-alpha.3` accepted 4 public symbols:
+  `ruckig_diagnostics_init`,
+  `ruckig_validate_input_with_diagnostics`,
+  `ruckig_calculate_with_diagnostics`, and
+  `ruckig_update_with_diagnostics`.
+- `0.16.0-alpha.4` extended interruption and waypoint resume diagnostics
+  mapping without adding public symbols.
+- `0.16.0-alpha.5` accepted 2 public symbols:
+  `ruckig_tracking_get_last_public_diagnostics` and
+  `ruckig_tracking_sequence_continuation_get_last_diagnostics`.
+- `0.16.0-readiness` passed full local readiness gates and kept the release,
+  tag, wrapper stabilization, and package-manager decisions deferred until the
+  stable closeout.
+
 ## v0.15.0 Stable ABI Baseline
 
 `v0.15.0` stabilizes the tracking sequence continuation public C ABI reviewed
-on the `0.15.0` design line. Current `main` remains on `0.15.0` release
-evidence after closeout; it does not start `0.16.0-design`.
+on the `0.15.0` design line. It was the stable baseline before `v0.16.0`
+promoted the public diagnostics ABI.
 
 The release promotes the `0.15.0-alpha.4` public ABI expansion from the
 published `v0.14.0` 172-symbol baseline to a 184-symbol stable baseline by

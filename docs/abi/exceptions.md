@@ -149,3 +149,25 @@ tracked in `docs/abi/public-symbols.txt`, and listed in
 numeric values and does not change `ruckig_tracking_diagnostics_t` layout.
 Alpha.4 provides the public handle scaffold; Fast and Optimized behavior
 implementation is split into later alpha slices.
+
+## 0.16.0 Public Diagnostics API Expansion
+
+`0.16.0` stabilizes the opt-in public diagnostics API reviewed on the
+`0.16.0` public diagnostics design line. It adds six public symbols:
+
+- `ruckig_diagnostics_init`
+- `ruckig_validate_input_with_diagnostics`
+- `ruckig_calculate_with_diagnostics`
+- `ruckig_update_with_diagnostics`
+- `ruckig_tracking_get_last_public_diagnostics`
+- `ruckig_tracking_sequence_continuation_get_last_diagnostics`
+
+The addition is approved by `docs/design/0.16.0_public_diagnostics.md`,
+tracked in `docs/abi/public-symbols.txt`, and listed in
+`docs/abi/public-symbol-exceptions.txt`. It does not renumber existing
+`ruckig_result_t` values and does not change existing public struct layouts.
+The new `ruckig_diagnostics_t` record is caller-owned, opt-in, initialized by
+`ruckig_diagnostics_init`, and protected by a `struct_size` prefix contract.
+Diagnostics expose stable coarse public failure classes only; solver profile
+branches, waypoint branch queues, tracking candidate ordering, score details,
+optimizer phases, and random seed/sample tooling state remain private.

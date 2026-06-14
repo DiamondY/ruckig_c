@@ -1,5 +1,44 @@
 # Changelog
 
+## 0.16.0 - 2026-06-14
+
+`0.16.0` is the stable public diagnostics release. It promotes the
+`0.16.0-alpha.3` through `0.16.0-alpha.5` diagnostics API, state/resume
+mapping, tracking getter, and readiness evidence reviewed during
+`0.16.0-readiness`. The public C ABI expands from the `v0.15.0` 184-symbol
+baseline to a 190-symbol public diagnostics baseline.
+
+- `0.16.0-alpha.3` adds the core opt-in public diagnostics API:
+  `ruckig_diagnostics_init`,
+  `ruckig_validate_input_with_diagnostics`,
+  `ruckig_calculate_with_diagnostics`, and
+  `ruckig_update_with_diagnostics`. The legacy validate/calculate/update entry
+  points keep behavior and return-code compatibility, and
+  `_with_diagnostics(..., NULL)` is defined to behave like the matching legacy
+  API.
+- `0.16.0-alpha.4` extends `ruckig_update_with_diagnostics` diagnostics for
+  no-waypoint interruption, waypoint interruption, waypoint resume identity
+  mismatch, waypoint count/capacity mismatch, and cleared/stale waypoint
+  resume state without adding public symbols.
+- `0.16.0-alpha.5` adds
+  `ruckig_tracking_get_last_public_diagnostics` and
+  `ruckig_tracking_sequence_continuation_get_last_diagnostics`. Tracking and
+  continuation diagnostics use getter-style accessors and expose only stable
+  coarse public state, not solver/profile/candidate/waypoint queue internals.
+- Existing `ruckig_result_t` numeric values and existing public struct layouts
+  are unchanged. `ruckig_diagnostics_t` is a new opt-in caller-owned struct
+  with a `struct_size` prefix contract and reserved fields for future
+  extension.
+- Python `cffi` and Rust wrappers remain prototype-only smoke targets. No
+  wheel, crate, package-manager recipe, release workflow policy change, Cloud
+  calculation, Pro equivalence claim, or wrapper stabilization is included.
+- `0.16.0-readiness` records local full CTest, oracle, random, performance,
+  ABI/export, Python, and Rust evidence for the 190-symbol design-line ABI.
+- `v0.16.0` stable closeout moves ABI artifact output paths to
+  `artifacts/abi/0.16.0`, records release-candidate and tag evidence in
+  `docs/release/checklists/0.16.0.md`, and publishes stable release notes in
+  `docs/release/notes/0.16.0.md`.
+
 ## 0.15.0 - 2026-06-12
 
 `0.15.0` is the stable tracking sequence continuation release. It promotes the

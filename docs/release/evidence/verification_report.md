@@ -3,6 +3,101 @@
 This report records verification runs for the C rewrite. Commands are run from
 the repository root unless noted otherwise.
 
+## 2026-06-14 0.16.0 Release Candidate
+
+This evidence promotes the completed public diagnostics design line to the
+`0.16.0` release candidate. It bumps version metadata and ABI artifact paths to
+`0.16.0`, records the accepted 190-symbol public diagnostics ABI, and keeps
+wrapper publication, package-manager recipes, upstream baseline, and
+visualization assets unchanged.
+
+Public ABI:
+
+| Baseline or release | Public symbols |
+| --- | ---: |
+| `v0.15.0` stable baseline | 184 |
+| `v0.16.0` public diagnostics release candidate | 190 |
+
+Release-candidate local commands and results:
+
+```text
+Preflight:
+  git status: planned release-candidate documentation/version diff only
+  local v0.16.0* tags: none
+  remote v0.16.0* tags: none
+
+cmake --build --preset windows-clang-ninja
+Result: passed.
+
+cmake --build --preset windows-clang-ninja-shared
+Result: passed.
+
+cmake --build --preset windows-clang-ninja-oracle
+Result: passed.
+
+cmake --build --preset windows-clang-ninja-performance
+Result: passed.
+
+ctest --test-dir out\build\windows-clang-ninja --output-on-failure
+Result: passed, 69/69.
+
+ctest --test-dir out\build\windows-clang-ninja-shared --output-on-failure
+Result: passed, 69/69.
+
+ctest --test-dir out\build\windows-clang-ninja-oracle --output-on-failure -E ruckig_c_oracle_random_release
+Result: passed, 80/80.
+
+out\build\windows-clang-ninja-oracle\ruckig_c_oracle_tests.exe
+Result: fixed oracle 92, waypoint section oracle 4.
+
+out\build\windows-clang-ninja-oracle\ruckig_c_oracle_tests.exe --random 100000 --seed 1
+Result: passed.
+
+out\build\windows-clang-ninja-oracle\ruckig_c_oracle_tests.exe --random 100000 --seed 2
+Result: passed.
+
+out\build\windows-clang-ninja-oracle\ruckig_c_oracle_tests.exe --random 100000 --seed 41
+Result: passed.
+
+out\build\windows-clang-ninja-oracle\ruckig_c_oracle_tests.exe --random-per-dof 100000 --seed 1
+Result: passed.
+
+ctest --test-dir out\build\windows-clang-ninja-oracle --output-on-failure -R ruckig_c_oracle_random_release
+Result: passed, 1/1.
+
+out\build\windows-clang-ninja-oracle\ruckig_c_oracle_tests.exe --random 1000000 --seed 1
+Result: passed.
+
+out\build\windows-clang-ninja-performance\ruckig_c_performance_benchmark.exe --samples 10000 --seed 1 --enforce-threshold
+Result: passed; average ratio 1.3214 <= 1.5 threshold.
+
+out\build\windows-clang-ninja-performance\ruckig_c_performance_benchmark.exe --samples 10000 --seed 1 --waypoints
+Result: passed; alpha C-only waypoint corpus.
+
+cmake --build out\build\windows-clang-ninja-shared --target ruckig_c_verify_public_symbols
+Result: passed; public symbols match header and allowlist.
+
+cmake --build out\build\windows-clang-ninja-shared --target ruckig_c_compare_public_exported_symbols
+Result: passed; 190 approved/current public symbols, 0 missing public symbols, 0 unapproved exported symbols.
+
+cargo test --manifest-path bindings\rust\Cargo.toml
+Result: passed, 16 tests.
+
+cargo test --manifest-path bindings\rust\Cargo.toml --examples
+Result: passed.
+
+$env:RUCKIG_C_SHARED_LIBRARY='E:\Yww\DownLoad\source\ruckig_c\out\build\windows-clang-ninja-shared\ruckig_c.dll'; python bindings\python_prototype\test_prototype.py
+Result: passed, 24 tests.
+
+.\tools\coverage\run_coverage.ps1 -CoverageLabel 0.16.0
+Result: passed; 76/76 coverage CTest.
+Coverage artifact: out/coverage/0.16.0/coverage-summary.txt
+Regions 8284 total, 879 missed, 89.39%
+Functions 491 total, 30 missed, 93.89%
+Lines 9191 total, 1030 missed, 88.79%
+Branches 4782 total, 1280 missed, 73.23%
+```
+
 ## 2026-06-14 0.16.0 Public Diagnostics Readiness
 
 This evidence closes the current public diagnostics design-line readiness

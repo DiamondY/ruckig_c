@@ -13,10 +13,30 @@ Coverage is tracked in three different senses:
 - Oracle coverage: frozen C++ differential comparisons against
   `original/ruckig-main`.
 
+## 0.16.0 Stable Release Baseline
+
+Current `main` is preparing the `v0.16.0` stable public diagnostics release.
+The release promotes the 190-symbol diagnostics ABI reviewed during
+`0.16.0-readiness`, including the alpha.3 core diagnostics API, alpha.4
+state/resume diagnostics mapping, and alpha.5 tracking public diagnostics
+getters.
+
+The release candidate regenerates coverage at
+`out/coverage/0.16.0/coverage-summary.txt`. Coverage percentage is not the
+release objective; future additions should be oracle-backed,
+public-behavior-backed, or regression-driven.
+
+| Metric | Total | Missed | Coverage |
+| --- | ---: | ---: | ---: |
+| Regions | 8284 | 879 | 89.39% |
+| Functions | 491 | 30 | 93.89% |
+| Lines | 9191 | 1030 | 88.79% |
+| Branches | 4782 | 1280 | 73.23% |
+
 ## 0.15.0 Stable Release Baseline
 
-Current `main` remains on `0.15.0` release evidence after the stable tracking
-sequence continuation closeout. The release promotes alpha.1 through alpha.8
+`v0.15.0` is the previous stable tracking sequence continuation closeout. The
+release promotes alpha.1 through alpha.8
 interrupt and continuation evidence, including the alpha.4 public continuation
 API expansion, Fast and Optimized continuation behavior, wrapper smoke, and
 alpha.8 continuation hardening. `v0.15.0` moves the stable public C ABI
@@ -25,11 +45,11 @@ baseline from the `v0.14.0` 172-symbol interrupt-surface baseline to the
 
 ## 0.16.0 Public Diagnostics Design-Line Coverage
 
-The `0.16.0` public diagnostics line is staged after the `v0.15.0` stable
+The `0.16.0` public diagnostics line is stabilized after the `v0.15.0` stable
 release. Alpha.3 expands the public ABI to 188 symbols with the core
 diagnostics API; alpha.4 adds no public symbols and extends update diagnostics
 for interruption and waypoint resume state; alpha.5 adds two tracking public
-diagnostics getter symbols for an expected 190-symbol design-line ABI.
+diagnostics getter symbols for the 190-symbol stable diagnostics ABI.
 
 Added coverage:
 
@@ -43,7 +63,7 @@ Added coverage:
 | State/resume diagnostics | Covers no-waypoint interruption, waypoint interruption, waypoint resume identity mismatch, limit/per-section/enabled-DoF resume mutations, and failed diagnostics preserving later resume state. |
 | Tracking getter diagnostics | Adds `--tracking-public-diagnostics` and CTest `ruckig_c_tracking_public_diagnostics`, covering getter argument validation, too-small `struct_size`, Fast/Optimized success, tracking failure state, continuation empty/interrupted/complete/reset state, and failed resume preserving continuation diagnostics. |
 | Boundary | Alpha.5 raises the expected public symbol count to 190 and does not expose solver profile branches, candidate ordering, waypoint queue internals, tracking score internals, optimizer phases, or random seed/sample state. |
-| Readiness | `0.16.0-readiness` reruns normal/shared full CTest, fixed and random oracle gates, performance, ABI/export, Rust wrapper smoke, and Python prototype smoke without publishing a release. |
+| Readiness | `0.16.0-readiness` reruns normal/shared full CTest, fixed and random oracle gates, performance, ABI/export, Rust wrapper smoke, and Python prototype smoke before stable release candidate promotion. |
 
 The local checklists are `docs/release/checklists/0.16.0-alpha.3.md` and
 `docs/release/checklists/0.16.0-alpha.4.md` and

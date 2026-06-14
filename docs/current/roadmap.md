@@ -18,12 +18,14 @@ install, pkg-config, static/DLL, shared install-tree, and CI consumer paths
 remain maintained; vcpkg, Conan, Homebrew, and similar recipes are reopened
 only after a separate user or release demand decision.
 
-## 0.16.0 Design Line
+## 0.16.0 Stable Release Line
 
-The `0.16.0` line is open for docs-only public diagnostics design. It does not
-change the current stable release, public header, public C ABI, version
-metadata, tag/release state, workflow, package-manager policy, wrapper
-publication status, upstream baseline, or visualization assets.
+The `0.16.0` line stabilizes opt-in public diagnostics. It promotes the
+public diagnostics design, implementation, and readiness evidence into the
+current stable release with a 190-symbol public C ABI. The release changes
+version metadata and ABI artifact paths, but does not change package-manager
+policy, wrapper publication status, upstream baseline, visualization assets,
+or default heavy-random CI policy.
 
 - `0.16.0-alpha.1` starts the public diagnostics design. It records opt-in
   candidate diagnostics types and entry points for invalid input,
@@ -55,18 +57,23 @@ publication status, upstream baseline, or visualization assets.
   existing specialized tracking diagnostics getter unchanged, and exposes only
   stable coarse tracking/continuation state.
 - `0.16.0-readiness` records release-readiness evidence for the public
-  diagnostics design line but does not publish `v0.16.0`. Stable release/tag,
-  version bump, wrapper stabilization, package recipes, tracking failure
-  shrinking, and solver long-tail coverage remain separate future decisions.
+  diagnostics design line before stable release promotion.
+- `v0.16.0` is the current stable release candidate scope. It bumps version
+  metadata, moves ABI artifact paths to `artifacts/abi/0.16.0`, keeps the
+  public symbol count at 190, and records stable release evidence in
+  `docs/release/checklists/0.16.0.md`.
+- `0.16.1` is reserved for emergency `v0.16.0` patch fixes only.
+- Wrapper stabilization, package recipes, tracking failure shrinking, and
+  solver long-tail coverage remain separate future decisions.
 
 ## 0.15.0 Stable Release Line
 
-`v0.15.0` remains the current stable release after the stable tracking sequence
+`v0.15.0` is the previous stable release after the stable tracking sequence
 continuation closeout. The stable release line promotes the 184-symbol public C
-ABI baseline accepted during the 0.15 design line. Later docs-only `0.16.0`
-design work does not change that stable release baseline.
+ABI baseline accepted during the 0.15 design line. The `v0.16.0` public
+diagnostics release supersedes it as the current stable line.
 
-- `v0.15.0` is the current stable release.
+- `v0.15.0` is the previous stable release.
 - `0.15.1` is reserved for emergency `v0.15.0` patch fixes only.
 - `0.14.1` is reserved for emergency `v0.14.0` patch fixes only.
 - `0.13.1` remains reserved for emergency `v0.13.0` patch fixes only.

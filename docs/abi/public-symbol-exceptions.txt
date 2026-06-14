@@ -132,3 +132,11 @@ allow-add ruckig_tracking_sequence_continuation_is_active
 allow-add ruckig_tracking_sequence_continuation_is_complete
 allow-add ruckig_tracking_sequence_continuation_reset
 allow-add ruckig_tracking_sequence_continuation_was_interrupted
+
+# 0.16.0 public diagnostics API additions.
+allow-add ruckig_diagnostics_init
+allow-add ruckig_validate_input_with_diagnostics
+allow-add ruckig_calculate_with_diagnostics
+allow-add ruckig_update_with_diagnostics
+allow-add ruckig_tracking_get_last_public_diagnostics
+allow-add ruckig_tracking_sequence_continuation_get_last_diagnostics

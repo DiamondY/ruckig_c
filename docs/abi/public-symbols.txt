@@ -4,8 +4,8 @@
 # include/ruckig_c/ruckig.h. The 0.4.0 line intentionally expands the
 # public C ABI for original-surface waypoint/per-section parity, 0.5.0
 # adds stable tracking Fast-mode ABI, 0.6.0 adds approved Optimized
-# tracking diagnostics and lookahead update, and 0.16.0-alpha.3 adds the core
-# public diagnostics entry points.
+# tracking diagnostics and lookahead update, and 0.16.0 stabilizes the public
+# diagnostics entry points and tracking diagnostics getters.
 ruckig_calculate
 ruckig_calculate_with_diagnostics
 ruckig_create

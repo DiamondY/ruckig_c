@@ -7,16 +7,16 @@ release, publish wrappers, or change package-manager scope.
 
 ## Baseline
 
-Current `main` remains on `0.15.0` release evidence after publishing
-`v0.15.0`. The stable public C ABI baseline is the 184-symbol continuation API
-surface reviewed during `0.15.0-readiness` and stabilized in `v0.15.0`.
+Current `main` is preparing the `v0.16.0` stable public diagnostics release.
+The stable public C ABI baseline moves from the `v0.15.0` 184-symbol
+continuation surface to the 190-symbol diagnostics surface reviewed during
+`0.16.0-readiness`.
 
-The `0.16.0` public diagnostics design line is now readiness-reviewed as a
-separate opt-in API expansion. It does not change the shipped `v0.15.0`
-release, version metadata, release/tag state, workflows, package-manager
-policy, wrapper publication status, upstream baseline, or visualization
-assets. The design-line public symbol count is 190 after alpha.3 and alpha.5;
-the stable release baseline remains 184 until a future explicit version bump.
+The `0.16.0` release candidate stabilizes the opt-in public diagnostics API
+without adding further quality/coverage scope. It changes version metadata and
+ABI artifact paths for the release, but keeps package-manager recipes, wrapper
+publication status, upstream baseline, visualization assets, and heavy random
+CI policy unchanged.
 
 Quality impact of the diagnostics line:
 
@@ -26,7 +26,21 @@ Quality impact of the diagnostics line:
 | Public diagnostics | `ruckig_diagnostics_t` is caller-owned, initialized with `ruckig_diagnostics_init`, and uses `struct_size` for future extension. |
 | Tracking boundary | Tracking uses generic getter-style public diagnostics rather than adding `_with_diagnostics` variants to every tracking operation. |
 | Private detail boundary | Solver branches, waypoint queues, tracking candidate order, scoring internals, optimizer phases, and random seed/sample tooling remain private. |
-| Verification | Alpha.6 readiness gates pass normal/shared CTest, oracle fixed/random, performance, ABI/export, Rust, and Python prototype smoke evidence. |
+| Verification | `0.16.0-readiness` gates pass normal/shared CTest, oracle fixed/random, performance, ABI/export, Rust, and Python prototype smoke evidence. |
+
+The release candidate does not continue coverage-percentage work. Future
+coverage additions are reserved for concrete regressions, oracle-backed cases,
+or public-behavior-backed cases rather than low-value branch probes.
+
+Release-candidate coverage is recorded at
+`out/coverage/0.16.0/coverage-summary.txt`:
+
+| Metric | Total | Missed | Coverage |
+| --- | ---: | ---: | ---: |
+| Regions | 8284 | 879 | 89.39% |
+| Functions | 491 | 30 | 93.89% |
+| Lines | 9191 | 1030 | 88.79% |
+| Branches | 4782 | 1280 | 73.23% |
 
 Local `0.15.0` implementation coverage, filtered to implementation sources and
 excluding generated, test, example, binding, and output paths:
