@@ -13,6 +13,9 @@
 #define M_PI 3.14159265358979323846264338327950288
 #endif
 
+static void configure_alpha2_resume_input(ruckig_input_t* input);
+static void configure_interrupt_boundary_no_waypoint_input(ruckig_input_t* input);
+
 static void test_create_destroy(void) {
     ruckig_t* otg = NULL;
     ruckig_input_t* input = NULL;
@@ -818,6 +821,147 @@ static void test_public_diagnostics_update_failures_and_success(void) {
     CHECK_EQ_INT(diagnostics.code, RUCKIG_DIAGNOSTIC_NONE);
 
     ruckig_output_destroy(mismatched_output);
+    ruckig_output_destroy(output);
+    ruckig_input_destroy(input);
+    ruckig_destroy(otg);
+}
+
+static void test_public_diagnostics_no_waypoint_interruption(void) {
+    ruckig_t* otg = NULL;
+    ruckig_input_t* input = NULL;
+    ruckig_output_t* output = NULL;
+    ruckig_diagnostics_t diagnostics;
+
+    CHECK_EQ_INT(ruckig_create(&otg, 1, 0.05), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_input_create(&input, 1), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_output_create(&output, 1), RUCKIG_WORKING);
+    configure_interrupt_boundary_no_waypoint_input(input);
+
+    ruckig_diagnostics_init(&diagnostics);
+    CHECK_EQ_INT(ruckig_update_with_diagnostics(otg, input, output, &diagnostics), RUCKIG_WORKING);
+    CHECK_TRUE(!ruckig_output_was_calculation_interrupted(output));
+    CHECK_EQ_INT(diagnostics.code, RUCKIG_DIAGNOSTIC_NONE);
+
+    ruckig_output_pass_to_input(output, input);
+    ruckig_input_target_position_data(input)[0] += 0.5;
+    CHECK_EQ_INT(ruckig_input_set_interrupt_calculation_duration(input, 0.0), RUCKIG_WORKING);
+    ruckig_diagnostics_init(&diagnostics);
+    CHECK_EQ_INT(ruckig_update_with_diagnostics(otg, input, output, &diagnostics), RUCKIG_WORKING);
+    CHECK_TRUE(ruckig_output_was_calculation_interrupted(output));
+    CHECK_EQ_INT(diagnostics.result, RUCKIG_WORKING);
+    CHECK_EQ_INT(diagnostics.scope, RUCKIG_DIAGNOSTIC_SCOPE_UPDATE);
+    CHECK_EQ_INT(diagnostics.code, RUCKIG_DIAGNOSTIC_INTERRUPTED);
+
+    ruckig_output_destroy(output);
+    ruckig_input_destroy(input);
+    ruckig_destroy(otg);
+}
+
+static void test_public_diagnostics_waypoint_interruption_and_resume(void) {
+    ruckig_t* otg = NULL;
+    ruckig_input_t* input = NULL;
+    ruckig_output_t* output = NULL;
+    ruckig_diagnostics_t diagnostics;
+    size_t too_small_size;
+
+    CHECK_EQ_INT(ruckig_create_with_waypoints(&otg, 3, 0.02, 2), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_input_create_with_waypoints(&input, 3, 2), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_output_create_with_waypoints(&output, 3, 2), RUCKIG_WORKING);
+    configure_alpha2_resume_input(input);
+    CHECK_EQ_INT(ruckig_input_set_interrupt_calculation_duration(input, 0.0), RUCKIG_WORKING);
+
+    ruckig_diagnostics_init(&diagnostics);
+    CHECK_EQ_INT(ruckig_update_with_diagnostics(otg, input, output, &diagnostics), RUCKIG_WORKING);
+    CHECK_TRUE(ruckig_output_was_calculation_interrupted(output));
+    CHECK_EQ_INT(diagnostics.result, RUCKIG_WORKING);
+    CHECK_EQ_INT(diagnostics.scope, RUCKIG_DIAGNOSTIC_SCOPE_WAYPOINT);
+    CHECK_EQ_INT(diagnostics.code, RUCKIG_DIAGNOSTIC_INTERRUPTED);
+
+    ruckig_output_pass_to_input(output, input);
+    CHECK_TRUE(ruckig_waypoint_resume_can_continue(otg, input));
+
+    ruckig_diagnostics_init(&diagnostics);
+    too_small_size = offsetof(ruckig_diagnostics_t, limit);
+    diagnostics.struct_size = too_small_size;
+    CHECK_EQ_INT(
+        ruckig_update_with_diagnostics(otg, input, output, &diagnostics),
+        RUCKIG_ERROR_INVALID_INPUT
+    );
+    CHECK_TRUE(ruckig_waypoint_resume_can_continue(otg, input));
+
+    ruckig_input_target_position_data(input)[0] += 0.04;
+    ruckig_diagnostics_init(&diagnostics);
+    CHECK_EQ_INT(ruckig_update_with_diagnostics(otg, input, output, &diagnostics), RUCKIG_WORKING);
+    CHECK_EQ_INT(diagnostics.result, RUCKIG_WORKING);
+    CHECK_EQ_INT(diagnostics.scope, RUCKIG_DIAGNOSTIC_SCOPE_WAYPOINT);
+    CHECK_EQ_INT(diagnostics.code, RUCKIG_DIAGNOSTIC_RESUME_IDENTITY_MISMATCH);
+    CHECK_EQ_INT(diagnostics.expected_count, 2);
+    CHECK_EQ_INT(diagnostics.actual_count, 2);
+
+    ruckig_output_destroy(output);
+    ruckig_input_destroy(input);
+    ruckig_destroy(otg);
+}
+
+static void test_public_diagnostics_waypoint_resume_mutation_families(void) {
+    ruckig_t* otg = NULL;
+    ruckig_input_t* input = NULL;
+    ruckig_output_t* output = NULL;
+    ruckig_diagnostics_t diagnostics;
+
+    CHECK_EQ_INT(ruckig_create_with_waypoints(&otg, 3, 0.02, 2), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_input_create_with_waypoints(&input, 3, 2), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_output_create_with_waypoints(&output, 3, 2), RUCKIG_WORKING);
+    configure_alpha2_resume_input(input);
+    CHECK_EQ_INT(ruckig_input_set_interrupt_calculation_duration(input, 0.0), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_update_with_diagnostics(otg, input, output, NULL), RUCKIG_WORKING);
+    ruckig_output_pass_to_input(output, input);
+
+    ruckig_input_max_velocity_data(input)[0] = 1.35;
+    ruckig_diagnostics_init(&diagnostics);
+    CHECK_EQ_INT(ruckig_update_with_diagnostics(otg, input, output, &diagnostics), RUCKIG_WORKING);
+    CHECK_EQ_INT(diagnostics.scope, RUCKIG_DIAGNOSTIC_SCOPE_WAYPOINT);
+    CHECK_EQ_INT(diagnostics.code, RUCKIG_DIAGNOSTIC_RESUME_IDENTITY_MISMATCH);
+
+    ruckig_output_destroy(output);
+    ruckig_input_destroy(input);
+    ruckig_destroy(otg);
+
+    CHECK_EQ_INT(ruckig_create_with_waypoints(&otg, 3, 0.02, 2), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_input_create_with_waypoints(&input, 3, 2), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_output_create_with_waypoints(&output, 3, 2), RUCKIG_WORKING);
+    configure_alpha2_resume_input(input);
+    CHECK_EQ_INT(ruckig_input_set_interrupt_calculation_duration(input, 0.0), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_update_with_diagnostics(otg, input, output, NULL), RUCKIG_WORKING);
+    ruckig_output_pass_to_input(output, input);
+
+    input->per_section_minimum_duration[1] = 0.01;
+    ruckig_diagnostics_init(&diagnostics);
+    CHECK_EQ_INT(ruckig_update_with_diagnostics(otg, input, output, &diagnostics), RUCKIG_WORKING);
+    CHECK_EQ_INT(diagnostics.scope, RUCKIG_DIAGNOSTIC_SCOPE_WAYPOINT);
+    CHECK_EQ_INT(diagnostics.code, RUCKIG_DIAGNOSTIC_RESUME_IDENTITY_MISMATCH);
+
+    ruckig_output_destroy(output);
+    ruckig_input_destroy(input);
+    ruckig_destroy(otg);
+
+    CHECK_EQ_INT(ruckig_create_with_waypoints(&otg, 3, 0.02, 2), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_input_create_with_waypoints(&input, 3, 2), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_output_create_with_waypoints(&output, 3, 2), RUCKIG_WORKING);
+    configure_alpha2_resume_input(input);
+    CHECK_EQ_INT(ruckig_input_set_interrupt_calculation_duration(input, 0.0), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_update_with_diagnostics(otg, input, output, NULL), RUCKIG_WORKING);
+    ruckig_output_pass_to_input(output, input);
+
+    CHECK_EQ_INT(ruckig_input_set_dof_enabled(input, 1, false), RUCKIG_WORKING);
+    ruckig_diagnostics_init(&diagnostics);
+    CHECK_EQ_INT(
+        ruckig_update_with_diagnostics(otg, input, output, &diagnostics),
+        RUCKIG_ERROR_INVALID_INPUT
+    );
+    CHECK_EQ_INT(diagnostics.scope, RUCKIG_DIAGNOSTIC_SCOPE_WAYPOINT);
+    CHECK_EQ_INT(diagnostics.code, RUCKIG_DIAGNOSTIC_RESUME_IDENTITY_MISMATCH);
+
     ruckig_output_destroy(output);
     ruckig_input_destroy(input);
     ruckig_destroy(otg);
@@ -9049,6 +9193,9 @@ void run_public_diagnostics_tests(void) {
     test_public_diagnostics_validation_failures();
     test_public_diagnostics_calculate_failures();
     test_public_diagnostics_update_failures_and_success();
+    test_public_diagnostics_no_waypoint_interruption();
+    test_public_diagnostics_waypoint_interruption_and_resume();
+    test_public_diagnostics_waypoint_resume_mutation_families();
 }
 
 void run_api_tests(void) {

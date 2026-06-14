@@ -42,6 +42,12 @@ publication status, upstream baseline, or visualization assets.
   legacy API return codes and behavior, keeps diagnostics opt-in, and leaves
   state/resume richer mapping and tracking/continuation getter symbols for
   alpha.4 and alpha.5.
+- `0.16.0-alpha.4` adds state-machine diagnostics on top of the alpha.3 API
+  without adding public symbols. It maps no-waypoint interruption, waypoint
+  interruption, waypoint resume identity mismatch, waypoint count/capacity
+  mismatch, and cleared/stale waypoint resume state to stable coarse public
+  diagnostics while keeping waypoint branch queues, candidate ordering, and
+  identity internals private.
 
 ## 0.15.0 Stable Release Line
 

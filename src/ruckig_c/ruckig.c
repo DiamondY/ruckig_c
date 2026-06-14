@@ -61,6 +61,53 @@ static void record_operation_result_diagnostics(
     }
 }
 
+static bool waypoint_update_capacity_mismatch(
+    const ruckig_t* otg,
+    const ruckig_input_t* input,
+    const ruckig_output_t* output,
+    size_t* expected_count,
+    size_t* actual_count
+) {
+    size_t capacity;
+    if (!otg || !input || !output || !output->trajectory || input->waypoint_count == 0) {
+        return false;
+    }
+    capacity = otg->max_number_of_waypoints;
+    if (input->max_number_of_waypoints < capacity) {
+        capacity = input->max_number_of_waypoints;
+    }
+    if (output->trajectory->max_number_of_waypoints < capacity) {
+        capacity = output->trajectory->max_number_of_waypoints;
+    }
+    if (expected_count) {
+        *expected_count = capacity;
+    }
+    if (actual_count) {
+        *actual_count = input->waypoint_count;
+    }
+    return input->waypoint_count > capacity;
+}
+
+static void record_waypoint_resume_mismatch_diagnostics(
+    ruckig_diagnostics_t* diagnostics,
+    const ruckig_t* otg,
+    const ruckig_input_t* input,
+    ruckig_result_t result
+) {
+    ruckig_diagnostics_record(
+        diagnostics,
+        result,
+        RUCKIG_DIAGNOSTIC_SCOPE_WAYPOINT,
+        RUCKIG_DIAGNOSTIC_RESUME_IDENTITY_MISMATCH,
+        0u,
+        0u,
+        otg && otg->waypoint_engine.identity_input ? otg->waypoint_engine.identity_input->waypoint_count : 0u,
+        input ? input->waypoint_count : 0u,
+        0.0,
+        0.0
+    );
+}
+
 static bool input_is_first_order_position(const ruckig_input_t* input) {
     size_t i;
     if (!input) {
@@ -1635,6 +1682,9 @@ static ruckig_result_t ruckig_update_impl(
     ruckig_diagnostics_t* diagnostics
 ) {
     const double calculation_start = calculation_duration_start();
+    bool waypoint_resume_mismatch;
+    size_t waypoint_capacity_expected = 0u;
+    size_t waypoint_capacity_actual = 0u;
     if (ruckig_diagnostics_validate_or_null(diagnostics) != RUCKIG_WORKING) {
         return RUCKIG_ERROR_INVALID_INPUT;
     }
@@ -1668,6 +1718,16 @@ static ruckig_result_t ruckig_update_impl(
         );
         return RUCKIG_ERROR_INVALID_INPUT;
     }
+    waypoint_resume_mismatch = otg->waypoint_engine.active
+        && !otg->waypoint_engine.complete
+        && !ruckig_waypoint_resume_can_continue(otg, input);
+    (void)waypoint_update_capacity_mismatch(
+        otg,
+        input,
+        output,
+        &waypoint_capacity_expected,
+        &waypoint_capacity_actual
+    );
     output->new_calculation = false;
     output->was_calculation_interrupted = false;
     if (input->waypoint_count == 0 || !input->has_interrupt_calculation_duration) {
@@ -1681,6 +1741,25 @@ static ruckig_result_t ruckig_update_impl(
         ruckig_result_t result = calculate_or_resume_output_trajectory(otg, input, output, input_matches_current);
         if (result != RUCKIG_WORKING) {
             output->calculation_duration = calculation_duration_finish(calculation_start);
+            if (diagnostics && waypoint_capacity_actual > waypoint_capacity_expected) {
+                ruckig_diagnostics_record(
+                    diagnostics,
+                    result,
+                    RUCKIG_DIAGNOSTIC_SCOPE_WAYPOINT,
+                    RUCKIG_DIAGNOSTIC_CAPACITY_MISMATCH,
+                    0u,
+                    0u,
+                    waypoint_capacity_expected,
+                    waypoint_capacity_actual,
+                    0.0,
+                    0.0
+                );
+                return result;
+            }
+            if (diagnostics && waypoint_resume_mismatch) {
+                record_waypoint_resume_mismatch_diagnostics(diagnostics, otg, input, result);
+                return result;
+            }
             if (diagnostics && result == RUCKIG_ERROR_INVALID_INPUT
                 && ruckig_validate_input_with_diagnostics(otg, input, false, true, diagnostics) != RUCKIG_WORKING) {
                 return result;
@@ -1701,11 +1780,13 @@ static ruckig_result_t ruckig_update_impl(
 
     {
         const ruckig_result_t result = output->time > output->trajectory->duration ? RUCKIG_FINISHED : RUCKIG_WORKING;
-        if (output->was_calculation_interrupted) {
+        if (waypoint_resume_mismatch) {
+            record_waypoint_resume_mismatch_diagnostics(diagnostics, otg, input, result);
+        } else if (output->was_calculation_interrupted) {
             ruckig_diagnostics_record(
                 diagnostics,
                 result,
-                RUCKIG_DIAGNOSTIC_SCOPE_UPDATE,
+                input->waypoint_count > 0 ? RUCKIG_DIAGNOSTIC_SCOPE_WAYPOINT : RUCKIG_DIAGNOSTIC_SCOPE_UPDATE,
                 RUCKIG_DIAGNOSTIC_INTERRUPTED,
                 0u,
                 output->new_section,

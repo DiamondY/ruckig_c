@@ -122,7 +122,8 @@ It is opt-in and leaves the legacy entry points unchanged:
   `ruckig_update_with_diagnostics` preserve the legacy result code while
   filling diagnostics for invalid handles, DoF/capacity mismatches, validation
   failures, zero-limit errors, synchronization errors, trajectory-duration
-  errors, unsupported combinations, and observable interruption.
+  errors, unsupported combinations, observable interruption, and waypoint
+  resume identity mismatch.
 - Passing `NULL` diagnostics to a `_with_diagnostics` function is defined to
   behave like the corresponding legacy API.
 
@@ -146,6 +147,11 @@ and `0.16.0-alpha.3` implements the core validate/calculate/update API:
   `ruckig_validate_input_with_diagnostics`,
   `ruckig_calculate_with_diagnostics`, and
   `ruckig_update_with_diagnostics`.
+- `0.16.0-alpha.4` adds no public symbols. It extends
+  `ruckig_update_with_diagnostics` diagnostics for no-waypoint interruption,
+  waypoint interruption, waypoint resume identity mismatch, waypoint
+  count/capacity mismatch, and cleared/stale waypoint resume state using the
+  existing stable coarse codes.
 - Tracking and continuation diagnostics use getter-style accessors instead of
   adding `_with_diagnostics` variants to every tracking operation; those
   getter symbols remain deferred to alpha.5.

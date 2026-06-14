@@ -23,6 +23,28 @@ alpha.8 continuation hardening. `v0.15.0` moves the stable public C ABI
 baseline from the `v0.14.0` 172-symbol interrupt-surface baseline to the
 184-symbol tracking sequence continuation baseline.
 
+## 0.16.0 Public Diagnostics Design-Line Coverage
+
+The `0.16.0` public diagnostics line is staged after the `v0.15.0` stable
+release. Alpha.3 expands the public ABI to 188 symbols with the core
+diagnostics API; alpha.4 adds no public symbols and extends update diagnostics
+for interruption and waypoint resume state.
+
+Added coverage:
+
+| Area | Evidence |
+| --- | --- |
+| Core diagnostics selector | Adds `--public-diagnostics` and CTest `ruckig_c_public_diagnostics`. |
+| Header visibility | C and C++ header compile tests instantiate `ruckig_diagnostics_t`, reference public enum constants, and call `ruckig_diagnostics_init`. |
+| Initialization contract | Covers `ruckig_diagnostics_init(NULL)`, valid init, `NULL` diagnostics parity, and too-small `struct_size` rejection before the operation runs. |
+| Validation diagnostics | Covers null arguments, DoF mismatch, non-finite values, negative limits, current-state out-of-limits, target-state out-of-limits, and invalid enum values. |
+| Calculate/update diagnostics | Covers trajectory/output mismatch, waypoint capacity mismatch, zero-limit result mapping, success clearing to `NONE`, and legacy API parity. |
+| State/resume diagnostics | Covers no-waypoint interruption, waypoint interruption, waypoint resume identity mismatch, limit/per-section/enabled-DoF resume mutations, and failed diagnostics preserving later resume state. |
+| Boundary | Alpha.4 keeps the public symbol count at 188 and does not expose solver profile branches, candidate ordering, waypoint queue internals, or random seed/sample state. |
+
+The local checklists are `docs/release/checklists/0.16.0-alpha.3.md` and
+`docs/release/checklists/0.16.0-alpha.4.md`.
+
 ## 0.15.0-alpha.1 Interrupt Post-Release Quality Baseline
 
 `0.15.0-alpha.1` adds a focused local post-release quality selector for the
