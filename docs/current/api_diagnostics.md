@@ -157,7 +157,8 @@ ABI:
   `ruckig_tracking_get_last_public_diagnostics` and
   `ruckig_tracking_sequence_continuation_get_last_diagnostics`.
 - `v0.16.0` stabilizes the 190-symbol public diagnostics ABI without changing
-  existing result-code numeric values or existing public struct layouts.
+  existing result-code numeric values or existing public struct layouts. The
+  stable release is published as tag `v0.16.0`.
 - Tracking and continuation diagnostics use getter-style accessors instead of
   adding `_with_diagnostics` variants to every tracking operation. The generic
   getters map only stable coarse status classes: success, budget/interruption,

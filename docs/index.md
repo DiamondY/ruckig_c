@@ -197,10 +197,12 @@ Historical rewrite plans and release evidence are retained for traceability.
   `0.15.0` tracking sequence continuation release notes, and the stable
   `0.16.0` public diagnostics release notes.
 
-`v0.16.0` is the current stable release candidate after the public diagnostics
-readiness audit. It promotes the alpha.3 core diagnostics API, alpha.4
-state/resume diagnostics mapping, and alpha.5 tracking public diagnostics
-getters to the stable 190-symbol public C ABI baseline. `v0.15.0` remains the
+`v0.16.0` is the current stable release after the public diagnostics readiness
+audit, release-candidate evidence, annotated tag, tag CI, tag manual
+release-random workflow, and GitHub Release publication. It promotes the
+alpha.3 core diagnostics API, alpha.4 state/resume diagnostics mapping, and
+alpha.5 tracking public diagnostics getters to the stable 190-symbol public C
+ABI baseline. `v0.15.0` remains the
 previous stable tracking sequence continuation release with a 184-symbol public
 C ABI baseline.
 The latest post-release residual coverage slice records branch coverage
@@ -229,8 +231,8 @@ waypoint resume mismatch diagnostics.
 The `0.16.0-alpha.5` implementation adds the two tracking public diagnostics
 getter symbols and raises the expected design-line public symbol count to 190
 without changing version/tag/release state.
-The `0.16.0-readiness` evidence confirms the public diagnostics line is ready
-for stable-release promotion. `0.16.0` release candidate work bumps version
+The `0.16.0-readiness` evidence confirmed the public diagnostics line was ready
+for stable-release promotion. The `v0.16.0` stable release bumps version
 metadata and ABI artifact paths while keeping wrapper stabilization deferred.
 The failure-oriented shrinker prototype adds local oracle random failure
 shrinking for seed/sample debugging without writing generated fixtures or

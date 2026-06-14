@@ -15,13 +15,13 @@ Coverage is tracked in three different senses:
 
 ## 0.16.0 Stable Release Baseline
 
-Current `main` is preparing the `v0.16.0` stable public diagnostics release.
+Current `main` has published the `v0.16.0` stable public diagnostics release.
 The release promotes the 190-symbol diagnostics ABI reviewed during
 `0.16.0-readiness`, including the alpha.3 core diagnostics API, alpha.4
 state/resume diagnostics mapping, and alpha.5 tracking public diagnostics
 getters.
 
-The release candidate regenerates coverage at
+The release candidate regenerated coverage at
 `out/coverage/0.16.0/coverage-summary.txt`. Coverage percentage is not the
 release objective; future additions should be oracle-backed,
 public-behavior-backed, or regression-driven.
@@ -63,7 +63,7 @@ Added coverage:
 | State/resume diagnostics | Covers no-waypoint interruption, waypoint interruption, waypoint resume identity mismatch, limit/per-section/enabled-DoF resume mutations, and failed diagnostics preserving later resume state. |
 | Tracking getter diagnostics | Adds `--tracking-public-diagnostics` and CTest `ruckig_c_tracking_public_diagnostics`, covering getter argument validation, too-small `struct_size`, Fast/Optimized success, tracking failure state, continuation empty/interrupted/complete/reset state, and failed resume preserving continuation diagnostics. |
 | Boundary | Alpha.5 raises the expected public symbol count to 190 and does not expose solver profile branches, candidate ordering, waypoint queue internals, tracking score internals, optimizer phases, or random seed/sample state. |
-| Readiness | `0.16.0-readiness` reruns normal/shared full CTest, fixed and random oracle gates, performance, ABI/export, Rust wrapper smoke, and Python prototype smoke before stable release candidate promotion. |
+| Readiness | `0.16.0-readiness` reruns normal/shared full CTest, fixed and random oracle gates, performance, ABI/export, Rust wrapper smoke, and Python prototype smoke before stable release promotion. |
 
 The local checklists are `docs/release/checklists/0.16.0-alpha.3.md` and
 `docs/release/checklists/0.16.0-alpha.4.md` and

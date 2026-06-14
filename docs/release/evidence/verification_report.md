@@ -3,20 +3,21 @@
 This report records verification runs for the C rewrite. Commands are run from
 the repository root unless noted otherwise.
 
-## 2026-06-14 0.16.0 Release Candidate
+## 2026-06-14 0.16.0 Stable Release
 
 This evidence promotes the completed public diagnostics design line to the
-`0.16.0` release candidate. It bumps version metadata and ABI artifact paths to
-`0.16.0`, records the accepted 190-symbol public diagnostics ABI, and keeps
-wrapper publication, package-manager recipes, upstream baseline, and
-visualization assets unchanged.
+stable `v0.16.0` release. It bumps version metadata and ABI artifact paths to
+`0.16.0`, records the accepted 190-symbol public diagnostics ABI, creates the
+annotated `v0.16.0` tag and GitHub Release, and keeps wrapper publication,
+package-manager recipes, upstream baseline, and visualization assets
+unchanged.
 
 Public ABI:
 
 | Baseline or release | Public symbols |
 | --- | ---: |
 | `v0.15.0` stable baseline | 184 |
-| `v0.16.0` public diagnostics release candidate | 190 |
+| `v0.16.0` stable public diagnostics release | 190 |
 
 Release-candidate local commands and results:
 
@@ -132,6 +133,67 @@ Exported-symbol artifacts:
   current_public_symbol_count 190
   missing_public_symbol_count 0
   unapproved_exported_symbol_count 0
+```
+
+Release evidence freeze and publication evidence:
+
+```text
+Release evidence freeze commit:
+  5e489db69070d6423a8e31d7739ba79f9737b803
+  Record 0.16.0 release candidate evidence
+
+Final evidence push CI:
+  run 27500832812
+  url https://github.com/DiamondY/ruckig_c/actions/runs/27500832812
+  event push
+  conclusion success
+  head 5e489db69070d6423a8e31d7739ba79f9737b803
+
+Annotated tag:
+  name v0.16.0
+  object 28fe5979e08618c2d712509015549af66760f573
+  target commit 5e489db69070d6423a8e31d7739ba79f9737b803
+
+Tag push CI:
+  run 27501046121
+  url https://github.com/DiamondY/ruckig_c/actions/runs/27501046121
+  event push
+  conclusion success
+  started 2026-06-14T13:56:01Z
+  completed 2026-06-14T14:02:32Z
+  head 5e489db69070d6423a8e31d7739ba79f9737b803
+  Linux public exported-symbol diff: clean
+  Windows public exported-symbol diff: clean
+  approved_public_symbol_count 190
+  current_public_symbol_count 190
+  missing_public_symbol_count 0
+  unapproved_exported_symbol_count 0
+
+Manual release-random workflow on tag:
+  run 27501251698
+  url https://github.com/DiamondY/ruckig_c/actions/runs/27501251698
+  event workflow_dispatch
+  conclusion success
+  started 2026-06-14T14:03:55Z
+  completed 2026-06-14T14:11:23Z
+  head 5e489db69070d6423a8e31d7739ba79f9737b803
+  Manual release random oracle job 81284422400: success
+  Linux Clang performance job 81284422051: success
+
+GitHub Release:
+  url https://github.com/DiamondY/ruckig_c/releases/tag/v0.16.0
+  title ruckig_c 0.16.0
+  published_at 2026-06-14T14:14:14Z
+  non_draft true
+  non_prerelease true
+  latest true
+
+Final release facts:
+  public_symbol_count 190
+  public_additions 6
+  public_removals 0
+  result_code_numeric_changes 0
+  existing_public_struct_layout_changes 0
 ```
 
 ## 2026-06-14 0.16.0 Public Diagnostics Readiness

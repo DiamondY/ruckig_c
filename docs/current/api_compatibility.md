@@ -90,6 +90,9 @@ Alpha history retained for ABI traceability:
 - `0.16.0-readiness` passed full local readiness gates and kept the release,
   tag, wrapper stabilization, and package-manager decisions deferred until the
   stable closeout.
+- `v0.16.0` was published as a stable GitHub Release from annotated tag
+  `v0.16.0` pointing to commit
+  `5e489db69070d6423a8e31d7739ba79f9737b803`.
 
 ## v0.15.0 Stable ABI Baseline
 

@@ -58,10 +58,10 @@ or default heavy-random CI policy.
   stable coarse tracking/continuation state.
 - `0.16.0-readiness` records release-readiness evidence for the public
   diagnostics design line before stable release promotion.
-- `v0.16.0` is the current stable release candidate scope. It bumps version
-  metadata, moves ABI artifact paths to `artifacts/abi/0.16.0`, keeps the
-  public symbol count at 190, and records stable release evidence in
-  `docs/release/checklists/0.16.0.md`.
+- `v0.16.0` is the current stable release. It bumps version metadata, moves
+  ABI artifact paths to `artifacts/abi/0.16.0`, keeps the public symbol count
+  at 190, publishes the annotated tag and GitHub Release, and records stable
+  release evidence in `docs/release/checklists/0.16.0.md`.
 - `0.16.1` is reserved for emergency `v0.16.0` patch fixes only.
 - Wrapper stabilization, package recipes, tracking failure shrinking, and
   solver long-tail coverage remain separate future decisions.
@@ -297,7 +297,7 @@ diagnostics release supersedes it as the current stable line.
 - `0.16.0-readiness` is implemented locally as docs/evidence closeout for the
   public diagnostics line. It records the 190-symbol design-line count, normal
   and shared CTest, oracle fixed/random, performance, ABI/export, Rust, and
-  Python prototype smoke gates while deferring a stable `v0.16.0` release.
+  Python prototype smoke gates before the later stable `v0.16.0` release.
 - `post-v0.15.0-failure-shrinker-prototype` is implemented locally as a
   test/tooling-only follow-up. It adds oracle random and oracle per-DoF random
   failure-preserving shrink commands that require the original seed/sample to

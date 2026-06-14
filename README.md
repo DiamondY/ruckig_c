@@ -164,11 +164,12 @@ Implemented and covered by fixed C/oracle tests plus deterministic random oracle
 
 Release-readiness evidence is tracked under `docs/release/`; see
 `docs/index.md` for the organized documentation map. `v0.16.0` is the current
-stable release candidate after completed `0.16.0-readiness`, release-candidate
-local gates, and the public diagnostics ABI review. `v0.16.0` promotes the
-public diagnostics API and moves the stable public C ABI baseline to 190
-symbols while preserving legacy API behavior and existing result-code numeric
-values. `v0.15.0` remains the previous stable tracking sequence continuation
+stable release after completed `0.16.0-readiness`, release-candidate local
+gates, tag CI, tag manual release-random, and GitHub Release publication.
+`v0.16.0` promotes the public diagnostics API and moves the stable public C ABI
+baseline to 190 symbols while preserving legacy API behavior and existing
+result-code numeric values. `v0.15.0` remains the previous stable tracking
+sequence continuation
 release with a 184-symbol public C ABI baseline. `v0.14.0` keeps the `v0.9.0`
 172-symbol public C ABI unchanged while stabilizing API-neutral interrupt
 surfaces. Public
