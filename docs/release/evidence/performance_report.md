@@ -48,6 +48,70 @@ waypoint_oracle_ratio: unavailable
 waypoint_benchmark_policy: alpha C-only local optimizer corpus
 ```
 
+Release-candidate push CI Linux performance:
+
+```text
+run: 27500260082
+url: https://github.com/DiamondY/ruckig_c/actions/runs/27500260082
+artifact: linux-performance/linux-performance.txt
+
+c_average_ns: 735.143
+c_p99_ns: 5460
+c_worst_ns: 29645
+oracle_average_ns: 558.956
+oracle_p99_ns: 4208
+oracle_worst_ns: 28674
+average_ratio_c_over_oracle: 1.31521
+release_threshold_average_ratio: 1.5
+```
+
+Release-candidate push CI Linux waypoint alpha benchmark:
+
+```text
+artifact: linux-performance/linux-waypoint-performance.txt
+
+waypoint_case_count: 10
+waypoint_max_dofs: 8
+waypoint_max_intermediate_positions: 3
+waypoint_c_average_ns: 3.59332e+06
+waypoint_c_p99_ns: 1.30727e+07
+waypoint_c_worst_ns: 1.8106e+07
+waypoint_oracle_ratio: unavailable
+waypoint_benchmark_policy: alpha C-only local optimizer corpus
+```
+
+Manual release-random workflow Linux performance:
+
+```text
+run: 27500474307
+url: https://github.com/DiamondY/ruckig_c/actions/runs/27500474307
+artifact: linux-performance/linux-performance.txt
+
+c_average_ns: 778.238
+c_p99_ns: 5838
+c_worst_ns: 39779
+oracle_average_ns: 585.433
+oracle_p99_ns: 4436
+oracle_worst_ns: 19729
+average_ratio_c_over_oracle: 1.32934
+release_threshold_average_ratio: 1.5
+```
+
+Manual release-random workflow Linux waypoint alpha benchmark:
+
+```text
+artifact: linux-performance/linux-waypoint-performance.txt
+
+waypoint_case_count: 10
+waypoint_max_dofs: 8
+waypoint_max_intermediate_positions: 3
+waypoint_c_average_ns: 3.71911e+06
+waypoint_c_p99_ns: 1.33658e+07
+waypoint_c_worst_ns: 1.50279e+07
+waypoint_oracle_ratio: unavailable
+waypoint_benchmark_policy: alpha C-only local optimizer corpus
+```
+
 ## 2026-06-14 0.16.0 Public Diagnostics Readiness Performance Evidence
 
 The public diagnostics readiness slice records a fresh local performance gate

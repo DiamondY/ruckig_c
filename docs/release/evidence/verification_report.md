@@ -98,6 +98,42 @@ Lines 9191 total, 1030 missed, 88.79%
 Branches 4782 total, 1280 missed, 73.23%
 ```
 
+Remote release-candidate evidence:
+
+```text
+Release-candidate commit:
+  e5fbd5746230629e575e0005078304317aabc833
+
+Release-candidate push CI:
+  run 27500260082
+  url https://github.com/DiamondY/ruckig_c/actions/runs/27500260082
+  event push
+  conclusion success
+  started 2026-06-14T13:24:29Z
+  completed 2026-06-14T13:30:40Z
+
+Manual release-random workflow:
+  run 27500474307
+  url https://github.com/DiamondY/ruckig_c/actions/runs/27500474307
+  event workflow_dispatch
+  conclusion success
+  started 2026-06-14T13:33:05Z
+  completed 2026-06-14T13:39:39Z
+  head e5fbd5746230629e575e0005078304317aabc833
+  Manual release random oracle job 81282298939: success
+  Linux Clang performance job 81282298829: success
+
+Exported-symbol artifacts:
+  Release-candidate push CI Linux public diff: clean
+  Release-candidate push CI Windows public diff: clean
+  Manual workflow Linux public diff: clean
+  Manual workflow Windows public diff: clean
+  approved_public_symbol_count 190
+  current_public_symbol_count 190
+  missing_public_symbol_count 0
+  unapproved_exported_symbol_count 0
+```
+
 ## 2026-06-14 0.16.0 Public Diagnostics Readiness
 
 This evidence closes the current public diagnostics design-line readiness
