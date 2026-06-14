@@ -132,7 +132,9 @@ Historical rewrite plans and release evidence are retained for traceability.
   GitHub Release. `release/checklists/0.15.0.md` records the stable tracking
   sequence continuation release closeout.
   `release/checklists/0.16.0-alpha.1.md` records the docs-only public
-  diagnostics design start without implementing API or changing ABI.
+  diagnostics design start without implementing API or changing ABI, and
+  `release/checklists/0.16.0-alpha.2.md` records the docs-only public
+  diagnostics contract freeze before implementation.
   `release/checklists/post-v0.15.0-quality-audit.md` records the post-release
   code-quality and test-quality audit slice without changing the stable ABI or
   release state.
@@ -203,6 +205,9 @@ package recipes, and release actions deferred.
 The `0.16.0-alpha.1` public diagnostics design is now open as docs-only work;
 `v0.15.0` remains the current stable release and the 184-symbol public C ABI
 baseline remains unchanged.
+The `0.16.0-alpha.2` contract freeze locks diagnostics initialization,
+`struct_size` compatibility, staged public API boundaries, and stable
+coarse-grained diagnostic codes before any header or ABI allowlist change.
 The failure-oriented shrinker prototype adds local oracle random failure
 shrinking for seed/sample debugging without writing generated fixtures or
 changing library API.

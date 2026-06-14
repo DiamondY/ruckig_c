@@ -117,8 +117,25 @@ or waypoint candidate family was selected internally.
 
 The post-`v0.15.0` readiness audit starts a docs-only
 `0.16.0-design-public-diagnostics` line in
-`docs/design/0.16.0_public_diagnostics.md`. That design remains opt-in,
-preserves existing result-code numeric values and public struct layouts, and
-lists candidate public symbols and ABI artifacts before any implementation.
-Python and Rust wrappers remain prototype-only until a separate stabilization
-design is accepted.
+`docs/design/0.16.0_public_diagnostics.md`. The follow-up
+`0.16.0-alpha.2` contract freeze keeps this line docs-only but locks the
+intended public diagnostics shape for staged implementation:
+
+- `ruckig_diagnostics_t` is an opt-in output record with `struct_size`,
+  result, stable scope/code, location, count, value, limit, and reserved
+  fields.
+- Callers that pass a non-NULL diagnostics pointer must initialize it with
+  `ruckig_diagnostics_init`; `NULL` diagnostics is defined to behave like the
+  legacy API.
+- The first implementation slice covers
+  `ruckig_validate_input_with_diagnostics`,
+  `ruckig_calculate_with_diagnostics`, and
+  `ruckig_update_with_diagnostics`.
+- Tracking and continuation diagnostics use getter-style accessors instead of
+  adding `_with_diagnostics` variants to every tracking operation.
+
+Diagnostics remain stable and coarse-grained. They explain public failure
+classes and locations, but do not expose solver profile branches, candidate
+ordering, waypoint queue internals, or random seed/sample tooling state. Python
+and Rust wrappers remain prototype-only until a separate stabilization design
+is accepted.

@@ -30,6 +30,11 @@ publication status, upstream baseline, or visualization assets.
   interruption, resume mismatch, tracking diagnostics, and waypoint resume
   diagnostics. It does not implement API or expand the 184-symbol `v0.15.0`
   ABI baseline.
+- `0.16.0-alpha.2` freezes the public diagnostics contract as docs-only work.
+  It locks the staged API direction, `ruckig_diagnostics_t` initialization and
+  `struct_size` compatibility rules, stable coarse diagnostic scope/code
+  boundaries, and alpha.3 through alpha.5 implementation boundaries without
+  editing the public header or ABI allowlist.
 
 ## 0.15.0 Stable Release Line
 
@@ -244,6 +249,11 @@ design work does not change that stable release baseline.
   keeping implementation, public header edits, ABI allowlist edits, version
   metadata, release/tag actions, wrapper publication, upstream baseline, and
   visualization assets unchanged.
+- `0.16.0-alpha.2` is implemented locally as a docs-only contract freeze for
+  public diagnostics. It keeps the `v0.15.0` 184-symbol ABI baseline unchanged
+  while freezing `ruckig_diagnostics_init`, core `_with_diagnostics` APIs,
+  tracking getter-style diagnostics, stable coarse diagnostic codes, and the
+  requirement that non-NULL diagnostics records are initialized before use.
 - `post-v0.15.0-failure-shrinker-prototype` is implemented locally as a
   test/tooling-only follow-up. It adds oracle random and oracle per-DoF random
   failure-preserving shrink commands that require the original seed/sample to
