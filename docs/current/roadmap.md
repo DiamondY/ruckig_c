@@ -18,12 +18,25 @@ install, pkg-config, static/DLL, shared install-tree, and CI consumer paths
 remain maintained; vcpkg, Conan, Homebrew, and similar recipes are reopened
 only after a separate user or release demand decision.
 
+## 0.16.0 Design Line
+
+The `0.16.0` line is open for docs-only public diagnostics design. It does not
+change the current stable release, public header, public C ABI, version
+metadata, tag/release state, workflow, package-manager policy, wrapper
+publication status, upstream baseline, or visualization assets.
+
+- `0.16.0-alpha.1` starts the public diagnostics design. It records opt-in
+  candidate diagnostics types and entry points for invalid input,
+  interruption, resume mismatch, tracking diagnostics, and waypoint resume
+  diagnostics. It does not implement API or expand the 184-symbol `v0.15.0`
+  ABI baseline.
+
 ## 0.15.0 Stable Release Line
 
-Current `main` remains on `0.15.0` release evidence after the stable tracking
-sequence continuation closeout. This closeout promotes the 184-symbol public C
-ABI baseline accepted during the 0.15 design line and does not start
-`0.16.0-design`.
+`v0.15.0` remains the current stable release after the stable tracking sequence
+continuation closeout. The stable release line promotes the 184-symbol public C
+ABI baseline accepted during the 0.15 design line. Later docs-only `0.16.0`
+design work does not change that stable release baseline.
 
 - `v0.15.0` is the current stable release.
 - `0.15.1` is reserved for emergency `v0.15.0` patch fixes only.
@@ -225,11 +238,18 @@ ABI baseline accepted during the 0.15 design line and does not start
   design line and recommends `0.16.0-design-public-diagnostics` as the first
   `0.16.0` topic, while deferring wrapper stabilization, failure-oriented
   shrink tooling, solver long-tail coverage, and package-manager recipes.
+- `0.16.0-alpha.1` is implemented locally as a docs-only public diagnostics
+  design start. It lists candidate diagnostic scopes/codes, a future
+  `ruckig_diagnostics_t` shape, and opt-in diagnostics entry points while
+  keeping implementation, public header edits, ABI allowlist edits, version
+  metadata, release/tag actions, wrapper publication, upstream baseline, and
+  visualization assets unchanged.
 - Keep the 184-symbol `v0.15.0` public C ABI baseline unless a later separate
   public API decision is accepted.
-- This quality audit does not start `0.16.0-design`, change version metadata,
-  tag a release, publish wrappers, edit the ABI allowlist, or change the
-  public C ABI baseline.
+- The closed quality audit did not change version metadata, tag a release,
+  publish wrappers, edit the ABI allowlist, or change the public C ABI
+  baseline. The later `0.16.0-alpha.1` public diagnostics design is docs-only
+  until a separate implementation decision is accepted.
 - Package-manager recipes and package publication remain frozen unless
   separately accepted.
 - Cloud/remote runtime, proprietary Pro equivalence claims, hard real-time

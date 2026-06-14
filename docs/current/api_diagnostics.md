@@ -115,9 +115,10 @@ does not expose a stable structured diagnostics channel for explaining why an
 input failed validation, why a resume attempt was rejected, or which tracking
 or waypoint candidate family was selected internally.
 
-The post-`v0.15.0` readiness audit recommends starting a docs-only
-`0.16.0-design-public-diagnostics` line. That design must remain opt-in,
-preserve existing result-code numeric values and public struct layouts, and
-list every proposed public symbol or ABI artifact before implementation.
+The post-`v0.15.0` readiness audit starts a docs-only
+`0.16.0-design-public-diagnostics` line in
+`docs/design/0.16.0_public_diagnostics.md`. That design remains opt-in,
+preserves existing result-code numeric values and public struct layouts, and
+lists candidate public symbols and ABI artifacts before any implementation.
 Python and Rust wrappers remain prototype-only until a separate stabilization
 design is accepted.

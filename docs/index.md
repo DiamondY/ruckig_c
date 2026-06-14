@@ -131,6 +131,8 @@ Historical rewrite plans and release evidence are retained for traceability.
   stable-review audit for alpha.1 through alpha.8 without creating a tag or
   GitHub Release. `release/checklists/0.15.0.md` records the stable tracking
   sequence continuation release closeout.
+  `release/checklists/0.16.0-alpha.1.md` records the docs-only public
+  diagnostics design start without implementing API or changing ABI.
   `release/checklists/post-v0.15.0-quality-audit.md` records the post-release
   code-quality and test-quality audit slice without changing the stable ABI or
   release state.
@@ -196,6 +198,9 @@ public-behavior invariants, or separate design decisions.
 The next design-readiness audit recommends public diagnostics as the first
 `0.16.0` design topic while keeping implementation, ABI expansion, wrappers,
 package recipes, and release actions deferred.
+The `0.16.0-alpha.1` public diagnostics design is now open as docs-only work;
+`v0.15.0` remains the current stable release and the 184-symbol public C ABI
+baseline remains unchanged.
 The follow-up random shrinker MVP adds local deterministic shrink commands for
 seed/sample materialization without changing random corpus semantics or writing
 generated fixtures automatically.
@@ -222,6 +227,8 @@ gate. The previous v1 gallery provenance remains available through the
   final planned `0.2.x` stabilization release.
 - `design/0.16.0_readiness.md` - post-`v0.15.0` readiness decision for the
   next design line, recommending public diagnostics first.
+- `design/0.16.0_public_diagnostics.md` - docs-only public diagnostics design
+  for possible opt-in `0.16.0` diagnostics APIs.
 - `design/0.3.0_release_decision.md` - accepted hardening-release scope for
   `0.3.0`.
 - `design/0.3.0_closeout_checklist.md` - engineering-hardening closeout
