@@ -220,6 +220,11 @@ ABI baseline accepted during the 0.15 design line and does not start
   quality-slice push CI runs, and states that future quality work should be
   regression-, oracle-, public-behavior-, or design-decision-driven rather than
   percentage-driven.
+- `post-v0.15.0-next-design-readiness` is implemented locally as a docs-only
+  decision audit. It concludes that the quality series no longer blocks a new
+  design line and recommends `0.16.0-design-public-diagnostics` as the first
+  `0.16.0` topic, while deferring wrapper stabilization, failure-oriented
+  shrink tooling, solver long-tail coverage, and package-manager recipes.
 - Keep the 184-symbol `v0.15.0` public C ABI baseline unless a later separate
   public API decision is accepted.
 - This quality audit does not start `0.16.0-design`, change version metadata,

@@ -107,3 +107,17 @@ cycle.
 
 Disabled DoFs keep their current state with constant acceleration behavior and
 do not contribute an independent minimum duration.
+
+## Future Public Diagnostics Design
+
+The current public API exposes result codes and queryable output state, but it
+does not expose a stable structured diagnostics channel for explaining why an
+input failed validation, why a resume attempt was rejected, or which tracking
+or waypoint candidate family was selected internally.
+
+The post-`v0.15.0` readiness audit recommends starting a docs-only
+`0.16.0-design-public-diagnostics` line. That design must remain opt-in,
+preserve existing result-code numeric values and public struct layouts, and
+list every proposed public symbol or ABI artifact before implementation.
+Python and Rust wrappers remain prototype-only until a separate stabilization
+design is accepted.

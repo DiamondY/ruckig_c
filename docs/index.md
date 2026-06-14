@@ -161,6 +161,8 @@ Historical rewrite plans and release evidence are retained for traceability.
   and platform-clock compile probes.
   `release/checklists/post-v0.15.0-quality-closeout.md` records the final
   post-release quality-series closeout and maintenance conclusion.
+  `release/checklists/post-v0.15.0-next-design-readiness.md` records the
+  docs-only readiness decision for starting public diagnostics design.
 - `release/evidence/verification_report.md` - local and CI verification
   history.
 - `release/evidence/performance_report.md` - performance procedure and release
@@ -191,6 +193,9 @@ without adding mandatory static-analysis CI or changing the stable ABI.
 The post-`v0.15.0` quality series is now closed at branch coverage `73.91%`;
 future coverage work is reserved for concrete regressions, oracle-backed cases,
 public-behavior invariants, or separate design decisions.
+The next design-readiness audit recommends public diagnostics as the first
+`0.16.0` design topic while keeping implementation, ABI expansion, wrappers,
+package recipes, and release actions deferred.
 The follow-up random shrinker MVP adds local deterministic shrink commands for
 seed/sample materialization without changing random corpus semantics or writing
 generated fixtures automatically.
@@ -215,6 +220,8 @@ gate. The previous v1 gallery provenance remains available through the
 - `design/0.3.0_priorities.md` - design-only `0.3.0` priority ordering.
 - `design/0.3.0_readiness.md` - pre-`0.3.0` readiness decisions after the
   final planned `0.2.x` stabilization release.
+- `design/0.16.0_readiness.md` - post-`v0.15.0` readiness decision for the
+  next design line, recommending public diagnostics first.
 - `design/0.3.0_release_decision.md` - accepted hardening-release scope for
   `0.3.0`.
 - `design/0.3.0_closeout_checklist.md` - engineering-hardening closeout
