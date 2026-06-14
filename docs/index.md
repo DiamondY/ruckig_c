@@ -144,6 +144,8 @@ Historical rewrite plans and release evidence are retained for traceability.
   `release/checklists/0.16.0-alpha.5.md` records the tracking public
   diagnostics getter ABI expansion for tracking and tracking sequence
   continuation state.
+  `release/checklists/0.16.0-readiness.md` records readiness evidence for the
+  190-symbol public diagnostics design line without publishing a release.
   `release/checklists/post-v0.15.0-quality-audit.md` records the post-release
   code-quality and test-quality audit slice without changing the stable ABI or
   release state.
@@ -226,6 +228,9 @@ waypoint resume mismatch diagnostics.
 The `0.16.0-alpha.5` implementation adds the two tracking public diagnostics
 getter symbols and raises the expected design-line public symbol count to 190
 without changing version/tag/release state.
+The `0.16.0-readiness` evidence confirms the public diagnostics line is ready
+for a future stable-release decision; it does not bump version metadata, tag a
+release, or stabilize wrappers.
 The failure-oriented shrinker prototype adds local oracle random failure
 shrinking for seed/sample debugging without writing generated fixtures or
 changing library API.

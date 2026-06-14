@@ -3,6 +3,101 @@
 This report records verification runs for the C rewrite. Commands are run from
 the repository root unless noted otherwise.
 
+## 2026-06-14 0.16.0 Public Diagnostics Readiness
+
+This evidence closes the current public diagnostics design-line readiness
+review without publishing `v0.16.0`, changing version metadata, creating a tag
+or release, changing workflows, publishing wrappers, editing package-manager
+recipes, updating `original/ruckig-main`, or touching visualization assets.
+
+Completed public diagnostics slices:
+
+| Slice | Commit | Push CI |
+| --- | --- | --- |
+| Contract freeze | `31ab7cb` | [27487914432](https://github.com/DiamondY/ruckig_c/actions/runs/27487914432), success |
+| Core public diagnostics API | `1e0d224` | [27488502732](https://github.com/DiamondY/ruckig_c/actions/runs/27488502732), success |
+| Interruption and resume state diagnostics | `c91c2df` | [27488882767](https://github.com/DiamondY/ruckig_c/actions/runs/27488882767), success |
+| Tracking public diagnostics getters | `7d85462` | [27489395330](https://github.com/DiamondY/ruckig_c/actions/runs/27489395330), success |
+
+Public ABI delta:
+
+| Baseline or slice | Public symbols |
+| --- | ---: |
+| `v0.15.0` stable baseline | 184 |
+| Alpha.3 core diagnostics additions | +4 |
+| Alpha.5 tracking diagnostics getter additions | +2 |
+| Expected `0.16.0` design-line count after alpha.5 | 190 |
+
+Compatibility policy:
+
+- Existing `ruckig_result_t` numeric values are unchanged.
+- Existing public struct layouts are unchanged.
+- Diagnostics are opt-in through `ruckig_diagnostics_t` and do not alter legacy
+  API behavior.
+- `_with_diagnostics(..., NULL)` preserves the corresponding legacy API
+  behavior.
+- Tracking diagnostics use getter-style accessors instead of adding
+  `_with_diagnostics` variants to each tracking operation.
+- Python and Rust wrappers remain prototype-only smoke targets.
+
+Local readiness commands and results:
+
+```text
+cmake --build --preset windows-clang-ninja
+Result: passed; no work to do after alpha.5.
+
+cmake --build --preset windows-clang-ninja-shared
+Result: passed; no work to do after alpha.5.
+
+cmake --build --preset windows-clang-ninja-oracle
+Result: passed.
+
+cmake --build --preset windows-clang-ninja-performance
+Result: passed.
+
+ctest --test-dir out\build\windows-clang-ninja --output-on-failure
+Result: passed, 69/69.
+
+ctest --test-dir out\build\windows-clang-ninja-shared --output-on-failure
+Result: passed, 69/69.
+
+out\build\windows-clang-ninja-oracle\ruckig_c_oracle_tests.exe
+Result: fixed oracle 92, waypoint section oracle 4.
+
+out\build\windows-clang-ninja-oracle\ruckig_c_oracle_tests.exe --random 100000 --seed 1
+Result: passed.
+
+out\build\windows-clang-ninja-oracle\ruckig_c_oracle_tests.exe --random 100000 --seed 2
+Result: passed.
+
+out\build\windows-clang-ninja-oracle\ruckig_c_oracle_tests.exe --random 100000 --seed 41
+Result: passed.
+
+out\build\windows-clang-ninja-oracle\ruckig_c_oracle_tests.exe --random-per-dof 100000 --seed 1
+Result: passed.
+
+out\build\windows-clang-ninja-performance\ruckig_c_performance_benchmark.exe --samples 10000 --seed 1 --enforce-threshold
+Result: passed; average ratio 1.29332 <= 1.5 threshold.
+
+out\build\windows-clang-ninja-performance\ruckig_c_performance_benchmark.exe --samples 10000 --seed 1 --waypoints
+Result: passed; alpha C-only waypoint corpus.
+
+cmake --build out\build\windows-clang-ninja-shared --target ruckig_c_verify_public_symbols
+Result: passed.
+
+cmake --build out\build\windows-clang-ninja-shared --target ruckig_c_compare_public_exported_symbols
+Result: passed; 190 approved/current public symbols, 0 missing public symbols, 0 unapproved exported symbols.
+
+cargo test --manifest-path bindings\rust\Cargo.toml
+Result: passed, 16 tests.
+
+cargo test --manifest-path bindings\rust\Cargo.toml --examples
+Result: passed.
+
+$env:RUCKIG_C_SHARED_LIBRARY='E:\Yww\DownLoad\source\ruckig_c\out\build\windows-clang-ninja-shared\ruckig_c.dll'; python bindings\python_prototype\test_prototype.py
+Result: passed, 24 tests.
+```
+
 ## 2026-06-14 Post-v0.15.0 Quality Series Closeout
 
 This evidence closes the post-`v0.15.0` quality series on top of the stable

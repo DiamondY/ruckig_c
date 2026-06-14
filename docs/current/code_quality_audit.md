@@ -11,6 +11,23 @@ Current `main` remains on `0.15.0` release evidence after publishing
 `v0.15.0`. The stable public C ABI baseline is the 184-symbol continuation API
 surface reviewed during `0.15.0-readiness` and stabilized in `v0.15.0`.
 
+The `0.16.0` public diagnostics design line is now readiness-reviewed as a
+separate opt-in API expansion. It does not change the shipped `v0.15.0`
+release, version metadata, release/tag state, workflows, package-manager
+policy, wrapper publication status, upstream baseline, or visualization
+assets. The design-line public symbol count is 190 after alpha.3 and alpha.5;
+the stable release baseline remains 184 until a future explicit version bump.
+
+Quality impact of the diagnostics line:
+
+| Area | Evidence |
+| --- | --- |
+| Legacy behavior | Existing validate/calculate/update APIs route through shared implementations and keep return-code compatibility. |
+| Public diagnostics | `ruckig_diagnostics_t` is caller-owned, initialized with `ruckig_diagnostics_init`, and uses `struct_size` for future extension. |
+| Tracking boundary | Tracking uses generic getter-style public diagnostics rather than adding `_with_diagnostics` variants to every tracking operation. |
+| Private detail boundary | Solver branches, waypoint queues, tracking candidate order, scoring internals, optimizer phases, and random seed/sample tooling remain private. |
+| Verification | Alpha.6 readiness gates pass normal/shared CTest, oracle fixed/random, performance, ABI/export, Rust, and Python prototype smoke evidence. |
+
 Local `0.15.0` implementation coverage, filtered to implementation sources and
 excluding generated, test, example, binding, and output paths:
 

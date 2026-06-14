@@ -54,6 +54,10 @@ publication status, upstream baseline, or visualization assets.
   `ruckig_tracking_sequence_continuation_get_last_diagnostics`, keeps the
   existing specialized tracking diagnostics getter unchanged, and exposes only
   stable coarse tracking/continuation state.
+- `0.16.0-readiness` records release-readiness evidence for the public
+  diagnostics design line but does not publish `v0.16.0`. Stable release/tag,
+  version bump, wrapper stabilization, package recipes, tracking failure
+  shrinking, and solver long-tail coverage remain separate future decisions.
 
 ## 0.15.0 Stable Release Line
 
@@ -283,6 +287,10 @@ design work does not change that stable release baseline.
 - `0.16.0-alpha.5` is implemented locally as the tracking public diagnostics
   getter slice. It adds the two generic tracking/continuation getter symbols
   and raises the expected public symbol count to 190.
+- `0.16.0-readiness` is implemented locally as docs/evidence closeout for the
+  public diagnostics line. It records the 190-symbol design-line count, normal
+  and shared CTest, oracle fixed/random, performance, ABI/export, Rust, and
+  Python prototype smoke gates while deferring a stable `v0.16.0` release.
 - `post-v0.15.0-failure-shrinker-prototype` is implemented locally as a
   test/tooling-only follow-up. It adds oracle random and oracle per-DoF random
   failure-preserving shrink commands that require the original seed/sample to

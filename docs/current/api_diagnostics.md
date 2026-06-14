@@ -108,7 +108,7 @@ cycle.
 Disabled DoFs keep their current state with constant acceleration behavior and
 do not contribute an independent minimum duration.
 
-## Future Public Diagnostics Design
+## Public Diagnostics Design Line
 
 The core public diagnostics API is now available on the `0.16.0` design line.
 It is opt-in and leaves the legacy entry points unchanged:
@@ -160,6 +160,8 @@ and `0.16.0-alpha.3` implements the core validate/calculate/update API:
   `ruckig_tracking_get_last_public_diagnostics` and
   `ruckig_tracking_sequence_continuation_get_last_diagnostics`. The expected
   public symbol count is now 190.
+- `0.16.0-readiness` records local readiness evidence for the 190-symbol
+  design-line ABI without publishing `v0.16.0` or changing version metadata.
 - Tracking and continuation diagnostics use getter-style accessors instead of
   adding `_with_diagnostics` variants to every tracking operation. The generic
   getters map only stable coarse status classes: success, budget/interruption,

@@ -43,10 +43,12 @@ Added coverage:
 | State/resume diagnostics | Covers no-waypoint interruption, waypoint interruption, waypoint resume identity mismatch, limit/per-section/enabled-DoF resume mutations, and failed diagnostics preserving later resume state. |
 | Tracking getter diagnostics | Adds `--tracking-public-diagnostics` and CTest `ruckig_c_tracking_public_diagnostics`, covering getter argument validation, too-small `struct_size`, Fast/Optimized success, tracking failure state, continuation empty/interrupted/complete/reset state, and failed resume preserving continuation diagnostics. |
 | Boundary | Alpha.5 raises the expected public symbol count to 190 and does not expose solver profile branches, candidate ordering, waypoint queue internals, tracking score internals, optimizer phases, or random seed/sample state. |
+| Readiness | `0.16.0-readiness` reruns normal/shared full CTest, fixed and random oracle gates, performance, ABI/export, Rust wrapper smoke, and Python prototype smoke without publishing a release. |
 
 The local checklists are `docs/release/checklists/0.16.0-alpha.3.md` and
 `docs/release/checklists/0.16.0-alpha.4.md` and
-`docs/release/checklists/0.16.0-alpha.5.md`.
+`docs/release/checklists/0.16.0-alpha.5.md`. Readiness evidence is recorded in
+`docs/release/checklists/0.16.0-readiness.md`.
 
 ## 0.15.0-alpha.1 Interrupt Post-Release Quality Baseline
 
