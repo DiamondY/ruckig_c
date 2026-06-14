@@ -1122,6 +1122,33 @@ upstream baseline change, or visualization asset change is part of this slice.
 The local checklist is
 `docs/release/checklists/post-v0.15.0-portability-static-audit.md`.
 
+## Post-v0.15.0 Quality Closeout
+
+The `post-v0.15.0-quality-closeout` slice closes the coverage-driven
+post-release quality series. It records the final baseline and keeps future
+coverage work tied to high-value behavior rather than percentage targets.
+
+Final coverage-bearing artifact:
+`out/coverage/post-v0.15.0-residual-branch-coverage/coverage-summary.txt`.
+
+| Metric | Total | Missed | Coverage |
+| --- | ---: | ---: | ---: |
+| Regions | 7939 | 758 | 90.45% |
+| Functions | 472 | 30 | 93.64% |
+| Lines | 8590 | 906 | 89.45% |
+| Branches | 4591 | 1198 | 73.91% |
+
+The closeout conclusion is that the major post-`v0.15.0` risk areas now have
+appropriate evidence: state-machine boundaries, solver branch families,
+solver-adjacent brake/lower-order paths, random replay/materialization,
+pass-preserving shrink tooling, external-review hardening, residual public API
+boundaries, ABI/export checks, and platform-clock compile probes.
+
+Remaining low-coverage branches should be addressed only when they are backed
+by public behavior, oracle comparison, or a concrete regression. The local
+checklist is
+`docs/release/checklists/post-v0.15.0-quality-closeout.md`.
+
 ## Original Test Mapping
 
 Original source: `original/ruckig-main/test/test_target.cpp`.

@@ -3,6 +3,22 @@
 This document records reproducible performance runs for the pure C rewrite
 against the frozen C++ oracle under `original/ruckig-main`.
 
+## 2026-06-14 Post-v0.15.0 Quality Closeout Performance Evidence
+
+The post-`v0.15.0` quality closeout does not introduce a new performance
+baseline. It references the existing performance evidence from the recent
+quality series:
+
+| Slice | Evidence |
+| --- | --- |
+| `post-v0.15.0-solver-branch-coverage` | Local quasi-release performance gates passed before `c934265`; ordinary push CI run `27460225445` concluded success. |
+| `post-v0.15.0-solver-adjacent-branch-coverage` | Local performance gates passed before `8a0e82c`; ordinary push CI run `27469013933` concluded success. |
+| `post-v0.15.0-review-followup-quality-hardening` | Local no-waypoint performance ratio `1.03447` was below the `1.5` threshold; waypoint C-only alpha corpus passed; ordinary push CI run `27472932035` concluded success. |
+| `post-v0.15.0-portability-static-audit` | Ordinary push CI run `27475649359` concluded success, including the Linux Clang performance job. |
+
+No package, release, tag, workflow, or performance-threshold policy change is
+made by the quality closeout.
+
 The benchmark measures `ruckig_calculate` after all C handles, inputs, and
 trajectories have been created. The C++ oracle measurement uses the equivalent
 `Ruckig::calculate` call on the same generated corpus. Lifecycle allocation cost

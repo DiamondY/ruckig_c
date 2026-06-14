@@ -159,6 +159,8 @@ Historical rewrite plans and release evidence are retained for traceability.
   `release/checklists/post-v0.15.0-portability-static-audit.md` records the
   evidence-only portability and static-audit slice for ABI/export verification
   and platform-clock compile probes.
+  `release/checklists/post-v0.15.0-quality-closeout.md` records the final
+  post-release quality-series closeout and maintenance conclusion.
 - `release/evidence/verification_report.md` - local and CI verification
   history.
 - `release/evidence/performance_report.md` - performance procedure and release
@@ -186,6 +188,9 @@ without changing the stable ABI or release state.
 The latest portability/static audit records normal/shared CTest, Windows
 ABI/export allowlist verification, and corrected platform-clock compile probes
 without adding mandatory static-analysis CI or changing the stable ABI.
+The post-`v0.15.0` quality series is now closed at branch coverage `73.91%`;
+future coverage work is reserved for concrete regressions, oracle-backed cases,
+public-behavior invariants, or separate design decisions.
 The follow-up random shrinker MVP adds local deterministic shrink commands for
 seed/sample materialization without changing random corpus semantics or writing
 generated fixtures automatically.

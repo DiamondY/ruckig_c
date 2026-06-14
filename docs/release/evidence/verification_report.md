@@ -3,6 +3,62 @@
 This report records verification runs for the C rewrite. Commands are run from
 the repository root unless noted otherwise.
 
+## 2026-06-14 Post-v0.15.0 Quality Series Closeout
+
+This evidence closes the post-`v0.15.0` quality series on top of the stable
+184-symbol public C ABI baseline. It does not start `0.16.0-design`, change
+version metadata, create a tag or release, publish wrappers, edit workflows,
+change ABI allowlists, update `original/ruckig-main`, or touch visualization
+assets.
+
+Completed post-release quality slices:
+
+| Slice | Commit | Push CI |
+| --- | --- | --- |
+| Quality audit hardening | `39379c2` | [27455611641](https://github.com/DiamondY/ruckig_c/actions/runs/27455611641), success |
+| State-machine branch coverage | `e99cad3` | [27458866923](https://github.com/DiamondY/ruckig_c/actions/runs/27458866923), success |
+| Solver branch coverage and skeleton refactor | `c934265` | [27460225445](https://github.com/DiamondY/ruckig_c/actions/runs/27460225445), success |
+| Solver-adjacent branch coverage | `8a0e82c` | [27469013933](https://github.com/DiamondY/ruckig_c/actions/runs/27469013933), success |
+| Random repro materialization | `09d4a4a` | [27470431431](https://github.com/DiamondY/ruckig_c/actions/runs/27470431431), success |
+| External review follow-up hardening | `a57b5b7` | [27472932035](https://github.com/DiamondY/ruckig_c/actions/runs/27472932035), success |
+| Quality evidence refresh | `b230fe9` | [27474149156](https://github.com/DiamondY/ruckig_c/actions/runs/27474149156), success |
+| Random shrinker MVP | `90d2030` | [27474682623](https://github.com/DiamondY/ruckig_c/actions/runs/27474682623), success |
+| Residual branch coverage | `1b869b4` | [27475165353](https://github.com/DiamondY/ruckig_c/actions/runs/27475165353), success |
+| Portability/static audit | `f00c0e7` | [27475649359](https://github.com/DiamondY/ruckig_c/actions/runs/27475649359), success |
+
+Final coverage-bearing artifact:
+`out/coverage/post-v0.15.0-residual-branch-coverage/coverage-summary.txt`.
+
+| Metric | Total | Missed | Coverage |
+| --- | ---: | ---: | ---: |
+| Regions | 7939 | 758 | 90.45% |
+| Functions | 472 | 30 | 93.64% |
+| Lines | 8590 | 906 | 89.45% |
+| Branches | 4591 | 1198 | 73.91% |
+
+Closeout local verification:
+
+```text
+cmake --build --preset windows-clang-ninja
+Result: passed.
+
+ctest --test-dir out\build\windows-clang-ninja --output-on-failure -R "ruckig_c_property_invariants|ruckig_c_state_machine_branch_coverage|ruckig_c_solver_branch_coverage|ruckig_c_roots_numeric_audit|ruckig_c_allocation_audit"
+Result: passed, 5/5.
+```
+
+Boundary evidence:
+
+```text
+git diff -- include/ruckig_c/ruckig.h docs/abi/public-symbols.txt docs/abi/public-symbol-exceptions.txt docs/abi/exceptions.md .github/workflows/ci.yml
+Result: clean.
+
+git diff -- original/ruckig-main docs/assets/visualization
+Result: clean.
+
+git diff --check
+Result: passed; only expected CRLF normalization warnings were reported.
+```
+
 ## 2026-06-07 Windows 0.5.0 Release-Candidate Verification
 
 Environment:

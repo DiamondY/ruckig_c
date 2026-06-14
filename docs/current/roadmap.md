@@ -214,6 +214,12 @@ ABI baseline accepted during the 0.15 design line and does not start
   paths without changing public ABI, public header, version metadata, workflow,
   tag/release state, upstream baseline, wrapper publication status, or
   visualization assets.
+- `post-v0.15.0-quality-closeout` is implemented locally as a docs/evidence
+  closeout for the full post-release quality series. It records the final
+  coverage-bearing baseline at branch coverage `73.91%`, confirms the recent
+  quality-slice push CI runs, and states that future quality work should be
+  regression-, oracle-, public-behavior-, or design-decision-driven rather than
+  percentage-driven.
 - Keep the 184-symbol `v0.15.0` public C ABI baseline unless a later separate
   public API decision is accepted.
 - This quality audit does not start `0.16.0-design`, change version metadata,

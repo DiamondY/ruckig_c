@@ -289,6 +289,32 @@ does not perform broad C89-to-C99 declaration-style rewrites.
 The local checklist is
 `docs/release/checklists/post-v0.15.0-portability-static-audit.md`.
 
+## Quality Series Closeout
+
+The `post-v0.15.0-quality-closeout` slice closes the post-release quality
+series as a maintenance phase. It adds no production code and keeps the
+`v0.15.0` 184-symbol public C ABI baseline unchanged.
+
+Final coverage-bearing baseline:
+
+| Metric | Total | Missed | Coverage |
+| --- | ---: | ---: | ---: |
+| Regions | 7939 | 758 | 90.45% |
+| Functions | 472 | 30 | 93.64% |
+| Lines | 8590 | 906 | 89.45% |
+| Branches | 4591 | 1198 | 73.91% |
+
+The closed quality series covers state-machine branch tests, solver and
+solver-adjacent fixed cases, random replay/export, pass-preserving shrink
+tooling, external-review hardening, residual public-boundary coverage, and
+portability/static evidence. Future quality work should start from a concrete
+regression, an oracle-backed solver case, a public-behavior invariant, or a
+separate design decision. Coverage percentage alone is no longer a sufficient
+reason to add tests.
+
+The local checklist is
+`docs/release/checklists/post-v0.15.0-quality-closeout.md`.
+
 ## Risk Map
 
 | Area | Risk | Current protection | Quality-audit action |
