@@ -154,6 +154,8 @@ Historical rewrite plans and release evidence are retained for traceability.
   tracking failure shrinker tooling slice.
   `release/checklists/0.17.0-design-wrapper-stabilization-readiness.md`
   records the docs-only wrapper stabilization readiness decision.
+  `release/checklists/post-v0.16.0-oracle-backed-long-tail-coverage.md`
+  records the docs-only long-tail coverage triage decision.
   `release/checklists/post-v0.15.0-quality-audit.md` records the post-release
   code-quality and test-quality audit slice without changing the stable ABI or
   release state.
@@ -246,6 +248,9 @@ changing library API.
 The follow-up random shrinker MVP adds local deterministic shrink commands for
 seed/sample materialization without changing random corpus semantics or writing
 generated fixtures automatically.
+The post-`v0.16.0` long-tail coverage triage adds no tests and keeps future
+solver branch work limited to oracle-backed, public-behavior-backed, or stable
+invariant cases.
 `v0.14.0` stabilizes the API-neutral interrupt surfaces without expanding the
 172-symbol public C ABI. `v0.13.0` stabilizes post-`v0.12.0` waypoint
 true-resume stress coverage and the private waypoint optimizer engine rewrite.

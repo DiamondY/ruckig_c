@@ -329,6 +329,29 @@ target is met. Remaining `velocity_third_step2.c` and
 slice deliberately avoids fragile white-box probes that would assert internal
 polynomial alternatives without public or oracle evidence.
 
+## Post-v0.16.0 Long-Tail Coverage Triage
+
+The `post-v0.16.0-oracle-backed-long-tail-coverage` slice performs a docs-only
+triage of the remaining solver and trajectory long-tail gaps after the stable
+`v0.16.0` release. It adds no tests because no compact, high-value
+oracle-backed or public-behavior-backed case was identified.
+
+The triage uses
+`out/coverage/post-v0.15.0-residual-branch-coverage/coverage-summary.txt` as
+the current reference. Remaining candidates are treated as follows:
+
+| File | Decision |
+| --- | --- |
+| `velocity_third_step2.c` | Still the lowest solver branch coverage candidate, but remaining misses are analytical timing alternatives that need oracle-backed evidence or stable public timing invariants. |
+| `position_second_step2.c` | Valid future candidate, but no new compact public case was selected. |
+| `roots.c` | Roots numeric audit already covers the review-followup numerical risks. |
+| `profile.c` | Profile context smoke and solver/oracle gates cover stable behavior; remaining gaps are private validation combinations. |
+| `trajectory.c` | Public boundary coverage was already added; remaining misses are defensive or hard-to-reach internal states. |
+
+Future long-tail coverage must be motivated by a concrete oracle mismatch,
+public-behavior regression, or stable invariant. Coverage percentage alone is
+not accepted as a reason to add white-box probes.
+
 ## Portability And Static Audit Slice
 
 The `post-v0.15.0-portability-static-audit` slice records portability and

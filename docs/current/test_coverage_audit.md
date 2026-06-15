@@ -1181,6 +1181,31 @@ Touched-file movement:
 The local checklist is
 `docs/release/checklists/post-v0.15.0-residual-branch-coverage.md`.
 
+## Post-v0.16.0 Oracle-Backed Long-Tail Coverage Triage
+
+The `post-v0.16.0-oracle-backed-long-tail-coverage` slice reviews the remaining
+long-tail candidates and adds no new tests. The decision is intentional:
+coverage percentage is no longer a primary target after the post-`v0.15.0`
+quality series and stable `v0.16.0` release.
+
+Current triage from
+`out/coverage/post-v0.15.0-residual-branch-coverage/coverage-summary.txt`:
+
+| Candidate | Branch coverage | Decision |
+| --- | ---: | --- |
+| `velocity_third_step2.c` | 60.87% | Defer until an oracle mismatch or stable public timing invariant is identified. |
+| `position_second_step2.c` | 68.75% | Defer for the same reason; do not force private analytical branches. |
+| `roots.c` | 83.85% | Covered by `ruckig_c_roots_numeric_audit` for the review-followup risks. |
+| `profile.c` | 80.16% | Covered by profile context smoke and solver/oracle gates for stable entry points. |
+| `trajectory.c` | 82.00% | Public boundary cases were already added by the residual slice. |
+
+Future cases must be oracle-backed, public-behavior-backed, or tied to a clear
+stable invariant. Defensive/platform/tiny-denominator branches remain better
+handled by portability/static evidence or code review than by fragile probes.
+
+The local checklist is
+`docs/release/checklists/post-v0.16.0-oracle-backed-long-tail-coverage.md`.
+
 ## Post-v0.15.0 Portability And Static Audit
 
 The `post-v0.15.0-portability-static-audit` slice is not a coverage-growth

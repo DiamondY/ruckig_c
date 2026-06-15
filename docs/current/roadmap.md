@@ -69,8 +69,12 @@ or default heavy-random CI policy.
 - `post-v0.16.0-tooling-maintenance` extends failure-oriented shrinker tooling
   to tracking random audit failures and improves shrinker output guidance
   without changing public ABI or default CI policy.
-- Wrapper stabilization, package recipes, generated fixture auto-write, and
-  solver long-tail coverage remain separate follow-up decisions.
+- Wrapper stabilization, package recipes, generated fixture auto-write, and any
+  future solver long-tail coverage additions remain separate follow-up
+  decisions.
+- `post-v0.16.0-oracle-backed-long-tail-coverage` records a docs-only triage
+  of remaining solver long-tail branch gaps. It adds no tests because no
+  compact oracle-backed or public-behavior-backed case was selected.
 
 ## 0.17.0 Wrapper Stabilization Readiness
 
