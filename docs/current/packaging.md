@@ -234,6 +234,12 @@ On Unix systems with `pkg-config`, the `ruckig_c_shared_install_consumer` CTest
 configures a temporary `BUILD_SHARED_LIBS=ON` build, installs it, then verifies
 both installed CMake and pkg-config consumers against that shared install tree.
 
+The post-`v0.16.0` consumer refresh keeps these install paths unchanged while
+upgrading the CMake and pkg-config smoke sources to compile and run minimal
+public diagnostics usage: an invalid limit reports a stable diagnostics code,
+and the restored valid path succeeds through
+`ruckig_calculate_with_diagnostics`.
+
 ## Frozen Packaging Scope
 
 The active maintenance scope keeps the existing installed CMake package,

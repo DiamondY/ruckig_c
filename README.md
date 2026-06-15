@@ -398,7 +398,8 @@ manually linking a static Windows build without CMake, define
 
 Additional consumer and packaging notes are collected in `docs/current/packaging.md`,
 including installed CMake consumers, pkg-config consumers, Windows manual
-static linking, DLL consumers, and shared install-tree verification.
+static linking, DLL consumers, shared install-tree verification, and
+post-`v0.16.0` consumer smoke coverage for public diagnostics.
 Patch-release API/ABI review notes, including exported-symbol snapshot
 generation, are collected in `docs/current/api_compatibility.md`.
 

@@ -533,6 +533,23 @@ Added wrapper smoke:
 The local checklist is
 `docs/release/checklists/post-v0.16.0-wrapper-public-diagnostics-prototype-smoke.md`.
 
+## Post-v0.16.0 Consumer Install Diagnostics Smoke
+
+The `post-v0.16.0-consumer-install-and-docs-refresh` slice upgrades installed
+CMake and pkg-config consumer smoke sources so the install consumption paths
+compile and run minimal public diagnostics usage.
+
+Added consumer smoke:
+
+| Area | Evidence |
+| --- | --- |
+| Installed CMake consumer | Validates an invalid-limit diagnostics path and a successful `ruckig_calculate_with_diagnostics` path through `test/consumer/cmake/main.c`. |
+| pkg-config consumer | Mirrors the same public diagnostics usage through `test/consumer/pkg_config/main.c`; availability depends on the configured platform/toolchain. |
+| Boundary | Install exports, package recipes, public ABI, and workflow behavior remain unchanged. |
+
+The local checklist is
+`docs/release/checklists/post-v0.16.0-consumer-install-and-docs-refresh.md`.
+
 ## 0.14.0-alpha.1 Interrupt Boundary API-Neutral Audit
 
 `0.14.0-alpha.1` adds a focused local audit for the existing

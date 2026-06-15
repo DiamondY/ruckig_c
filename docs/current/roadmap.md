@@ -79,6 +79,10 @@ or default heavy-random CI policy.
   Python/Rust prototype smoke coverage for the stable `v0.16.0` public
   diagnostics C API without changing public ABI or making wrapper publication
   claims.
+- `post-v0.16.0-consumer-install-and-docs-refresh` upgrades installed CMake
+  and pkg-config consumer smoke sources to compile and run minimal public
+  diagnostics usage without changing install exports or package-manager
+  policy.
 
 ## 0.17.0 Wrapper Stabilization Readiness
 

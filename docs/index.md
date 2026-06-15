@@ -159,6 +159,9 @@ Historical rewrite plans and release evidence are retained for traceability.
   `release/checklists/post-v0.16.0-wrapper-public-diagnostics-prototype-smoke.md`
   records Python/Rust prototype smoke evidence for the stable `v0.16.0`
   public diagnostics C API without wrapper publication.
+  `release/checklists/post-v0.16.0-consumer-install-and-docs-refresh.md`
+  records installed CMake/pkg-config consumer smoke coverage for minimal
+  public diagnostics usage.
   `release/checklists/post-v0.15.0-quality-audit.md` records the post-release
   code-quality and test-quality audit slice without changing the stable ABI or
   release state.
@@ -257,6 +260,9 @@ invariant cases.
 The post-`v0.16.0` wrapper public diagnostics smoke slice maps the stable
 diagnostics API into Python/Rust prototypes while keeping both wrappers
 prototype-only.
+The post-`v0.16.0` consumer install refresh verifies the same diagnostics API
+through installed CMake and pkg-config consumer smoke sources without adding
+package-manager recipes.
 `v0.14.0` stabilizes the API-neutral interrupt surfaces without expanding the
 172-symbol public C ABI. `v0.13.0` stabilizes post-`v0.12.0` waypoint
 true-resume stress coverage and the private waypoint optimizer engine rewrite.

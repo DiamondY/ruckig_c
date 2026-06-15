@@ -150,6 +150,9 @@ treated as non-diagnostic payload.
 `examples/c/24_public_diagnostics.c` shows the minimum C usage pattern: initialize
 the record, run a failing validation path, read the stable fields, then rerun a
 successful calculate path that reports `RUCKIG_DIAGNOSTIC_NONE`.
+The installed CMake and pkg-config consumer smoke sources also compile and run
+this minimal pattern so downstream install paths exercise the stable
+diagnostics declarations and exported symbols.
 
 The `0.16.0` release promotes the public diagnostics design line to stable C
 ABI:
