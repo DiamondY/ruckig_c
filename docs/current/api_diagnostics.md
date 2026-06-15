@@ -137,6 +137,20 @@ Callers that pass a non-NULL diagnostics pointer must initialize it with
 written only within the caller-declared stable prefix, leaving reserved fields
 for future ABI-compatible expansion.
 
+The stable fields are intentionally coarse. `result` mirrors the public result
+returned by the operation, `scope` identifies the public subsystem that can
+explain the condition, and `code` identifies the stable failure class. `dof`
+and `section` are populated only when the condition has a meaningful public
+location. `expected_count` and `actual_count` are used for DoF, waypoint, or
+capacity mismatches. `value` and `limit` are used for numeric validation
+failures such as non-finite state values or invalid limits. When `code` is
+`RUCKIG_DIAGNOSTIC_NONE`, location, count, value, and limit fields should be
+treated as non-diagnostic payload.
+
+`examples/c/24_public_diagnostics.c` shows the minimum C usage pattern: initialize
+the record, run a failing validation path, read the stable fields, then rerun a
+successful calculate path that reports `RUCKIG_DIAGNOSTIC_NONE`.
+
 The `0.16.0` release promotes the public diagnostics design line to stable C
 ABI:
 

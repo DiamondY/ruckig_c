@@ -160,7 +160,8 @@ Implemented and covered by fixed C/oracle tests plus deterministic random oracle
   closeout.
 - C examples for position, offline position, online update, per-DoF overrides,
   velocity, stop, minimum duration, waypoints, per-section minimum duration,
-  tracking Fast-mode scenarios, and Optimized tracking scenarios.
+  tracking Fast-mode scenarios, Optimized tracking scenarios, sequence
+  continuation, and public diagnostics.
 
 Release-readiness evidence is tracked under `docs/release/`; see
 `docs/index.md` for the organized documentation map. `v0.16.0` is the current
@@ -184,6 +185,28 @@ the new interruptible/resume sequence API uses a continuation handle and
 exposes only complete sequence-step prefixes. Python and Rust wrappers remain
 prototype smoke evidence only; no wheel, crate, package-manager recipe, or
 stable wrapper API is claimed.
+
+Minimal public diagnostics usage initializes a caller-owned record, calls the
+diagnostics variant, and reads stable coarse fields:
+
+```c
+ruckig_diagnostics_t diagnostics;
+ruckig_diagnostics_init(&diagnostics);
+ruckig_result_t result = ruckig_calculate_with_diagnostics(
+    otg, input, trajectory, &diagnostics);
+
+printf("result=%d scope=%d code=%d dof=%zu value=%g limit=%g\n",
+    (int)result,
+    (int)diagnostics.scope,
+    (int)diagnostics.code,
+    diagnostics.dof,
+    diagnostics.value,
+    diagnostics.limit);
+```
+
+Passing `NULL` diagnostics to a `_with_diagnostics` API is defined to behave
+like the corresponding legacy API. `examples/c/24_public_diagnostics.c`
+contains a complete validation-failure and successful-calculate example.
 `v0.10.0` adopts the current gallery as 30 `1400x900` Matplotlib `Agg` and
 NumPy PNG assets under `docs/assets/visualization/`. The gallery covers local
 C ABI equivalents of original examples `01-10` and `14-16`, plus tracking

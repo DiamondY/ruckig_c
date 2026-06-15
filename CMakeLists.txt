@@ -466,6 +466,11 @@ if(BUILD_RUCKIG_C_EXAMPLES)
   add_test(NAME example_ruckig_c_23_tracking_sequence_continuation COMMAND example-ruckig-c-23-tracking-sequence-continuation)
   add_test(NAME ruckig_c_examples_tracking_sequence_continuation COMMAND example-ruckig-c-23-tracking-sequence-continuation)
 
+  add_executable(example-ruckig-c-24-public-diagnostics examples/c/24_public_diagnostics.c)
+  target_link_libraries(example-ruckig-c-24-public-diagnostics PRIVATE ruckig_c)
+  add_test(NAME example_ruckig_c_24_public_diagnostics COMMAND example-ruckig-c-24-public-diagnostics)
+  add_test(NAME ruckig_c_examples_public_diagnostics COMMAND example-ruckig-c-24-public-diagnostics)
+
   add_custom_target(ruckig_c_examples
     DEPENDS
       example-ruckig-c-00-minimal-offline
@@ -492,6 +497,7 @@ if(BUILD_RUCKIG_C_EXAMPLES)
       example-ruckig-c-21-no-waypoint-interrupt-boundary
       example-ruckig-c-22-tracking-interrupt-boundary
       example-ruckig-c-23-tracking-sequence-continuation
+      example-ruckig-c-24-public-diagnostics
   )
 endif()
 

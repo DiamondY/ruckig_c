@@ -63,8 +63,11 @@ or default heavy-random CI policy.
   at 190, publishes the annotated tag and GitHub Release, and records stable
   release evidence in `docs/release/checklists/0.16.0.md`.
 - `0.16.1` is reserved for emergency `v0.16.0` patch fixes only.
+- `post-v0.16.0-docs-and-examples-polish` adds a minimal public diagnostics C
+  example and updates current stable documentation without changing public ABI
+  or release state.
 - Wrapper stabilization, package recipes, tracking failure shrinking, and
-  solver long-tail coverage remain separate future decisions.
+  solver long-tail coverage remain separate follow-up decisions.
 
 ## 0.15.0 Stable Release Line
 

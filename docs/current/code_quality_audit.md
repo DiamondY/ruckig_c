@@ -7,14 +7,14 @@ release, publish wrappers, or change package-manager scope.
 
 ## Baseline
 
-Current `main` is preparing the `v0.16.0` stable public diagnostics release.
-The stable public C ABI baseline moves from the `v0.15.0` 184-symbol
-continuation surface to the 190-symbol diagnostics surface reviewed during
-`0.16.0-readiness`.
+Current `main` has published the `v0.16.0` stable public diagnostics release.
+The stable public C ABI baseline has moved from the `v0.15.0` 184-symbol
+continuation surface to the 190-symbol diagnostics surface released at
+`v0.16.0`.
 
-The `0.16.0` release candidate stabilizes the opt-in public diagnostics API
-without adding further quality/coverage scope. It changes version metadata and
-ABI artifact paths for the release, but keeps package-manager recipes, wrapper
+The `v0.16.0` stable release stabilizes the opt-in public diagnostics API
+without adding further quality/coverage scope. It changed version metadata and
+ABI artifact paths for the release, but kept package-manager recipes, wrapper
 publication status, upstream baseline, visualization assets, and heavy random
 CI policy unchanged.
 
@@ -28,11 +28,11 @@ Quality impact of the diagnostics line:
 | Private detail boundary | Solver branches, waypoint queues, tracking candidate order, scoring internals, optimizer phases, and random seed/sample tooling remain private. |
 | Verification | `0.16.0-readiness` gates pass normal/shared CTest, oracle fixed/random, performance, ABI/export, Rust, and Python prototype smoke evidence. |
 
-The release candidate does not continue coverage-percentage work. Future
+The stable release does not continue coverage-percentage work. Future
 coverage additions are reserved for concrete regressions, oracle-backed cases,
 or public-behavior-backed cases rather than low-value branch probes.
 
-Release-candidate coverage is recorded at
+Release coverage is recorded at
 `out/coverage/0.16.0/coverage-summary.txt`:
 
 | Metric | Total | Missed | Coverage |

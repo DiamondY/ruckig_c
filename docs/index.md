@@ -148,6 +148,8 @@ Historical rewrite plans and release evidence are retained for traceability.
   190-symbol public diagnostics design line before stable release promotion.
   `release/checklists/0.16.0.md` records the stable public diagnostics release
   closeout.
+  `release/checklists/post-v0.16.0-docs-and-examples-polish.md` records the
+  post-release public diagnostics C example and current-docs polish slice.
   `release/checklists/post-v0.15.0-quality-audit.md` records the post-release
   code-quality and test-quality audit slice without changing the stable ABI or
   release state.
