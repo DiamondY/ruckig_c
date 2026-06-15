@@ -37,6 +37,10 @@ Current alpha coverage:
 - tracking sequence continuation smoke for the `0.15.0-alpha.4` continuation
   handle and the Fast/Optimized interruptible/resume sequence API implemented
   in alpha.5 and alpha.6;
+- prototype public diagnostics smoke for the stable `v0.16.0` C API, including
+  `Diagnostics`, diagnostic scope/code enums, validate/calculate/update
+  diagnostics calls, tracking public diagnostics, and tracking sequence
+  continuation diagnostics;
 - Rust examples for position, offline, velocity, waypoints, per-section
   minimum duration, tracking Fast, tracking Optimized alpha, interrupt smoke,
   and tracking sequence continuation.
@@ -64,3 +68,6 @@ Boundaries:
   publication decision.
 - No stable Rust tracking sequence continuation API commitment before a
   deliberate wrapper publication decision.
+- No stable Rust public diagnostics API commitment before a deliberate wrapper
+  publication decision; diagnostics coverage remains prototype smoke evidence
+  over the stable C ABI.

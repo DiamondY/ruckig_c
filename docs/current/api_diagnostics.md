@@ -183,5 +183,6 @@ ABI:
 Diagnostics remain stable and coarse-grained. They explain public failure
 classes and locations, but do not expose solver profile branches, candidate
 ordering, waypoint queue internals, or random seed/sample tooling state. Python
-and Rust wrappers remain prototype-only until a separate stabilization design
-is accepted.
+and Rust wrappers now include minimal prototype smoke mappings for these
+diagnostics, but remain prototype-only until a separate stabilization design is
+accepted.

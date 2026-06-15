@@ -516,6 +516,23 @@ Added tooling:
 The local checklist is
 `docs/release/checklists/post-v0.16.0-tooling-maintenance.md`.
 
+## Post-v0.16.0 Wrapper Public Diagnostics Prototype Smoke
+
+The `post-v0.16.0-wrapper-public-diagnostics-prototype-smoke` slice extends
+Python and Rust prototype smoke coverage to the stable `v0.16.0` public
+diagnostics C API without changing public ABI or wrapper publication status.
+
+Added wrapper smoke:
+
+| Area | Evidence |
+| --- | --- |
+| Python diagnostics prototype | Covers invalid input diagnostics, successful calculate/update diagnostics, tracking public diagnostics, and tracking sequence continuation diagnostics through `bindings/python_prototype/test_prototype.py`. |
+| Rust diagnostics prototype | Covers the same minimal diagnostics paths through `cargo test --manifest-path bindings\rust\Cargo.toml`. |
+| Boundary | Existing specialized tracking diagnostics wrappers remain unchanged, and the new diagnostics wrappers do not expose solver/profile/candidate/queue internals. |
+
+The local checklist is
+`docs/release/checklists/post-v0.16.0-wrapper-public-diagnostics-prototype-smoke.md`.
+
 ## 0.14.0-alpha.1 Interrupt Boundary API-Neutral Audit
 
 `0.14.0-alpha.1` adds a focused local audit for the existing

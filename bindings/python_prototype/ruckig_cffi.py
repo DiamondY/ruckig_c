@@ -23,6 +23,8 @@ ffi.cdef(
     typedef struct ruckig_tracking_output_sequence ruckig_tracking_output_sequence_t;
     typedef struct ruckig_tracking_sequence_continuation ruckig_tracking_sequence_continuation_t;
     typedef int ruckig_result_t;
+    typedef int ruckig_diagnostic_scope_t;
+    typedef int ruckig_diagnostic_code_t;
     typedef _Bool bool;
 
     typedef struct ruckig_position_extrema {
@@ -55,6 +57,21 @@ ffi.cdef(
         size_t reserved_size[4];
         double reserved_value[4];
     } ruckig_tracking_diagnostics_t;
+
+    typedef struct ruckig_diagnostics {
+        size_t struct_size;
+        ruckig_result_t result;
+        ruckig_diagnostic_scope_t scope;
+        ruckig_diagnostic_code_t code;
+        size_t dof;
+        size_t section;
+        size_t expected_count;
+        size_t actual_count;
+        double value;
+        double limit;
+        size_t reserved_size[8];
+        double reserved_value[8];
+    } ruckig_diagnostics_t;
 
     ruckig_result_t ruckig_create(ruckig_t** otg, size_t dofs, double delta_time);
     ruckig_result_t ruckig_create_with_waypoints(
@@ -95,10 +112,30 @@ ffi.cdef(
         const ruckig_input_t* input,
         ruckig_trajectory_t* trajectory
     );
+    void ruckig_diagnostics_init(ruckig_diagnostics_t* diagnostics);
+    ruckig_result_t ruckig_validate_input_with_diagnostics(
+        const ruckig_t* otg,
+        const ruckig_input_t* input,
+        bool check_current_state_within_limits,
+        bool check_target_state_within_limits,
+        ruckig_diagnostics_t* diagnostics
+    );
+    ruckig_result_t ruckig_calculate_with_diagnostics(
+        ruckig_t* otg,
+        const ruckig_input_t* input,
+        ruckig_trajectory_t* trajectory,
+        ruckig_diagnostics_t* diagnostics
+    );
     ruckig_result_t ruckig_update(
         ruckig_t* otg,
         const ruckig_input_t* input,
         ruckig_output_t* output
+    );
+    ruckig_result_t ruckig_update_with_diagnostics(
+        ruckig_t* otg,
+        const ruckig_input_t* input,
+        ruckig_output_t* output,
+        ruckig_diagnostics_t* diagnostics
     );
     void ruckig_output_pass_to_input(const ruckig_output_t* output, ruckig_input_t* input);
     void ruckig_reset(ruckig_t* otg);
@@ -244,6 +281,10 @@ ffi.cdef(
         const ruckig_tracking_t* tracking,
         ruckig_tracking_diagnostics_t* diagnostics
     );
+    ruckig_result_t ruckig_tracking_get_last_public_diagnostics(
+        const ruckig_tracking_t* tracking,
+        ruckig_diagnostics_t* diagnostics
+    );
     ruckig_result_t ruckig_tracking_update(
         ruckig_tracking_t* tracking,
         const ruckig_target_state_t* target_state,
@@ -327,6 +368,10 @@ ffi.cdef(
     bool ruckig_tracking_sequence_continuation_is_complete(const ruckig_tracking_sequence_continuation_t* continuation);
     size_t ruckig_tracking_sequence_continuation_get_completed_count(const ruckig_tracking_sequence_continuation_t* continuation);
     size_t ruckig_tracking_sequence_continuation_get_target_count(const ruckig_tracking_sequence_continuation_t* continuation);
+    ruckig_result_t ruckig_tracking_sequence_continuation_get_last_diagnostics(
+        const ruckig_tracking_sequence_continuation_t* continuation,
+        ruckig_diagnostics_t* diagnostics
+    );
     """
 )
 
@@ -342,6 +387,34 @@ class Result(enum.IntEnum):
     ERROR_EXECUTION_TIME_CALCULATION = -110
     ERROR_SYNCHRONIZATION_CALCULATION = -111
     ERROR_UNSUPPORTED = -200
+
+
+class DiagnosticScope(enum.IntEnum):
+    NONE = 0
+    INPUT = 1
+    CALCULATION = 2
+    UPDATE = 3
+    WAYPOINT = 4
+    TRACKING = 5
+    TRACKING_SEQUENCE = 6
+
+
+class DiagnosticCode(enum.IntEnum):
+    NONE = 0
+    NULL_ARGUMENT = 1
+    DOF_MISMATCH = 2
+    CAPACITY_MISMATCH = 3
+    INVALID_ENUM = 4
+    NONFINITE_VALUE = 5
+    NEGATIVE_LIMIT = 6
+    ZERO_LIMIT = 7
+    CURRENT_STATE_OUT_OF_LIMITS = 8
+    TARGET_STATE_OUT_OF_LIMITS = 9
+    TRAJECTORY_DURATION = 10
+    SYNCHRONIZATION = 11
+    INTERRUPTED = 12
+    RESUME_IDENTITY_MISMATCH = 13
+    UNSUPPORTED = 14
 
 
 class ControlInterface(enum.IntEnum):
@@ -378,6 +451,21 @@ class TrackingOptimizedStrategy(enum.IntEnum):
     STABLE = 0
     BALANCED = 1
     AGGRESSIVE = 2
+
+
+@dataclass(frozen=True)
+class Diagnostics:
+    result: Result
+    scope: DiagnosticScope
+    code: DiagnosticCode
+    dof: int
+    section: int
+    expected_count: int
+    actual_count: int
+    value: float
+    limit: float
+    reserved_size: tuple[int, int, int, int, int, int, int, int]
+    reserved_value: tuple[float, float, float, float, float, float, float, float]
 
 
 @dataclass(frozen=True)
@@ -524,6 +612,28 @@ def _result(value: int, operation: str) -> Result:
     raise error_type(result, operation)
 
 
+def _new_diagnostics():
+    diagnostics = ffi.new("ruckig_diagnostics_t*")
+    _library().ruckig_diagnostics_init(diagnostics)
+    return diagnostics
+
+
+def _diagnostics_from_raw(diagnostics) -> Diagnostics:
+    return Diagnostics(
+        result=Result(int(diagnostics.result)),
+        scope=DiagnosticScope(int(diagnostics.scope)),
+        code=DiagnosticCode(int(diagnostics.code)),
+        dof=int(diagnostics.dof),
+        section=int(diagnostics.section),
+        expected_count=int(diagnostics.expected_count),
+        actual_count=int(diagnostics.actual_count),
+        value=float(diagnostics.value),
+        limit=float(diagnostics.limit),
+        reserved_size=tuple(int(diagnostics.reserved_size[index]) for index in range(8)),  # type: ignore[arg-type]
+        reserved_value=tuple(float(diagnostics.reserved_value[index]) for index in range(8)),  # type: ignore[arg-type]
+    )
+
+
 def _copy_in(ptr, values: Iterable[float], dofs: int) -> None:
     items = list(values)
     if len(items) != dofs:
@@ -644,11 +754,47 @@ class Ruckig(_Handle):
             "ruckig_calculate",
         )
 
+    def validate_input_with_diagnostics(
+        self,
+        input_: "Input",
+        check_current_state_within_limits: bool = False,
+        check_target_state_within_limits: bool = True,
+    ) -> tuple[Result, Diagnostics]:
+        diagnostics = _new_diagnostics()
+        result = Result(int(_library().ruckig_validate_input_with_diagnostics(
+            self.ptr,
+            input_.ptr,
+            bool(check_current_state_within_limits),
+            bool(check_target_state_within_limits),
+            diagnostics,
+        )))
+        return result, _diagnostics_from_raw(diagnostics)
+
+    def calculate_with_diagnostics(self, input_: "Input", trajectory: "Trajectory") -> tuple[Result, Diagnostics]:
+        diagnostics = _new_diagnostics()
+        result = Result(int(_library().ruckig_calculate_with_diagnostics(
+            self.ptr,
+            input_.ptr,
+            trajectory.ptr,
+            diagnostics,
+        )))
+        return result, _diagnostics_from_raw(diagnostics)
+
     def update(self, input_: "Input", output: "Output") -> Result:
         return _result(
             _library().ruckig_update(self.ptr, input_.ptr, output.ptr),
             "ruckig_update",
         )
+
+    def update_with_diagnostics(self, input_: "Input", output: "Output") -> tuple[Result, Diagnostics]:
+        diagnostics = _new_diagnostics()
+        result = Result(int(_library().ruckig_update_with_diagnostics(
+            self.ptr,
+            input_.ptr,
+            output.ptr,
+            diagnostics,
+        )))
+        return result, _diagnostics_from_raw(diagnostics)
 
     def reset(self) -> None:
         _library().ruckig_reset(self.ptr)
@@ -865,6 +1011,15 @@ class TrackingSequenceContinuation(_Handle):
     def reset(self) -> None:
         _library().ruckig_tracking_sequence_continuation_reset(self.ptr)
 
+    @property
+    def last_diagnostics(self) -> Diagnostics:
+        diagnostics = _new_diagnostics()
+        _result(
+            _library().ruckig_tracking_sequence_continuation_get_last_diagnostics(self.ptr, diagnostics),
+            "ruckig_tracking_sequence_continuation_get_last_diagnostics",
+        )
+        return _diagnostics_from_raw(diagnostics)
+
 
 class Tracking(_Handle):
     _destroy_name = "ruckig_tracking_destroy"
@@ -966,6 +1121,15 @@ class Tracking(_Handle):
             reserved_size=tuple(int(diagnostics.reserved_size[index]) for index in range(4)),  # type: ignore[arg-type]
             reserved_value=tuple(float(diagnostics.reserved_value[index]) for index in range(4)),  # type: ignore[arg-type]
         )
+
+    @property
+    def last_public_diagnostics(self) -> Diagnostics:
+        diagnostics = _new_diagnostics()
+        _result(
+            _library().ruckig_tracking_get_last_public_diagnostics(self.ptr, diagnostics),
+            "ruckig_tracking_get_last_public_diagnostics",
+        )
+        return _diagnostics_from_raw(diagnostics)
 
     def update(self, target_state: TargetState, input_: "Input", output: "Output") -> Result:
         return _result(

@@ -83,11 +83,131 @@ struct TrackingDiagnosticsRaw {
     reserved_value: [f64; 4],
 }
 
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Default)]
+struct DiagnosticsRaw {
+    struct_size: usize,
+    result: i32,
+    scope: i32,
+    code: i32,
+    dof: usize,
+    section: usize,
+    expected_count: usize,
+    actual_count: usize,
+    value: f64,
+    limit: f64,
+    reserved_size: [usize; 8],
+    reserved_value: [f64; 8],
+}
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 #[repr(i32)]
 pub enum RuckigResult {
     Working = 0,
     Finished = 1,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum DiagnosticScope {
+    None,
+    Input,
+    Calculation,
+    Update,
+    Waypoint,
+    Tracking,
+    TrackingSequence,
+    Unknown(i32),
+}
+
+impl DiagnosticScope {
+    fn from_raw(value: i32) -> Self {
+        match value {
+            0 => DiagnosticScope::None,
+            1 => DiagnosticScope::Input,
+            2 => DiagnosticScope::Calculation,
+            3 => DiagnosticScope::Update,
+            4 => DiagnosticScope::Waypoint,
+            5 => DiagnosticScope::Tracking,
+            6 => DiagnosticScope::TrackingSequence,
+            other => DiagnosticScope::Unknown(other),
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum DiagnosticCode {
+    None,
+    NullArgument,
+    DofMismatch,
+    CapacityMismatch,
+    InvalidEnum,
+    NonfiniteValue,
+    NegativeLimit,
+    ZeroLimit,
+    CurrentStateOutOfLimits,
+    TargetStateOutOfLimits,
+    TrajectoryDuration,
+    Synchronization,
+    Interrupted,
+    ResumeIdentityMismatch,
+    Unsupported,
+    Unknown(i32),
+}
+
+impl DiagnosticCode {
+    fn from_raw(value: i32) -> Self {
+        match value {
+            0 => DiagnosticCode::None,
+            1 => DiagnosticCode::NullArgument,
+            2 => DiagnosticCode::DofMismatch,
+            3 => DiagnosticCode::CapacityMismatch,
+            4 => DiagnosticCode::InvalidEnum,
+            5 => DiagnosticCode::NonfiniteValue,
+            6 => DiagnosticCode::NegativeLimit,
+            7 => DiagnosticCode::ZeroLimit,
+            8 => DiagnosticCode::CurrentStateOutOfLimits,
+            9 => DiagnosticCode::TargetStateOutOfLimits,
+            10 => DiagnosticCode::TrajectoryDuration,
+            11 => DiagnosticCode::Synchronization,
+            12 => DiagnosticCode::Interrupted,
+            13 => DiagnosticCode::ResumeIdentityMismatch,
+            14 => DiagnosticCode::Unsupported,
+            other => DiagnosticCode::Unknown(other),
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct Diagnostics {
+    pub result: i32,
+    pub scope: DiagnosticScope,
+    pub code: DiagnosticCode,
+    pub dof: usize,
+    pub section: usize,
+    pub expected_count: usize,
+    pub actual_count: usize,
+    pub value: f64,
+    pub limit: f64,
+    pub reserved_size: [usize; 8],
+    pub reserved_value: [f64; 8],
+}
+
+impl From<DiagnosticsRaw> for Diagnostics {
+    fn from(raw: DiagnosticsRaw) -> Self {
+        Self {
+            result: raw.result,
+            scope: DiagnosticScope::from_raw(raw.scope),
+            code: DiagnosticCode::from_raw(raw.code),
+            dof: raw.dof,
+            section: raw.section,
+            expected_count: raw.expected_count,
+            actual_count: raw.actual_count,
+            value: raw.value,
+            limit: raw.limit,
+            reserved_size: raw.reserved_size,
+            reserved_value: raw.reserved_value,
+        }
+    }
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -285,7 +405,27 @@ unsafe extern "C" {
         input: *const InputRaw,
         trajectory: *mut TrajectoryRaw,
     ) -> i32;
+    fn ruckig_diagnostics_init(diagnostics: *mut DiagnosticsRaw);
+    fn ruckig_validate_input_with_diagnostics(
+        otg: *const RuckigRaw,
+        input: *const InputRaw,
+        check_current_state_within_limits: bool,
+        check_target_state_within_limits: bool,
+        diagnostics: *mut DiagnosticsRaw,
+    ) -> i32;
+    fn ruckig_calculate_with_diagnostics(
+        otg: *mut RuckigRaw,
+        input: *const InputRaw,
+        trajectory: *mut TrajectoryRaw,
+        diagnostics: *mut DiagnosticsRaw,
+    ) -> i32;
     fn ruckig_update(otg: *mut RuckigRaw, input: *const InputRaw, output: *mut OutputRaw) -> i32;
+    fn ruckig_update_with_diagnostics(
+        otg: *mut RuckigRaw,
+        input: *const InputRaw,
+        output: *mut OutputRaw,
+        diagnostics: *mut DiagnosticsRaw,
+    ) -> i32;
     fn ruckig_filter_intermediate_positions(
         otg: *const RuckigRaw,
         input: *const InputRaw,
@@ -483,6 +623,10 @@ unsafe extern "C" {
         tracking: *const TrackingRaw,
         diagnostics: *mut TrackingDiagnosticsRaw,
     ) -> i32;
+    fn ruckig_tracking_get_last_public_diagnostics(
+        tracking: *const TrackingRaw,
+        diagnostics: *mut DiagnosticsRaw,
+    ) -> i32;
     fn ruckig_tracking_update(
         tracking: *mut TrackingRaw,
         target_state: *const TargetStateRaw,
@@ -608,6 +752,10 @@ unsafe extern "C" {
     fn ruckig_tracking_sequence_continuation_get_target_count(
         continuation: *const TrackingSequenceContinuationRaw,
     ) -> usize;
+    fn ruckig_tracking_sequence_continuation_get_last_diagnostics(
+        continuation: *const TrackingSequenceContinuationRaw,
+        diagnostics: *mut DiagnosticsRaw,
+    ) -> i32;
 }
 
 fn check_code(code: i32, operation: &'static str) -> Result<RuckigResult> {
@@ -616,6 +764,12 @@ fn check_code(code: i32, operation: &'static str) -> Result<RuckigResult> {
         1 => Ok(RuckigResult::Finished),
         _ => Err(Error { code, operation }),
     }
+}
+
+fn initialized_diagnostics() -> DiagnosticsRaw {
+    let mut raw = DiagnosticsRaw::default();
+    unsafe { ruckig_diagnostics_init(&mut raw) };
+    raw
 }
 
 fn require_len(values: &[f64], expected: usize, operation: &'static str) -> Result<()> {
@@ -706,6 +860,42 @@ impl Ruckig {
         )
     }
 
+    pub fn validate_input_with_diagnostics(
+        &self,
+        input: &InputParameter,
+        check_current_state_within_limits: bool,
+        check_target_state_within_limits: bool,
+    ) -> Diagnostics {
+        let mut raw = initialized_diagnostics();
+        unsafe {
+            ruckig_validate_input_with_diagnostics(
+                self.raw.as_ptr(),
+                input.raw.as_ptr(),
+                check_current_state_within_limits,
+                check_target_state_within_limits,
+                &mut raw,
+            );
+        }
+        raw.into()
+    }
+
+    pub fn calculate_with_diagnostics(
+        &mut self,
+        input: &InputParameter,
+        trajectory: &mut Trajectory,
+    ) -> Diagnostics {
+        let mut raw = initialized_diagnostics();
+        unsafe {
+            ruckig_calculate_with_diagnostics(
+                self.raw.as_ptr(),
+                input.raw.as_ptr(),
+                trajectory.raw.as_ptr(),
+                &mut raw,
+            );
+        }
+        raw.into()
+    }
+
     pub fn update(
         &mut self,
         input: &InputParameter,
@@ -715,6 +905,23 @@ impl Ruckig {
             unsafe { ruckig_update(self.raw.as_ptr(), input.raw.as_ptr(), output.raw.as_ptr()) },
             "ruckig_update",
         )
+    }
+
+    pub fn update_with_diagnostics(
+        &mut self,
+        input: &InputParameter,
+        output: &mut OutputParameter,
+    ) -> Diagnostics {
+        let mut raw = initialized_diagnostics();
+        unsafe {
+            ruckig_update_with_diagnostics(
+                self.raw.as_ptr(),
+                input.raw.as_ptr(),
+                output.raw.as_ptr(),
+                &mut raw,
+            );
+        }
+        raw.into()
     }
 
     pub fn filter_intermediate_positions(
@@ -1682,6 +1889,20 @@ impl TrackingSequenceContinuation {
     pub fn reset(&mut self) {
         unsafe { ruckig_tracking_sequence_continuation_reset(self.raw.as_ptr()) };
     }
+
+    pub fn last_diagnostics(&self) -> Result<Diagnostics> {
+        let mut raw = initialized_diagnostics();
+        check_code(
+            unsafe {
+                ruckig_tracking_sequence_continuation_get_last_diagnostics(
+                    self.raw.as_ptr(),
+                    &mut raw,
+                )
+            },
+            "ruckig_tracking_sequence_continuation_get_last_diagnostics",
+        )?;
+        Ok(raw.into())
+    }
 }
 
 impl Drop for TrackingSequenceContinuation {
@@ -1798,6 +2019,15 @@ impl Tracking {
         check_code(
             unsafe { ruckig_tracking_get_last_diagnostics(self.raw.as_ptr(), &mut raw) },
             "ruckig_tracking_get_last_diagnostics",
+        )?;
+        Ok(raw.into())
+    }
+
+    pub fn last_public_diagnostics(&self) -> Result<Diagnostics> {
+        let mut raw = initialized_diagnostics();
+        check_code(
+            unsafe { ruckig_tracking_get_last_public_diagnostics(self.raw.as_ptr(), &mut raw) },
+            "ruckig_tracking_get_last_public_diagnostics",
         )?;
         Ok(raw.into())
     }
@@ -1991,6 +2221,36 @@ mod tests {
     }
 
     #[test]
+    fn public_diagnostics_core_smoke() -> Result<()> {
+        let mut otg = Ruckig::new(1, 0.1)?;
+        let mut input = InputParameter::new(1)?;
+        let mut trajectory = Trajectory::new(1)?;
+        let mut output = OutputParameter::new(1)?;
+        configure_position(&mut input)?;
+        input.set_max_velocity(&[-1.0])?;
+
+        let diagnostics = otg.validate_input_with_diagnostics(&input, true, true);
+        assert_eq!(diagnostics.result, -100);
+        assert_eq!(diagnostics.scope, DiagnosticScope::Input);
+        assert_eq!(diagnostics.code, DiagnosticCode::NegativeLimit);
+        assert_eq!(diagnostics.dof, 0);
+
+        input.set_max_velocity(&[1.0])?;
+        let diagnostics = otg.calculate_with_diagnostics(&input, &mut trajectory);
+        assert_eq!(diagnostics.result, RuckigResult::Working as i32);
+        assert_eq!(diagnostics.scope, DiagnosticScope::None);
+        assert_eq!(diagnostics.code, DiagnosticCode::None);
+
+        let diagnostics = otg.update_with_diagnostics(&input, &mut output);
+        assert!(
+            diagnostics.result == RuckigResult::Working as i32
+                || diagnostics.result == RuckigResult::Finished as i32
+        );
+        assert_eq!(diagnostics.code, DiagnosticCode::None);
+        Ok(())
+    }
+
+    #[test]
     fn waypoint_offline_calculate() -> Result<()> {
         let mut otg = Ruckig::with_waypoints(1, 0.05, 1)?;
         let mut input = InputParameter::with_waypoints(1, 1)?;
@@ -2136,6 +2396,10 @@ mod tests {
         assert_eq!(diagnostics.family_candidate_count(), 0);
         assert_eq!(diagnostics.reserved_size, [0; 4]);
         assert_eq!(diagnostics.reserved_value, [0.0; 4]);
+        let public_diagnostics = tracking.last_public_diagnostics()?;
+        assert_eq!(public_diagnostics.result, RuckigResult::Working as i32);
+        assert_eq!(public_diagnostics.scope, DiagnosticScope::Tracking);
+        assert_eq!(public_diagnostics.code, DiagnosticCode::None);
         assert!((tracking.reactiveness() - 1.0).abs() < f64::EPSILON);
         for strategy in [
             TrackingOptimizedStrategy::Stable,
@@ -2558,6 +2822,12 @@ mod tests {
         let mut outputs = TrackingOutputSequence::new(1, count)?;
         let mut continuation = TrackingSequenceContinuation::new(1, count)?;
         let mut input = InputParameter::new(1)?;
+        let public_diagnostics = continuation.last_diagnostics()?;
+        assert_eq!(public_diagnostics.result, RuckigResult::Working as i32);
+        assert_eq!(public_diagnostics.scope, DiagnosticScope::TrackingSequence);
+        assert_eq!(public_diagnostics.code, DiagnosticCode::Unsupported);
+        assert_eq!(public_diagnostics.expected_count, 0);
+        assert_eq!(public_diagnostics.actual_count, 0);
         configure_tracking_input(&mut input)?;
         input.set_interrupt_calculation_duration(0.0)?;
         tracking.set_mode(TrackingMode::Optimized)?;
@@ -2603,6 +2873,10 @@ mod tests {
         assert_eq!(continuation.target_count(), count);
         assert_eq!(outputs.count(), count);
         assert_eq!(outputs.new_positions_flat().len(), count);
+        let public_diagnostics = continuation.last_diagnostics()?;
+        assert_eq!(public_diagnostics.result, RuckigResult::Working as i32);
+        assert_eq!(public_diagnostics.scope, DiagnosticScope::TrackingSequence);
+        assert_eq!(public_diagnostics.code, DiagnosticCode::None);
         let diagnostics = tracking.last_diagnostics()?;
         assert!(
             diagnostics.calculation_status == TrackingCalculationStatus::Optimized

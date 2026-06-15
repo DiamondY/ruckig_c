@@ -7,6 +7,8 @@ import unittest
 from ruckig_cffi import (
     Bound,
     ControlInterface,
+    DiagnosticCode,
+    DiagnosticScope,
     DurationDiscretization,
     Input,
     Output,
@@ -121,6 +123,30 @@ class PrototypeTests(unittest.TestCase):
             self.assertEqual(result, Result.FINISHED)
             self.assertAlmostEqual(output.new_position()[0], 1.0, places=8)
             self.assertAlmostEqual(output.new_velocity()[0], 0.0, places=8)
+
+    def test_public_diagnostics_core_smoke(self) -> None:
+        with Ruckig(1, 0.1) as otg, Input(1) as input_, Trajectory(1) as trajectory, Output(1) as output:
+            configure_input(input_)
+            input_.set_max_velocity([-1.0])
+
+            result, diagnostics = otg.validate_input_with_diagnostics(input_, True, True)
+            self.assertEqual(result, Result.ERROR_INVALID_INPUT)
+            self.assertEqual(diagnostics.result, Result.ERROR_INVALID_INPUT)
+            self.assertEqual(diagnostics.scope, DiagnosticScope.INPUT)
+            self.assertEqual(diagnostics.code, DiagnosticCode.NEGATIVE_LIMIT)
+            self.assertEqual(diagnostics.dof, 0)
+
+            input_.set_max_velocity([1.0])
+            result, diagnostics = otg.calculate_with_diagnostics(input_, trajectory)
+            self.assertEqual(result, Result.WORKING)
+            self.assertEqual(diagnostics.result, Result.WORKING)
+            self.assertEqual(diagnostics.scope, DiagnosticScope.NONE)
+            self.assertEqual(diagnostics.code, DiagnosticCode.NONE)
+
+            result, diagnostics = otg.update_with_diagnostics(input_, output)
+            self.assertIn(result, (Result.WORKING, Result.FINISHED))
+            self.assertEqual(diagnostics.result, result)
+            self.assertEqual(diagnostics.code, DiagnosticCode.NONE)
 
     def test_waypoint_offline_calculate(self) -> None:
         with (
@@ -337,6 +363,10 @@ class PrototypeTests(unittest.TestCase):
             self.assertEqual(diagnostics.family_candidate_count, 0)
             self.assertEqual(diagnostics.reserved_size, (0, 0, 0, 0))
             self.assertEqual(diagnostics.reserved_value, (0.0, 0.0, 0.0, 0.0))
+            public_diagnostics = tracking.last_public_diagnostics
+            self.assertEqual(public_diagnostics.result, Result.WORKING)
+            self.assertEqual(public_diagnostics.scope, DiagnosticScope.TRACKING)
+            self.assertEqual(public_diagnostics.code, DiagnosticCode.NONE)
             self.assertAlmostEqual(tracking.reactiveness, 1.0)
             tracking.set_reactiveness(1.0)
             tracking.set_look_ahead_cycles(1)
@@ -680,6 +710,10 @@ class PrototypeTests(unittest.TestCase):
             self.assertEqual(continuation.target_count, count)
             self.assertEqual(outputs.count, count)
             self.assertEqual(len(outputs.new_positions()), count)
+            public_diagnostics = continuation.last_diagnostics
+            self.assertEqual(public_diagnostics.result, Result.WORKING)
+            self.assertEqual(public_diagnostics.scope, DiagnosticScope.TRACKING_SEQUENCE)
+            self.assertEqual(public_diagnostics.code, DiagnosticCode.NONE)
             diagnostics = tracking.last_diagnostics
             self.assertIn(
                 diagnostics.calculation_status,
@@ -688,6 +722,15 @@ class PrototypeTests(unittest.TestCase):
             self.assertGreaterEqual(diagnostics.candidate_count, count)
             self.assertGreater(diagnostics.budget_exhausted_count, 0)
             self.assertEqual(diagnostics.family_candidate_count, diagnostics.candidate_count)
+
+    def test_tracking_sequence_continuation_public_diagnostics_unstarted(self) -> None:
+        with TrackingSequenceContinuation(1, 2) as continuation:
+            diagnostics = continuation.last_diagnostics
+            self.assertEqual(diagnostics.result, Result.WORKING)
+            self.assertEqual(diagnostics.scope, DiagnosticScope.TRACKING_SEQUENCE)
+            self.assertEqual(diagnostics.code, DiagnosticCode.UNSUPPORTED)
+            self.assertEqual(diagnostics.expected_count, 0)
+            self.assertEqual(diagnostics.actual_count, 0)
 
     def test_tuple_copy_in_and_list_copy_out(self) -> None:
         with Ruckig(1, 0.1) as otg, Input(1) as input_, Trajectory(1) as trajectory:

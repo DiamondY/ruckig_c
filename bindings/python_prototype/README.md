@@ -28,6 +28,10 @@ ABI mode and validates the minimum wrapper model:
 - tracking sequence continuation smoke for the `0.15.0-alpha.4` continuation
   handle and the Fast/Optimized interruptible/resume sequence API implemented
   in alpha.5 and alpha.6.
+- prototype public diagnostics smoke for the stable `v0.16.0` C API, including
+  `Diagnostics`, diagnostic scope/code enums, validate/calculate/update
+  `_with_diagnostics`, tracking public diagnostics, and tracking sequence
+  continuation diagnostics.
 
 ## Prerequisites
 
@@ -57,3 +61,5 @@ macOS, point it at the built `libruckig_c.dylib`.
   smoke evidence for the C ABI.
 - No stable tracking sequence continuation binding API commitment; the
   continuation wrapper is alpha smoke evidence only.
+- No stable Python public diagnostics wrapper API commitment; diagnostics
+  coverage remains prototype smoke evidence over the stable C ABI.

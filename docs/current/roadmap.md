@@ -75,6 +75,10 @@ or default heavy-random CI policy.
 - `post-v0.16.0-oracle-backed-long-tail-coverage` records a docs-only triage
   of remaining solver long-tail branch gaps. It adds no tests because no
   compact oracle-backed or public-behavior-backed case was selected.
+- `post-v0.16.0-wrapper-public-diagnostics-prototype-smoke` adds minimal
+  Python/Rust prototype smoke coverage for the stable `v0.16.0` public
+  diagnostics C API without changing public ABI or making wrapper publication
+  claims.
 
 ## 0.17.0 Wrapper Stabilization Readiness
 
@@ -90,6 +94,9 @@ are accepted for a specific wrapper.
   package-manager recipe changes are part of readiness.
 - A later implementation plan must explicitly choose Python-first, Rust-first,
   dual-wrapper stabilization, or continued prototype-only status.
+- The post-`v0.16.0` wrapper diagnostics smoke slice improves readiness
+  evidence only; it does not satisfy packaging, discovery, ownership, or
+  release criteria for stable wrapper publication.
 
 ## 0.15.0 Stable Release Line
 
