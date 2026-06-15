@@ -66,7 +66,10 @@ or default heavy-random CI policy.
 - `post-v0.16.0-docs-and-examples-polish` adds a minimal public diagnostics C
   example and updates current stable documentation without changing public ABI
   or release state.
-- Wrapper stabilization, package recipes, tracking failure shrinking, and
+- `post-v0.16.0-tooling-maintenance` extends failure-oriented shrinker tooling
+  to tracking random audit failures and improves shrinker output guidance
+  without changing public ABI or default CI policy.
+- Wrapper stabilization, package recipes, generated fixture auto-write, and
   solver long-tail coverage remain separate follow-up decisions.
 
 ## 0.15.0 Stable Release Line

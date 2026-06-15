@@ -469,7 +469,7 @@ Added test tooling:
 | Tracking audit shrink | Adds `--tracking-random-audit-shrink SAMPLE --seed S`, reducing audit config dimensions and flags while preserving diagnostics consistency. |
 | Routine smoke | Adds `ruckig_c_oracle_random_shrink_smoke`, `ruckig_c_oracle_random_per_dof_shrink_smoke`, and `ruckig_c_tracking_random_audit_shrink_smoke` as deterministic single-sample CTest checks. |
 | Compatibility | Existing replay and random commands keep their behavior and output contract. |
-| Deferred | Full failure-predicate-preserving shrinkage and generated source-file writing remain local-tool follow-up work, not default CI behavior. |
+| Deferred | Generated source-file writing remains local-tool follow-up work, not default CI behavior. |
 
 The local checklist is
 `docs/release/checklists/post-v0.15.0-random-shrinker-mvp.md`.
@@ -494,9 +494,27 @@ Small CTest smoke entries cover the expected non-failing sample rejection path
 with `WILL_FAIL`, while real failure shrinking remains a local/manual debugging
 workflow.
 
-Tracking failure-oriented shrinking and automatic source-file fixture writing
-remain deferred. The local checklist is
+Automatic source-file fixture writing remains deferred. The local checklist is
 `docs/release/checklists/post-v0.15.0-failure-shrinker-prototype.md`.
+
+## Post-v0.16.0 Tooling Maintenance
+
+The `post-v0.16.0-tooling-maintenance` slice extends failure-oriented shrinker
+coverage to tracking random audit cases without changing public ABI or default
+heavy CI behavior.
+
+Added tooling:
+
+| Area | Evidence |
+| --- | --- |
+| Tracking audit failure shrink | Adds `--tracking-random-audit-shrink-failure SAMPLE --seed S`, requiring the original sample to fail before accepting simplifications that preserve the same coarse tracking audit failure class. |
+| Smoke coverage | Adds `ruckig_c_tracking_random_audit_shrink_failure_smoke` as an expected-failure CTest on a known non-failing sample. |
+| Oracle output | Keeps existing oracle failure shrink CLIs while making the reduced fixed-case instructions explicit. |
+| Compatibility | Existing replay, pass-preserving shrink, oracle shrink, and random commands keep their behavior. |
+| Deferred | Generated fixture auto-write remains a separate tooling decision. |
+
+The local checklist is
+`docs/release/checklists/post-v0.16.0-tooling-maintenance.md`.
 
 ## 0.14.0-alpha.1 Interrupt Boundary API-Neutral Audit
 

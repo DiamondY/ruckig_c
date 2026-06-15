@@ -239,6 +239,8 @@ if(BUILD_RUCKIG_C_TESTS)
   add_test(NAME ruckig_c_tracking_random_replay_smoke COMMAND ruckig_c_tests --tracking-random-replay 22 --seed 1)
   add_test(NAME ruckig_c_tracking_random_audit_replay_smoke COMMAND ruckig_c_tests --tracking-random-audit-replay 22 --seed 1)
   add_test(NAME ruckig_c_tracking_random_audit_shrink_smoke COMMAND ruckig_c_tests --tracking-random-audit-shrink 22 --seed 1)
+  add_test(NAME ruckig_c_tracking_random_audit_shrink_failure_smoke COMMAND ruckig_c_tests --tracking-random-audit-shrink-failure 22 --seed 1)
+  set_tests_properties(ruckig_c_tracking_random_audit_shrink_failure_smoke PROPERTIES WILL_FAIL TRUE)
   add_test(NAME ruckig_c_tracking_no_allocation COMMAND ruckig_c_tests --tracking-no-allocation)
   add_test(NAME ruckig_c_allocation_audit
     COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/test/c/audit_allocations.cmake

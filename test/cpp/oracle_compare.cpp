@@ -1724,6 +1724,8 @@ void print_failure_shrink_summary(
         << (per_dof ? "--replay-random-per-dof " : "--replay-random ")
         << sample_index << " --seed " << seed << '\n';
     std::cout << "oracle failure shrink reduced replay: paste the initializer below into the fixed oracle corpus\n";
+    std::cout << "oracle failure shrink reduced fixed-case instructions: add the fixture-ready CaseData initializer below as a deterministic fixed oracle case\n";
+    std::cout << "oracle failure shrink fixture-ready initializer follows\n";
     print_case_fixture_initializer(reduced, seed, sample_index, kind);
 }
 

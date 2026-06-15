@@ -150,6 +150,8 @@ Historical rewrite plans and release evidence are retained for traceability.
   closeout.
   `release/checklists/post-v0.16.0-docs-and-examples-polish.md` records the
   post-release public diagnostics C example and current-docs polish slice.
+  `release/checklists/post-v0.16.0-tooling-maintenance.md` records the
+  tracking failure shrinker tooling slice.
   `release/checklists/post-v0.15.0-quality-audit.md` records the post-release
   code-quality and test-quality audit slice without changing the stable ABI or
   release state.

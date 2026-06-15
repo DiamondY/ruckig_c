@@ -252,15 +252,14 @@ tracking lookahead/config flags, and conservative numeric rounding. Output
 includes the original seed/sample, reduced-case summary, a fixture-ready
 initializer, and the replay command for the original generated case.
 
-This MVP does not attempt to preserve a failing predicate automatically once a
-new bug is found, does not write a generated fixture file, and does not alter
-random corpus semantics. Full failure-oriented shrinking remains a later
-optional local-tool slice.
+This MVP does not write generated fixture files automatically and does not
+alter random corpus semantics. Failure-oriented shrink tooling is handled by
+separate local-tool slices.
 
 ## Failure-Oriented Shrinker Prototype
 
-The `post-v0.15.0-failure-shrinker-prototype` slice adds local failure-oriented
-oracle shrink commands:
+The `post-v0.15.0-failure-shrinker-prototype` slice adds local
+failure-oriented oracle shrink commands:
 
 ```powershell
 out\build\windows-clang-ninja-oracle\ruckig_c_oracle_tests.exe --shrink-random-failure SAMPLE --seed S
@@ -273,12 +272,29 @@ when the reduced case still fails with the same coarse oracle failure class,
 such as result mismatch, duration mismatch, or sample/update vector mismatch.
 
 The prototype prints the original seed/sample, original and reduced failure
-summaries, the original replay command, and a fixture-ready `CaseData`
-initializer. It still does not write generated source files automatically and
-does not cover tracking random audit failures.
+summaries, the original replay command, reduced fixed-case instructions, and a
+fixture-ready `CaseData` initializer. It still does not write generated source
+files automatically.
+
+The `post-v0.16.0-tooling-maintenance` slice extends failure-oriented shrinking
+to tracking random audit cases:
+
+```powershell
+out\build\windows-clang-ninja\ruckig_c_tests.exe --tracking-random-audit-shrink-failure SAMPLE --seed S
+```
+
+The tracking failure shrinker replays the requested audit seed/sample first.
+If the sample still passes, it returns the expected development error and
+points callers to the pass-preserving `--tracking-random-audit-shrink` mode.
+If the sample fails, candidate simplifications are accepted only when the
+reduced case preserves the same coarse tracking audit failure class. Output
+includes original and reduced summaries, the original replay command, and a
+fixture-ready `tracking_audit_case_config_t` initializer.
 
 The local checklist is
-`docs/release/checklists/post-v0.15.0-failure-shrinker-prototype.md`.
+`docs/release/checklists/post-v0.15.0-failure-shrinker-prototype.md`; the
+tracking follow-up checklist is
+`docs/release/checklists/post-v0.16.0-tooling-maintenance.md`.
 
 ## Residual Branch Coverage Slice
 
