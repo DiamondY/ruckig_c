@@ -71,3 +71,5 @@ Boundaries:
 - No stable Rust public diagnostics API commitment before a deliberate wrapper
   publication decision; diagnostics coverage remains prototype smoke evidence
   over the stable C ABI.
+- The `0.17.0-wrapper-stabilization-decision` record keeps this wrapper
+  prototype-only until crate/linking ownership is separately accepted.

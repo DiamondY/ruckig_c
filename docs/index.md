@@ -154,6 +154,9 @@ Historical rewrite plans and release evidence are retained for traceability.
   tracking failure shrinker tooling slice.
   `release/checklists/0.17.0-design-wrapper-stabilization-readiness.md`
   records the docs-only wrapper stabilization readiness decision.
+  `release/checklists/0.17.0-wrapper-stabilization-decision.md` records the
+  docs-only decision to keep Python/Rust wrappers prototype-only after the
+  public diagnostics prototype smoke evidence.
   `release/checklists/post-v0.16.0-oracle-backed-long-tail-coverage.md`
   records the docs-only long-tail coverage triage decision.
   `release/checklists/post-v0.16.0-wrapper-public-diagnostics-prototype-smoke.md`
@@ -290,6 +293,8 @@ gate. The previous v1 gallery provenance remains available through the
   for possible opt-in `0.16.0` diagnostics APIs.
 - `design/0.17.0_wrapper_stabilization_readiness.md` - docs-only wrapper
   stabilization criteria for possible future Python/Rust package work.
+- `design/0.17.0_wrapper_stabilization_decision.md` - docs-only decision to
+  keep wrappers prototype-only until package/discovery ownership is accepted.
 - `design/0.3.0_release_decision.md` - accepted hardening-release scope for
   `0.3.0`.
 - `design/0.3.0_closeout_checklist.md` - engineering-hardening closeout

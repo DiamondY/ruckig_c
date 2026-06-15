@@ -72,6 +72,9 @@ Compatibility rules for `v0.16.0`:
   remain private.
 - Python `cffi` and Rust wrapper updates remain prototype smoke evidence only;
   no wheel, crate, or stable wrapper API is published.
+- `0.17.0-wrapper-stabilization-decision` keeps the wrapper status
+  prototype-only after the public diagnostics smoke evidence; no public C ABI
+  delta is associated with that decision.
 - `0.16.1` is reserved for emergency patch fixes only.
 
 Alpha history retained for ABI traceability:

@@ -63,3 +63,5 @@ macOS, point it at the built `libruckig_c.dylib`.
   continuation wrapper is alpha smoke evidence only.
 - No stable Python public diagnostics wrapper API commitment; diagnostics
   coverage remains prototype smoke evidence over the stable C ABI.
+- The `0.17.0-wrapper-stabilization-decision` record keeps this wrapper
+  prototype-only until package/discovery ownership is separately accepted.

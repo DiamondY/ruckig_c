@@ -101,6 +101,10 @@ are accepted for a specific wrapper.
 - The post-`v0.16.0` wrapper diagnostics smoke slice improves readiness
   evidence only; it does not satisfy packaging, discovery, ownership, or
   release criteria for stable wrapper publication.
+- `0.17.0-wrapper-stabilization-decision` keeps both wrappers prototype-only
+  after reviewing the diagnostics prototype and consumer install evidence. It
+  defers any Python-first, Rust-first, or dual-wrapper stable implementation
+  until package/discovery ownership is separately accepted.
 
 ## 0.15.0 Stable Release Line
 
