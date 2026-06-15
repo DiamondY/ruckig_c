@@ -72,6 +72,21 @@ or default heavy-random CI policy.
 - Wrapper stabilization, package recipes, generated fixture auto-write, and
   solver long-tail coverage remain separate follow-up decisions.
 
+## 0.17.0 Wrapper Stabilization Readiness
+
+The `0.17.0` wrapper line is not an implementation line yet. The docs-only
+`0.17.0-design-wrapper-stabilization-readiness` slice records a criteria-first
+decision: Python and Rust wrappers remain prototype-only until shared-library
+or static-library discovery, packaging policy, C ABI compatibility,
+diagnostics mapping, lifecycle rules, array handling, CI, and release evidence
+are accepted for a specific wrapper.
+
+- No Python wheel or Rust crate is published by the readiness slice.
+- No C public ABI, public header, version metadata, release state, workflow, or
+  package-manager recipe changes are part of readiness.
+- A later implementation plan must explicitly choose Python-first, Rust-first,
+  dual-wrapper stabilization, or continued prototype-only status.
+
 ## 0.15.0 Stable Release Line
 
 `v0.15.0` is the previous stable release after the stable tracking sequence

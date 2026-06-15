@@ -152,6 +152,8 @@ Historical rewrite plans and release evidence are retained for traceability.
   post-release public diagnostics C example and current-docs polish slice.
   `release/checklists/post-v0.16.0-tooling-maintenance.md` records the
   tracking failure shrinker tooling slice.
+  `release/checklists/0.17.0-design-wrapper-stabilization-readiness.md`
+  records the docs-only wrapper stabilization readiness decision.
   `release/checklists/post-v0.15.0-quality-audit.md` records the post-release
   code-quality and test-quality audit slice without changing the stable ABI or
   release state.
@@ -269,6 +271,8 @@ gate. The previous v1 gallery provenance remains available through the
   next design line, recommending public diagnostics first.
 - `design/0.16.0_public_diagnostics.md` - docs-only public diagnostics design
   for possible opt-in `0.16.0` diagnostics APIs.
+- `design/0.17.0_wrapper_stabilization_readiness.md` - docs-only wrapper
+  stabilization criteria for possible future Python/Rust package work.
 - `design/0.3.0_release_decision.md` - accepted hardening-release scope for
   `0.3.0`.
 - `design/0.3.0_closeout_checklist.md` - engineering-hardening closeout
