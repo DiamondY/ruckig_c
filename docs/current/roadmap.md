@@ -144,6 +144,10 @@ are accepted for a specific wrapper.
   external installed shared libraries, vendored shared libraries, and static
   linking, but still selects no implementation route and keeps wrappers
   prototype-only.
+- `0.17.0-wrapper-route-selection` compares continue prototype-only,
+  Python-first external-installed-library, Rust-first, and dual-wrapper
+  routes. It selects continued prototype-only as the default and requires any
+  wrapper implementation to start from a separate route-specific slice.
 
 ## Post-v0.16.0 Event-Driven Backlog
 

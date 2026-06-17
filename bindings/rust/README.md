@@ -76,3 +76,6 @@ Boundaries:
 - The `0.17.0-wrapper-package-policy-design` record keeps stable Rust
   publication blocked on linking/discovery, version compatibility, CI, and
   crate ownership decisions.
+- The `0.17.0-wrapper-route-selection` record selects continued prototype-only
+  status by default; Rust-first publication requires a separate accepted
+  route-specific implementation slice.

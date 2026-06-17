@@ -166,6 +166,9 @@ Historical rewrite plans and release evidence are retained for traceability.
   `release/checklists/0.17.0-wrapper-package-policy-design.md` records the
   docs-only wrapper package/discovery policy design and keeps wrapper
   stabilization blocked on ownership decisions.
+  `release/checklists/0.17.0-wrapper-route-selection.md` records the
+  docs-only wrapper route-selection decision to continue prototype-only by
+  default.
   `release/checklists/post-v0.16.0-oracle-backed-long-tail-coverage.md`
   records the docs-only long-tail coverage triage decision.
   `release/checklists/post-v0.16.0-wrapper-public-diagnostics-prototype-smoke.md`
@@ -316,6 +319,9 @@ gate. The previous v1 gallery provenance remains available through the
   keep wrappers prototype-only until package/discovery ownership is accepted.
 - `design/0.17.0_wrapper_package_policy.md` - docs-only package/discovery
   policy blockers for future wrapper stabilization.
+- `design/0.17.0_wrapper_route_selection.md` - docs-only wrapper route
+  selection; keeps wrappers prototype-only unless a future route-specific
+  implementation is accepted.
 - `design/0.18.0_upstream_baseline_provenance_readiness.md` - docs-only
   upstream baseline provenance readiness; keeps the baseline frozen without
   re-labeling it as a post-tag snapshot.

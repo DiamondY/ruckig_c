@@ -68,3 +68,6 @@ macOS, point it at the built `libruckig_c.dylib`.
 - The `0.17.0-wrapper-package-policy-design` record keeps stable Python
   packaging blocked on shared-library discovery, version compatibility, CI, and
   package ownership decisions.
+- The `0.17.0-wrapper-route-selection` record selects continued prototype-only
+  status by default; Python-first publication requires a separate accepted
+  route-specific implementation slice.
