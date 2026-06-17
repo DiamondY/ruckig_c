@@ -550,6 +550,22 @@ Added consumer smoke:
 The local checklist is
 `docs/release/checklists/post-v0.16.0-consumer-install-and-docs-refresh.md`.
 
+## Post-v0.16.0 Tracking Public Diagnostics Example
+
+The `post-v0.16.0-tracking-diagnostics-examples-polish` slice adds a focused C
+example for the stable tracking public diagnostics getter pattern.
+
+Added example smoke:
+
+| Area | Evidence |
+| --- | --- |
+| Tracking getter | `examples/c/25_tracking_public_diagnostics.c` performs a valid Fast tracking update and reads `ruckig_tracking_get_last_public_diagnostics`. |
+| Continuation getter | The same example reads `ruckig_tracking_sequence_continuation_get_last_diagnostics` on an unstarted continuation and checks the stable tracking-sequence scope/code. |
+| Boundary | No public ABI, specialized tracking diagnostics layout, tracking evaluator behavior, workflow, upstream baseline, or visualization asset changes. |
+
+The local checklist is
+`docs/release/checklists/post-v0.16.0-tracking-diagnostics-examples-polish.md`.
+
 ## 0.14.0-alpha.1 Interrupt Boundary API-Neutral Audit
 
 `0.14.0-alpha.1` adds a focused local audit for the existing

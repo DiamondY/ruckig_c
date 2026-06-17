@@ -108,6 +108,10 @@ or default heavy-random CI policy.
   `0.17.3-line frozen baseline`, does not formally re-label it as a post-tag
   snapshot, and leaves any source re-anchor to a future upgrade readiness
   trigger.
+- `post-v0.16.0-tracking-diagnostics-examples-polish` adds a focused C example
+  for the stable tracking public diagnostics getter pattern without changing
+  tracking API, evaluator behavior, public ABI, upstream baseline, or
+  visualization assets.
 
 ## 0.17.0 Wrapper Stabilization Readiness
 

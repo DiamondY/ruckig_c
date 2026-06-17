@@ -180,6 +180,8 @@ Historical rewrite plans and release evidence are retained for traceability.
   the documentation maintenance freeze and event-driven backlog policy.
   `release/checklists/0.18.0-upstream-baseline-provenance-readiness.md`
   records the docs-only upstream baseline provenance readiness decision.
+  `release/checklists/post-v0.16.0-tracking-diagnostics-examples-polish.md`
+  records the tracking public diagnostics C example polish slice.
   `release/checklists/post-v0.15.0-quality-audit.md` records the post-release
   code-quality and test-quality audit slice without changing the stable ABI or
   release state.

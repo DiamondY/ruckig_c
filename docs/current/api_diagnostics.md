@@ -154,6 +154,13 @@ The installed CMake and pkg-config consumer smoke sources also compile and run
 this minimal pattern so downstream install paths exercise the stable
 diagnostics declarations and exported symbols.
 
+`examples/c/25_tracking_public_diagnostics.c` shows the tracking getter pattern:
+run a normal tracking update, initialize a `ruckig_diagnostics_t`, call
+`ruckig_tracking_get_last_public_diagnostics`, and read only the stable
+scope/code/result fields. It also demonstrates the sequence continuation
+diagnostics getter on an unstarted continuation, which reports the stable
+tracking-sequence scope with an unsupported/unstarted coarse code.
+
 The `0.16.0` release promotes the public diagnostics design line to stable C
 ABI:
 

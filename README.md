@@ -578,6 +578,9 @@ The C examples are in `examples/c`:
 - `20_tracking_offline_optimized_sequence.c`
 - `21_no_waypoint_interrupt_boundary.c`
 - `22_tracking_interrupt_boundary.c`
+- `23_tracking_sequence_continuation.c`
+- `24_public_diagnostics.c`
+- `25_tracking_public_diagnostics.c`
 
 All examples are wired into CMake when `BUILD_RUCKIG_C_EXAMPLES=ON`.
 
