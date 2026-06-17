@@ -18,6 +18,21 @@ install, pkg-config, static/DLL, shared install-tree, and CI consumer paths
 remain maintained; vcpkg, Conan, Homebrew, and similar recipes are reopened
 only after a separate user or release demand decision.
 
+## Documentation Maintenance Policy
+
+Current planning should flow through `docs/current/`, active design records, and
+the documentation index. Historical release checklists and evidence files remain
+in place for traceability but are not active maintenance targets.
+
+- `v0.1.x` through `v0.15.x` release-line records are frozen historical
+  evidence.
+- Active maintained lines are `v0.16.0` stable public diagnostics, `0.17.0`
+  wrapper/package policy design, and post-`v0.16.0` event-driven maintenance.
+- Historical files should only be updated for broken links, factual release
+  errors, security-relevant corrections, or explicit current-line references.
+- New planning should prefer current summary/index updates rather than broad
+  historical document churn.
+
 ## 0.16.0 Stable Release Line
 
 The `0.16.0` line stabilizes opt-in public diagnostics. It promotes the
@@ -115,6 +130,29 @@ are accepted for a specific wrapper.
   external installed shared libraries, vendored shared libraries, and static
   linking, but still selects no implementation route and keeps wrappers
   prototype-only.
+
+## Post-v0.16.0 Event-Driven Backlog
+
+The following items are not active implementation lines. They should only be
+opened when their triggers are met:
+
+- `post-v0.16.0-tooling-generated-fixture-write`: open only if shrinker users
+  need automatic fixture writes. Until then, fixture-ready initializer output is
+  sufficient and avoids accidental source edits.
+- `post-v0.16.0-oracle-backed-solver-regression`: open only for a reproducible
+  oracle mismatch, public behavior regression, user report, or stable invariant.
+  `brake.c`, `roots.c`, `profile.c`, and `trajectory.c` may be candidates, but
+  coverage percentage alone is not a reason to add cases.
+- `0.18.0-upstream-baseline-upgrade-readiness`: open only if the upstream delta
+  audit or a later upstream tag shows material solver, API, performance, or
+  provenance risk that needs a baseline project.
+- `0.16.1`: reserve for emergency `v0.16.0` patch bugs only; do not use patch
+  releases for documentation, coverage, or tooling polish.
+- Package-manager recipes: reopen only after concrete external install demand
+  and an accepted maintenance owner.
+- Wrapper stable publication: reopen only after package/discovery policy is
+  accepted and Python-first, Rust-first, or dual-wrapper stabilization is
+  explicitly chosen.
 
 ## 0.15.0 Stable Release Line
 

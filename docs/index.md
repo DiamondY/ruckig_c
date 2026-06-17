@@ -35,6 +35,8 @@ Historical rewrite plans and release evidence are retained for traceability.
   policy.
 - `current/upstream_delta_audit.md` - post-`v0.16.0` audit of the frozen
   upstream tree against current upstream tags and HEAD.
+- `historical/README.md` - historical documentation maintenance policy and
+  active-line boundaries.
 
 ## Release Evidence
 
@@ -172,6 +174,8 @@ Historical rewrite plans and release evidence are retained for traceability.
   public diagnostics usage.
   `release/checklists/post-v0.16.0-upstream-delta-audit.md` records the
   upstream delta audit without updating the frozen upstream baseline.
+  `release/checklists/post-v0.16.0-docs-maintenance-index-freeze.md` records
+  the documentation maintenance freeze and event-driven backlog policy.
   `release/checklists/post-v0.15.0-quality-audit.md` records the post-release
   code-quality and test-quality audit slice without changing the stable ABI or
   release state.
