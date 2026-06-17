@@ -33,6 +33,8 @@ Historical rewrite plans and release evidence are retained for traceability.
   release, and CI evidence operation notes.
 - `current/upstream_baseline_policy.md` - frozen upstream oracle baseline
   policy.
+- `current/upstream_delta_audit.md` - post-`v0.16.0` audit of the frozen
+  upstream tree against current upstream tags and HEAD.
 
 ## Release Evidence
 
@@ -168,6 +170,8 @@ Historical rewrite plans and release evidence are retained for traceability.
   `release/checklists/post-v0.16.0-consumer-install-and-docs-refresh.md`
   records installed CMake/pkg-config consumer smoke coverage for minimal
   public diagnostics usage.
+  `release/checklists/post-v0.16.0-upstream-delta-audit.md` records the
+  upstream delta audit without updating the frozen upstream baseline.
   `release/checklists/post-v0.15.0-quality-audit.md` records the post-release
   code-quality and test-quality audit slice without changing the stable ABI or
   release state.

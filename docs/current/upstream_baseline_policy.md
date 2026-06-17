@@ -1,8 +1,14 @@
 # Upstream Baseline Policy
 
-`original/ruckig-main` is frozen as the Ruckig Community `0.17.3` oracle
-baseline for `ruckig_c 0.1.x` and `0.2.x` until an explicit upstream baseline
-upgrade project is approved and completed.
+`original/ruckig-main` is frozen as the Ruckig Community `0.17.3`-line oracle
+baseline until an explicit upstream baseline upgrade project is approved and
+completed.
+
+The post-`v0.16.0` upstream delta audit in
+`docs/current/upstream_delta_audit.md` records that upstream has no newer public
+tag than `v0.17.3`, while upstream HEAD contains post-tag commits. Ordinary
+maintenance must still treat the checked-in `original/ruckig-main` tree as the
+frozen baseline and must not refresh it opportunistically.
 
 ## Rules
 
@@ -16,6 +22,8 @@ upgrade project is approved and completed.
 - ABI/exported-symbol comparison, consumer-matrix hardening, package-manager
   feasibility notes, performance-trend work, and `0.3.0` release planning must
   not update the upstream baseline.
+- Wrapper package policy design, post-`v0.16.0` docs maintenance, and ordinary
+  event-driven solver regression triage must not update the upstream baseline.
 
 ## Upstream Upgrade Requirements
 

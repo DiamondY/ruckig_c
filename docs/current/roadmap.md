@@ -83,6 +83,11 @@ or default heavy-random CI policy.
   and pkg-config consumer smoke sources to compile and run minimal public
   diagnostics usage without changing install exports or package-manager
   policy.
+- `post-v0.16.0-upstream-delta-audit` reviews the frozen
+  `original/ruckig-main` tree against current upstream without updating the
+  baseline. It records that no newer public upstream tag than `v0.17.3` was
+  observed, while upstream HEAD has post-tag source and wrapper deltas that
+  should only be handled by a separate upstream baseline readiness slice.
 
 ## 0.17.0 Wrapper Stabilization Readiness
 
