@@ -35,6 +35,8 @@ Historical rewrite plans and release evidence are retained for traceability.
   policy.
 - `current/upstream_delta_audit.md` - post-`v0.16.0` audit of the frozen
   upstream tree against current upstream tags and HEAD.
+- `current/maintenance_watch.md` - post-`v0.16.0` event-driven maintenance
+  watch list and explicit non-triggers.
 - `design/0.18.0_upstream_baseline_provenance_readiness.md` - docs-only
   readiness record for upstream baseline provenance.
 - `historical/README.md` - historical documentation maintenance policy and
@@ -187,6 +189,8 @@ Historical rewrite plans and release evidence are retained for traceability.
   records the tracking public diagnostics C example polish slice.
   `release/checklists/post-v0.16.0-tracking-scenario-maintenance.md` records
   the docs-only tracking scenario maintenance triage.
+  `release/checklists/post-v0.16.0-maintenance-watch.md` records the
+  docs-only event-driven maintenance watch list.
   `release/checklists/post-v0.15.0-quality-audit.md` records the post-release
   code-quality and test-quality audit slice without changing the stable ABI or
   release state.

@@ -172,6 +172,10 @@ opened when their triggers are met:
   accepted and Python-first, Rust-first, or dual-wrapper stabilization is
   explicitly chosen.
 
+`post-v0.16.0-maintenance-watch` records these triggers in
+`docs/current/maintenance_watch.md` and keeps them out of the active roadmap
+until a triggering event is observed.
+
 ## 0.15.0 Stable Release Line
 
 `v0.15.0` is the previous stable release after the stable tracking sequence
