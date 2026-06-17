@@ -566,6 +566,29 @@ Added example smoke:
 The local checklist is
 `docs/release/checklists/post-v0.16.0-tracking-diagnostics-examples-polish.md`.
 
+## Post-v0.16.0 Tracking Scenario Maintenance Triage
+
+The `post-v0.16.0-tracking-scenario-maintenance` slice performs a docs-only
+triage of candidate tracking maintenance cases. It adds no tests because the
+selected audit and shrink evidence did not expose a compact new
+public-behavior-backed or audit-backed regression case.
+
+Triage evidence:
+
+| Area | Evidence |
+| --- | --- |
+| Focused tracking gates | Tracking public diagnostics, quality hardening, stability, optimized continuation, and random audit replay smoke passed 5/5. |
+| Random audit | `--tracking-random-audit 10000 --seed 1` passed thresholds with 9993 optimized, 7 fallback, 141520 candidates, 0 rejected, and 40298 budget-exhausted evaluations. |
+| Shrink sample | `--tracking-random-audit-shrink 22 --seed 1` reduced to a 1-DoF stable/default optimized case; no failure or regression surfaced. |
+| Boundary | No tracking source, public ABI, workflow, upstream baseline, visualization, or default heavy CI change. |
+
+Future tracking additions require a reproducible audit/shrinker sample, public
+behavior regression, user-reported workflow, or stable invariant. Coverage
+percentage alone is not accepted as a reason to add cases.
+
+The local checklist is
+`docs/release/checklists/post-v0.16.0-tracking-scenario-maintenance.md`.
+
 ## 0.14.0-alpha.1 Interrupt Boundary API-Neutral Audit
 
 `0.14.0-alpha.1` adds a focused local audit for the existing

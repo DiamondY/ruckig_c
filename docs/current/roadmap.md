@@ -112,6 +112,11 @@ or default heavy-random CI policy.
   for the stable tracking public diagnostics getter pattern without changing
   tracking API, evaluator behavior, public ABI, upstream baseline, or
   visualization assets.
+- `post-v0.16.0-tracking-scenario-maintenance` records a docs-only triage of
+  candidate tracking maintenance cases. The focused gates, 10k random audit,
+  and pass-preserving shrink sample did not identify a compact new regression
+  or public-behavior-backed case, so no coverage probe or evaluator change is
+  added.
 
 ## 0.17.0 Wrapper Stabilization Readiness
 

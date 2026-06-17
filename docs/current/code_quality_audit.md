@@ -32,6 +32,11 @@ The stable release does not continue coverage-percentage work. Future
 coverage additions are reserved for concrete regressions, oracle-backed cases,
 or public-behavior-backed cases rather than low-value branch probes.
 
+The `post-v0.16.0-tracking-scenario-maintenance` triage keeps that policy for
+tracking. The 10k tracking random audit and pass-preserving shrink sample did
+not identify a new regression or stable public-behavior gap, so no tracking
+source or test case is added for coverage percentage alone.
+
 Release coverage is recorded at
 `out/coverage/0.16.0/coverage-summary.txt`:
 
