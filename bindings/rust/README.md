@@ -73,3 +73,6 @@ Boundaries:
   over the stable C ABI.
 - The `0.17.0-wrapper-stabilization-decision` record keeps this wrapper
   prototype-only until crate/linking ownership is separately accepted.
+- The `0.17.0-wrapper-package-policy-design` record keeps stable Rust
+  publication blocked on linking/discovery, version compatibility, CI, and
+  crate ownership decisions.

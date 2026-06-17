@@ -105,6 +105,11 @@ are accepted for a specific wrapper.
   after reviewing the diagnostics prototype and consumer install evidence. It
   defers any Python-first, Rust-first, or dual-wrapper stable implementation
   until package/discovery ownership is separately accepted.
+- `0.17.0-wrapper-package-policy-design` records the package and discovery
+  policy blockers for any future wrapper stabilization route. It compares
+  external installed shared libraries, vendored shared libraries, and static
+  linking, but still selects no implementation route and keeps wrappers
+  prototype-only.
 
 ## 0.15.0 Stable Release Line
 

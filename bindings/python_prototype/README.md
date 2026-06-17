@@ -65,3 +65,6 @@ macOS, point it at the built `libruckig_c.dylib`.
   coverage remains prototype smoke evidence over the stable C ABI.
 - The `0.17.0-wrapper-stabilization-decision` record keeps this wrapper
   prototype-only until package/discovery ownership is separately accepted.
+- The `0.17.0-wrapper-package-policy-design` record keeps stable Python
+  packaging blocked on shared-library discovery, version compatibility, CI, and
+  package ownership decisions.
