@@ -103,6 +103,11 @@ or default heavy-random CI policy.
   baseline. It records that no newer public upstream tag than `v0.17.3` was
   observed, while upstream HEAD has post-tag source and wrapper deltas that
   should only be handled by a separate upstream baseline readiness slice.
+- `0.18.0-upstream-baseline-provenance-readiness` records the provenance
+  readiness conclusion for that audit. It keeps `original/ruckig-main` as the
+  `0.17.3-line frozen baseline`, does not formally re-label it as a post-tag
+  snapshot, and leaves any source re-anchor to a future upgrade readiness
+  trigger.
 
 ## 0.17.0 Wrapper Stabilization Readiness
 
@@ -144,8 +149,8 @@ opened when their triggers are met:
   `brake.c`, `roots.c`, `profile.c`, and `trajectory.c` may be candidates, but
   coverage percentage alone is not a reason to add cases.
 - `0.18.0-upstream-baseline-upgrade-readiness`: open only if the upstream delta
-  audit or a later upstream tag shows material solver, API, performance, or
-  provenance risk that needs a baseline project.
+  audit, provenance readiness, or a later upstream tag shows material solver,
+  API, performance, or provenance risk that needs a baseline project.
 - `0.16.1`: reserve for emergency `v0.16.0` patch bugs only; do not use patch
   releases for documentation, coverage, or tooling polish.
 - Package-manager recipes: reopen only after concrete external install demand

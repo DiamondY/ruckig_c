@@ -35,6 +35,8 @@ Historical rewrite plans and release evidence are retained for traceability.
   policy.
 - `current/upstream_delta_audit.md` - post-`v0.16.0` audit of the frozen
   upstream tree against current upstream tags and HEAD.
+- `design/0.18.0_upstream_baseline_provenance_readiness.md` - docs-only
+  readiness record for upstream baseline provenance.
 - `historical/README.md` - historical documentation maintenance policy and
   active-line boundaries.
 
@@ -176,6 +178,8 @@ Historical rewrite plans and release evidence are retained for traceability.
   upstream delta audit without updating the frozen upstream baseline.
   `release/checklists/post-v0.16.0-docs-maintenance-index-freeze.md` records
   the documentation maintenance freeze and event-driven backlog policy.
+  `release/checklists/0.18.0-upstream-baseline-provenance-readiness.md`
+  records the docs-only upstream baseline provenance readiness decision.
   `release/checklists/post-v0.15.0-quality-audit.md` records the post-release
   code-quality and test-quality audit slice without changing the stable ABI or
   release state.
@@ -308,6 +312,9 @@ gate. The previous v1 gallery provenance remains available through the
   keep wrappers prototype-only until package/discovery ownership is accepted.
 - `design/0.17.0_wrapper_package_policy.md` - docs-only package/discovery
   policy blockers for future wrapper stabilization.
+- `design/0.18.0_upstream_baseline_provenance_readiness.md` - docs-only
+  upstream baseline provenance readiness; keeps the baseline frozen without
+  re-labeling it as a post-tag snapshot.
 - `design/0.3.0_release_decision.md` - accepted hardening-release scope for
   `0.3.0`.
 - `design/0.3.0_closeout_checklist.md` - engineering-hardening closeout

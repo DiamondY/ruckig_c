@@ -87,3 +87,10 @@ If the project wants to regularize baseline provenance, open a separate
 whether to keep the current frozen source tree as-is, re-anchor it to an
 upstream tag when one exists, or explicitly document the current post-tag source
 snapshot as the oracle baseline.
+
+## Follow-up Readiness
+
+`docs/design/0.18.0_upstream_baseline_provenance_readiness.md` records the
+readiness-only follow-up. It keeps the current tree frozen as the `0.17.3-line`
+baseline, documents the provenance risk, and does not formally re-label the
+baseline as a post-tag snapshot.

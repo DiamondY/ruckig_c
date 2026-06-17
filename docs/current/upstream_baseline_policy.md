@@ -10,6 +10,12 @@ tag than `v0.17.3`, while upstream HEAD contains post-tag commits. Ordinary
 maintenance must still treat the checked-in `original/ruckig-main` tree as the
 frozen baseline and must not refresh it opportunistically.
 
+The `0.18.0` provenance readiness record in
+`docs/design/0.18.0_upstream_baseline_provenance_readiness.md` keeps this as a
+readiness-only conclusion. It does not formally re-label the baseline as a
+post-tag snapshot and does not change source, oracle, tolerance, or performance
+baselines.
+
 ## Rules
 
 - Ordinary maintenance commits must not modify files under `original/ruckig-main`.
@@ -24,6 +30,8 @@ frozen baseline and must not refresh it opportunistically.
   not update the upstream baseline.
 - Wrapper package policy design, post-`v0.16.0` docs maintenance, and ordinary
   event-driven solver regression triage must not update the upstream baseline.
+- Upstream provenance readiness work may record baseline identity risk, but it
+  must not update or re-anchor `original/ruckig-main`.
 
 ## Upstream Upgrade Requirements
 
