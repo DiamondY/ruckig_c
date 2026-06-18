@@ -138,6 +138,9 @@ or default heavy-random CI policy.
   place, covering ownership, array lifetimes, diagnostics initialization,
   return-code expectations, and `pass_to_input` no-op boundaries without
   changing declarations or ABI.
+- `post-v0.16.0-local-static-analysis-config` adds local clang-format and
+  clang-tidy configuration for targeted developer use, without running
+  formatter churn or adding a default CI gate.
 
 ## 0.17.0 Wrapper Stabilization Readiness
 

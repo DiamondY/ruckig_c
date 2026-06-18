@@ -88,6 +88,14 @@ lifetimes, count requirements, diagnostics initialization, return-code
 expectations, and `ruckig_output_pass_to_input` no-op behavior. This is a
 source-level documentation change only and does not alter the public ABI.
 
+The `post-v0.16.0-local-static-analysis-config` slice adds local
+`.clang-format` and `.clang-tidy` configuration without applying formatter
+churn or changing default CI. The configuration is intended for targeted
+developer use on touched files. Any future promotion of formatting,
+clang-tidy, cppcheck, CodeQL, or coverage upload into routine CI requires a
+separate CI-policy slice that accepts the additional runtime and maintenance
+cost.
+
 Release coverage is recorded at
 `out/coverage/0.16.0/coverage-summary.txt`:
 

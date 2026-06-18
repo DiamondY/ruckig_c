@@ -13,8 +13,9 @@ Historical rewrite plans and release evidence are retained for traceability.
 - `current/api_diagnostics.md` - C API validation and diagnostics behavior.
 - `current/code_quality_audit.md` - post-`v0.15.0` code-quality and
   test-quality risk map, state-machine and solver branch coverage evidence,
-  external-review follow-up hardening evidence, local quality gates, and
-  random replay/materialization policy.
+  external-review follow-up hardening evidence, local quality gates, local
+  static-analysis configuration policy, and random replay/materialization
+  policy.
 - `current/original_parity_coverage.md` - current coverage estimates and gaps
   against the frozen original reference and original product surface.
 - `current/test_coverage_audit.md` - local LLVM coverage summary and original
@@ -205,6 +206,9 @@ Historical rewrite plans and release evidence are retained for traceability.
   boundaries.
   `release/checklists/post-v0.16.0-public-header-doxygen.md` records the
   source-level public header documentation slice without ABI changes.
+  `release/checklists/post-v0.16.0-local-static-analysis-config.md` records
+  the local clang-format and clang-tidy configuration slice without default CI
+  adoption.
   `release/checklists/post-v0.15.0-quality-audit.md` records the post-release
   code-quality and test-quality audit slice without changing the stable ABI or
   release state.

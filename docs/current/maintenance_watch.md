@@ -24,6 +24,7 @@ event-driven after `v0.16.0`. It is not an active implementation roadmap.
 | `0.16.1` | An emergency stable patch bug affects `v0.16.0`. |
 | Package-manager recipes | External install demand exists and a maintenance owner accepts recipe support. |
 | Wrapper stable publication | The wrapper route-selection work is superseded by an accepted Python-first, Rust-first, or dual-wrapper route with package/discovery ownership. |
+| Static-analysis CI | A maintainer accepts the noise budget, platform availability, runtime cost, and triage ownership for clang-tidy, cppcheck, CodeQL, or formatter gates. |
 
 ## Explicit Non-Triggers
 
@@ -37,6 +38,8 @@ event-driven after `v0.16.0`. It is not an active implementation roadmap.
   source.
 - Do not update `original/ruckig-main` opportunistically during routine
   maintenance.
+- Do not promote local `.clang-format` or `.clang-tidy` configuration into
+  routine CI without a separate CI policy decision.
 
 ## Current Default
 

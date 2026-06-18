@@ -1,0 +1,21 @@
+---
+Checks: >
+  -*,
+  clang-analyzer-*,
+  bugprone-*,
+  performance-*,
+  portability-*,
+  readability-misleading-indentation,
+  readability-redundant-*,
+  readability-inconsistent-declaration-parameter-name
+WarningsAsErrors: ''
+HeaderFilterRegex: '^(include|src|test|examples)/'
+AnalyzeTemporaryDtors: false
+CheckOptions:
+  - key: bugprone-easily-swappable-parameters.MinimumLength
+    value: '6'
+  - key: readability-function-cognitive-complexity.Threshold
+    value: '80'
+  - key: readability-identifier-length.MinimumVariableNameLength
+    value: '1'
+...
