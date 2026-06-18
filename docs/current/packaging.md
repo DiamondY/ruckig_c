@@ -3,6 +3,28 @@
 This document records supported consumer paths for `ruckig_c`. It is a
 maintenance checklist, not a commitment to package-manager recipes.
 
+## CMake Presets
+
+The repository keeps two kinds of local presets:
+
+- `windows-clang-ninja*` presets are maintainer-verified Windows local presets.
+  They intentionally point at the currently verified LLVM and Visual Studio
+  Ninja paths on the maintainer machine.
+- `dev`, `portable-ninja`, `release`, `shared`, and `oracle` avoid hardcoded
+  compiler paths. Use these when the current shell or environment provides the
+  compiler and generator.
+
+For a portable Ninja build:
+
+```sh
+cmake --preset portable-ninja
+cmake --build --preset portable-ninja
+ctest --preset portable-ninja
+```
+
+If Ninja or the compiler is not discoverable, set `CMAKE_C_COMPILER` and
+`CMAKE_CXX_COMPILER` in the environment or use normal `cmake -S/-B` arguments.
+
 ## Installed CMake Package
 
 Install the library and consume the exported CMake target:

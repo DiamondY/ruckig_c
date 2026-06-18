@@ -112,6 +112,12 @@ white-box `ruckig_c_tests` executable by proving a normal in-tree linked
 consumer can create handles, calculate with public diagnostics, run one online
 update, and call `ruckig_output_pass_to_input`.
 
+The `post-v0.16.0-presets-portability-polish` slice keeps the existing
+maintainer-verified Windows LLVM/Ninja presets intact and adds a
+`portable-ninja` preset that relies on the current shell for Ninja and compiler
+discovery. This improves external developer entry points without changing CI or
+invalidating the known-good local Windows presets.
+
 Release coverage is recorded at
 `out/coverage/0.16.0/coverage-summary.txt`:
 

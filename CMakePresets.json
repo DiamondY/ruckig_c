@@ -20,6 +20,21 @@
       }
     },
     {
+      "name": "portable-ninja",
+      "displayName": "Portable Ninja",
+      "description": "Portable Ninja build under out/build/portable-ninja. Uses compilers discoverable from the current shell or CMAKE_C_COMPILER/CMAKE_CXX_COMPILER environment.",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/out/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "BUILD_RUCKIG_C": "ON",
+        "BUILD_RUCKIG_C_TESTS": "ON",
+        "BUILD_RUCKIG_C_EXAMPLES": "ON",
+        "BUILD_RUCKIG_C_ORACLE_TESTS": "OFF",
+        "BUILD_RUCKIG_C_PERFORMANCE_TESTS": "OFF"
+      }
+    },
+    {
       "name": "windows-clang-ninja",
       "displayName": "Windows LLVM clang + Ninja",
       "description": "Windows local build under out/build/windows-clang-ninja using the verified LLVM clang toolchain and Visual Studio bundled Ninja.",
@@ -171,6 +186,11 @@
       "configurePreset": "dev"
     },
     {
+      "name": "portable-ninja",
+      "configurePreset": "portable-ninja",
+      "configuration": "Release"
+    },
+    {
       "name": "windows-clang-ninja",
       "configurePreset": "windows-clang-ninja",
       "configuration": "Release"
@@ -220,6 +240,14 @@
     {
       "name": "dev",
       "configurePreset": "dev",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "portable-ninja",
+      "configurePreset": "portable-ninja",
+      "configuration": "Release",
       "output": {
         "outputOnFailure": true
       }

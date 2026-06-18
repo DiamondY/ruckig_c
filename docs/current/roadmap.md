@@ -147,6 +147,9 @@ or default heavy-random CI policy.
 - `post-v0.16.0-linked-library-smoke` adds a public-header-only test
   executable linked with the `ruckig_c` target, complementing the existing
   white-box test binary without restructuring it.
+- `post-v0.16.0-presets-portability-polish` adds a portable Ninja preset and
+  packaging guidance while preserving the maintainer-verified Windows local
+  presets.
 
 ## 0.17.0 Wrapper Stabilization Readiness
 
