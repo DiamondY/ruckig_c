@@ -25,6 +25,8 @@ or numerical inputs that cannot be validated. Common causes include:
 - A `ruckig_t`, `ruckig_input_t`, `ruckig_output_t`, or `ruckig_trajectory_t`
   created for a different DoF count.
 - NaN position, velocity, acceleration, or limit values.
+- Negative, NaN, or infinite `delta_time` passed to `ruckig_create` or
+  `ruckig_create_with_waypoints`.
 - Negative `max_velocity`, `max_acceleration`, or `max_jerk`.
 - Positive directional lower limits passed through `min_velocity` or
   `min_acceleration`.
@@ -84,6 +86,13 @@ Do not enable unsafe fast-math options that erase IEEE infinity semantics.
 duration. With continuous duration, the solver may use that exact value when it
 is longer than the independent minimum duration. With discrete duration, the
 selected synchronization duration is rounded up to a multiple of `delta_time`.
+
+For compatibility with existing offline calculation users,
+`ruckig_create(..., 0.0)` and `ruckig_create_with_waypoints(..., 0.0, ...)`
+remain valid constructor calls. They are not valid for discrete duration:
+`ruckig_validate_input` and calculation APIs still reject
+`RUCKIG_DURATION_DISCRETE` when the OTG `delta_time` is non-positive.
+Negative, NaN, and infinite constructor `delta_time` values are rejected.
 
 `minimum_duration` must be finite or infinite according to normal `double`
 rules, non-NaN, and non-negative. Use `ruckig_input_clear_minimum_duration` to

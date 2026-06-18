@@ -194,6 +194,9 @@ Historical rewrite plans and release evidence are retained for traceability.
   `release/checklists/post-v0.16.0-constructor-boundary-hardening.md` records
   public constructor capacity overflow hardening and the focused constructor
   boundary selector.
+  `release/checklists/post-v0.16.0-delta-time-policy.md` records constructor
+  rejection of negative, NaN, and infinite `delta_time` while preserving zero
+  `delta_time` compatibility.
   `release/checklists/post-v0.15.0-quality-audit.md` records the post-release
   code-quality and test-quality audit slice without changing the stable ABI or
   release state.

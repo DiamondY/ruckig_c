@@ -1320,6 +1320,9 @@ static ruckig_result_t ruckig_create_impl(
     }
 
     *otg = NULL;
+    if (delta_time < 0.0 || isnan(delta_time) || isinf(delta_time)) {
+        return RUCKIG_ERROR_INVALID_INPUT;
+    }
     if (!ruckig_checked_waypoint_counts(dofs, max_number_of_waypoints, NULL, NULL, &waypoint_values)) {
         return RUCKIG_ERROR_INVALID_INPUT;
     }

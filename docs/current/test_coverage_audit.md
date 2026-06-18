@@ -608,6 +608,24 @@ Added coverage:
 The local checklist is
 `docs/release/checklists/post-v0.16.0-constructor-boundary-hardening.md`.
 
+## Post-v0.16.0 Delta-Time Constructor Policy
+
+The `post-v0.16.0-delta-time-policy` slice extends constructor boundary
+coverage to OTG `delta_time` values.
+
+Added coverage:
+
+| Area | Evidence |
+| --- | --- |
+| Focused selector | Reuses `--constructor-boundaries` and CTest `ruckig_c_constructor_boundaries`. |
+| Invalid constructor values | Confirms `ruckig_create` and `ruckig_create_with_waypoints` reject negative, NaN, and infinite `delta_time` and leave the output handle `NULL`. |
+| Zero compatibility | Confirms ordinary and waypoint OTG constructors still accept `delta_time == 0.0`. |
+| Discrete duration boundary | Existing validation coverage continues to reject zero `delta_time` when `RUCKIG_DURATION_DISCRETE` is selected. |
+| Boundary | No public C ABI, workflow, upstream baseline, visualization asset, wrapper, package, or default heavy-CI change. |
+
+The local checklist is
+`docs/release/checklists/post-v0.16.0-delta-time-policy.md`.
+
 ## 0.14.0-alpha.1 Interrupt Boundary API-Neutral Audit
 
 `0.14.0-alpha.1` adds a focused local audit for the existing

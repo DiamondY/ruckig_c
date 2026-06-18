@@ -121,6 +121,10 @@ or default heavy-random CI policy.
   capacity validation with checked `size_t` arithmetic and adds the focused
   `ruckig_c_constructor_boundaries` selector without changing public ABI,
   release state, workflow, upstream baseline, or default heavy-CI policy.
+- `post-v0.16.0-delta-time-policy` rejects negative, NaN, and infinite
+  `delta_time` values in OTG constructors while preserving
+  `ruckig_create(..., 0.0)` compatibility and leaving discrete-duration
+  rejection in validation/calculation.
 
 ## 0.17.0 Wrapper Stabilization Readiness
 

@@ -49,6 +49,12 @@ New public constructor paths that compute `count + 1`, `count * dofs`, or
 `waypoints * dofs` should use the shared checked-size helpers in
 `src/ruckig_c/internal.h` before allocating or storing derived capacities.
 
+The `post-v0.16.0-delta-time-policy` slice also tightens OTG constructor
+validation. `ruckig_create` and `ruckig_create_with_waypoints` reject negative,
+NaN, and infinite `delta_time` values before allocation while preserving
+`delta_time == 0.0` for existing offline-compatible usage. Discrete duration
+with zero `delta_time` remains invalid at validate/calculate time.
+
 Release coverage is recorded at
 `out/coverage/0.16.0/coverage-summary.txt`:
 

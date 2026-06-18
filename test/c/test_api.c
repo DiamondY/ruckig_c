@@ -65,6 +65,26 @@ static void test_constructor_boundary_validation(void) {
 
     CHECK_EQ_INT(ruckig_create(NULL, 1, 0.01), RUCKIG_ERROR_INVALID_INPUT);
     CHECK_EQ_INT(ruckig_create(&otg, 0, 0.01), RUCKIG_ERROR_INVALID_INPUT);
+    CHECK_EQ_INT(ruckig_create(&otg, 1, -0.01), RUCKIG_ERROR_INVALID_INPUT);
+    CHECK_TRUE(otg == NULL);
+    CHECK_EQ_INT(ruckig_create(&otg, 1, NAN), RUCKIG_ERROR_INVALID_INPUT);
+    CHECK_TRUE(otg == NULL);
+    CHECK_EQ_INT(ruckig_create(&otg, 1, INFINITY), RUCKIG_ERROR_INVALID_INPUT);
+    CHECK_TRUE(otg == NULL);
+    CHECK_EQ_INT(ruckig_create(&otg, 1, 0.0), RUCKIG_WORKING);
+    CHECK_TRUE(otg != NULL);
+    ruckig_destroy(otg);
+    otg = NULL;
+    CHECK_EQ_INT(ruckig_create_with_waypoints(&otg, 1, -0.01, 1), RUCKIG_ERROR_INVALID_INPUT);
+    CHECK_TRUE(otg == NULL);
+    CHECK_EQ_INT(ruckig_create_with_waypoints(&otg, 1, NAN, 1), RUCKIG_ERROR_INVALID_INPUT);
+    CHECK_TRUE(otg == NULL);
+    CHECK_EQ_INT(ruckig_create_with_waypoints(&otg, 1, INFINITY, 1), RUCKIG_ERROR_INVALID_INPUT);
+    CHECK_TRUE(otg == NULL);
+    CHECK_EQ_INT(ruckig_create_with_waypoints(&otg, 1, 0.0, 1), RUCKIG_WORKING);
+    CHECK_TRUE(otg != NULL);
+    ruckig_destroy(otg);
+    otg = NULL;
     CHECK_EQ_INT(ruckig_input_create_with_waypoints(NULL, 1, 1), RUCKIG_ERROR_INVALID_INPUT);
     CHECK_EQ_INT(ruckig_input_create_with_waypoints(&input, 0, 1), RUCKIG_ERROR_INVALID_INPUT);
     CHECK_EQ_INT(ruckig_output_create_with_waypoints(NULL, 1, 1), RUCKIG_ERROR_INVALID_INPUT);
