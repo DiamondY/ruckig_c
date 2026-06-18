@@ -20,6 +20,8 @@ event-driven after `v0.16.0`. It is not an active implementation roadmap.
   developer use; they remain manual evidence, not default CI gates.
 - Static-analysis evidence policy is documented; default CI still excludes
   clang-tidy, cppcheck, CodeQL, formatter gates, and coverage upload.
+- The post-`v0.16.0` quality tightening series is closed out; remaining quality
+  expansion is event-driven.
 
 ## Watch Triggers
 
@@ -34,6 +36,7 @@ event-driven after `v0.16.0`. It is not an active implementation roadmap.
 | Static-analysis CI | A maintainer accepts the noise budget, platform availability, runtime cost, and triage ownership for clang-tidy, cppcheck, CodeQL, or formatter gates. |
 | Thread-safe allocation audit counters | A concrete multi-threaded audit use case needs consistent aggregate allocation statistics across threads. |
 | CI matrix expansion | A maintainer accepts owner, runtime, and triage cost for MSVC full matrix, Windows sanitizer, macOS sanitizer/oracle/performance, coverage upload, or new static-analysis jobs. |
+| Solver white-box coverage push | A reproducible oracle mismatch, public behavior regression, user report, or stable invariant justifies cases; coverage percentage alone is insufficient. |
 
 ## Explicit Non-Triggers
 
@@ -55,6 +58,7 @@ event-driven after `v0.16.0`. It is not an active implementation roadmap.
   audit use without a concrete consumer.
 - Do not expand default CI for coverage upload, static analysis, sanitizer
   matrix, or platform-matrix polish without an accepted CI policy slice.
+- Do not open solver white-box coverage work solely to improve percentages.
 
 ## Current Default
 

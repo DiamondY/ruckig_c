@@ -172,6 +172,31 @@ recorded as successful local evidence. Formatter, clang-tidy, cppcheck, CodeQL,
 coverage upload, and platform-matrix expansion remain owner-gated future work,
 not default push CI.
 
+## Post-v0.16.0 Quality Tightening Closeout
+
+The `post-v0.16.0-quality-tightening-closeout` slice records this quality
+tightening series as complete. The series addressed the accepted priority items
+without changing the public ABI, workflow, version metadata, release state,
+upstream baseline, visualization assets, wrapper publication, or package
+recipes.
+
+Completed outcomes:
+
+| Area | Closeout state |
+| --- | --- |
+| Installed CMake package version policy | `SameMinorVersion` is the installed package compatibility policy, with versioned consumer smoke for `find_package(ruckig_c 0.16 CONFIG REQUIRED)`. |
+| Developer tooling portability | Portable preset guidance uses shell discovery, `CC`/`CXX`, or explicit CMake cache variables; clang-tidy header filtering handles absolute and Windows-style paths. |
+| Linked consumer coverage | Public-header-only linked smoke now covers no-waypoint, waypoint, and Fast tracking workflows while the white-box test binary remains intact. |
+| Calculation duration timing | Optional duration builds use the monotonic platform clock for elapsed microseconds; default builds still report `0.0`. |
+| Installed package metadata | Static/shared exported target metadata and instrumentation flag leakage are covered by focused installed consumer checks. |
+| Static-analysis policy | Local clang-tidy evidence is recorded, while clang-tidy, cppcheck, CodeQL, formatter gates, coverage upload, and larger sanitizer/platform matrices remain owner-gated. |
+
+Remaining non-active work stays in `docs/current/maintenance_watch.md`.
+Full CI static analyzer adoption, MSVC full-matrix expansion, Windows
+sanitizers, macOS sanitizer/oracle/performance expansion, solver white-box
+coverage pushes, package-manager recipes, and wrapper publication require
+separate triggers and owner acceptance.
+
 Release coverage is recorded at
 `out/coverage/0.16.0/coverage-summary.txt`:
 

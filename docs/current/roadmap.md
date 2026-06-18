@@ -176,6 +176,11 @@ or default heavy-random CI policy.
   clang-tidy evidence and keeps clang-tidy, cppcheck, CodeQL, formatter,
   coverage upload, and broader sanitizer/platform matrix gates out of default
   CI until an owner accepts the cost.
+- `post-v0.16.0-quality-tightening-closeout` closes the quality tightening
+  series by recording completed package-version, tooling, linked-smoke,
+  duration-timing, package-metadata, and static-analysis policy work, while
+  leaving broader CI/static-analysis/platform and solver coverage work
+  event-driven.
 
 ## 0.17.0 Wrapper Stabilization Readiness
 

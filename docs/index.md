@@ -239,6 +239,8 @@ Historical rewrite plans and release evidence are retained for traceability.
   `release/checklists/post-v0.16.0-ci-static-analysis-evidence-policy.md`
   records local static-analysis evidence and keeps static analysis out of
   default CI.
+  `release/checklists/post-v0.16.0-quality-tightening-closeout.md` records the
+  closeout for the post-`v0.16.0` quality tightening series.
   `release/checklists/post-v0.15.0-quality-audit.md` records the post-release
   code-quality and test-quality audit slice without changing the stable ABI or
   release state.
