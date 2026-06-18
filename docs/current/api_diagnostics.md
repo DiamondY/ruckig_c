@@ -205,3 +205,14 @@ ordering, waypoint queue internals, or random seed/sample tooling state. Python
 and Rust wrappers now include minimal prototype smoke mappings for these
 diagnostics, but remain prototype-only until a separate stabilization design is
 accepted.
+
+## Public Header Documentation
+
+The `post-v0.16.0-public-header-doxygen` slice adds source-level Doxygen
+comments to `include/ruckig_c/ruckig.h`. The comments document ownership,
+destroy `NULL` safety, array accessor lifetimes, count requirements,
+diagnostics initialization, and no-op behavior for
+`ruckig_output_pass_to_input` DoF mismatches.
+
+This is documentation only. It does not change declarations, enum values,
+struct layout, public symbols, or ABI compatibility.

@@ -203,6 +203,8 @@ Historical rewrite plans and release evidence are retained for traceability.
   `release/checklists/post-v0.16.0-build-instrumentation-scope-hardening.md`
   records sanitizer and coverage CMake link-scope hardening for consumer
   boundaries.
+  `release/checklists/post-v0.16.0-public-header-doxygen.md` records the
+  source-level public header documentation slice without ABI changes.
   `release/checklists/post-v0.15.0-quality-audit.md` records the post-release
   code-quality and test-quality audit slice without changing the stable ABI or
   release state.

@@ -81,6 +81,13 @@ requirements to downstream consumers. The pkg-config `Libs.private` sanitizer
 entry remains an opt-in instrumented pkg-config build detail, not a default
 consumer requirement.
 
+The `post-v0.16.0-public-header-doxygen` slice addresses public API
+readability by documenting the full public header in place. The added comments
+cover handle ownership, `NULL`-safe destroy functions, array accessor
+lifetimes, count requirements, diagnostics initialization, return-code
+expectations, and `ruckig_output_pass_to_input` no-op behavior. This is a
+source-level documentation change only and does not alter the public ABI.
+
 Release coverage is recorded at
 `out/coverage/0.16.0/coverage-summary.txt`:
 

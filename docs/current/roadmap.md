@@ -134,6 +134,10 @@ or default heavy-random CI policy.
   coverage link flags private to explicitly instrumented CMake targets so they
   do not propagate to downstream consumers through `ruckig_c` usage
   requirements.
+- `post-v0.16.0-public-header-doxygen` documents the full public C header in
+  place, covering ownership, array lifetimes, diagnostics initialization,
+  return-code expectations, and `pass_to_input` no-op boundaries without
+  changing declarations or ABI.
 
 ## 0.17.0 Wrapper Stabilization Readiness
 
