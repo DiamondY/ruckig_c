@@ -585,9 +585,16 @@ The `post-v0.16.0-linked-library-smoke` slice adds CTest
 binary, the smoke includes only the public header and links the `ruckig_c`
 target, covering lifecycle, calculate-with-diagnostics, update, and
 `ruckig_output_pass_to_input` through a normal in-tree linked consumer path.
+The `post-v0.16.0-linked-consumer-smoke-expansion` slice extends the same smoke
+with minimum waypoint calculate and Fast tracking public diagnostics workflows
+without inspecting private diagnostics, candidate ordering, score internals, or
+queue internals.
 
 The local checklist is
 `docs/release/checklists/post-v0.16.0-linked-library-smoke.md`.
+
+The expansion checklist is
+`docs/release/checklists/post-v0.16.0-linked-consumer-smoke-expansion.md`.
 
 ## Post-v0.16.0 Precision Constants Hardening
 

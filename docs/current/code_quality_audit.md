@@ -127,6 +127,12 @@ white-box `ruckig_c_tests` executable by proving a normal in-tree linked
 consumer can create handles, calculate with public diagnostics, run one online
 update, and call `ruckig_output_pass_to_input`.
 
+The `post-v0.16.0-linked-consumer-smoke-expansion` slice extends that linked
+consumer smoke to minimum waypoint and tracking workflows. It still avoids
+private diagnostics, candidate order, score internals, queue internals, and the
+large white-box test structure; the goal is target-linkage realism for public
+workflows, not duplicate solver coverage.
+
 The `post-v0.16.0-presets-portability-polish` slice keeps the existing
 maintainer-verified Windows LLVM/Ninja presets intact and adds a
 `portable-ninja` preset that relies on the current shell for Ninja and compiler

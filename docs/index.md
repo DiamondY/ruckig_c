@@ -222,6 +222,9 @@ Historical rewrite plans and release evidence are retained for traceability.
   sequencing test.
   `release/checklists/post-v0.16.0-linked-library-smoke.md` records the
   public-header-only linked library smoke test.
+  `release/checklists/post-v0.16.0-linked-consumer-smoke-expansion.md` records
+  the no-waypoint, waypoint, and tracking expansion of that linked target
+  smoke.
   `release/checklists/post-v0.16.0-presets-portability-polish.md` records the
   portable CMake preset guidance slice.
   `release/checklists/post-v0.16.0-precision-constants-hardening.md` records
