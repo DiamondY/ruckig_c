@@ -22,8 +22,10 @@ cmake --build --preset portable-ninja
 ctest --preset portable-ninja
 ```
 
-If Ninja or the compiler is not discoverable, set `CMAKE_C_COMPILER` and
-`CMAKE_CXX_COMPILER` in the environment or use normal `cmake -S/-B` arguments.
+If Ninja or the compiler is not discoverable, set the standard `CC` and `CXX`
+environment variables before configuring, or pass `CMAKE_C_COMPILER` and
+`CMAKE_CXX_COMPILER` as CMake cache variables with normal `cmake -S/-B`
+arguments such as `-DCMAKE_C_COMPILER=... -DCMAKE_CXX_COMPILER=...`.
 
 ## Installed CMake Package
 

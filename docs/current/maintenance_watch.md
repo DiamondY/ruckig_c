@@ -16,6 +16,8 @@ event-driven after `v0.16.0`. It is not an active implementation roadmap.
 - Allocation audit counters are documented as local, non-thread-safe
   instrumentation; no atomics or locks are planned unless a future threaded
   audit requirement is accepted.
+- Local `.clang-tidy` and portable preset guidance are available for targeted
+  developer use; they remain manual evidence, not default CI gates.
 
 ## Watch Triggers
 

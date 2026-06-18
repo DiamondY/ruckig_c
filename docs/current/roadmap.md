@@ -144,6 +144,9 @@ or default heavy-random CI policy.
 - `post-v0.16.0-local-static-analysis-config` adds local clang-format and
   clang-tidy configuration for targeted developer use, without running
   formatter churn or adding a default CI gate.
+- `post-v0.16.0-developer-tooling-portability-polish` fixes portable preset
+  compiler guidance, makes the clang-tidy header filter path-portable, and
+  records a targeted local clang-tidy evidence run without changing CI.
 - `post-v0.16.0-allocation-audit-threading-policy` documents allocation
   counters as local non-thread-safe audit instrumentation and adds
   deterministic counter sequencing coverage without adding atomics or locks.

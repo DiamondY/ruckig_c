@@ -22,7 +22,7 @@
     {
       "name": "portable-ninja",
       "displayName": "Portable Ninja",
-      "description": "Portable Ninja build under out/build/portable-ninja. Uses compilers discoverable from the current shell or CMAKE_C_COMPILER/CMAKE_CXX_COMPILER environment.",
+      "description": "Portable Ninja build under out/build/portable-ninja. Uses compilers discoverable from the current shell, CC/CXX, or explicit CMAKE_C_COMPILER/CMAKE_CXX_COMPILER cache arguments.",
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/out/build/${presetName}",
       "cacheVariables": {

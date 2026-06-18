@@ -103,6 +103,14 @@ clang-tidy, cppcheck, CodeQL, or coverage upload into routine CI requires a
 separate CI-policy slice that accepts the additional runtime and maintenance
 cost.
 
+The `post-v0.16.0-developer-tooling-portability-polish` slice fixes local
+tooling usability details discovered after that configuration landed. The
+portable Ninja preset guidance now points users to standard `CC`/`CXX`
+environment variables or explicit CMake compiler cache variables, and the
+`.clang-tidy` header filter matches absolute and Windows-style paths. A
+targeted local `clang-tidy test/c/linked_library_smoke.c -- -std=c99 -Iinclude`
+run completed successfully; static analysis remains local/manual evidence.
+
 The `post-v0.16.0-allocation-audit-threading-policy` slice records the
 threading boundary for allocation audit counters. The counters in
 `src/ruckig_c/alloc.h` are local test/audit instrumentation and are not

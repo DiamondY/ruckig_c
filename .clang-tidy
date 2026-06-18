@@ -9,8 +9,7 @@ Checks: >
   readability-redundant-*,
   readability-inconsistent-declaration-parameter-name
 WarningsAsErrors: ''
-HeaderFilterRegex: '^(include|src|test|examples)/'
-AnalyzeTemporaryDtors: false
+HeaderFilterRegex: '(^|[/\\])(include|src|test|examples)[/\\]'
 CheckOptions:
   - key: bugprone-easily-swappable-parameters.MinimumLength
     value: '6'

@@ -214,6 +214,9 @@ Historical rewrite plans and release evidence are retained for traceability.
   `release/checklists/post-v0.16.0-local-static-analysis-config.md` records
   the local clang-format and clang-tidy configuration slice without default CI
   adoption.
+  `release/checklists/post-v0.16.0-developer-tooling-portability-polish.md`
+  records portable preset guidance and clang-tidy path-filter usability
+  hardening.
   `release/checklists/post-v0.16.0-allocation-audit-threading-policy.md`
   records the allocation audit counter threading boundary and deterministic
   sequencing test.
