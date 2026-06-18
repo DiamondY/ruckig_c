@@ -130,6 +130,10 @@ or default heavy-random CI policy.
   the default public-constructor rule, and leaves sanitizer/static analyzer,
   coverage, performance, and heavy random work as local/manual evidence unless
   future CI policy changes.
+- `post-v0.16.0-build-instrumentation-scope-hardening` keeps sanitizer and
+  coverage link flags private to explicitly instrumented CMake targets so they
+  do not propagate to downstream consumers through `ruckig_c` usage
+  requirements.
 
 ## 0.17.0 Wrapper Stabilization Readiness
 

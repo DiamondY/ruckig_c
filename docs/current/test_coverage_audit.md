@@ -653,6 +653,25 @@ CI after a separate CI policy decision.
 The local checklist is
 `docs/release/checklists/post-v0.16.0-quality-gate-refresh.md`.
 
+## Post-v0.16.0 Build Instrumentation Scope Hardening
+
+The `post-v0.16.0-build-instrumentation-scope-hardening` slice keeps sanitizer
+and coverage instrumentation opt-in for the targets that request it while
+removing CMake usage-requirement propagation to downstream consumers.
+
+Added evidence:
+
+| Area | Evidence |
+| --- | --- |
+| Sanitizer scope | `ruckig_c_apply_sanitizers` keeps compile and link instrumentation private to each instrumented target. |
+| Coverage scope | `ruckig_c_apply_coverage` keeps LLVM coverage compile and link instrumentation private to each coverage target. |
+| Consumer boundary | Normal and shared consumer/header diagnostics gates remain the verification path for non-instrumented consumers. |
+| pkg-config boundary | Sanitizer entries remain in pkg-config private libs only for explicitly instrumented pkg-config builds. |
+| Boundary | No public C ABI, workflow, upstream baseline, visualization asset, wrapper, package recipe, or default heavy-CI change. |
+
+The local checklist is
+`docs/release/checklists/post-v0.16.0-build-instrumentation-scope-hardening.md`.
+
 ## 0.14.0-alpha.1 Interrupt Boundary API-Neutral Audit
 
 `0.14.0-alpha.1` adds a focused local audit for the existing

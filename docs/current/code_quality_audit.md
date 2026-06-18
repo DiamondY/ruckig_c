@@ -73,6 +73,14 @@ Refreshed local quality gates:
 | ABI/export | Shared export comparison passed against the approved `0.16.0` allowlist. |
 | Boundary | Public header, ABI docs, workflow, upstream baseline, and visualization asset diffs are empty. |
 
+The `post-v0.16.0-build-instrumentation-scope-hardening` slice tightens the
+build-system side of that policy. Sanitizer and coverage link options are
+private target instrumentation for the targets that opt into them through
+CMake options; they are not propagated through `ruckig_c`'s CMake usage
+requirements to downstream consumers. The pkg-config `Libs.private` sanitizer
+entry remains an opt-in instrumented pkg-config build detail, not a default
+consumer requirement.
+
 Release coverage is recorded at
 `out/coverage/0.16.0/coverage-summary.txt`:
 
