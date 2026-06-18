@@ -1950,6 +1950,45 @@ static void test_no_allocation_in_realtime_paths(void) {
     ruckig_destroy(otg);
 }
 
+static void test_allocation_audit_counter_sequence(void) {
+    void* first = NULL;
+    void* second = NULL;
+
+    ruckig_allocation_counters_reset();
+    CHECK_EQ_INT(ruckig_allocation_count(), 0);
+    CHECK_EQ_INT(ruckig_free_count(), 0);
+    CHECK_EQ_INT(ruckig_allocation_forbidden_count(), 0);
+
+    ruckig_allocation_forbidden_set(true);
+    first = ruckig_calloc(1, sizeof(double));
+    CHECK_TRUE(first != NULL);
+    CHECK_EQ_INT(ruckig_allocation_count(), 1);
+    CHECK_EQ_INT(ruckig_free_count(), 0);
+    CHECK_EQ_INT(ruckig_allocation_forbidden_count(), 1);
+
+    ruckig_free(first);
+    CHECK_EQ_INT(ruckig_allocation_count(), 1);
+    CHECK_EQ_INT(ruckig_free_count(), 1);
+    CHECK_EQ_INT(ruckig_allocation_forbidden_count(), 1);
+
+    ruckig_allocation_forbidden_set(false);
+    second = ruckig_calloc(1, sizeof(double));
+    CHECK_TRUE(second != NULL);
+    CHECK_EQ_INT(ruckig_allocation_count(), 2);
+    CHECK_EQ_INT(ruckig_free_count(), 1);
+    CHECK_EQ_INT(ruckig_allocation_forbidden_count(), 1);
+
+    ruckig_free(second);
+    CHECK_EQ_INT(ruckig_allocation_count(), 2);
+    CHECK_EQ_INT(ruckig_free_count(), 2);
+    CHECK_EQ_INT(ruckig_allocation_forbidden_count(), 1);
+
+    ruckig_allocation_counters_reset();
+    CHECK_EQ_INT(ruckig_allocation_count(), 0);
+    CHECK_EQ_INT(ruckig_free_count(), 0);
+    CHECK_EQ_INT(ruckig_allocation_forbidden_count(), 0);
+}
+
 static void test_waypoint_constructors_storage_and_optimizer(void) {
     ruckig_t* otg = NULL;
     ruckig_t* section_otg = NULL;
@@ -9827,6 +9866,7 @@ void run_api_tests(void) {
     test_velocity_third_order_calculate();
     test_velocity_third_order_minimum_duration();
     test_no_allocation_in_realtime_paths();
+    test_allocation_audit_counter_sequence();
     run_waypoint_tests();
     run_tracking_tests();
     test_position_third_order_nonzero_target_velocity();

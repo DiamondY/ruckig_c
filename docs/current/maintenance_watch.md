@@ -13,6 +13,9 @@ event-driven after `v0.16.0`. It is not an active implementation roadmap.
 - Package-manager recipes remain frozen.
 - Constructor capacity overflow and invalid constructor `delta_time` handling
   are covered baseline risks after the post-`v0.16.0` quality hardening slices.
+- Allocation audit counters are documented as local, non-thread-safe
+  instrumentation; no atomics or locks are planned unless a future threaded
+  audit requirement is accepted.
 
 ## Watch Triggers
 
@@ -25,6 +28,7 @@ event-driven after `v0.16.0`. It is not an active implementation roadmap.
 | Package-manager recipes | External install demand exists and a maintenance owner accepts recipe support. |
 | Wrapper stable publication | The wrapper route-selection work is superseded by an accepted Python-first, Rust-first, or dual-wrapper route with package/discovery ownership. |
 | Static-analysis CI | A maintainer accepts the noise budget, platform availability, runtime cost, and triage ownership for clang-tidy, cppcheck, CodeQL, or formatter gates. |
+| Thread-safe allocation audit counters | A concrete multi-threaded audit use case needs consistent aggregate allocation statistics across threads. |
 
 ## Explicit Non-Triggers
 
@@ -40,6 +44,8 @@ event-driven after `v0.16.0`. It is not an active implementation roadmap.
   maintenance.
 - Do not promote local `.clang-format` or `.clang-tidy` configuration into
   routine CI without a separate CI policy decision.
+- Do not add locks or atomics to allocation counters for hypothetical threaded
+  audit use without a concrete consumer.
 
 ## Current Default
 

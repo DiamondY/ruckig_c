@@ -141,6 +141,9 @@ or default heavy-random CI policy.
 - `post-v0.16.0-local-static-analysis-config` adds local clang-format and
   clang-tidy configuration for targeted developer use, without running
   formatter churn or adding a default CI gate.
+- `post-v0.16.0-allocation-audit-threading-policy` documents allocation
+  counters as local non-thread-safe audit instrumentation and adds
+  deterministic counter sequencing coverage without adding atomics or locks.
 
 ## 0.17.0 Wrapper Stabilization Readiness
 

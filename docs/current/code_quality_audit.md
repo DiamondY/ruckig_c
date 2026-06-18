@@ -96,6 +96,15 @@ clang-tidy, cppcheck, CodeQL, or coverage upload into routine CI requires a
 separate CI-policy slice that accepts the additional runtime and maintenance
 cost.
 
+The `post-v0.16.0-allocation-audit-threading-policy` slice records the
+threading boundary for allocation audit counters. The counters in
+`src/ruckig_c/alloc.h` are local test/audit instrumentation and are not
+thread-safe aggregate statistics. The runtime library continues to rely on
+caller ownership: independent handles can be used independently, while a
+shared handle requires external synchronization. A deterministic sequencing
+test now covers counter reset, forbidden-allocation counting, and free-count
+behavior without adding locks or atomics to the real-time path.
+
 Release coverage is recorded at
 `out/coverage/0.16.0/coverage-summary.txt`:
 
@@ -502,7 +511,7 @@ Existing selectors that remain relevant to this audit:
 | `ruckig_c_tracking_quality_hardening` | Deterministic Optimized tracking random-audit thresholds and representative cases. |
 | `ruckig_c_tracking_no_allocation` | Tracking real-time path allocation guard. |
 | `ruckig_c_waypoint_resume_stress` | Waypoint true-resume budget matrix, long online loop, and allocation guard. |
-| `ruckig_c_allocation_audit` | Static allocation audit for real-time-sensitive paths. |
+| `ruckig_c_allocation_audit` | Static allocation audit for real-time-sensitive paths; allocation counters are local, non-thread-safe audit instrumentation. |
 | `ruckig_c_constructor_boundaries` | Public constructor null/zero-DoF, capacity overflow, tracking sequence overflow, and invalid `delta_time` boundary coverage. |
 
 ## Random Failure Materialization
