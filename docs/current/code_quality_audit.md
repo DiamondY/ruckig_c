@@ -133,6 +133,13 @@ private diagnostics, candidate order, score internals, queue internals, and the
 large white-box test structure; the goal is target-linkage realism for public
 workflows, not duplicate solver coverage.
 
+The `post-v0.16.0-calculation-duration-clock-policy` slice changes optional
+`RUCKIG_C_ENABLE_CALCULATION_DURATION` reporting from `clock()` CPU-time style
+measurement to the existing monotonic platform clock helper. Default builds
+still report `0.0`; enabled builds report elapsed microseconds and guard
+against clock fallback/direction anomalies by returning `0.0` if the stop value
+is earlier than the start value.
+
 The `post-v0.16.0-presets-portability-polish` slice keeps the existing
 maintainer-verified Windows LLVM/Ninja presets intact and adds a
 `portable-ninja` preset that relies on the current shell for Ninja and compiler

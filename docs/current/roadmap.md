@@ -156,6 +156,9 @@ or default heavy-random CI policy.
 - `post-v0.16.0-linked-consumer-smoke-expansion` extends that linked target
   smoke across no-waypoint, waypoint, and Fast tracking public workflows while
   avoiding private diagnostics or evaluator internals.
+- `post-v0.16.0-calculation-duration-clock-policy` switches optional
+  calculation-duration reporting to the existing monotonic platform clock while
+  preserving default `0.0` behavior when the option is disabled.
 - `post-v0.16.0-presets-portability-polish` adds a portable Ninja preset and
   packaging guidance while preserving the maintainer-verified Windows local
   presets.

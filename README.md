@@ -357,7 +357,7 @@ Useful CMake options:
 - `BUILD_RUCKIG_C_EXAMPLES=ON` builds C examples.
 - `BUILD_RUCKIG_C_ORACLE_TESTS=ON` builds the C++ differential oracle tests against `original/ruckig-main`.
 - `BUILD_RUCKIG_C_PERFORMANCE_TESTS=ON` builds the C/C++ oracle performance benchmark.
-- `RUCKIG_C_ENABLE_CALCULATION_DURATION=ON` records `ruckig_update` calculation duration in microseconds in `ruckig_output_get_calculation_duration`.
+- `RUCKIG_C_ENABLE_CALCULATION_DURATION=ON` records `ruckig_update` monotonic elapsed calculation duration in microseconds in `ruckig_output_get_calculation_duration`.
 - `BUILD_SHARED_LIBS=ON` builds a shared library instead of a static library.
 
 On Windows, the current verified CMake path uses LLVM clang/clang++ with the
@@ -514,7 +514,7 @@ Create functions allocate handles and all vectors owned by those handles. The in
 
 The current implementation includes an internal allocation counter hook used by C tests. It verifies representative `ruckig_calculate`, `ruckig_update`, and `ruckig_trajectory_at_time` paths do not call the library's allocation helpers after lifecycle setup. CTest also runs a source-level allocation audit that rejects direct `malloc`/`calloc`/`realloc`/`free` calls outside `src/ruckig_c/alloc.c`.
 
-`ruckig_output_get_calculation_duration` returns `0.0` by default. Define `RUCKIG_C_ENABLE_CALCULATION_DURATION` or configure CMake with `-DRUCKIG_C_ENABLE_CALCULATION_DURATION=ON` to measure `ruckig_update` calculation duration in microseconds.
+`ruckig_output_get_calculation_duration` returns `0.0` by default. Define `RUCKIG_C_ENABLE_CALCULATION_DURATION` or configure CMake with `-DRUCKIG_C_ENABLE_CALCULATION_DURATION=ON` to measure `ruckig_update` monotonic elapsed calculation duration in microseconds.
 
 Ownership rules:
 

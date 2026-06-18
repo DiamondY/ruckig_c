@@ -1,30 +1,28 @@
 #include "ruckig_c/internal.h"
 
 #include "ruckig_c/interrupt_context.h"
+#include "ruckig_c/platform_clock.h"
 #include "ruckig_c/position_first.h"
 #include "ruckig_c/velocity_second.h"
 
 #include <math.h>
 #include <string.h>
-#ifdef RUCKIG_C_ENABLE_CALCULATION_DURATION
-#include <time.h>
-#endif
 
-static double calculation_duration_start(void) {
+static uint64_t calculation_duration_start(void) {
 #ifdef RUCKIG_C_ENABLE_CALCULATION_DURATION
-    return (double)clock();
+    return ruckig_platform_monotonic_time_us();
 #else
-    return 0.0;
+    return 0u;
 #endif
 }
 
-static double calculation_duration_finish(double start) {
+static double calculation_duration_finish(uint64_t start) {
 #ifdef RUCKIG_C_ENABLE_CALCULATION_DURATION
-    const clock_t stop = clock();
-    if (stop == (clock_t)-1) {
+    const uint64_t stop = ruckig_platform_monotonic_time_us();
+    if (stop < start) {
         return 0.0;
     }
-    return (((double)stop - start) * 1000000.0) / (double)CLOCKS_PER_SEC;
+    return (double)(stop - start);
 #else
     (void)start;
     return 0.0;
@@ -1687,7 +1685,7 @@ static ruckig_result_t ruckig_update_impl(
     ruckig_output_t* output,
     ruckig_diagnostics_t* diagnostics
 ) {
-    const double calculation_start = calculation_duration_start();
+    const uint64_t calculation_start = calculation_duration_start();
     bool waypoint_resume_mismatch;
     size_t waypoint_capacity_expected = 0u;
     size_t waypoint_capacity_actual = 0u;

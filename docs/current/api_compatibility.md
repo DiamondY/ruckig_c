@@ -227,8 +227,9 @@ the public C ABI:
 - Public `ruckig_calculate`, no-waypoint target solving, and tracking remain
   unchanged by the field.
 - `RUCKIG_C_ENABLE_CALCULATION_DURATION` continues to control only
-  `ruckig_output_get_calculation_duration`; soft interruption uses internal
-  budget timing when the input field is set.
+  `ruckig_output_get_calculation_duration`; when enabled, that getter reports
+  monotonic elapsed microseconds for `ruckig_update`. Soft interruption still
+  uses the input interrupt budget rather than the public reporting option.
 - The internal platform clock abstraction can be overridden at compile time
   with `RUCKIG_C_PLATFORM_CLOCK_HEADER` and
   `RUCKIG_C_CUSTOM_MONOTONIC_TIME_US`. These are build-time implementation
@@ -255,7 +256,8 @@ without expanding the public C ABI:
   field.
 - Soft interruption still uses internal budget timing independent of
   `RUCKIG_C_ENABLE_CALCULATION_DURATION`; the public calculation-duration
-  getter keeps its existing compile-time option semantics.
+  getter keeps its existing compile-time option semantics and reports monotonic
+  elapsed microseconds when enabled.
 - The private true-resume state, planning-identity snapshot, branch queue, and
   step-driven optimizer cursors are internal implementation details. They do
   not add public getters, runtime diagnostics, public structs, or exported C
