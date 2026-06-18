@@ -18,6 +18,8 @@ event-driven after `v0.16.0`. It is not an active implementation roadmap.
   audit requirement is accepted.
 - Local `.clang-tidy` and portable preset guidance are available for targeted
   developer use; they remain manual evidence, not default CI gates.
+- Static-analysis evidence policy is documented; default CI still excludes
+  clang-tidy, cppcheck, CodeQL, formatter gates, and coverage upload.
 
 ## Watch Triggers
 
@@ -47,6 +49,8 @@ event-driven after `v0.16.0`. It is not an active implementation roadmap.
   maintenance.
 - Do not promote local `.clang-format` or `.clang-tidy` configuration into
   routine CI without a separate CI policy decision.
+- Do not add cppcheck, CodeQL, formatter, or coverage-upload gates merely
+  because local configuration exists.
 - Do not add locks or atomics to allocation counters for hypothetical threaded
   audit use without a concrete consumer.
 - Do not expand default CI for coverage upload, static analysis, sanitizer

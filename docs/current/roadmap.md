@@ -172,6 +172,10 @@ or default heavy-random CI policy.
 - `post-v0.16.0-ci-coverage-policy-refresh` records current CI coverage and
   owner-gated triggers for future static-analysis, sanitizer, coverage, and
   platform-matrix expansion without editing the workflow.
+- `post-v0.16.0-ci-static-analysis-evidence-policy` records targeted local
+  clang-tidy evidence and keeps clang-tidy, cppcheck, CodeQL, formatter,
+  coverage upload, and broader sanitizer/platform matrix gates out of default
+  CI until an owner accepts the cost.
 
 ## 0.17.0 Wrapper Stabilization Readiness
 

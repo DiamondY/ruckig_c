@@ -36,6 +36,18 @@ policy slice explicitly accepts their cost:
 | macOS sanitizer/oracle/performance | Not routine CI. |
 | Heavy random / release random | Manual release or event-triggered evidence, not default push CI. |
 
+The `post-v0.16.0-ci-static-analysis-evidence-policy` slice keeps this
+boundary unchanged. The current `.clang-tidy` configuration is usable for
+targeted local runs after the path-portable `HeaderFilterRegex` update. Local
+evidence from this series:
+
+```sh
+clang-tidy test/c/linked_library_smoke.c --quiet -- -std=c99 -Iinclude
+```
+
+The command exited successfully locally and emitted only the normal warning
+summary. This is recorded as manual evidence, not as a default CI gate.
+
 ## Promotion Criteria
 
 Do not expand default CI merely because a tool exists. A new routine CI gate
@@ -51,6 +63,10 @@ needs all of the following:
 Static analysis, sanitizer expansion, coverage upload, MSVC full-matrix
 coverage, and macOS oracle/performance work should each be opened as separate
 policy slices if their triggers are met.
+
+The same rule applies to formatter gates, cppcheck, CodeQL, and coverage upload:
+do not add them to `.github/workflows/ci.yml` without an accepted owner, runtime
+budget, noise policy, and failure triage path.
 
 ## Non-Goals
 

@@ -236,6 +236,9 @@ Historical rewrite plans and release evidence are retained for traceability.
   the private precision constants hardening slice.
   `release/checklists/post-v0.16.0-ci-coverage-policy-refresh.md` records the
   docs-only CI coverage policy refresh.
+  `release/checklists/post-v0.16.0-ci-static-analysis-evidence-policy.md`
+  records local static-analysis evidence and keeps static analysis out of
+  default CI.
   `release/checklists/post-v0.15.0-quality-audit.md` records the post-release
   code-quality and test-quality audit slice without changing the stable ABI or
   release state.

@@ -164,6 +164,14 @@ analysis, coverage upload, Windows sanitizer expansion, macOS oracle or
 performance expansion, and MSVC full-matrix coverage event-driven rather than
 adding them to the default workflow.
 
+The `post-v0.16.0-ci-static-analysis-evidence-policy` slice keeps that boundary
+unchanged after the tooling polish work. The local `.clang-tidy` configuration
+is usable for targeted runs, with
+`clang-tidy test/c/linked_library_smoke.c --quiet -- -std=c99 -Iinclude`
+recorded as successful local evidence. Formatter, clang-tidy, cppcheck, CodeQL,
+coverage upload, and platform-matrix expansion remain owner-gated future work,
+not default push CI.
+
 Release coverage is recorded at
 `out/coverage/0.16.0/coverage-summary.txt`:
 
