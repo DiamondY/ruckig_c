@@ -227,6 +227,9 @@ Historical rewrite plans and release evidence are retained for traceability.
   smoke.
   `release/checklists/post-v0.16.0-calculation-duration-clock-policy.md`
   records the optional calculation-duration switch to monotonic elapsed timing.
+  `release/checklists/post-v0.16.0-installed-package-metadata-smoke.md`
+  records installed CMake target metadata checks for static/shared defines and
+  instrumentation flag leakage.
   `release/checklists/post-v0.16.0-presets-portability-polish.md` records the
   portable CMake preset guidance slice.
   `release/checklists/post-v0.16.0-precision-constants-hardening.md` records

@@ -12,6 +12,11 @@ if("@CMAKE_MAKE_PROGRAM@" STREQUAL "")
 else()
   set(make_program_args "-DCMAKE_MAKE_PROGRAM=@CMAKE_MAKE_PROGRAM@")
 endif()
+if("@BUILD_SHARED_LIBS@" STREQUAL "ON")
+  set(expect_static_define OFF)
+else()
+  set(expect_static_define ON)
+endif()
 
 set(consumer_c_flags "")
 set(consumer_exe_linker_flags "")
@@ -55,6 +60,7 @@ execute_process(
     "-DCMAKE_C_FLAGS=${consumer_c_flags}"
     "-DCMAKE_EXE_LINKER_FLAGS=${consumer_exe_linker_flags}"
     "-DRUCKIG_C_CONSUMER_FIND_VERSION=${RUCKIG_C_CONSUMER_FIND_VERSION}"
+    "-DRUCKIG_C_EXPECT_STATIC_DEFINE=${expect_static_define}"
     -DCMAKE_PREFIX_PATH=${prefix}
   RESULT_VARIABLE configure_result
 )

@@ -596,6 +596,28 @@ The local checklist is
 The expansion checklist is
 `docs/release/checklists/post-v0.16.0-linked-consumer-smoke-expansion.md`.
 
+## Post-v0.16.0 Installed Package Metadata Smoke
+
+The `post-v0.16.0-installed-package-metadata-smoke` slice extends the installed
+CMake consumer fixture with target metadata checks. Static installed CMake
+target consumers now assert that `RUCKIG_C_STATIC_DEFINE` is propagated by the
+exported target, while shared installed target consumers assert that the define
+is absent. The fixture also rejects exported target usage requirements that
+contain sanitizer or coverage link/compile flags, keeping instrumentation
+opt-in instead of leaking to ordinary consumers.
+
+Local focused evidence:
+
+| Gate | Result |
+| --- | --- |
+| Static installed consumer metadata | Passed in `windows-clang-ninja` through `ruckig_c_cmake_consumer` and `ruckig_c_cmake_consumer_versioned`. |
+| Windows manual static consumer | Passed in `windows-clang-ninja`. |
+| Shared Windows DLL consumer metadata | Passed in `windows-clang-ninja-shared` through `ruckig_c_windows_dll_consumer`. |
+| Shared install-tree consumer | Not configured in the Windows shared preset used for this local check; Unix CI remains the maintained install-tree path. |
+
+The local checklist is
+`docs/release/checklists/post-v0.16.0-installed-package-metadata-smoke.md`.
+
 ## Post-v0.16.0 Precision Constants Hardening
 
 The `post-v0.16.0-precision-constants-hardening` slice is behavior-preserving

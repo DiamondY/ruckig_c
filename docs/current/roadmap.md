@@ -159,6 +159,10 @@ or default heavy-random CI policy.
 - `post-v0.16.0-calculation-duration-clock-policy` switches optional
   calculation-duration reporting to the existing monotonic platform clock while
   preserving default `0.0` behavior when the option is disabled.
+- `post-v0.16.0-installed-package-metadata-smoke` extends installed CMake
+  consumer smoke coverage to assert static/shared `RUCKIG_C_STATIC_DEFINE`
+  metadata and reject sanitizer or coverage flag leakage from exported target
+  usage requirements.
 - `post-v0.16.0-presets-portability-polish` adds a portable Ninja preset and
   packaging guidance while preserving the maintainer-verified Windows local
   presets.

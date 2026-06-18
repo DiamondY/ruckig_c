@@ -1,5 +1,13 @@
 #include <ruckig_c/ruckig.h>
 
+#if defined(RUCKIG_C_EXPECT_STATIC_DEFINE) && !defined(RUCKIG_C_STATIC_DEFINE)
+#error "Expected the installed static target to propagate RUCKIG_C_STATIC_DEFINE"
+#endif
+
+#if defined(RUCKIG_C_EXPECT_NO_STATIC_DEFINE) && defined(RUCKIG_C_STATIC_DEFINE)
+#error "Expected the installed shared target to avoid RUCKIG_C_STATIC_DEFINE"
+#endif
+
 int main(void) {
     ruckig_t* otg = NULL;
     ruckig_input_t* input = NULL;

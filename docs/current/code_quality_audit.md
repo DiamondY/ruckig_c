@@ -140,6 +140,12 @@ still report `0.0`; enabled builds report elapsed microseconds and guard
 against clock fallback/direction anomalies by returning `0.0` if the stop value
 is earlier than the start value.
 
+The `post-v0.16.0-installed-package-metadata-smoke` slice extends the installed
+CMake consumer fixture to check target metadata directly. Static installed
+targets must propagate `RUCKIG_C_STATIC_DEFINE`, shared installed targets must
+not propagate it, and exported target usage requirements must not contain
+sanitizer or coverage flags for ordinary consumers.
+
 The `post-v0.16.0-presets-portability-polish` slice keeps the existing
 maintainer-verified Windows LLVM/Ninja presets intact and adds a
 `portable-ninja` preset that relies on the current shell for Ninja and compiler

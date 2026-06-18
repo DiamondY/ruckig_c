@@ -8,8 +8,28 @@ else()
   find_package(ruckig_c CONFIG REQUIRED)
 endif()
 
+set(RUCKIG_C_EXPECT_STATIC_DEFINE "" CACHE STRING "Whether the installed target should propagate RUCKIG_C_STATIC_DEFINE")
+set(RUCKIG_C_EXPECT_NO_INSTRUMENTATION_USAGE_REQUIREMENTS ON CACHE BOOL "Reject sanitizer/coverage usage requirements on the installed target")
+
+if(RUCKIG_C_EXPECT_NO_INSTRUMENTATION_USAGE_REQUIREMENTS)
+  foreach(prop IN ITEMS INTERFACE_COMPILE_OPTIONS INTERFACE_LINK_OPTIONS INTERFACE_LINK_LIBRARIES)
+    get_target_property(value ruckig_c::ruckig_c ${prop})
+    if(value)
+      string(REPLACE ";" " " value_text "${value}")
+      if(value_text MATCHES "fsanitize|sanitize=|fprofile-instr-generate|fcoverage-mapping")
+        message(FATAL_ERROR "Unexpected instrumentation usage requirement in ${prop}: ${value_text}")
+      endif()
+    endif()
+  endforeach()
+endif()
+
 add_executable(ruckig_c_consumer main.c)
 target_link_libraries(ruckig_c_consumer PRIVATE ruckig_c::ruckig_c)
+if(RUCKIG_C_EXPECT_STATIC_DEFINE STREQUAL "ON")
+  target_compile_definitions(ruckig_c_consumer PRIVATE RUCKIG_C_EXPECT_STATIC_DEFINE)
+elseif(RUCKIG_C_EXPECT_STATIC_DEFINE STREQUAL "OFF")
+  target_compile_definitions(ruckig_c_consumer PRIVATE RUCKIG_C_EXPECT_NO_STATIC_DEFINE)
+endif()
 set_target_properties(ruckig_c_consumer PROPERTIES
   C_STANDARD 99
   C_STANDARD_REQUIRED ON
