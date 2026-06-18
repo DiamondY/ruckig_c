@@ -8,6 +8,27 @@ else()
   set(make_program_args "-DCMAKE_MAKE_PROGRAM=@CMAKE_MAKE_PROGRAM@")
 endif()
 
+set(consumer_c_flags "")
+set(consumer_exe_linker_flags "")
+if("@CMAKE_C_COMPILER_ID@" MATCHES "Clang|GNU")
+  set(consumer_sanitizers "")
+  if("@RUCKIG_C_ENABLE_ASAN@")
+    list(APPEND consumer_sanitizers address)
+  endif()
+  if("@RUCKIG_C_ENABLE_UBSAN@")
+    list(APPEND consumer_sanitizers undefined)
+  endif()
+  if(consumer_sanitizers)
+    list(JOIN consumer_sanitizers "," consumer_sanitizer_flags)
+    set(consumer_c_flags "-fsanitize=${consumer_sanitizer_flags} -fno-omit-frame-pointer")
+    set(consumer_exe_linker_flags "-fsanitize=${consumer_sanitizer_flags}")
+  endif()
+  if("@RUCKIG_C_ENABLE_COVERAGE@")
+    string(APPEND consumer_c_flags " -fprofile-instr-generate -fcoverage-mapping")
+    string(APPEND consumer_exe_linker_flags " -fprofile-instr-generate -fcoverage-mapping")
+  endif()
+endif()
+
 file(REMOVE_RECURSE "${prefix}" "${build_dir}")
 execute_process(
   COMMAND "@CMAKE_COMMAND@" --install "@CMAKE_BINARY_DIR@" --prefix "${prefix}"
@@ -26,6 +47,8 @@ execute_process(
     ${make_program_args}
     "-DCMAKE_C_COMPILER=@CMAKE_C_COMPILER@"
     "-DCMAKE_BUILD_TYPE=@CMAKE_BUILD_TYPE@"
+    "-DCMAKE_C_FLAGS=${consumer_c_flags}"
+    "-DCMAKE_EXE_LINKER_FLAGS=${consumer_exe_linker_flags}"
     -DCMAKE_PREFIX_PATH=${prefix}
   RESULT_VARIABLE configure_result
 )

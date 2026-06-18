@@ -212,6 +212,8 @@ Historical rewrite plans and release evidence are retained for traceability.
   `release/checklists/post-v0.16.0-allocation-audit-threading-policy.md`
   records the allocation audit counter threading boundary and deterministic
   sequencing test.
+  `release/checklists/post-v0.16.0-linked-library-smoke.md` records the
+  public-header-only linked library smoke test.
   `release/checklists/post-v0.15.0-quality-audit.md` records the post-release
   code-quality and test-quality audit slice without changing the stable ABI or
   release state.

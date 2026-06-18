@@ -144,6 +144,9 @@ or default heavy-random CI policy.
 - `post-v0.16.0-allocation-audit-threading-policy` documents allocation
   counters as local non-thread-safe audit instrumentation and adds
   deterministic counter sequencing coverage without adding atomics or locks.
+- `post-v0.16.0-linked-library-smoke` adds a public-header-only test
+  executable linked with the `ruckig_c` target, complementing the existing
+  white-box test binary without restructuring it.
 
 ## 0.17.0 Wrapper Stabilization Readiness
 

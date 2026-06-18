@@ -258,6 +258,12 @@ if(BUILD_RUCKIG_C_TESTS)
   ruckig_c_apply_sanitizers(ruckig_c_header_cpp)
   add_test(NAME ruckig_c_header_cpp COMMAND ruckig_c_header_cpp)
 
+  add_executable(ruckig_c_linked_library_smoke test/c/linked_library_smoke.c)
+  target_link_libraries(ruckig_c_linked_library_smoke PRIVATE ruckig_c)
+  ruckig_c_apply_sanitizers(ruckig_c_linked_library_smoke)
+  ruckig_c_apply_coverage(ruckig_c_linked_library_smoke)
+  add_test(NAME ruckig_c_linked_library_smoke COMMAND ruckig_c_linked_library_smoke)
+
   add_executable(ruckig_c_platform_clock_custom test/c/platform_clock_custom_compile.c)
   target_include_directories(ruckig_c_platform_clock_custom PRIVATE src test/c)
   if(MSVC)

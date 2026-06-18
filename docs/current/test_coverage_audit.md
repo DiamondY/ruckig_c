@@ -566,6 +566,17 @@ Added example smoke:
 The local checklist is
 `docs/release/checklists/post-v0.16.0-tracking-diagnostics-examples-polish.md`.
 
+## Post-v0.16.0 Linked Library Smoke
+
+The `post-v0.16.0-linked-library-smoke` slice adds CTest
+`ruckig_c_linked_library_smoke`. Unlike the main white-box `ruckig_c_tests`
+binary, the smoke includes only the public header and links the `ruckig_c`
+target, covering lifecycle, calculate-with-diagnostics, update, and
+`ruckig_output_pass_to_input` through a normal in-tree linked consumer path.
+
+The local checklist is
+`docs/release/checklists/post-v0.16.0-linked-library-smoke.md`.
+
 ## Post-v0.16.0 Tracking Scenario Maintenance Triage
 
 The `post-v0.16.0-tracking-scenario-maintenance` slice performs a docs-only

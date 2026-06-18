@@ -105,6 +105,13 @@ shared handle requires external synchronization. A deterministic sequencing
 test now covers counter reset, forbidden-allocation counting, and free-count
 behavior without adding locks or atomics to the real-time path.
 
+The `post-v0.16.0-linked-library-smoke` slice adds
+`ruckig_c_linked_library_smoke`, a tiny executable that includes only the
+public header and links the `ruckig_c` target. It complements the existing
+white-box `ruckig_c_tests` executable by proving a normal in-tree linked
+consumer can create handles, calculate with public diagnostics, run one online
+update, and call `ruckig_output_pass_to_input`.
+
 Release coverage is recorded at
 `out/coverage/0.16.0/coverage-summary.txt`:
 
@@ -512,6 +519,7 @@ Existing selectors that remain relevant to this audit:
 | `ruckig_c_tracking_no_allocation` | Tracking real-time path allocation guard. |
 | `ruckig_c_waypoint_resume_stress` | Waypoint true-resume budget matrix, long online loop, and allocation guard. |
 | `ruckig_c_allocation_audit` | Static allocation audit for real-time-sensitive paths; allocation counters are local, non-thread-safe audit instrumentation. |
+| `ruckig_c_linked_library_smoke` | Public-header-only in-tree executable linked with the `ruckig_c` target. |
 | `ruckig_c_constructor_boundaries` | Public constructor null/zero-DoF, capacity overflow, tracking sequence overflow, and invalid `delta_time` boundary coverage. |
 
 ## Random Failure Materialization
