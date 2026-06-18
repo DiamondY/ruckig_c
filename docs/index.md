@@ -216,6 +216,8 @@ Historical rewrite plans and release evidence are retained for traceability.
   public-header-only linked library smoke test.
   `release/checklists/post-v0.16.0-presets-portability-polish.md` records the
   portable CMake preset guidance slice.
+  `release/checklists/post-v0.16.0-precision-constants-hardening.md` records
+  the private precision constants hardening slice.
   `release/checklists/post-v0.15.0-quality-audit.md` records the post-release
   code-quality and test-quality audit slice without changing the stable ABI or
   release state.

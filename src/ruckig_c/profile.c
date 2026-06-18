@@ -1,5 +1,6 @@
 #include "ruckig_c/profile.h"
 
+#include "ruckig_c/precision.h"
 #include "ruckig_c/roots.h"
 #include "ruckig_c/utils.h"
 
@@ -7,13 +8,13 @@
 #include <math.h>
 #include <string.h>
 
-static const double profile_v_eps = 1e-12;
-static const double profile_a_eps = 1e-12;
-static const double profile_j_eps = 1e-12;
-static const double profile_p_precision = 1e-8;
-static const double profile_v_precision = 1e-8;
-static const double profile_a_precision = 1e-10;
-static const double profile_first_position_precision = 4.0 * DBL_EPSILON;
+static const double profile_v_eps = RUCKIG_C_PROFILE_V_EPS;
+static const double profile_a_eps = RUCKIG_C_PROFILE_A_EPS;
+static const double profile_j_eps = RUCKIG_C_PROFILE_J_EPS;
+static const double profile_p_precision = RUCKIG_C_PROFILE_P_PRECISION;
+static const double profile_v_precision = RUCKIG_C_PROFILE_V_PRECISION;
+static const double profile_a_precision = RUCKIG_C_PROFILE_A_PRECISION;
+static const double profile_first_position_precision = RUCKIG_C_PROFILE_FIRST_POSITION_PRECISION;
 static const double profile_t_max = 1e12;
 
 void ruckig_profile_init(ruckig_profile_t* profile) {
@@ -595,7 +596,7 @@ bool ruckig_profile_get_first_state_at_position(const ruckig_profile_t* profile,
         t_cum += profile->t[i];
     }
 
-    if ((profile->t[6] > 0.0 || profile->t_sum[6] == 0.0) && fabs(profile->pf - position) < 1e-9 && profile->t_sum[6] >= time_after) {
+    if ((profile->t[6] > 0.0 || profile->t_sum[6] == 0.0) && fabs(profile->pf - position) < RUCKIG_C_PROFILE_POSITION_MATCH_PRECISION && profile->t_sum[6] >= time_after) {
         *time = profile->t_sum[6];
         return true;
     }

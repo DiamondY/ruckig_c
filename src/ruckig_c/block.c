@@ -1,5 +1,7 @@
 #include "ruckig_c/block.h"
 
+#include "ruckig_c/precision.h"
+
 #include <float.h>
 #include <math.h>
 #include <string.h>
@@ -64,7 +66,7 @@ bool ruckig_block_calculate(ruckig_block_t* block, ruckig_profile_t* valid_profi
         return true;
     } else if (valid_profile_count == 2) {
         /* Preserve oracle candidate ordering: equal-duration alternatives collapse to the first profile. */
-        if (fabs(profile_duration(&valid_profiles[0]) - profile_duration(&valid_profiles[1])) < 8.0 * DBL_EPSILON) {
+        if (fabs(profile_duration(&valid_profiles[0]) - profile_duration(&valid_profiles[1])) < RUCKIG_C_BLOCK_DURATION_TIE_EPS_2 * DBL_EPSILON) {
             block_set_min_profile(block, &valid_profiles[0]);
             return true;
         }
@@ -76,13 +78,13 @@ bool ruckig_block_calculate(ruckig_block_t* block, ruckig_profile_t* valid_profi
 
     } else if (valid_profile_count == 4) {
         /* Ruckig Step1 may emit a mirrored pair around a blocked interval; remove only the oracle-matched duplicate. */
-        if (fabs(profile_duration(&valid_profiles[0]) - profile_duration(&valid_profiles[1])) < 32.0 * DBL_EPSILON
+        if (fabs(profile_duration(&valid_profiles[0]) - profile_duration(&valid_profiles[1])) < RUCKIG_C_BLOCK_DURATION_TIE_EPS_4_NEAR * DBL_EPSILON
             && valid_profiles[0].direction != valid_profiles[1].direction) {
             remove_profile(valid_profiles, &valid_profile_count, 1);
-        } else if (fabs(profile_duration(&valid_profiles[2]) - profile_duration(&valid_profiles[3])) < 256.0 * DBL_EPSILON
+        } else if (fabs(profile_duration(&valid_profiles[2]) - profile_duration(&valid_profiles[3])) < RUCKIG_C_BLOCK_DURATION_TIE_EPS_4_FAR * DBL_EPSILON
             && valid_profiles[2].direction != valid_profiles[3].direction) {
             remove_profile(valid_profiles, &valid_profile_count, 3);
-        } else if (fabs(profile_duration(&valid_profiles[0]) - profile_duration(&valid_profiles[3])) < 256.0 * DBL_EPSILON
+        } else if (fabs(profile_duration(&valid_profiles[0]) - profile_duration(&valid_profiles[3])) < RUCKIG_C_BLOCK_DURATION_TIE_EPS_4_FAR * DBL_EPSILON
             && valid_profiles[0].direction != valid_profiles[3].direction) {
             remove_profile(valid_profiles, &valid_profile_count, 3);
         } else {

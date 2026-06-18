@@ -577,6 +577,17 @@ target, covering lifecycle, calculate-with-diagnostics, update, and
 The local checklist is
 `docs/release/checklists/post-v0.16.0-linked-library-smoke.md`.
 
+## Post-v0.16.0 Precision Constants Hardening
+
+The `post-v0.16.0-precision-constants-hardening` slice is behavior-preserving
+production-code maintenance. It centralizes selected private tolerance
+constants and relies on normal C tests, roots numeric audit, solver branch
+coverage, public diagnostics, and oracle fixed cases to prove no intended
+numeric behavior change.
+
+The local checklist is
+`docs/release/checklists/post-v0.16.0-precision-constants-hardening.md`.
+
 ## Post-v0.16.0 Tracking Scenario Maintenance Triage
 
 The `post-v0.16.0-tracking-scenario-maintenance` slice performs a docs-only

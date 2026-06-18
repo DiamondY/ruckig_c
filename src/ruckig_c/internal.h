@@ -14,14 +14,12 @@
 
 #include "ruckig_c/alloc.h"
 #include "ruckig_c/block.h"
+#include "ruckig_c/precision.h"
 #include "ruckig_c/profile.h"
 
 #define RUCKIG_TRACKING_AUDIT_FAMILY_COUNT 6u
 #define RUCKIG_WAYPOINT_BRANCH_QUEUE_CAPACITY 64u
 #define RUCKIG_WAYPOINT_BRANCH_ITERATION_BUDGET 256u
-#define RUCKIG_DBL_EPSILON 2.2204460492503131e-16
-#define RUCKIG_TIME_EPS (2.0 * RUCKIG_DBL_EPSILON)
-
 #ifdef RUCKIG_C_ENABLE_INTERNAL_ASSERTS
 #define RUCKIG_C_INTERNAL_ASSERT(expr) \
     do { \

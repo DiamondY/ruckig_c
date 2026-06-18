@@ -1,5 +1,7 @@
 #include "ruckig_c/roots.h"
 
+#include "ruckig_c/precision.h"
+
 #include <float.h>
 #include <math.h>
 #include <stdbool.h>
@@ -307,7 +309,7 @@ void ruckig_poly_monic_derivative(const double* monic_coeffs, size_t count, doub
 }
 
 double ruckig_shrink_interval(const double* p, size_t count, double l, double h) {
-    const double tolerance = 1e-14;
+    const double tolerance = RUCKIG_C_ROOTS_SHRINK_INTERVAL_TOLERANCE;
     const size_t max_its = 128;
     double deriv[16];
     double fl;

@@ -118,6 +118,12 @@ maintainer-verified Windows LLVM/Ninja presets intact and adds a
 discovery. This improves external developer entry points without changing CI or
 invalidating the known-good local Windows presets.
 
+The `post-v0.16.0-precision-constants-hardening` slice introduces private
+`src/ruckig_c/precision.h` and moves selected profile, roots, block, and
+third-order position tolerances behind named constants. It preserves the exact
+numeric values and keeps solver formulas, oracle tolerances, public ABI,
+workflow, and upstream baseline unchanged.
+
 Release coverage is recorded at
 `out/coverage/0.16.0/coverage-summary.txt`:
 

@@ -1,5 +1,6 @@
 #include "ruckig_c/position_first.h"
 
+#include "ruckig_c/precision.h"
 #include "ruckig_c/roots.h"
 #include "ruckig_c/utils.h"
 
@@ -190,7 +191,7 @@ static bool time_vel_general_uddu(
         }
 
         orig = ruckig_poly_eval(deriv, 5, tz);
-        if (fabs(orig) > 1e-14) {
+        if (fabs(orig) > RUCKIG_C_POLY_ROOT_REFINEMENT_TOLERANCE) {
             const double d2 = ruckig_poly_eval(dderiv, 4, tz);
             if (fabs(d2) > DBL_EPSILON) {
                 tz -= orig / d2;
@@ -198,7 +199,7 @@ static bool time_vel_general_uddu(
         }
 
         val_new = ruckig_poly_eval(polynom, 6, tz);
-        if (fabs(val_new) < 64.0 * fabs(ruckig_poly_eval(dderiv, 4, tz)) * 1e-14) {
+        if (fabs(val_new) < 64.0 * fabs(ruckig_poly_eval(dderiv, 4, tz)) * RUCKIG_C_POLY_ROOT_REFINEMENT_TOLERANCE) {
             if (check_time_vel_general_uddu_root(profile, tz, tf, vd, v0, a0, af, pd, v_max, v_min, a_max, a_min, j_max)) {
                 return true;
             }
@@ -216,7 +217,7 @@ static bool time_vel_general_uddu(
             if (check_time_vel_general_uddu_root(profile, ruckig_shrink_interval(polynom, 6, tz_current, tz_max), tf, vd, v0, a0, af, pd, v_max, v_min, a_max, a_min, j_max)) {
                 return true;
             }
-        } else if (fabs(val_max) < 8.0 * DBL_EPSILON) {
+        } else if (fabs(val_max) < RUCKIG_C_POLY_BOUNDARY_EPS_FACTOR * DBL_EPSILON) {
             if (check_time_vel_general_uddu_root(profile, tz_max, tf, vd, v0, a0, af, pd, v_max, v_min, a_max, a_min, j_max)) {
                 return true;
             }
@@ -273,7 +274,7 @@ static bool check_time_vel_general_udud_root(
     orig = -pd + (af_p3 - a0_p3 + 3.0 * a0_a0 * j_max * (tf - 2.0 * t)) / (6.0 * j_max_j_max)
         + (2.0 * a0 + j_max * t) * t * (tf - t)
         + (j_max * h1 - af) * h1 * h1 + tf * v0;
-    if (fabs(orig) > 1e-9) {
+    if (fabs(orig) > RUCKIG_C_TIME_SYNC_RESIDUAL_TOLERANCE) {
         deriv_newton = (a0 + j_max * t) * (2.0 * (af + j_max * tf) - 3.0 * j_max * (h1 + t) - a0) / j_max;
         if (fabs(deriv_newton) > DBL_EPSILON) {
             t -= orig / deriv_newton;
@@ -371,7 +372,7 @@ static bool time_vel_general_udud(
         }
 
         orig = ruckig_poly_eval(dderiv, 5, tz);
-        if (fabs(orig) > 1e-14) {
+        if (fabs(orig) > RUCKIG_C_POLY_ROOT_REFINEMENT_TOLERANCE) {
             const double d3 = ruckig_poly_eval(ddderiv, 4, tz);
             if (fabs(d3) > DBL_EPSILON) {
                 tz -= orig / d3;
@@ -399,7 +400,7 @@ static bool time_vel_general_udud(
         }
 
         p_val = ruckig_poly_eval(polynom, 7, tz);
-        if (fabs(p_val) < 64.0 * fabs(ruckig_poly_eval(dderiv, 5, tz)) * 1e-14) {
+        if (fabs(p_val) < 64.0 * fabs(ruckig_poly_eval(dderiv, 5, tz)) * RUCKIG_C_POLY_ROOT_REFINEMENT_TOLERANCE) {
             if (check_time_vel_general_udud_root(profile, tz, tf, pd, vd, v0, a0, af, v_max, v_min, a_max, a_min, j_max)) {
                 return true;
             }
@@ -1484,7 +1485,7 @@ bool ruckig_position_third_step2_get_profile(
         }
 
         jf = pd / (2.0 * tj * tj * tj);
-        if (fabs(jf) > fabs(j_max) + 1e-12) {
+        if (fabs(jf) > fabs(j_max) + RUCKIG_C_JERK_LIMIT_TOLERANCE) {
             return false;
         }
 
