@@ -134,6 +134,9 @@ or default heavy-random CI policy.
   coverage link flags private to explicitly instrumented CMake targets so they
   do not propagate to downstream consumers through `ruckig_c` usage
   requirements.
+- `post-v0.16.0-cmake-package-version-policy` tightens installed CMake package
+  version matching to `SameMinorVersion` and adds a versioned installed
+  consumer smoke for `find_package(ruckig_c 0.16 CONFIG REQUIRED)`.
 - `post-v0.16.0-public-header-doxygen` documents the full public C header in
   place, covering ownership, array lifetimes, diagnostics initialization,
   return-code expectations, and `pass_to_input` no-op boundaries without

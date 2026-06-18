@@ -81,6 +81,13 @@ requirements to downstream consumers. The pkg-config `Libs.private` sanitizer
 entry remains an opt-in instrumented pkg-config build detail, not a default
 consumer requirement.
 
+The `post-v0.16.0-cmake-package-version-policy` slice tightens installed CMake
+package matching from `SameMajorVersion` to `SameMinorVersion`. Versioned
+consumers that request `0.16` continue to match the `0.16.x` patch line, while
+future `0.17` or `0.18` packages are not silently accepted for `0.16`
+requests. The added `ruckig_c_cmake_consumer_versioned` CTest verifies the
+installed package metadata with `find_package(ruckig_c 0.16 CONFIG REQUIRED)`.
+
 The `post-v0.16.0-public-header-doxygen` slice addresses public API
 readability by documenting the full public header in place. The added comments
 cover handle ownership, `NULL`-safe destroy functions, array accessor

@@ -281,6 +281,11 @@ if(BUILD_RUCKIG_C_TESTS)
   add_test(NAME ruckig_c_cmake_consumer
     COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/test_cmake_consumer.cmake
   )
+  add_test(NAME ruckig_c_cmake_consumer_versioned
+    COMMAND ${CMAKE_COMMAND}
+      -DRUCKIG_C_CONSUMER_FIND_VERSION=0.16
+      -P ${CMAKE_CURRENT_BINARY_DIR}/test_cmake_consumer.cmake
+  )
 
   if(UNIX)
     find_program(PKG_CONFIG_EXECUTABLE pkg-config)
@@ -698,7 +703,7 @@ if(BUILD_RUCKIG_C)
   write_basic_package_version_file(
     ${CMAKE_CURRENT_BINARY_DIR}/ruckig_cConfigVersion.cmake
     VERSION ${PROJECT_VERSION}
-    COMPATIBILITY SameMajorVersion
+    COMPATIBILITY SameMinorVersion
   )
   configure_file(
     cmake/ruckig_c.pc.in

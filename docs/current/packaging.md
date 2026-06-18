@@ -43,6 +43,11 @@ target_link_libraries(app PRIVATE ruckig_c::ruckig_c)
 
 The exported target is `ruckig_c::ruckig_c`. Static CMake consumers receive
 `RUCKIG_C_STATIC_DEFINE` from the target and should not add it manually.
+The installed CMake package version file uses `SameMinorVersion`
+compatibility: `0.16.x` patch releases are compatible for `find_package`
+version matching, but future `0.17` or `0.18` packages are not accepted as a
+match for a `0.16` request by default. The `ruckig_c_cmake_consumer_versioned`
+CTest covers `find_package(ruckig_c 0.16 CONFIG REQUIRED)`.
 
 ## pkg-config
 

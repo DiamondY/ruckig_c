@@ -550,6 +550,18 @@ Added consumer smoke:
 The local checklist is
 `docs/release/checklists/post-v0.16.0-consumer-install-and-docs-refresh.md`.
 
+## Post-v0.16.0 CMake Package Version Policy
+
+The `post-v0.16.0-cmake-package-version-policy` slice tightens installed CMake
+package version matching to `SameMinorVersion` and adds
+`ruckig_c_cmake_consumer_versioned`. The existing installed CMake consumer
+continues to exercise unversioned `find_package(ruckig_c CONFIG REQUIRED)`;
+the new focused CTest exercises `find_package(ruckig_c 0.16 CONFIG REQUIRED)`
+against the installed package metadata.
+
+The local checklist is
+`docs/release/checklists/post-v0.16.0-cmake-package-version-policy.md`.
+
 ## Post-v0.16.0 Tracking Public Diagnostics Example
 
 The `post-v0.16.0-tracking-diagnostics-examples-polish` slice adds a focused C

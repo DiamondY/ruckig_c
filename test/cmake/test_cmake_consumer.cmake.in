@@ -1,5 +1,10 @@
 set(prefix "@CMAKE_CURRENT_BINARY_DIR@/consumer-install/cmake")
-set(build_dir "@CMAKE_CURRENT_BINARY_DIR@/consumer-build/cmake")
+if(DEFINED RUCKIG_C_CONSUMER_FIND_VERSION AND NOT RUCKIG_C_CONSUMER_FIND_VERSION STREQUAL "")
+  set(version_suffix "-${RUCKIG_C_CONSUMER_FIND_VERSION}")
+else()
+  set(version_suffix "")
+endif()
+set(build_dir "@CMAKE_CURRENT_BINARY_DIR@/consumer-build/cmake${version_suffix}")
 set(exe "${build_dir}/ruckig_c_consumer@CMAKE_EXECUTABLE_SUFFIX@")
 set(generator_args -G "@CMAKE_GENERATOR@")
 if("@CMAKE_MAKE_PROGRAM@" STREQUAL "")
@@ -49,6 +54,7 @@ execute_process(
     "-DCMAKE_BUILD_TYPE=@CMAKE_BUILD_TYPE@"
     "-DCMAKE_C_FLAGS=${consumer_c_flags}"
     "-DCMAKE_EXE_LINKER_FLAGS=${consumer_exe_linker_flags}"
+    "-DRUCKIG_C_CONSUMER_FIND_VERSION=${RUCKIG_C_CONSUMER_FIND_VERSION}"
     -DCMAKE_PREFIX_PATH=${prefix}
   RESULT_VARIABLE configure_result
 )

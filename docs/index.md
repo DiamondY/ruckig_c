@@ -206,6 +206,9 @@ Historical rewrite plans and release evidence are retained for traceability.
   `release/checklists/post-v0.16.0-build-instrumentation-scope-hardening.md`
   records sanitizer and coverage CMake link-scope hardening for consumer
   boundaries.
+  `release/checklists/post-v0.16.0-cmake-package-version-policy.md` records
+  installed CMake package `SameMinorVersion` compatibility and versioned
+  consumer smoke evidence.
   `release/checklists/post-v0.16.0-public-header-doxygen.md` records the
   source-level public header documentation slice without ABI changes.
   `release/checklists/post-v0.16.0-local-static-analysis-config.md` records
