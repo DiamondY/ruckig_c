@@ -29,6 +29,7 @@ event-driven after `v0.16.0`. It is not an active implementation roadmap.
 | Wrapper stable publication | The wrapper route-selection work is superseded by an accepted Python-first, Rust-first, or dual-wrapper route with package/discovery ownership. |
 | Static-analysis CI | A maintainer accepts the noise budget, platform availability, runtime cost, and triage ownership for clang-tidy, cppcheck, CodeQL, or formatter gates. |
 | Thread-safe allocation audit counters | A concrete multi-threaded audit use case needs consistent aggregate allocation statistics across threads. |
+| CI matrix expansion | A maintainer accepts owner, runtime, and triage cost for MSVC full matrix, Windows sanitizer, macOS sanitizer/oracle/performance, coverage upload, or new static-analysis jobs. |
 
 ## Explicit Non-Triggers
 
@@ -46,6 +47,8 @@ event-driven after `v0.16.0`. It is not an active implementation roadmap.
   routine CI without a separate CI policy decision.
 - Do not add locks or atomics to allocation counters for hypothetical threaded
   audit use without a concrete consumer.
+- Do not expand default CI for coverage upload, static analysis, sanitizer
+  matrix, or platform-matrix polish without an accepted CI policy slice.
 
 ## Current Default
 

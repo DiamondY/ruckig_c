@@ -124,6 +124,12 @@ third-order position tolerances behind named constants. It preserves the exact
 numeric values and keeps solver formulas, oracle tolerances, public ABI,
 workflow, and upstream baseline unchanged.
 
+The `post-v0.16.0-ci-coverage-policy-refresh` slice records the current CI
+quality boundary in `docs/current/ci_quality_policy.md`. It keeps static
+analysis, coverage upload, Windows sanitizer expansion, macOS oracle or
+performance expansion, and MSVC full-matrix coverage event-driven rather than
+adding them to the default workflow.
+
 Release coverage is recorded at
 `out/coverage/0.16.0/coverage-summary.txt`:
 

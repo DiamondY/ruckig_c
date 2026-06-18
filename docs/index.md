@@ -16,6 +16,8 @@ Historical rewrite plans and release evidence are retained for traceability.
   external-review follow-up hardening evidence, local quality gates, local
   static-analysis configuration policy, and random replay/materialization
   policy.
+- `current/ci_quality_policy.md` - default CI quality coverage, local/manual
+  evidence policy, and owner-gated triggers for future CI expansion.
 - `current/original_parity_coverage.md` - current coverage estimates and gaps
   against the frozen original reference and original product surface.
 - `current/test_coverage_audit.md` - local LLVM coverage summary and original
@@ -218,6 +220,8 @@ Historical rewrite plans and release evidence are retained for traceability.
   portable CMake preset guidance slice.
   `release/checklists/post-v0.16.0-precision-constants-hardening.md` records
   the private precision constants hardening slice.
+  `release/checklists/post-v0.16.0-ci-coverage-policy-refresh.md` records the
+  docs-only CI coverage policy refresh.
   `release/checklists/post-v0.15.0-quality-audit.md` records the post-release
   code-quality and test-quality audit slice without changing the stable ABI or
   release state.
