@@ -589,6 +589,25 @@ percentage alone is not accepted as a reason to add cases.
 The local checklist is
 `docs/release/checklists/post-v0.16.0-tracking-scenario-maintenance.md`.
 
+## Post-v0.16.0 Constructor Boundary Hardening
+
+The `post-v0.16.0-constructor-boundary-hardening` slice adds focused boundary
+coverage for public constructors that derive allocation counts from DoF and
+waypoint/sequence capacities.
+
+Added coverage:
+
+| Area | Evidence |
+| --- | --- |
+| Focused selector | Adds `--constructor-boundaries` and CTest `ruckig_c_constructor_boundaries`. |
+| Existing invalid boundaries | Confirms null output pointers and zero DoF continue to return `RUCKIG_ERROR_INVALID_INPUT`. |
+| Waypoint capacity overflow | Rejects `SIZE_MAX` waypoint counts and `dofs=2`, `max_waypoints=SIZE_MAX/2+1` multiplication overflow shapes for input, trajectory, output, and OTG constructors. |
+| Tracking sequence capacity overflow | Confirms target sequence, tracking output sequence, and tracking sequence continuation constructors reject overflowing `dofs * capacity` shapes. |
+| Boundary | No public C ABI, workflow, upstream baseline, visualization asset, wrapper, package, or default heavy-CI change. |
+
+The local checklist is
+`docs/release/checklists/post-v0.16.0-constructor-boundary-hardening.md`.
+
 ## 0.14.0-alpha.1 Interrupt Boundary API-Neutral Audit
 
 `0.14.0-alpha.1` adds a focused local audit for the existing

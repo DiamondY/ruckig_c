@@ -37,6 +37,18 @@ tracking. The 10k tracking random audit and pass-preserving shrink sample did
 not identify a new regression or stable public-behavior gap, so no tracking
 source or test case is added for coverage percentage alone.
 
+The `post-v0.16.0-constructor-boundary-hardening` slice tightens public
+constructor allocation boundaries without changing the public ABI. Waypoint
+section counts, section-value counts, waypoint-value counts, and tracking
+sequence value counts now use shared checked `size_t` arithmetic before
+allocation. Overflowing capacities are rejected as
+`RUCKIG_ERROR_INVALID_INPUT` instead of relying on wrapped allocation sizes or
+late allocation failures.
+
+New public constructor paths that compute `count + 1`, `count * dofs`, or
+`waypoints * dofs` should use the shared checked-size helpers in
+`src/ruckig_c/internal.h` before allocating or storing derived capacities.
+
 Release coverage is recorded at
 `out/coverage/0.16.0/coverage-summary.txt`:
 

@@ -90,7 +90,8 @@ RUCKIG_C_API ruckig_result_t ruckig_tracking_sequence_continuation_create(
     size_t capacity
 ) {
     ruckig_tracking_sequence_continuation_t* value;
-    if (!continuation || dofs == 0 || capacity == 0) {
+    size_t value_count = 0;
+    if (!continuation || dofs == 0 || capacity == 0 || !ruckig_checked_mul_size(dofs, capacity, &value_count)) {
         return RUCKIG_ERROR_INVALID_INPUT;
     }
     *continuation = NULL;

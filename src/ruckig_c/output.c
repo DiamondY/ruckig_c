@@ -13,6 +13,9 @@ static ruckig_result_t ruckig_output_create_impl(
     }
 
     *output = NULL;
+    if (!ruckig_checked_waypoint_counts(dofs, max_number_of_waypoints, NULL, NULL, NULL)) {
+        return RUCKIG_ERROR_INVALID_INPUT;
+    }
     value = (ruckig_output_t*)ruckig_calloc(1, sizeof(*value));
     if (!value) {
         return RUCKIG_ERROR;

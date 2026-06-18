@@ -10,12 +10,16 @@ static ruckig_result_t ruckig_trajectory_create_impl(
     size_t max_number_of_waypoints
 ) {
     ruckig_trajectory_t* value;
-    const size_t section_capacity = max_number_of_waypoints + 1;
+    size_t section_capacity = 0;
+    size_t profile_count = 0;
     if (!trajectory || dofs == 0) {
         return RUCKIG_ERROR_INVALID_INPUT;
     }
 
     *trajectory = NULL;
+    if (!ruckig_checked_waypoint_counts(dofs, max_number_of_waypoints, &section_capacity, &profile_count, NULL)) {
+        return RUCKIG_ERROR_INVALID_INPUT;
+    }
     value = (ruckig_trajectory_t*)ruckig_calloc(1, sizeof(*value));
     if (!value) {
         return RUCKIG_ERROR;
@@ -25,7 +29,7 @@ static ruckig_result_t ruckig_trajectory_create_impl(
     value->max_number_of_waypoints = max_number_of_waypoints;
     value->section_capacity = section_capacity;
     value->section_count = 1;
-    value->profiles = (ruckig_profile_t*)ruckig_calloc(section_capacity * dofs, sizeof(ruckig_profile_t));
+    value->profiles = (ruckig_profile_t*)ruckig_calloc(profile_count, sizeof(ruckig_profile_t));
     value->blocks = (ruckig_block_t*)ruckig_calloc(dofs, sizeof(ruckig_block_t));
     value->independent_min_durations = ruckig_allocate_double_vector(dofs);
     value->cumulative_times = ruckig_allocate_double_vector(section_capacity);

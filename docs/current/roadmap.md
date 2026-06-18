@@ -117,6 +117,10 @@ or default heavy-random CI policy.
   and pass-preserving shrink sample did not identify a compact new regression
   or public-behavior-backed case, so no coverage probe or evaluator change is
   added.
+- `post-v0.16.0-constructor-boundary-hardening` tightens public constructor
+  capacity validation with checked `size_t` arithmetic and adds the focused
+  `ruckig_c_constructor_boundaries` selector without changing public ABI,
+  release state, workflow, upstream baseline, or default heavy-CI policy.
 
 ## 0.17.0 Wrapper Stabilization Readiness
 

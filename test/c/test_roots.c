@@ -196,6 +196,7 @@ void run_waypoint_resume_quality_baseline_dump(void);
 void run_interrupt_boundary_audit_tests(void);
 void run_no_waypoint_interrupt_audit_tests(void);
 void run_interrupt_post_release_quality_tests(void);
+void run_constructor_boundary_tests(void);
 void run_property_invariant_tests(void);
 void run_state_machine_branch_coverage_tests(void);
 void run_solver_branch_coverage_tests(void);
@@ -296,6 +297,10 @@ int main(int argc, char** argv) {
             run_interrupt_post_release_quality_tests();
             return ruckig_c_test_failures == 0 ? 0 : 1;
         }
+        if (strcmp(argv[1], "--constructor-boundaries") == 0) {
+            run_constructor_boundary_tests();
+            return ruckig_c_test_failures == 0 ? 0 : 1;
+        }
         if (strcmp(argv[1], "--property-invariants") == 0) {
             run_property_invariant_tests();
             return ruckig_c_test_failures == 0 ? 0 : 1;
@@ -384,7 +389,7 @@ int main(int argc, char** argv) {
         return 2;
     }
     if (argc > 2) {
-        fprintf(stderr, "usage: ruckig_c_tests [--waypoint|--per-section|--waypoint-quality|--waypoint-resume-stress|--waypoint-resume-quality-audit|--interrupt-boundary-audit|--no-waypoint-interrupt-audit|--interrupt-post-release-quality|--property-invariants|--roots-numeric-audit|--state-machine-branch-coverage|--solver-branch-coverage|--public-diagnostics|--tracking|--tracking-api|--tracking-public-diagnostics|--tracking-sequence-continuation-api|--tracking-validation|--tracking-online|--tracking-interrupt-audit|--tracking-fixed-corpus|--tracking-offline|--tracking-optimized|--tracking-quality|--tracking-quality-hardening|--tracking-stability|--tracking-no-allocation|--tracking-random N --seed S|--tracking-random-audit N --seed S|--tracking-random-replay SAMPLE --seed S|--tracking-random-audit-replay SAMPLE --seed S|--tracking-random-audit-shrink SAMPLE --seed S|--tracking-random-audit-shrink-failure SAMPLE --seed S]\n");
+        fprintf(stderr, "usage: ruckig_c_tests [--waypoint|--per-section|--waypoint-quality|--waypoint-resume-stress|--waypoint-resume-quality-audit|--interrupt-boundary-audit|--no-waypoint-interrupt-audit|--interrupt-post-release-quality|--constructor-boundaries|--property-invariants|--roots-numeric-audit|--state-machine-branch-coverage|--solver-branch-coverage|--public-diagnostics|--tracking|--tracking-api|--tracking-public-diagnostics|--tracking-sequence-continuation-api|--tracking-validation|--tracking-online|--tracking-interrupt-audit|--tracking-fixed-corpus|--tracking-offline|--tracking-optimized|--tracking-quality|--tracking-quality-hardening|--tracking-stability|--tracking-no-allocation|--tracking-random N --seed S|--tracking-random-audit N --seed S|--tracking-random-replay SAMPLE --seed S|--tracking-random-audit-replay SAMPLE --seed S|--tracking-random-audit-shrink SAMPLE --seed S|--tracking-random-audit-shrink-failure SAMPLE --seed S]\n");
         return 2;
     }
 

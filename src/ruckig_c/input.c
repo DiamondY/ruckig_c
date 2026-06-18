@@ -20,11 +20,13 @@ static ruckig_synchronization_t* allocate_synchronization_vector(size_t count) {
     return (ruckig_synchronization_t*)ruckig_calloc(count, sizeof(ruckig_synchronization_t));
 }
 
-static bool allocate_input_vectors(ruckig_input_t* input) {
+static bool allocate_input_vectors(
+    ruckig_input_t* input,
+    size_t sections,
+    size_t section_values,
+    size_t waypoint_values
+) {
     const size_t n = input->dofs;
-    const size_t sections = input->max_number_of_waypoints + 1;
-    const size_t section_values = sections * n;
-    const size_t waypoint_values = input->max_number_of_waypoints * n;
     /* On partial failure, ruckig_input_destroy reclaims fields that were
        already assigned; this relies on the owning input object being calloc-zeroed. */
     input->current_position = ruckig_allocate_double_vector(n);
@@ -107,11 +109,17 @@ static ruckig_result_t ruckig_input_create_impl(
     size_t max_number_of_waypoints
 ) {
     ruckig_input_t* value;
+    size_t sections = 0;
+    size_t section_values = 0;
+    size_t waypoint_values = 0;
     if (!input || dofs == 0) {
         return RUCKIG_ERROR_INVALID_INPUT;
     }
 
     *input = NULL;
+    if (!ruckig_checked_waypoint_counts(dofs, max_number_of_waypoints, &sections, &section_values, &waypoint_values)) {
+        return RUCKIG_ERROR_INVALID_INPUT;
+    }
     value = (ruckig_input_t*)ruckig_calloc(1, sizeof(*value));
     if (!value) {
         return RUCKIG_ERROR;
@@ -119,7 +127,7 @@ static ruckig_result_t ruckig_input_create_impl(
 
     value->dofs = dofs;
     value->max_number_of_waypoints = max_number_of_waypoints;
-    if (!allocate_input_vectors(value)) {
+    if (!allocate_input_vectors(value, sections, section_values, waypoint_values)) {
         ruckig_input_destroy(value);
         return RUCKIG_ERROR;
     }

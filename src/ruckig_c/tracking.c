@@ -230,17 +230,6 @@ static ruckig_result_t* allocate_result_vector(size_t count) {
     return (ruckig_result_t*)ruckig_calloc(count, sizeof(ruckig_result_t));
 }
 
-static bool valid_value_count(size_t dofs, size_t capacity, size_t* count) {
-    if (dofs == 0 || capacity == 0) {
-        return false;
-    }
-    if (capacity > ((size_t)-1) / dofs) {
-        return false;
-    }
-    *count = dofs * capacity;
-    return true;
-}
-
 bool finite_vector(const double* values, size_t count) {
     size_t i;
     if (!values) {
@@ -321,7 +310,7 @@ RUCKIG_C_API ruckig_result_t ruckig_target_state_sequence_create(
 ) {
     ruckig_target_state_sequence_t* value;
     size_t value_count = 0;
-    if (!sequence || !valid_value_count(dofs, capacity, &value_count)) {
+    if (!sequence || dofs == 0u || capacity == 0u || !ruckig_checked_mul_size(dofs, capacity, &value_count)) {
         return RUCKIG_ERROR_INVALID_INPUT;
     }
     *sequence = NULL;
@@ -409,7 +398,7 @@ RUCKIG_C_API ruckig_result_t ruckig_tracking_output_sequence_create(
 ) {
     ruckig_tracking_output_sequence_t* value;
     size_t value_count = 0;
-    if (!sequence || !valid_value_count(dofs, capacity, &value_count)) {
+    if (!sequence || dofs == 0u || capacity == 0u || !ruckig_checked_mul_size(dofs, capacity, &value_count)) {
         return RUCKIG_ERROR_INVALID_INPUT;
     }
     *sequence = NULL;

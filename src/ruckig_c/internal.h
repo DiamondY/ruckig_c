@@ -34,6 +34,50 @@
 #define RUCKIG_C_INTERNAL_ASSERT(expr) ((void)sizeof(expr))
 #endif
 
+static inline bool ruckig_checked_add_size(size_t lhs, size_t rhs, size_t* out) {
+    if (!out || lhs > ((size_t)-1) - rhs) {
+        return false;
+    }
+    *out = lhs + rhs;
+    return true;
+}
+
+static inline bool ruckig_checked_mul_size(size_t lhs, size_t rhs, size_t* out) {
+    if (!out || (lhs != 0u && rhs > ((size_t)-1) / lhs)) {
+        return false;
+    }
+    *out = lhs * rhs;
+    return true;
+}
+
+static inline bool ruckig_checked_waypoint_counts(
+    size_t dofs,
+    size_t max_waypoints,
+    size_t* sections,
+    size_t* section_values,
+    size_t* waypoint_values
+) {
+    size_t local_sections = 0;
+    size_t local_section_values = 0;
+    size_t local_waypoint_values = 0;
+    if (dofs == 0u
+        || !ruckig_checked_add_size(max_waypoints, 1u, &local_sections)
+        || !ruckig_checked_mul_size(local_sections, dofs, &local_section_values)
+        || !ruckig_checked_mul_size(max_waypoints, dofs, &local_waypoint_values)) {
+        return false;
+    }
+    if (sections) {
+        *sections = local_sections;
+    }
+    if (section_values) {
+        *section_values = local_section_values;
+    }
+    if (waypoint_values) {
+        *waypoint_values = local_waypoint_values;
+    }
+    return true;
+}
+
 static inline size_t ruckig_diagnostics_stable_prefix_size(void) {
     return offsetof(ruckig_diagnostics_t, reserved_size);
 }

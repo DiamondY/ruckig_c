@@ -1314,12 +1314,15 @@ static ruckig_result_t ruckig_create_impl(
     size_t max_number_of_waypoints
 ) {
     ruckig_t* value;
-    const size_t waypoint_values = max_number_of_waypoints * dofs;
+    size_t waypoint_values = 0;
     if (!otg || dofs == 0) {
         return RUCKIG_ERROR_INVALID_INPUT;
     }
 
     *otg = NULL;
+    if (!ruckig_checked_waypoint_counts(dofs, max_number_of_waypoints, NULL, NULL, &waypoint_values)) {
+        return RUCKIG_ERROR_INVALID_INPUT;
+    }
     value = (ruckig_t*)ruckig_calloc(1, sizeof(*value));
     if (!value) {
         return RUCKIG_ERROR;
