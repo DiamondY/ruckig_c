@@ -626,6 +626,33 @@ Added coverage:
 The local checklist is
 `docs/release/checklists/post-v0.16.0-delta-time-policy.md`.
 
+## Post-v0.16.0 Quality Gate Refresh
+
+The `post-v0.16.0-quality-gate-refresh` slice records the constructor boundary
+and `delta_time` hardening as covered baseline behavior. It adds no production
+code and does not change public ABI, workflow, upstream baseline,
+visualization assets, wrappers, or package recipes.
+
+Refreshed local evidence:
+
+| Gate | Result |
+| --- | --- |
+| Normal build | Passed; no work to do |
+| Normal full CTest | Passed; 75/75 tests |
+| Shared build | Passed |
+| Shared focused CTest | Passed; constructor boundaries, public diagnostics, C header, and C++ header tests all passed 4/4 |
+| ABI/export | `ruckig_c_verify_public_symbols` and `ruckig_c_compare_public_exported_symbols` passed; public exported symbols match the approved allowlist. |
+| Sanitizer/static analyzer status | ASan/UBSan, Valgrind, and static analyzer runs remain local/manual evidence and were not added to default CI by this slice. |
+| Boundary | Public header, ABI docs, workflow, `original/ruckig-main`, and visualization asset diffs are empty. |
+
+Future quality work should keep checked arithmetic as the default for public
+constructor derived counts, should not add solver/tracking probes for coverage
+percentage alone, and should only promote sanitizer/static analyzer work into
+CI after a separate CI policy decision.
+
+The local checklist is
+`docs/release/checklists/post-v0.16.0-quality-gate-refresh.md`.
+
 ## 0.14.0-alpha.1 Interrupt Boundary API-Neutral Audit
 
 `0.14.0-alpha.1` adds a focused local audit for the existing

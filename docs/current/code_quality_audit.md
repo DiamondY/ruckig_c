@@ -37,6 +37,8 @@ tracking. The 10k tracking random audit and pass-preserving shrink sample did
 not identify a new regression or stable public-behavior gap, so no tracking
 source or test case is added for coverage percentage alone.
 
+## Constructor Boundary And Delta-Time Hardening
+
 The `post-v0.16.0-constructor-boundary-hardening` slice tightens public
 constructor allocation boundaries without changing the public ABI. Waypoint
 section counts, section-value counts, waypoint-value counts, and tracking
@@ -54,6 +56,22 @@ validation. `ruckig_create` and `ruckig_create_with_waypoints` reject negative,
 NaN, and infinite `delta_time` values before allocation while preserving
 `delta_time == 0.0` for existing offline-compatible usage. Discrete duration
 with zero `delta_time` remains invalid at validate/calculate time.
+
+The quality-gate refresh treats these risks as covered baseline behavior:
+checked arithmetic is the default for public constructor derived counts, and
+constructor `delta_time` validation rejects values that cannot produce a
+meaningful online sampling interval. Sanitizer, static analyzer, performance,
+coverage, and heavy random gates remain local/manual evidence unless a future
+CI-policy slice explicitly accepts their maintenance cost.
+
+Refreshed local quality gates:
+
+| Gate | Result |
+| --- | --- |
+| Normal full CTest | Passed; 75/75 tests |
+| Shared focused CTest | Passed; constructor boundaries, public diagnostics, C header, and C++ header tests passed 4/4 |
+| ABI/export | Shared export comparison passed against the approved `0.16.0` allowlist. |
+| Boundary | Public header, ABI docs, workflow, upstream baseline, and visualization asset diffs are empty. |
 
 Release coverage is recorded at
 `out/coverage/0.16.0/coverage-summary.txt`:
@@ -462,6 +480,7 @@ Existing selectors that remain relevant to this audit:
 | `ruckig_c_tracking_no_allocation` | Tracking real-time path allocation guard. |
 | `ruckig_c_waypoint_resume_stress` | Waypoint true-resume budget matrix, long online loop, and allocation guard. |
 | `ruckig_c_allocation_audit` | Static allocation audit for real-time-sensitive paths. |
+| `ruckig_c_constructor_boundaries` | Public constructor null/zero-DoF, capacity overflow, tracking sequence overflow, and invalid `delta_time` boundary coverage. |
 
 ## Random Failure Materialization
 

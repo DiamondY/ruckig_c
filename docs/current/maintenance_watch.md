@@ -11,6 +11,8 @@ event-driven after `v0.16.0`. It is not an active implementation roadmap.
 - Upstream baseline status: `original/ruckig-main` remains the
   `0.17.3-line frozen baseline`.
 - Package-manager recipes remain frozen.
+- Constructor capacity overflow and invalid constructor `delta_time` handling
+  are covered baseline risks after the post-`v0.16.0` quality hardening slices.
 
 ## Watch Triggers
 
@@ -44,5 +46,6 @@ The default maintenance route is conservative:
 - keep wrappers prototype-only;
 - keep package recipes frozen;
 - keep upstream baseline frozen;
+- require checked arithmetic for public constructor derived counts;
 - add tests only when backed by public behavior, oracle evidence, a reproducible
   audit/shrinker sample, or a clear invariant.

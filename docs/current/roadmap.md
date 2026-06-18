@@ -125,6 +125,11 @@ or default heavy-random CI policy.
   `delta_time` values in OTG constructors while preserving
   `ruckig_create(..., 0.0)` compatibility and leaving discrete-duration
   rejection in validation/calculation.
+- `post-v0.16.0-quality-gate-refresh` records the constructor boundary and
+  delta-time hardening as covered baseline risks, keeps checked arithmetic as
+  the default public-constructor rule, and leaves sanitizer/static analyzer,
+  coverage, performance, and heavy random work as local/manual evidence unless
+  future CI policy changes.
 
 ## 0.17.0 Wrapper Stabilization Readiness
 
