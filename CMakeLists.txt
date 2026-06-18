@@ -479,8 +479,7 @@ if(BUILD_RUCKIG_C_EXAMPLES)
   add_test(NAME example_ruckig_c_25_tracking_public_diagnostics COMMAND example-ruckig-c-25-tracking-public-diagnostics)
   add_test(NAME ruckig_c_examples_tracking_public_diagnostics COMMAND example-ruckig-c-25-tracking-public-diagnostics)
 
-  add_custom_target(ruckig_c_examples
-    DEPENDS
+  set(RUCKIG_C_EXAMPLE_TARGETS
       example-ruckig-c-00-minimal-offline
       example-ruckig-c-01-position
       example-ruckig-c-02-position-offline
@@ -507,6 +506,14 @@ if(BUILD_RUCKIG_C_EXAMPLES)
       example-ruckig-c-23-tracking-sequence-continuation
       example-ruckig-c-24-public-diagnostics
       example-ruckig-c-25-tracking-public-diagnostics
+  )
+  foreach(example_target IN LISTS RUCKIG_C_EXAMPLE_TARGETS)
+    ruckig_c_apply_sanitizers(${example_target})
+    ruckig_c_apply_coverage(${example_target})
+  endforeach()
+
+  add_custom_target(ruckig_c_examples
+    DEPENDS ${RUCKIG_C_EXAMPLE_TARGETS}
   )
 endif()
 
