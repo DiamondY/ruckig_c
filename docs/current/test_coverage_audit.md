@@ -683,6 +683,18 @@ storage is not used for diagnostics writes.
 The local checklist is
 `docs/release/checklists/post-v0.16.0-diagnostics-struct-size-policy-docs.md`.
 
+## Post-v0.16.0 Waypoint Derived Count Hardening
+
+The `post-v0.16.0-waypoint-derived-count-hardening` slice extends
+`ruckig_c_constructor_boundaries` with artificial/corrupted public-boundary
+cases for waypoint derived count overflow. The selector now verifies
+intermediate-position setters/getters, input state copy/equality, and waypoint
+filtering reject overflowing `waypoint_count * dofs` shapes without entering
+wrapped-size copy or filter behavior.
+
+The local checklist is
+`docs/release/checklists/post-v0.16.0-waypoint-derived-count-hardening.md`.
+
 ## Post-v0.16.0 Delta-Time Constructor Policy
 
 The `post-v0.16.0-delta-time-policy` slice extends constructor boundary

@@ -55,8 +55,12 @@ static void test_create_destroy(void) {
 static void test_constructor_boundary_validation(void) {
     const size_t size_max = (size_t)-1;
     const size_t overflow_waypoints = (size_max / 2u) + 1u;
+    double dummy_positions[2] = {0.0, 0.0};
+    double threshold[2] = {0.1, 0.1};
+    size_t written = size_max;
     ruckig_t* otg = NULL;
     ruckig_input_t* input = NULL;
+    ruckig_input_t* compare_input = NULL;
     ruckig_output_t* output = NULL;
     ruckig_trajectory_t* trajectory = NULL;
     ruckig_target_state_sequence_t* target_sequence = NULL;
@@ -110,6 +114,35 @@ static void test_constructor_boundary_validation(void) {
     CHECK_EQ_INT(ruckig_create_with_waypoints(&otg, 2, 0.01, overflow_waypoints), RUCKIG_ERROR_INVALID_INPUT);
     CHECK_TRUE(otg == NULL);
 
+    CHECK_EQ_INT(ruckig_create_with_waypoints(&otg, 2, 0.01, 1), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_input_create_with_waypoints(&input, 2, 1), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_input_create_with_waypoints(&compare_input, 2, 1), RUCKIG_WORKING);
+    input->max_number_of_waypoints = overflow_waypoints;
+    compare_input->max_number_of_waypoints = overflow_waypoints;
+    CHECK_EQ_INT(
+        ruckig_input_set_intermediate_positions(input, dummy_positions, overflow_waypoints, 2),
+        RUCKIG_ERROR_INVALID_INPUT
+    );
+    input->waypoint_count = overflow_waypoints;
+    compare_input->waypoint_count = overflow_waypoints;
+    CHECK_EQ_INT(
+        ruckig_input_get_intermediate_positions(input, dummy_positions, size_max),
+        RUCKIG_ERROR_INVALID_INPUT
+    );
+    CHECK_EQ_INT(ruckig_input_copy_state(input, compare_input), RUCKIG_ERROR_INVALID_INPUT);
+    CHECK_TRUE(!ruckig_input_equals(input, compare_input));
+    CHECK_EQ_INT(
+        ruckig_filter_intermediate_positions(otg, input, threshold, 2, dummy_positions, size_max, &written),
+        RUCKIG_ERROR_INVALID_INPUT
+    );
+    CHECK_EQ_INT(written, 0);
+    ruckig_input_destroy(compare_input);
+    compare_input = NULL;
+    ruckig_input_destroy(input);
+    input = NULL;
+    ruckig_destroy(otg);
+    otg = NULL;
+
     CHECK_EQ_INT(ruckig_target_state_sequence_create(&target_sequence, 2, overflow_waypoints), RUCKIG_ERROR_INVALID_INPUT);
     CHECK_EQ_INT(ruckig_tracking_output_sequence_create(&tracking_outputs, 2, overflow_waypoints), RUCKIG_ERROR_INVALID_INPUT);
     CHECK_EQ_INT(ruckig_tracking_sequence_continuation_create(&continuation, 2, overflow_waypoints), RUCKIG_ERROR_INVALID_INPUT);
@@ -117,6 +150,7 @@ static void test_constructor_boundary_validation(void) {
     ruckig_tracking_sequence_continuation_destroy(continuation);
     ruckig_tracking_output_sequence_destroy(tracking_outputs);
     ruckig_target_state_sequence_destroy(target_sequence);
+    ruckig_input_destroy(compare_input);
     ruckig_trajectory_destroy(trajectory);
     ruckig_output_destroy(output);
     ruckig_input_destroy(input);

@@ -213,6 +213,14 @@ storage is rejected with `RUCKIG_ERROR_INVALID_INPUT` before the operation runs,
 and the diagnostics record is not written because the caller-provided storage
 did not pass the stable-prefix validation.
 
+The `post-v0.16.0-waypoint-derived-count-hardening` slice adds defense-in-depth
+checked arithmetic for public waypoint and per-section derived counts. Normal
+constructed handles already have checked capacities, but public boundary code
+now rechecks `waypoint_count * dofs`, `(waypoint_count + 1) * dofs`, and
+`waypoint_count + 1` before copying, comparing, or filtering derived buffers.
+Artificially corrupted overflow states return `RUCKIG_ERROR_INVALID_INPUT` or
+`false` instead of relying on constructor invariants alone.
+
 Release coverage is recorded at
 `out/coverage/0.16.0/coverage-summary.txt`:
 

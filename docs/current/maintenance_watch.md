@@ -13,6 +13,8 @@ event-driven after `v0.16.0`. It is not an active implementation roadmap.
 - Package-manager recipes remain frozen.
 - Constructor capacity overflow and invalid constructor `delta_time` handling
   are covered baseline risks after the post-`v0.16.0` quality hardening slices.
+- Public waypoint derived count overflow is covered as a defense-in-depth
+  baseline after the review follow-up hardening slice.
 - Allocation audit counters are documented as local, non-thread-safe
   instrumentation; no atomics or locks are planned unless a future threaded
   audit requirement is accepted.

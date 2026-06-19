@@ -400,8 +400,10 @@ RUCKIG_C_API ruckig_result_t ruckig_input_set_intermediate_positions(
     size_t waypoint_count,
     size_t dofs
 ) {
-    const size_t count = waypoint_count * dofs;
-    if (!input || (!flat_positions && count > 0) || dofs != input->dofs || waypoint_count > input->max_number_of_waypoints) {
+    size_t count = 0;
+    if (!input || dofs != input->dofs || waypoint_count > input->max_number_of_waypoints
+        || !ruckig_checked_mul_size(waypoint_count, dofs, &count)
+        || (!flat_positions && count > 0)) {
         return RUCKIG_ERROR_INVALID_INPUT;
     }
     if (input->waypoint_count != waypoint_count) {
@@ -430,8 +432,9 @@ RUCKIG_C_API ruckig_result_t ruckig_input_get_intermediate_positions(
     double* flat_positions,
     size_t capacity
 ) {
-    const size_t count = input ? input->waypoint_count * input->dofs : 0;
-    if (!input || (!flat_positions && count > 0) || capacity < count) {
+    size_t count = 0;
+    if (!input || !ruckig_checked_mul_size(input->waypoint_count, input->dofs, &count)
+        || (!flat_positions && count > 0) || capacity < count) {
         return RUCKIG_ERROR_INVALID_INPUT;
     }
     if (count > 0) {
@@ -448,9 +451,12 @@ static ruckig_result_t set_per_section_vector(
     size_t section_count,
     size_t dofs
 ) {
-    const size_t expected_sections = input ? input->waypoint_count + 1 : 0;
-    const size_t count = section_count * dofs;
-    if (!input || !dst || !flag || !values || dofs != input->dofs || section_count != expected_sections) {
+    size_t expected_sections = 0;
+    size_t count = 0;
+    if (!input || !dst || !flag || !values || dofs != input->dofs
+        || !ruckig_checked_add_size(input->waypoint_count, 1u, &expected_sections)
+        || section_count != expected_sections
+        || !ruckig_checked_mul_size(section_count, dofs, &count)) {
         return RUCKIG_ERROR_INVALID_INPUT;
     }
     memcpy(dst, values, sizeof(double) * count);
@@ -465,8 +471,12 @@ static ruckig_result_t get_per_section_vector(
     double* values,
     size_t capacity
 ) {
-    const size_t count = input ? (input->waypoint_count + 1) * input->dofs : 0;
-    if (!input || !src || !flag || (!values && count > 0) || capacity < count) {
+    size_t sections = 0;
+    size_t count = 0;
+    if (!input || !src || !flag
+        || !ruckig_checked_add_size(input->waypoint_count, 1u, &sections)
+        || !ruckig_checked_mul_size(sections, input->dofs, &count)
+        || (!values && count > 0) || capacity < count) {
         return RUCKIG_ERROR_INVALID_INPUT;
     }
     memcpy(values, src, sizeof(double) * count);
@@ -512,8 +522,10 @@ RUCKIG_C_API ruckig_result_t ruckig_input_set_per_section_minimum_duration(
     size_t section_count
 ) {
     size_t i;
-    const size_t expected_sections = input ? input->waypoint_count + 1 : 0;
-    if (!input || !values || section_count != expected_sections) {
+    size_t expected_sections = 0;
+    if (!input || !values
+        || !ruckig_checked_add_size(input->waypoint_count, 1u, &expected_sections)
+        || section_count != expected_sections) {
         return RUCKIG_ERROR_INVALID_INPUT;
     }
     for (i = 0; i < section_count; ++i) {
@@ -541,8 +553,10 @@ RUCKIG_C_API ruckig_result_t ruckig_input_get_per_section_minimum_duration(
     double* values,
     size_t capacity
 ) {
-    const size_t count = input ? input->waypoint_count + 1 : 0;
-    if (!input || !input->has_per_section_minimum_duration || !values || capacity < count) {
+    size_t count = 0;
+    if (!input || !input->has_per_section_minimum_duration || !values
+        || !ruckig_checked_add_size(input->waypoint_count, 1u, &count)
+        || capacity < count) {
         return RUCKIG_ERROR_INVALID_INPUT;
     }
     memcpy(values, input->per_section_minimum_duration, sizeof(double) * count);
@@ -948,13 +962,16 @@ RUCKIG_C_API ruckig_result_t ruckig_validate_input(
 
 ruckig_result_t ruckig_input_copy_state(const ruckig_input_t* src, ruckig_input_t* dst) {
     const size_t n = src && dst ? src->dofs : 0;
-    const size_t waypoint_values = src ? src->waypoint_count * src->dofs : 0;
-    const size_t section_values = src ? (src->waypoint_count + 1) * src->dofs : 0;
-    const size_t section_count = src ? src->waypoint_count + 1 : 0;
+    size_t waypoint_values = 0;
+    size_t section_values = 0;
+    size_t section_count = 0;
     if (!src || !dst || src->dofs != dst->dofs) {
         return RUCKIG_ERROR_INVALID_INPUT;
     }
     if (src->waypoint_count > dst->max_number_of_waypoints) {
+        return RUCKIG_ERROR_INVALID_INPUT;
+    }
+    if (!ruckig_checked_waypoint_counts(src->dofs, src->waypoint_count, &section_count, &section_values, &waypoint_values)) {
         return RUCKIG_ERROR_INVALID_INPUT;
     }
     memcpy(dst->current_position, src->current_position, sizeof(double) * n);
@@ -1053,10 +1070,13 @@ static bool synchronization_arrays_equal(const ruckig_synchronization_t* lhs, co
 
 static bool ruckig_input_equals_impl(const ruckig_input_t* lhs, const ruckig_input_t* rhs, bool compare_interrupt) {
     const size_t n = lhs && rhs ? lhs->dofs : 0;
-    const size_t waypoint_values = lhs && rhs ? lhs->waypoint_count * lhs->dofs : 0;
-    const size_t section_values = lhs && rhs ? (lhs->waypoint_count + 1) * lhs->dofs : 0;
-    const size_t section_count = lhs && rhs ? lhs->waypoint_count + 1 : 0;
+    size_t waypoint_values = 0;
+    size_t section_values = 0;
+    size_t section_count = 0;
     if (!lhs || !rhs || lhs->dofs != rhs->dofs) {
+        return false;
+    }
+    if (!ruckig_checked_waypoint_counts(lhs->dofs, lhs->waypoint_count, &section_count, &section_values, &waypoint_values)) {
         return false;
     }
 

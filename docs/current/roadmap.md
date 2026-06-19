@@ -187,6 +187,9 @@ or default heavy-random CI policy.
 - `post-v0.16.0-diagnostics-struct-size-policy-docs` documents and tests that
   too-small diagnostics `struct_size` values return invalid input without
   writing diagnostics records.
+- `post-v0.16.0-waypoint-derived-count-hardening` adds defense-in-depth checked
+  arithmetic for public waypoint derived counts and covers corrupted overflow
+  states in the constructor boundary selector.
 
 ## 0.17.0 Wrapper Stabilization Readiness
 

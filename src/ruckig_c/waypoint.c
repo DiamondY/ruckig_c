@@ -111,10 +111,13 @@ static bool waypoint_identity_per_section_arrays_equal(
 
 static bool waypoint_planning_identity_equals(const ruckig_input_t* lhs, const ruckig_input_t* rhs) {
     const size_t n = lhs && rhs ? lhs->dofs : 0;
-    const size_t waypoint_values = lhs && rhs ? lhs->waypoint_count * lhs->dofs : 0;
-    const size_t section_values = lhs && rhs ? (lhs->waypoint_count + 1) * lhs->dofs : 0;
-    const size_t section_count = lhs && rhs ? lhs->waypoint_count + 1 : 0;
+    size_t waypoint_values = 0;
+    size_t section_values = 0;
+    size_t section_count = 0;
     if (!lhs || !rhs || lhs->dofs != rhs->dofs) {
+        return false;
+    }
+    if (!ruckig_checked_waypoint_counts(lhs->dofs, lhs->waypoint_count, &section_count, &section_values, &waypoint_values)) {
         return false;
     }
 
@@ -1160,7 +1163,15 @@ RUCKIG_C_API ruckig_result_t ruckig_filter_intermediate_positions(
     if (input->waypoint_count == 0) {
         return RUCKIG_WORKING;
     }
-    if (!filtered_positions || capacity < input->waypoint_count * input->dofs) {
+    {
+        size_t waypoint_values = 0;
+        if (!ruckig_checked_mul_size(input->waypoint_count, input->dofs, &waypoint_values)
+            || !filtered_positions || capacity < waypoint_values) {
+            return RUCKIG_ERROR_INVALID_INPUT;
+        }
+    }
+
+    if (input->waypoint_count > ((size_t)-1) - 2u) {
         return RUCKIG_ERROR_INVALID_INPUT;
     }
 
