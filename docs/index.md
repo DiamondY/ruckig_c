@@ -243,6 +243,8 @@ Historical rewrite plans and release evidence are retained for traceability.
   closeout for the post-`v0.16.0` quality tightening series.
   `release/checklists/post-v0.16.0-tracking-strategy-null-doc-fix.md` records
   the tracking optimized strategy NULL getter documentation fix.
+  `release/checklists/post-v0.16.0-diagnostics-struct-size-policy-docs.md`
+  records the diagnostics too-small `struct_size` safety-boundary policy.
   `release/checklists/post-v0.15.0-quality-audit.md` records the post-release
   code-quality and test-quality audit slice without changing the stable ABI or
   release state.

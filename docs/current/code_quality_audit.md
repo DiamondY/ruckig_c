@@ -207,6 +207,12 @@ the public header now documents the NULL getter result as Balanced instead of
 Stable. This is a source-level documentation correction only and does not
 change public ABI or runtime behavior.
 
+The `post-v0.16.0-diagnostics-struct-size-policy-docs` slice documents and
+tests the diagnostics `struct_size` safety boundary. Too-small diagnostics
+storage is rejected with `RUCKIG_ERROR_INVALID_INPUT` before the operation runs,
+and the diagnostics record is not written because the caller-provided storage
+did not pass the stable-prefix validation.
+
 Release coverage is recorded at
 `out/coverage/0.16.0/coverage-summary.txt`:
 

@@ -93,8 +93,11 @@ typedef enum ruckig_diagnostic_code {
  * Caller-owned diagnostics record for opt-in public diagnostics APIs.
  *
  * Initialize the object with `ruckig_diagnostics_init` before passing it to an
- * API. `struct_size` is used for source-level forward compatibility. Reserved
- * fields are read-only and currently zeroed.
+ * API. `struct_size` is used for source-level forward compatibility. If
+ * `struct_size` is smaller than the stable prefix required by the library, the
+ * API returns `RUCKIG_ERROR_INVALID_INPUT` and does not write a diagnostics
+ * record because the caller-provided storage is not valid for the stable
+ * fields. Reserved fields are read-only and currently zeroed.
  */
 typedef struct ruckig_diagnostics {
     size_t struct_size;

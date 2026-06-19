@@ -671,6 +671,18 @@ Added coverage:
 The local checklist is
 `docs/release/checklists/post-v0.16.0-constructor-boundary-hardening.md`.
 
+## Post-v0.16.0 Diagnostics Struct-Size Policy
+
+The `post-v0.16.0-diagnostics-struct-size-policy-docs` slice extends the
+existing `ruckig_c_public_diagnostics` selector to lock the too-small
+`struct_size` safety boundary for validate, calculate, and update diagnostics
+entry points. The tests verify `RUCKIG_ERROR_INVALID_INPUT` and preserve
+sentinel diagnostics fields for calculate/update, proving that invalid caller
+storage is not used for diagnostics writes.
+
+The local checklist is
+`docs/release/checklists/post-v0.16.0-diagnostics-struct-size-policy-docs.md`.
+
 ## Post-v0.16.0 Delta-Time Constructor Policy
 
 The `post-v0.16.0-delta-time-policy` slice extends constructor boundary

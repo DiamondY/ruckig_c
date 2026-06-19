@@ -668,6 +668,34 @@ static void test_public_diagnostics_init_and_null_parity(void) {
     CHECK_EQ_INT(diagnostics.struct_size, too_small_size);
 
     ruckig_diagnostics_init(&diagnostics);
+    diagnostics.struct_size = too_small_size;
+    diagnostics.result = RUCKIG_FINISHED;
+    diagnostics.scope = RUCKIG_DIAGNOSTIC_SCOPE_TRACKING;
+    diagnostics.code = RUCKIG_DIAGNOSTIC_UNSUPPORTED;
+    CHECK_EQ_INT(
+        ruckig_calculate_with_diagnostics(otg, input, trajectory, &diagnostics),
+        RUCKIG_ERROR_INVALID_INPUT
+    );
+    CHECK_EQ_INT(diagnostics.struct_size, too_small_size);
+    CHECK_EQ_INT(diagnostics.result, RUCKIG_FINISHED);
+    CHECK_EQ_INT(diagnostics.scope, RUCKIG_DIAGNOSTIC_SCOPE_TRACKING);
+    CHECK_EQ_INT(diagnostics.code, RUCKIG_DIAGNOSTIC_UNSUPPORTED);
+
+    ruckig_diagnostics_init(&diagnostics);
+    diagnostics.struct_size = too_small_size;
+    diagnostics.result = RUCKIG_FINISHED;
+    diagnostics.scope = RUCKIG_DIAGNOSTIC_SCOPE_TRACKING;
+    diagnostics.code = RUCKIG_DIAGNOSTIC_UNSUPPORTED;
+    CHECK_EQ_INT(
+        ruckig_update_with_diagnostics(otg, input, output, &diagnostics),
+        RUCKIG_ERROR_INVALID_INPUT
+    );
+    CHECK_EQ_INT(diagnostics.struct_size, too_small_size);
+    CHECK_EQ_INT(diagnostics.result, RUCKIG_FINISHED);
+    CHECK_EQ_INT(diagnostics.scope, RUCKIG_DIAGNOSTIC_SCOPE_TRACKING);
+    CHECK_EQ_INT(diagnostics.code, RUCKIG_DIAGNOSTIC_UNSUPPORTED);
+
+    ruckig_diagnostics_init(&diagnostics);
     CHECK_EQ_INT(
         ruckig_validate_input_with_diagnostics(otg, input, false, true, &diagnostics),
         RUCKIG_WORKING

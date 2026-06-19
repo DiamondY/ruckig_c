@@ -184,6 +184,9 @@ or default heavy-random CI policy.
 - `post-v0.16.0-tracking-strategy-null-doc-fix` corrects the public header
   documentation for `ruckig_tracking_get_optimized_strategy(NULL)` to match the
   existing Balanced default behavior without changing runtime code or ABI.
+- `post-v0.16.0-diagnostics-struct-size-policy-docs` documents and tests that
+  too-small diagnostics `struct_size` values return invalid input without
+  writing diagnostics records.
 
 ## 0.17.0 Wrapper Stabilization Readiness
 

@@ -142,9 +142,12 @@ leaves the legacy entry points unchanged:
 
 Callers that pass a non-NULL diagnostics pointer must initialize it with
 `ruckig_diagnostics_init`. A too-small `struct_size` is rejected with
-`RUCKIG_ERROR_INVALID_INPUT` before the main operation runs. Valid records are
-written only within the caller-declared stable prefix, leaving reserved fields
-for future ABI-compatible expansion.
+`RUCKIG_ERROR_INVALID_INPUT` before the main operation runs. The API does not
+write a diagnostics record for that failure because the caller-provided storage
+has not passed the stable-prefix safety check. This is an intentional
+forward-compatibility boundary, not a missing diagnostics fill path. Valid
+records are written only within the caller-declared stable prefix, leaving
+reserved fields for future ABI-compatible expansion.
 
 The stable fields are intentionally coarse. `result` mirrors the public result
 returned by the operation, `scope` identifies the public subsystem that can
