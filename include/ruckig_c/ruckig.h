@@ -788,7 +788,7 @@ RUCKIG_C_API ruckig_result_t ruckig_tracking_set_optimized_strategy(
     ruckig_tracking_t* tracking,
     ruckig_tracking_optimized_strategy_t strategy
 );
-/** Return optimized tracking strategy, or Stable for `NULL`. */
+/** Return optimized tracking strategy, or Balanced for `NULL`. */
 RUCKIG_C_API ruckig_tracking_optimized_strategy_t ruckig_tracking_get_optimized_strategy(
     const ruckig_tracking_t* tracking
 );

@@ -197,6 +197,16 @@ sanitizers, macOS sanitizer/oracle/performance expansion, solver white-box
 coverage pushes, package-manager recipes, and wrapper publication require
 separate triggers and owner acceptance.
 
+## Post-v0.16.0 Review Follow-Up Tightening
+
+The `post-v0.16.0-tracking-strategy-null-doc-fix` slice fixes a review-found
+documentation mismatch in the tracking optimized strategy getter. The
+implementation and constructor default both use
+`RUCKIG_TRACKING_OPTIMIZED_BALANCED` for the NULL/default strategy boundary, so
+the public header now documents the NULL getter result as Balanced instead of
+Stable. This is a source-level documentation correction only and does not
+change public ABI or runtime behavior.
+
 Release coverage is recorded at
 `out/coverage/0.16.0/coverage-summary.txt`:
 

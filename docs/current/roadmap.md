@@ -181,6 +181,9 @@ or default heavy-random CI policy.
   duration-timing, package-metadata, and static-analysis policy work, while
   leaving broader CI/static-analysis/platform and solver coverage work
   event-driven.
+- `post-v0.16.0-tracking-strategy-null-doc-fix` corrects the public header
+  documentation for `ruckig_tracking_get_optimized_strategy(NULL)` to match the
+  existing Balanced default behavior without changing runtime code or ABI.
 
 ## 0.17.0 Wrapper Stabilization Readiness
 
