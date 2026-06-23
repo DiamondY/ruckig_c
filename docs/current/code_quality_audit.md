@@ -251,6 +251,12 @@ do not add coverage probes for percentage movement alone, and do not promote
 clang-tidy, cppcheck, CodeQL, formatter gates, coverage upload, or platform
 matrix expansion into default CI without an accepted owner/cost decision.
 
+The `post-v0.16.0-solver-hotspot-commentary` slice responds to the useful
+portion of that review by adding small intent comments around selected
+third-order position timing helpers. The comments identify candidate families,
+the role of Newton refinement, and the final profile-check acceptance gate
+without changing formulas, constants, solver ordering, or oracle expectations.
+
 Release coverage is recorded at
 `out/coverage/0.16.0/coverage-summary.txt`:
 

@@ -28,6 +28,9 @@ event-driven after `v0.16.0`. It is not an active implementation roadmap.
 - External code-quality review triage is documented; large-file complexity,
   static-analysis CI, platform matrix expansion, and solver documentation work
   remain scoped by concrete triggers rather than broad churn.
+- Selected third-order position solver hotspot comments are now covered; future
+  comments should stay focused on branch-family intent, formula provenance, or
+  invariants.
 - The post-`v0.16.0` quality tightening series is closed out; remaining quality
   expansion is event-driven.
 

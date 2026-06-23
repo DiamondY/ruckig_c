@@ -12,6 +12,7 @@ static void clear_times(ruckig_profile_t* profile) {
     memset(profile->t, 0, sizeof(profile->t));
 }
 
+/* Rest-to-rest velocity-limited UDDU family; tf/4 bounds the symmetric four jerk pulses. */
 static bool time_vel_rest_to_rest(
     ruckig_profile_t* profile,
     double tf,
@@ -58,6 +59,7 @@ static bool time_vel_rest_to_rest(
     return false;
 }
 
+/* Refine a candidate UDDU root once, then let the profile timing check validate limits. */
 static bool check_time_vel_general_uddu_root(
     ruckig_profile_t* profile,
     double t,
@@ -1156,6 +1158,7 @@ static bool time_none_udud_t0246(
     return ruckig_profile_check_with_timing(profile, RUCKIG_PROFILE_SIGNS_UDUD, RUCKIG_PROFILE_LIMITS_NONE, tf, j_max, v_max, v_min, a_max, a_min);
 }
 
+/* Enumerates no-limit synchronization families in one place to keep candidate order auditable. */
 static bool time_none(
     ruckig_profile_t* profile,
     double tf,
@@ -1442,6 +1445,7 @@ static bool time_none(
     return false;
 }
 
+/* Dispatches third-order position timing families; profile checks are the final acceptance gate. */
 bool ruckig_position_third_step2_get_profile(
     ruckig_profile_t* profile,
     double tf,

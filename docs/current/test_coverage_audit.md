@@ -726,6 +726,17 @@ Evidence:
 The local checklist is
 `docs/release/checklists/post-v0.16.0-strict-platform-clock-policy.md`.
 
+## Post-v0.16.0 Solver Hotspot Commentary
+
+The `post-v0.16.0-solver-hotspot-commentary` slice adds intent comments around
+selected third-order position timing helpers. It changes no formulas, limits,
+candidate ordering, constants, or public behavior, so verification focuses on
+ordinary solver gates, branch selectors, roots numeric audit, headers, and
+fixed oracle behavior.
+
+The local checklist is
+`docs/release/checklists/post-v0.16.0-solver-hotspot-commentary.md`.
+
 ## Post-v0.16.0 Delta-Time Constructor Policy
 
 The `post-v0.16.0-delta-time-policy` slice extends constructor boundary

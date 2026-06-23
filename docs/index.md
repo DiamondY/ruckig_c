@@ -254,6 +254,8 @@ Historical rewrite plans and release evidence are retained for traceability.
   policy.
   `release/checklists/post-v0.16.0-review-triage-policy.md` records external
   code-quality review triage and owner-gated follow-up boundaries.
+  `release/checklists/post-v0.16.0-solver-hotspot-commentary.md` records
+  narrow third-order position solver intent-comment hardening.
   `release/checklists/post-v0.15.0-quality-audit.md` records the post-release
   code-quality and test-quality audit slice without changing the stable ABI or
   release state.

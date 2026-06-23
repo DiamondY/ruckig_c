@@ -198,6 +198,9 @@ or default heavy-random CI policy.
 - `post-v0.16.0-review-triage-policy` records the latest external
   code-quality review triage, keeping static-analysis CI, platform expansion,
   solver splitting, and coverage-percentage work event-driven.
+- `post-v0.16.0-solver-hotspot-commentary` adds narrow intent comments for
+  selected third-order position timing helpers without changing solver
+  behavior.
 
 ## 0.17.0 Wrapper Stabilization Readiness
 
