@@ -252,6 +252,8 @@ Historical rewrite plans and release evidence are retained for traceability.
   `release/checklists/post-v0.16.0-strict-platform-clock-policy.md` records
   removal of the private `clock()` fallback and the strict monotonic timing
   policy.
+  `release/checklists/post-v0.16.0-review-triage-policy.md` records external
+  code-quality review triage and owner-gated follow-up boundaries.
   `release/checklists/post-v0.15.0-quality-audit.md` records the post-release
   code-quality and test-quality audit slice without changing the stable ABI or
   release state.

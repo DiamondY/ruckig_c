@@ -25,6 +25,9 @@ event-driven after `v0.16.0`. It is not an active implementation roadmap.
   developer use; they remain manual evidence, not default CI gates.
 - Static-analysis evidence policy is documented; default CI still excludes
   clang-tidy, cppcheck, CodeQL, formatter gates, and coverage upload.
+- External code-quality review triage is documented; large-file complexity,
+  static-analysis CI, platform matrix expansion, and solver documentation work
+  remain scoped by concrete triggers rather than broad churn.
 - The post-`v0.16.0` quality tightening series is closed out; remaining quality
   expansion is event-driven.
 
@@ -43,6 +46,8 @@ event-driven after `v0.16.0`. It is not an active implementation roadmap.
 | CI matrix expansion | A maintainer accepts owner, runtime, and triage cost for MSVC full matrix, Windows sanitizer, macOS sanitizer/oracle/performance, coverage upload, or new static-analysis jobs. |
 | Solver white-box coverage push | A reproducible oracle mismatch, public behavior regression, user report, or stable invariant justifies cases; coverage percentage alone is insufficient. |
 | Non-standard platform clock support | A concrete platform lacks Windows QPC/POSIX `CLOCK_MONOTONIC` and cannot use the compile-time custom monotonic provider hook. |
+| Solver hotspot documentation | A reviewer or maintainer identifies a branch family, formula source, invariant, or candidate-order rationale that is hard to understand and can be clarified without changing formulas. |
+| Solver/module splitting | A concrete ownership boundary, duplicated logic, testability blocker, or regression-prone hotspot justifies a small refactor; file length alone is insufficient. |
 
 ## Explicit Non-Triggers
 
@@ -67,6 +72,8 @@ event-driven after `v0.16.0`. It is not an active implementation roadmap.
 - Do not open solver white-box coverage work solely to improve percentages.
 - Do not reintroduce `clock()` CPU-time fallback for duration or interruption
   timing.
+- Do not split solver files or move formula coefficients into constants merely
+  to reduce line count or literal-count metrics.
 
 ## Current Default
 
@@ -80,3 +87,5 @@ The default maintenance route is conservative:
 - require monotonic timing sources for private platform timing;
 - add tests only when backed by public behavior, oracle evidence, a reproducible
   audit/shrinker sample, or a clear invariant.
+- add solver comments only when they explain stable intent, candidate families,
+  formula provenance, or invariants that reviewers are likely to misread.

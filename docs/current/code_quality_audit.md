@@ -237,6 +237,20 @@ helpers. The selector behavior and assertions are unchanged; the helper names
 make clear that the inputs are artificial states used to prove public boundary
 checked arithmetic, not normal API usage.
 
+The `post-v0.16.0-review-triage-policy` slice records the follow-up review
+triage for the latest external code-quality report. The useful risk signals
+are large-file solver complexity, sparse intent comments around complex
+mathematics, static analysis remaining local/manual rather than default CI,
+platform matrix asymmetry, and remaining branch-coverage or precision-constant
+long tail. The report's exact line counts are treated as rough estimates, and
+absolute claims such as all public APIs or all array accesses being explicitly
+checked are intentionally not adopted as project guarantees.
+
+Default policy remains conservative: do not split files for line count alone,
+do not add coverage probes for percentage movement alone, and do not promote
+clang-tidy, cppcheck, CodeQL, formatter gates, coverage upload, or platform
+matrix expansion into default CI without an accepted owner/cost decision.
+
 Release coverage is recorded at
 `out/coverage/0.16.0/coverage-summary.txt`:
 

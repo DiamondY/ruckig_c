@@ -195,6 +195,9 @@ or default heavy-random CI policy.
 - `post-v0.16.0-strict-platform-clock-policy` removes the private `clock()`
   CPU-time fallback, requiring custom provider, Windows QueryPerformanceCounter,
   or POSIX `CLOCK_MONOTONIC` for duration and soft-interruption timing.
+- `post-v0.16.0-review-triage-policy` records the latest external
+  code-quality review triage, keeping static-analysis CI, platform expansion,
+  solver splitting, and coverage-percentage work event-driven.
 
 ## 0.17.0 Wrapper Stabilization Readiness
 
