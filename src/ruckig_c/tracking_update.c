@@ -631,11 +631,13 @@ ruckig_result_t evaluate_optimized_tracking(
     ruckig_result_t result;
     const size_t window_count = min_size(target_count, tracking->look_ahead_cycles);
     ruckig_interrupt_context_t interrupt_context = ruckig_interrupt_context_start(input, allow_interrupt);
+    size_t target_value_count;
     tracking_reset_diagnostics(tracking);
     if (!config || target_count == 0 || window_count == 0
-        || !finite_vector(target_position, target_count * tracking->dofs)
-        || !finite_vector(target_velocity, target_count * tracking->dofs)
-        || !finite_vector(target_acceleration, target_count * tracking->dofs)) {
+        || !ruckig_checked_mul_size(target_count, tracking->dofs, &target_value_count)
+        || !finite_vector(target_position, target_value_count)
+        || !finite_vector(target_velocity, target_value_count)
+        || !finite_vector(target_acceleration, target_value_count)) {
         tracking_mark_error(tracking);
         return RUCKIG_ERROR_INVALID_INPUT;
     }

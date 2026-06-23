@@ -33,13 +33,17 @@ static ruckig_result_t ruckig_trajectory_copy_internal(
     ruckig_trajectory_t* dst,
     const ruckig_trajectory_t* src
 ) {
+    size_t profile_count;
     if (!dst || !src || dst->dofs != src->dofs || src->section_count > dst->section_capacity) {
+        return RUCKIG_ERROR_INVALID_INPUT;
+    }
+    if (!ruckig_checked_mul_size(src->section_count, src->dofs, &profile_count)) {
         return RUCKIG_ERROR_INVALID_INPUT;
     }
     dst->section_count = src->section_count;
     dst->duration = src->duration;
     dst->valid = src->valid;
-    memcpy(dst->profiles, src->profiles, sizeof(ruckig_profile_t) * src->section_count * src->dofs);
+    memcpy(dst->profiles, src->profiles, sizeof(ruckig_profile_t) * profile_count);
     memcpy(dst->blocks, src->blocks, sizeof(ruckig_block_t) * src->dofs);
     memcpy(dst->independent_min_durations, src->independent_min_durations, sizeof(double) * src->dofs);
     memcpy(dst->cumulative_times, src->cumulative_times, sizeof(double) * src->section_count);

@@ -421,7 +421,10 @@ static bool accept_if_better(
     double* best_duration
 ) {
     double duration = 0.0;
-    const size_t count = input->waypoint_count * input->dofs;
+    size_t count;
+    if (!ruckig_checked_mul_size(input->waypoint_count, input->dofs, &count)) {
+        return false;
+    }
     ++otg->waypoint_engine.last_candidate_evaluations;
     if (evaluate_candidate(otg, input, velocity, acceleration, &duration) != RUCKIG_WORKING) {
         return false;
@@ -591,8 +594,11 @@ static bool waypoint_engine_accept_if_better(
     return accepted;
 }
 
-static void waypoint_engine_advance_refine_index(ruckig_t* otg, const ruckig_input_t* input) {
-    const size_t count = input->waypoint_count * input->dofs;
+static ruckig_result_t waypoint_engine_advance_refine_index(ruckig_t* otg, const ruckig_input_t* input) {
+    size_t count;
+    if (!ruckig_checked_mul_size(input->waypoint_count, input->dofs, &count)) {
+        return RUCKIG_ERROR_INVALID_INPUT;
+    }
     memcpy(otg->waypoint_engine.candidate_velocity, otg->waypoint_engine.best_velocity, sizeof(double) * count);
     memcpy(otg->waypoint_engine.candidate_acceleration, otg->waypoint_engine.best_acceleration, sizeof(double) * count);
 
@@ -611,6 +617,7 @@ static void waypoint_engine_advance_refine_index(ruckig_t* otg, const ruckig_inp
             }
         }
     }
+    return RUCKIG_WORKING;
 }
 
 static ruckig_result_t waypoint_engine_step_refine(
@@ -692,7 +699,7 @@ static ruckig_result_t waypoint_engine_step_refine(
         );
         if (accepted) {
             otg->waypoint_engine.refine_improved = true;
-            waypoint_engine_advance_refine_index(otg, input);
+            return waypoint_engine_advance_refine_index(otg, input);
         } else {
             otg->waypoint_engine.refine_attempt = 1;
         }
@@ -712,8 +719,7 @@ static ruckig_result_t waypoint_engine_step_refine(
     } else {
         otg->waypoint_engine.candidate_acceleration[index] = otg->waypoint_engine.refine_original;
     }
-    waypoint_engine_advance_refine_index(otg, input);
-    return RUCKIG_WORKING;
+    return waypoint_engine_advance_refine_index(otg, input);
 }
 
 static ruckig_result_t waypoint_engine_step_branch(
@@ -721,7 +727,10 @@ static ruckig_result_t waypoint_engine_step_branch(
     const ruckig_input_t* input,
     bool* candidate_evaluated
 ) {
-    const size_t count = input->waypoint_count * input->dofs;
+    size_t count;
+    if (!ruckig_checked_mul_size(input->waypoint_count, input->dofs, &count)) {
+        return RUCKIG_ERROR_INVALID_INPUT;
+    }
 
     while (true) {
         if (otg->waypoint_engine.branch_iteration >= RUCKIG_WAYPOINT_BRANCH_ITERATION_BUDGET
@@ -802,8 +811,11 @@ static ruckig_result_t waypoint_engine_step(
     const ruckig_input_t* input,
     bool* candidate_evaluated
 ) {
-    const size_t count = input->waypoint_count * input->dofs;
+    size_t count;
     *candidate_evaluated = false;
+    if (!ruckig_checked_mul_size(input->waypoint_count, input->dofs, &count)) {
+        return RUCKIG_ERROR_INVALID_INPUT;
+    }
 
     switch (otg->waypoint_engine.phase) {
     case RUCKIG_WAYPOINT_ENGINE_PHASE_BASELINE:
@@ -897,6 +909,16 @@ static ruckig_result_t waypoint_engine_step(
     }
 }
 
+#ifdef RUCKIG_C_TESTING
+ruckig_result_t ruckig_test_waypoint_engine_step(
+    ruckig_t* otg,
+    const ruckig_input_t* input,
+    bool* candidate_evaluated
+) {
+    return waypoint_engine_step(otg, input, candidate_evaluated);
+}
+#endif
+
 static ruckig_result_t waypoint_engine_run(
     ruckig_t* otg,
     const ruckig_input_t* input,
@@ -957,9 +979,12 @@ static ruckig_result_t copy_waypoint_trajectory(
     ruckig_trajectory_t* dst,
     const ruckig_trajectory_t* src
 ) {
-    const size_t profile_count = src ? src->section_count * src->dofs : 0;
+    size_t profile_count;
     if (!dst || !src || dst->dofs != src->dofs
         || dst->section_capacity < src->section_count) {
+        return RUCKIG_ERROR_INVALID_INPUT;
+    }
+    if (!ruckig_checked_mul_size(src->section_count, src->dofs, &profile_count)) {
         return RUCKIG_ERROR_INVALID_INPUT;
     }
     dst->section_count = src->section_count;

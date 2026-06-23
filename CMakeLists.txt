@@ -195,7 +195,7 @@ if(BUILD_RUCKIG_C_TESTS)
     test/c/test_utils.c
     ${RUCKIG_C_SOURCES}
   )
-  target_compile_definitions(ruckig_c_tests PRIVATE RUCKIG_C_STATIC_DEFINE)
+  target_compile_definitions(ruckig_c_tests PRIVATE RUCKIG_C_STATIC_DEFINE RUCKIG_C_TESTING)
   if(RUCKIG_C_ENABLE_CALCULATION_DURATION)
     target_compile_definitions(ruckig_c_tests PRIVATE RUCKIG_C_ENABLE_CALCULATION_DURATION)
   endif()

@@ -244,6 +244,15 @@ now rechecks `waypoint_count * dofs`, `(waypoint_count + 1) * dofs`, and
 Artificially corrupted overflow states return `RUCKIG_ERROR_INVALID_INPUT` or
 `false` instead of relying on constructor invariants alone.
 
+The `post-v0.16.0-private-derived-count-hardening` slice applies the same rule
+to selected private helper paths. Tracking sequence prefix/capture/store,
+Optimized tracking target-window validation, no-waypoint trajectory copying,
+and waypoint engine candidate/trajectory helper paths now check derived
+`count * dofs` values locally before copy, compare, or finite-vector access.
+The added white-box coverage uses explicit corrupted states and a
+`RUCKIG_C_TESTING`-only waypoint engine hook; no public C ABI or installed
+target surface changes are involved.
+
 The `post-v0.16.0-constructor-boundary-test-helper` slice keeps that
 corrupted-state coverage but moves the private-field mutation into test-only
 helpers. The selector behavior and assertions are unchanged; the helper names

@@ -719,6 +719,19 @@ wrapped-size copy or filter behavior.
 The local checklist is
 `docs/release/checklists/post-v0.16.0-waypoint-derived-count-hardening.md`.
 
+## Post-v0.16.0 Private Derived Count Hardening
+
+The `post-v0.16.0-private-derived-count-hardening` slice extends
+`ruckig_c_constructor_boundaries` with corrupted-state evidence for private
+tracking sequence and waypoint engine derived-count paths. The selector now
+verifies that tracking continuation capture rejects overflowing target counts,
+that output-prefix copy does not publish a wrapped count, and that the waypoint
+engine step helper returns invalid before evaluating a candidate when
+`waypoint_count * dofs` would overflow.
+
+The local checklist is
+`docs/release/checklists/post-v0.16.0-private-derived-count-hardening.md`.
+
 ## Post-v0.16.0 Constructor Boundary Test Helper
 
 The `post-v0.16.0-constructor-boundary-test-helper` slice keeps the

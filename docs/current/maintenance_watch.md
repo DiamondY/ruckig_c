@@ -15,6 +15,8 @@ event-driven after `v0.16.0`. It is not an active implementation roadmap.
   are covered baseline risks after the post-`v0.16.0` quality hardening slices.
 - Public waypoint derived count overflow is covered as a defense-in-depth
   baseline after the review follow-up hardening slice.
+- Selected private tracking/waypoint/trajectory derived count paths are covered
+  by local checked arithmetic and corrupted-state selector evidence.
 - Platform timing uses strict monotonic sources only: custom provider, Windows
   QueryPerformanceCounter, or POSIX `CLOCK_MONOTONIC`. CPU-time `clock()`
   fallback is not part of the baseline.
@@ -58,6 +60,7 @@ event-driven after `v0.16.0`. It is not an active implementation roadmap.
 | Solver hotspot documentation | A reviewer or maintainer identifies a branch family, formula source, invariant, or candidate-order rationale that is hard to understand and can be clarified without changing formulas. |
 | Solver/module splitting | A concrete ownership boundary, duplicated logic, testability blocker, or regression-prone hotspot justifies a small refactor; file length alone is insufficient. |
 | Precision-constant cleanup | A remaining literal has a stable semantic name, the exact value can be preserved, and normal/oracle-backed evidence can prove no numeric behavior change. |
+| Private derived-count cleanup | A touched private helper computes buffer lengths from counts or sections and can be hardened locally without changing candidate order, scoring, or public behavior. |
 
 ## Explicit Non-Triggers
 
@@ -96,6 +99,9 @@ The default maintenance route is conservative:
 - keep package recipes frozen;
 - keep upstream baseline frozen;
 - require checked arithmetic for public constructor derived counts;
+- require checked arithmetic for touched private derived counts before buffer
+  copy, finite-vector validation, or trajectory profile copying when the
+  product can be expressed locally;
 - require monotonic timing sources for private platform timing;
 - add tests only when backed by public behavior, oracle evidence, a reproducible
   audit/shrinker sample, or a clear invariant.

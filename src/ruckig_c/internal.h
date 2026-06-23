@@ -428,5 +428,12 @@ ruckig_result_t ruckig_waypoint_resume_continue(
     bool* was_interrupted,
     bool* published
 );
+#ifdef RUCKIG_C_TESTING
+ruckig_result_t ruckig_test_waypoint_engine_step(
+    ruckig_t* otg,
+    const ruckig_input_t* input,
+    bool* candidate_evaluated
+);
+#endif
 
 #endif
