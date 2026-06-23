@@ -235,6 +235,11 @@ the public C ABI:
   `RUCKIG_C_CUSTOM_MONOTONIC_TIME_US`. These are build-time implementation
   hooks only; they do not add public symbols, public structs, or exported C ABI
   entries.
+- The private platform clock intentionally has no CPU-time fallback. Platforms
+  without Windows QueryPerformanceCounter, POSIX `CLOCK_MONOTONIC`, or a custom
+  monotonic provider fail at compile time. Runtime timestamp failures are
+  treated as unavailable timing evidence, so optional duration reporting
+  returns `0.0` rather than a synthetic elapsed value.
 
 ## v0.12.0 Stable True-Resume ABI Baseline
 
@@ -257,7 +262,9 @@ without expanding the public C ABI:
 - Soft interruption still uses internal budget timing independent of
   `RUCKIG_C_ENABLE_CALCULATION_DURATION`; the public calculation-duration
   getter keeps its existing compile-time option semantics and reports monotonic
-  elapsed microseconds when enabled.
+  elapsed microseconds when enabled. The private platform clock does not fall
+  back to CPU-time measurement; unsupported platforms must provide a custom
+  monotonic provider.
 - The private true-resume state, planning-identity snapshot, branch queue, and
   step-driven optimizer cursors are internal implementation details. They do
   not add public getters, runtime diagnostics, public structs, or exported C

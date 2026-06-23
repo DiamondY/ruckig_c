@@ -15,6 +15,9 @@ event-driven after `v0.16.0`. It is not an active implementation roadmap.
   are covered baseline risks after the post-`v0.16.0` quality hardening slices.
 - Public waypoint derived count overflow is covered as a defense-in-depth
   baseline after the review follow-up hardening slice.
+- Platform timing uses strict monotonic sources only: custom provider, Windows
+  QueryPerformanceCounter, or POSIX `CLOCK_MONOTONIC`. CPU-time `clock()`
+  fallback is not part of the baseline.
 - Allocation audit counters are documented as local, non-thread-safe
   instrumentation; no atomics or locks are planned unless a future threaded
   audit requirement is accepted.
@@ -39,6 +42,7 @@ event-driven after `v0.16.0`. It is not an active implementation roadmap.
 | Thread-safe allocation audit counters | A concrete multi-threaded audit use case needs consistent aggregate allocation statistics across threads. |
 | CI matrix expansion | A maintainer accepts owner, runtime, and triage cost for MSVC full matrix, Windows sanitizer, macOS sanitizer/oracle/performance, coverage upload, or new static-analysis jobs. |
 | Solver white-box coverage push | A reproducible oracle mismatch, public behavior regression, user report, or stable invariant justifies cases; coverage percentage alone is insufficient. |
+| Non-standard platform clock support | A concrete platform lacks Windows QPC/POSIX `CLOCK_MONOTONIC` and cannot use the compile-time custom monotonic provider hook. |
 
 ## Explicit Non-Triggers
 
@@ -61,6 +65,8 @@ event-driven after `v0.16.0`. It is not an active implementation roadmap.
 - Do not expand default CI for coverage upload, static analysis, sanitizer
   matrix, or platform-matrix polish without an accepted CI policy slice.
 - Do not open solver white-box coverage work solely to improve percentages.
+- Do not reintroduce `clock()` CPU-time fallback for duration or interruption
+  timing.
 
 ## Current Default
 
@@ -71,5 +77,6 @@ The default maintenance route is conservative:
 - keep package recipes frozen;
 - keep upstream baseline frozen;
 - require checked arithmetic for public constructor derived counts;
+- require monotonic timing sources for private platform timing;
 - add tests only when backed by public behavior, oracle evidence, a reproducible
   audit/shrinker sample, or a clear invariant.

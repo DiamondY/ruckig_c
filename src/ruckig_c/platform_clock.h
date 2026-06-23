@@ -12,23 +12,17 @@
 #endif
 
 #if !defined(RUCKIG_C_CUSTOM_MONOTONIC_TIME_US)
-#include <time.h>
 #if defined(_WIN32)
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
 #include <windows.h>
+#else
+#include <time.h>
+#if !defined(CLOCK_MONOTONIC)
+#error "Ruckig C requires a monotonic platform clock; define RUCKIG_C_PLATFORM_CLOCK_HEADER and RUCKIG_C_CUSTOM_MONOTONIC_TIME_US for this platform."
 #endif
 #endif
-
-#if !defined(RUCKIG_C_CUSTOM_MONOTONIC_TIME_US)
-static uint64_t ruckig_platform_clock_fallback_us(void) {
-    const clock_t value = clock();
-    if (value == (clock_t)-1) {
-        return 0u;
-    }
-    return (uint64_t)(((double)value * 1000000.0) / (double)CLOCKS_PER_SEC);
-}
 #endif
 
 static uint64_t ruckig_platform_monotonic_time_us(void) {
@@ -44,15 +38,13 @@ static uint64_t ruckig_platform_monotonic_time_us(void) {
         return (ticks / ticks_per_second) * 1000000u
             + ((ticks % ticks_per_second) * 1000000u) / ticks_per_second;
     }
-    return ruckig_platform_clock_fallback_us();
+    return 0u;
 #else
-#if defined(CLOCK_MONOTONIC)
     struct timespec ts;
     if (clock_gettime(CLOCK_MONOTONIC, &ts) == 0) {
         return (uint64_t)ts.tv_sec * 1000000u + (uint64_t)(ts.tv_nsec / 1000);
     }
-#endif
-    return ruckig_platform_clock_fallback_us();
+    return 0u;
 #endif
 }
 

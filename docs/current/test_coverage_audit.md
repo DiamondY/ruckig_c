@@ -695,6 +695,26 @@ wrapped-size copy or filter behavior.
 The local checklist is
 `docs/release/checklists/post-v0.16.0-waypoint-derived-count-hardening.md`.
 
+## Post-v0.16.0 Strict Platform Clock Policy
+
+The `post-v0.16.0-strict-platform-clock-policy` slice removes the private
+`clock()` fallback from platform timing. The focused gates keep the normal,
+duration-enabled, shared, and custom-provider paths covered without adding new
+public ABI or workflow requirements.
+
+Evidence:
+
+| Area | Evidence |
+| --- | --- |
+| Default timing path | Normal Windows build and focused header/public-diagnostics/constructor-boundary CTest passed. |
+| Duration-enabled path | Existing duration build directory runs the main C test binary with `RUCKIG_C_ENABLE_CALCULATION_DURATION`. |
+| Custom provider path | `ruckig_c_platform_clock_custom` verifies `RUCKIG_C_PLATFORM_CLOCK_HEADER` and `RUCKIG_C_CUSTOM_MONOTONIC_TIME_US`. |
+| Export boundary | Shared public-symbol verification remains unchanged. |
+| Source boundary | `src/ruckig_c/platform_clock.h` has no remaining `clock()` call. |
+
+The local checklist is
+`docs/release/checklists/post-v0.16.0-strict-platform-clock-policy.md`.
+
 ## Post-v0.16.0 Delta-Time Constructor Policy
 
 The `post-v0.16.0-delta-time-policy` slice extends constructor boundary

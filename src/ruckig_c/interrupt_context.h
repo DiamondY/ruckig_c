@@ -31,8 +31,17 @@ static inline bool ruckig_interrupt_context_elapsed(const ruckig_interrupt_conte
     if (!context || !context->enabled) {
         return false;
     }
+    if (context->duration_us <= 0.0) {
+        return true;
+    }
+    if (context->start_us == 0u) {
+        return false;
+    }
     now_us = ruckig_platform_monotonic_time_us();
-    elapsed_us = now_us >= context->start_us ? (double)(now_us - context->start_us) : 0.0;
+    if (now_us == 0u || now_us < context->start_us) {
+        return false;
+    }
+    elapsed_us = (double)(now_us - context->start_us);
     return elapsed_us >= context->duration_us;
 }
 

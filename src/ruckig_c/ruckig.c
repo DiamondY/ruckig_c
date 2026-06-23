@@ -19,7 +19,7 @@ static uint64_t calculation_duration_start(void) {
 static double calculation_duration_finish(uint64_t start) {
 #ifdef RUCKIG_C_ENABLE_CALCULATION_DURATION
     const uint64_t stop = ruckig_platform_monotonic_time_us();
-    if (stop < start) {
+    if (start == 0u || stop == 0u || stop < start) {
         return 0.0;
     }
     return (double)(stop - start);

@@ -140,6 +140,16 @@ still report `0.0`; enabled builds report elapsed microseconds and guard
 against clock fallback/direction anomalies by returning `0.0` if the stop value
 is earlier than the start value.
 
+The `post-v0.16.0-strict-platform-clock-policy` slice tightens that boundary by
+removing the remaining `clock()` fallback from the private platform clock
+helper. Supported timing sources are now a compile-time custom monotonic
+provider, Windows QueryPerformanceCounter, or POSIX `CLOCK_MONOTONIC`.
+Unsupported platforms fail at compile time unless they provide the custom
+provider hooks. Runtime failures to obtain a monotonic timestamp produce `0`;
+public calculation-duration reporting treats that as unavailable timing
+evidence and returns `0.0`, while positive soft-interruption budgets avoid
+computing elapsed time from a zero timestamp.
+
 The `post-v0.16.0-installed-package-metadata-smoke` slice extends the installed
 CMake consumer fixture to check target metadata directly. Static installed
 targets must propagate `RUCKIG_C_STATIC_DEFINE`, shared installed targets must
@@ -187,7 +197,7 @@ Completed outcomes:
 | Installed CMake package version policy | `SameMinorVersion` is the installed package compatibility policy, with versioned consumer smoke for `find_package(ruckig_c 0.16 CONFIG REQUIRED)`. |
 | Developer tooling portability | Portable preset guidance uses shell discovery, `CC`/`CXX`, or explicit CMake cache variables; clang-tidy header filtering handles absolute and Windows-style paths. |
 | Linked consumer coverage | Public-header-only linked smoke now covers no-waypoint, waypoint, and Fast tracking workflows while the white-box test binary remains intact. |
-| Calculation duration timing | Optional duration builds use the monotonic platform clock for elapsed microseconds; default builds still report `0.0`. |
+| Calculation duration timing | Optional duration builds use strict monotonic platform timing without `clock()` fallback; default builds still report `0.0`. |
 | Installed package metadata | Static/shared exported target metadata and instrumentation flag leakage are covered by focused installed consumer checks. |
 | Static-analysis policy | Local clang-tidy evidence is recorded, while clang-tidy, cppcheck, CodeQL, formatter gates, coverage upload, and larger sanitizer/platform matrices remain owner-gated. |
 

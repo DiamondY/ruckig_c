@@ -247,6 +247,9 @@ Historical rewrite plans and release evidence are retained for traceability.
   records the diagnostics too-small `struct_size` safety-boundary policy.
   `release/checklists/post-v0.16.0-waypoint-derived-count-hardening.md`
   records public waypoint derived count checked-arithmetic hardening.
+  `release/checklists/post-v0.16.0-strict-platform-clock-policy.md` records
+  removal of the private `clock()` fallback and the strict monotonic timing
+  policy.
   `release/checklists/post-v0.15.0-quality-audit.md` records the post-release
   code-quality and test-quality audit slice without changing the stable ABI or
   release state.

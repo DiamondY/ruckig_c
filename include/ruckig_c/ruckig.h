@@ -395,7 +395,7 @@ RUCKIG_C_API bool ruckig_output_did_section_change(const ruckig_output_t* output
 RUCKIG_C_API bool ruckig_output_new_calculation(const ruckig_output_t* output);
 /** Return whether the last waypoint calculation was interrupted. */
 RUCKIG_C_API bool ruckig_output_was_calculation_interrupted(const ruckig_output_t* output);
-/** Return optional monotonic elapsed calculation time in microseconds when enabled, otherwise `0.0`. */
+/** Return optional monotonic elapsed calculation time in microseconds when enabled; returns `0.0` when disabled or when no monotonic timestamp is available. */
 RUCKIG_C_API double ruckig_output_get_calculation_duration(const ruckig_output_t* output);
 
 /** Return the trajectory owned by `output`; the pointer remains owned by `output`. */

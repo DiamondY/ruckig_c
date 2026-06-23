@@ -190,6 +190,9 @@ or default heavy-random CI policy.
 - `post-v0.16.0-waypoint-derived-count-hardening` adds defense-in-depth checked
   arithmetic for public waypoint derived counts and covers corrupted overflow
   states in the constructor boundary selector.
+- `post-v0.16.0-strict-platform-clock-policy` removes the private `clock()`
+  CPU-time fallback, requiring custom provider, Windows QueryPerformanceCounter,
+  or POSIX `CLOCK_MONOTONIC` for duration and soft-interruption timing.
 
 ## 0.17.0 Wrapper Stabilization Readiness
 
