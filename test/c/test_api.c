@@ -52,6 +52,15 @@ static void test_create_destroy(void) {
     ruckig_destroy(NULL);
 }
 
+/* Test-only corrupted state: proves public boundary checks do not rely solely on constructor invariants. */
+static void force_waypoint_capacity_overflow_state(ruckig_input_t* input, size_t max_number_of_waypoints) {
+    input->max_number_of_waypoints = max_number_of_waypoints;
+}
+
+static void force_waypoint_count_overflow_state(ruckig_input_t* input, size_t waypoint_count) {
+    input->waypoint_count = waypoint_count;
+}
+
 static void test_constructor_boundary_validation(void) {
     const size_t size_max = (size_t)-1;
     const size_t overflow_waypoints = (size_max / 2u) + 1u;
@@ -117,14 +126,14 @@ static void test_constructor_boundary_validation(void) {
     CHECK_EQ_INT(ruckig_create_with_waypoints(&otg, 2, 0.01, 1), RUCKIG_WORKING);
     CHECK_EQ_INT(ruckig_input_create_with_waypoints(&input, 2, 1), RUCKIG_WORKING);
     CHECK_EQ_INT(ruckig_input_create_with_waypoints(&compare_input, 2, 1), RUCKIG_WORKING);
-    input->max_number_of_waypoints = overflow_waypoints;
-    compare_input->max_number_of_waypoints = overflow_waypoints;
+    force_waypoint_capacity_overflow_state(input, overflow_waypoints);
+    force_waypoint_capacity_overflow_state(compare_input, overflow_waypoints);
     CHECK_EQ_INT(
         ruckig_input_set_intermediate_positions(input, dummy_positions, overflow_waypoints, 2),
         RUCKIG_ERROR_INVALID_INPUT
     );
-    input->waypoint_count = overflow_waypoints;
-    compare_input->waypoint_count = overflow_waypoints;
+    force_waypoint_count_overflow_state(input, overflow_waypoints);
+    force_waypoint_count_overflow_state(compare_input, overflow_waypoints);
     CHECK_EQ_INT(
         ruckig_input_get_intermediate_positions(input, dummy_positions, size_max),
         RUCKIG_ERROR_INVALID_INPUT

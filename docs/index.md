@@ -247,6 +247,8 @@ Historical rewrite plans and release evidence are retained for traceability.
   records the diagnostics too-small `struct_size` safety-boundary policy.
   `release/checklists/post-v0.16.0-waypoint-derived-count-hardening.md`
   records public waypoint derived count checked-arithmetic hardening.
+  `release/checklists/post-v0.16.0-constructor-boundary-test-helper.md`
+  records the constructor-boundary corrupted-state test helper cleanup.
   `release/checklists/post-v0.16.0-strict-platform-clock-policy.md` records
   removal of the private `clock()` fallback and the strict monotonic timing
   policy.

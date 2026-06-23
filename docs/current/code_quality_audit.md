@@ -231,6 +231,12 @@ now rechecks `waypoint_count * dofs`, `(waypoint_count + 1) * dofs`, and
 Artificially corrupted overflow states return `RUCKIG_ERROR_INVALID_INPUT` or
 `false` instead of relying on constructor invariants alone.
 
+The `post-v0.16.0-constructor-boundary-test-helper` slice keeps that
+corrupted-state coverage but moves the private-field mutation into test-only
+helpers. The selector behavior and assertions are unchanged; the helper names
+make clear that the inputs are artificial states used to prove public boundary
+checked arithmetic, not normal API usage.
+
 Release coverage is recorded at
 `out/coverage/0.16.0/coverage-summary.txt`:
 

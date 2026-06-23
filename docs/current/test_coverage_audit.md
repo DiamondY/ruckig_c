@@ -695,6 +695,17 @@ wrapped-size copy or filter behavior.
 The local checklist is
 `docs/release/checklists/post-v0.16.0-waypoint-derived-count-hardening.md`.
 
+## Post-v0.16.0 Constructor Boundary Test Helper
+
+The `post-v0.16.0-constructor-boundary-test-helper` slice keeps the
+`ruckig_c_constructor_boundaries` corrupted-state assertions unchanged while
+moving direct private-field mutation into named test-only helpers. This keeps
+the coverage focused on public boundary checked arithmetic and makes the
+artificial overflow state setup explicit.
+
+The local checklist is
+`docs/release/checklists/post-v0.16.0-constructor-boundary-test-helper.md`.
+
 ## Post-v0.16.0 Strict Platform Clock Policy
 
 The `post-v0.16.0-strict-platform-clock-policy` slice removes the private
