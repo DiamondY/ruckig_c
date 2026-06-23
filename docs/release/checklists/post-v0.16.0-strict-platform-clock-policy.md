@@ -18,6 +18,9 @@ package-manager recipes.
   timestamp is unavailable.
 - Positive soft-interruption budgets do not compute elapsed time from a zero
   timestamp; zero budgets remain immediate.
+- CMake sets `_POSIX_C_SOURCE=200809L` privately on targets that compile the
+  library sources so Linux builds expose `clock_gettime` and `CLOCK_MONOTONIC`
+  regardless of include order.
 
 ## Verification
 
@@ -30,6 +33,7 @@ package-manager recipes.
 | `cmake --build --preset windows-clang-ninja-shared` | Passed |
 | Shared public-symbol verification | Passed; header allowlist and exported symbols match |
 | `rg -n "clock\(" src\ruckig_c\platform_clock.h` | No matches |
+| `zig cc -target x86_64-linux-gnu -std=c99 -Wall -Wextra -Wpedantic -D_POSIX_C_SOURCE=200809L -Iinclude -Isrc -c src\ruckig_c\ruckig.c` | Passed |
 | Public ABI allowlist / workflow diff | Empty |
 | `original/ruckig-main` and `docs/assets/visualization` diff | Empty |
 | `git diff --check` | Passed with CRLF normalization warnings only |
