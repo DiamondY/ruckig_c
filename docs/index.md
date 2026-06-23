@@ -234,6 +234,8 @@ Historical rewrite plans and release evidence are retained for traceability.
   portable CMake preset guidance slice.
   `release/checklists/post-v0.16.0-precision-constants-hardening.md` records
   the private precision constants hardening slice.
+  `release/checklists/post-v0.16.0-brake-epsilon-constant-polish.md` records
+  the private brake timing epsilon naming polish slice.
   `release/checklists/post-v0.16.0-ci-coverage-policy-refresh.md` records the
   docs-only CI coverage policy refresh.
   `release/checklists/post-v0.16.0-ci-static-analysis-evidence-policy.md`

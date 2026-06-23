@@ -169,6 +169,9 @@ or default heavy-random CI policy.
 - `post-v0.16.0-precision-constants-hardening` centralizes selected private
   tolerance constants without changing numeric values, solver formulas, oracle
   tolerances, public ABI, or workflow.
+- `post-v0.16.0-brake-epsilon-constant-polish` names the remaining private
+  brake timing epsilon and shares it with white-box brake assertions while
+  preserving the exact value and behavior.
 - `post-v0.16.0-ci-coverage-policy-refresh` records current CI coverage and
   owner-gated triggers for future static-analysis, sanitizer, coverage, and
   platform-matrix expansion without editing the workflow.

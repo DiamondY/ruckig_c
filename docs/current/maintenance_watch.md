@@ -31,6 +31,9 @@ event-driven after `v0.16.0`. It is not an active implementation roadmap.
 - Selected third-order position solver hotspot comments are now covered; future
   comments should stay focused on branch-family intent, formula provenance, or
   invariants.
+- The remaining review-adopted brake timing epsilon is named in the private
+  precision header; future precision-constant cleanup should stay semantic,
+  oracle-backed, and low-risk.
 - The post-`v0.16.0` quality tightening series is closed out; remaining quality
   expansion is event-driven.
 
@@ -51,6 +54,7 @@ event-driven after `v0.16.0`. It is not an active implementation roadmap.
 | Non-standard platform clock support | A concrete platform lacks Windows QPC/POSIX `CLOCK_MONOTONIC` and cannot use the compile-time custom monotonic provider hook. |
 | Solver hotspot documentation | A reviewer or maintainer identifies a branch family, formula source, invariant, or candidate-order rationale that is hard to understand and can be clarified without changing formulas. |
 | Solver/module splitting | A concrete ownership boundary, duplicated logic, testability blocker, or regression-prone hotspot justifies a small refactor; file length alone is insufficient. |
+| Precision-constant cleanup | A remaining literal has a stable semantic name, the exact value can be preserved, and normal/oracle-backed evidence can prove no numeric behavior change. |
 
 ## Explicit Non-Triggers
 
@@ -77,6 +81,8 @@ event-driven after `v0.16.0`. It is not an active implementation roadmap.
   timing.
 - Do not split solver files or move formula coefficients into constants merely
   to reduce line count or literal-count metrics.
+- Do not rename remaining numeric literals unless the semantic name is clear
+  and the diff can preserve exact numeric behavior.
 
 ## Current Default
 
@@ -92,3 +98,5 @@ The default maintenance route is conservative:
   audit/shrinker sample, or a clear invariant.
 - add solver comments only when they explain stable intent, candidate families,
   formula provenance, or invariants that reviewers are likely to misread.
+- add precision constants only when the name captures an implementation
+  contract and does not change numeric behavior.

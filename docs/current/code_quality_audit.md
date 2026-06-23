@@ -168,6 +168,12 @@ third-order position tolerances behind named constants. It preserves the exact
 numeric values and keeps solver formulas, oracle tolerances, public ABI,
 workflow, and upstream baseline unchanged.
 
+The `post-v0.16.0-brake-epsilon-constant-polish` slice adopts the remaining
+low-risk precision-constant review item by naming the private brake timing
+epsilon as `RUCKIG_C_BRAKE_TIME_EPS`. The production code and white-box brake
+tests now share the same private constant while preserving the exact
+`2.2e-14` value, formulas, public ABI, workflow, and oracle behavior.
+
 The `post-v0.16.0-ci-coverage-policy-refresh` slice records the current CI
 quality boundary in `docs/current/ci_quality_policy.md`. It keeps static
 analysis, coverage upload, Windows sanitizer expansion, macOS oracle or
@@ -256,6 +262,12 @@ portion of that review by adding small intent comments around selected
 third-order position timing helpers. The comments identify candidate families,
 the role of Newton refinement, and the final profile-check acceptance gate
 without changing formulas, constants, solver ordering, or oracle expectations.
+
+The `post-v0.16.0-brake-epsilon-constant-polish` slice closes the adopted
+precision-constant portion of the follow-up review. It does not expand the
+review scope into clang-tidy/cppcheck/CodeQL CI gates, large-file solver
+splitting, nullability annotations, platform-matrix expansion, or solver
+formula refactoring; those remain owner/event-gated maintenance items.
 
 Release coverage is recorded at
 `out/coverage/0.16.0/coverage-summary.txt`:

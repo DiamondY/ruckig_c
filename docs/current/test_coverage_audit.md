@@ -629,6 +629,18 @@ numeric behavior change.
 The local checklist is
 `docs/release/checklists/post-v0.16.0-precision-constants-hardening.md`.
 
+## Post-v0.16.0 Brake Epsilon Constant Polish
+
+The `post-v0.16.0-brake-epsilon-constant-polish` slice is
+behavior-preserving production-code maintenance. It moves the brake timing
+epsilon behind the private `RUCKIG_C_BRAKE_TIME_EPS` constant and updates the
+white-box brake assertions to use the same value. The focused evidence remains
+the existing `ruckig_c_tests` brake coverage plus solver/header gates; no new
+coverage selector is added.
+
+The local checklist is
+`docs/release/checklists/post-v0.16.0-brake-epsilon-constant-polish.md`.
+
 ## Post-v0.16.0 Tracking Scenario Maintenance Triage
 
 The `post-v0.16.0-tracking-scenario-maintenance` slice performs a docs-only

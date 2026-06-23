@@ -1,11 +1,12 @@
 #include "ruckig_c/brake.h"
 
+#include "ruckig_c/precision.h"
 #include "ruckig_c/utils.h"
 
 #include <math.h>
 #include <string.h>
 
-static const double brake_eps = 2.2e-14;
+static const double brake_eps = RUCKIG_C_BRAKE_TIME_EPS;
 
 static double v_at_t(double v0, double a0, double j, double t) {
     return v0 + t * (a0 + j * t / 2.0);
