@@ -253,6 +253,14 @@ The added white-box coverage uses explicit corrupted states and a
 `RUCKIG_C_TESTING`-only waypoint engine hook; no public C ABI or installed
 target surface changes are involved.
 
+The `post-v0.16.0-manual-analysis-evidence-policy` slice documents how local
+static-analysis evidence should scale with touched high-risk files. Future
+slices that modify tracking, waypoint, `ruckig.c`, solver step, roots, or
+profile implementation files should prefer targeted `clang-tidy` runs when the
+tool is available, record unavailable tooling in the checklist, and keep
+clang-tidy/cppcheck/CodeQL/formatter gates out of default CI unless a separate
+owner/cost decision accepts them.
+
 The `post-v0.16.0-constructor-boundary-test-helper` slice keeps that
 corrupted-state coverage but moves the private-field mutation into test-only
 helpers. The selector behavior and assertions are unchanged; the helper names

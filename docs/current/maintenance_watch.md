@@ -27,6 +27,9 @@ event-driven after `v0.16.0`. It is not an active implementation roadmap.
   developer use; they remain manual evidence, not default CI gates.
 - Static-analysis evidence policy is documented; default CI still excludes
   clang-tidy, cppcheck, CodeQL, formatter gates, and coverage upload.
+- Touched-file manual static-analysis evidence is preferred for high-risk
+  implementation slices when `clang-tidy` is locally available; unavailable
+  tooling is recorded in the checklist and does not block the slice.
 - `RUCKIG_C_ENABLE_CALCULATION_DURATION` is a library-build option only. The
   installed CMake target must not propagate it through public usage
   requirements.
@@ -53,6 +56,7 @@ event-driven after `v0.16.0`. It is not an active implementation roadmap.
 | Package-manager recipes | External install demand exists and a maintenance owner accepts recipe support. |
 | Wrapper stable publication | The wrapper route-selection work is superseded by an accepted Python-first, Rust-first, or dual-wrapper route with package/discovery ownership. |
 | Static-analysis CI | A maintainer accepts the noise budget, platform availability, runtime cost, and triage ownership for clang-tidy, cppcheck, CodeQL, or formatter gates. |
+| Manual static-analysis evidence refresh | A slice touches high-risk implementation files such as tracking, waypoint, `ruckig.c`, solver step, roots, or profile code and local `clang-tidy` is available. |
 | Thread-safe allocation audit counters | A concrete multi-threaded audit use case needs consistent aggregate allocation statistics across threads. |
 | CI matrix expansion | A maintainer accepts owner, runtime, and triage cost for MSVC full matrix, Windows sanitizer, macOS sanitizer/oracle/performance, coverage upload, or new static-analysis jobs. |
 | Solver white-box coverage push | A reproducible oracle mismatch, public behavior regression, user report, or stable invariant justifies cases; coverage percentage alone is insufficient. |
@@ -78,6 +82,8 @@ event-driven after `v0.16.0`. It is not an active implementation roadmap.
   routine CI without a separate CI policy decision.
 - Do not add cppcheck, CodeQL, formatter, or coverage-upload gates merely
   because local configuration exists.
+- Do not block a slice solely because local `clang-tidy` is unavailable for
+  touched-file evidence; record the unavailability in the checklist.
 - Do not add locks or atomics to allocation counters for hypothetical threaded
   audit use without a concrete consumer.
 - Do not expand default CI for coverage upload, static analysis, sanitizer

@@ -183,6 +183,9 @@ or default heavy-random CI policy.
   clang-tidy evidence and keeps clang-tidy, cppcheck, CodeQL, formatter,
   coverage upload, and broader sanitizer/platform matrix gates out of default
   CI until an owner accepts the cost.
+- `post-v0.16.0-manual-analysis-evidence-policy` documents the touched-file
+  manual static-analysis evidence rule for high-risk implementation slices
+  while keeping static analysis out of default CI.
 - `post-v0.16.0-quality-tightening-closeout` closes the quality tightening
   series by recording completed package-version, tooling, linked-smoke,
   duration-timing, package-metadata, and static-analysis policy work, while

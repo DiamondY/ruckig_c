@@ -48,6 +48,25 @@ clang-tidy test/c/linked_library_smoke.c --quiet -- -std=c99 -Iinclude
 The command exited successfully locally and emitted only the normal warning
 summary. This is recorded as manual evidence, not as a default CI gate.
 
+## Touched-File Static Analysis Evidence
+
+When a slice modifies high-risk implementation files, prefer a targeted
+manual `clang-tidy` run over the touched files if the tool is locally
+available. This applies especially to:
+
+- `src/ruckig_c/tracking_*.c`;
+- `src/ruckig_c/waypoint.c`;
+- `src/ruckig_c/ruckig.c`;
+- `src/ruckig_c/position_*_step*.c`;
+- `src/ruckig_c/roots.c`;
+- `src/ruckig_c/profile.c`.
+
+This is evidence guidance, not a default CI gate. If `clang-tidy` is missing or
+the local toolchain cannot analyze the touched file without unrelated noise,
+record that in the slice checklist and continue with the normal build, CTest,
+ABI, and boundary-diff gates. Any finding triage remains owned by the current
+slice and must stay scoped to the touched change.
+
 ## Promotion Criteria
 
 Do not expand default CI merely because a tool exists. A new routine CI gate
