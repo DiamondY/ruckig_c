@@ -618,6 +618,18 @@ Local focused evidence:
 The local checklist is
 `docs/release/checklists/post-v0.16.0-installed-package-metadata-smoke.md`.
 
+## Post-v0.16.0 Duration Macro Scope Hardening
+
+The `post-v0.16.0-duration-macro-scope-hardening` slice extends the installed
+CMake consumer metadata checks to `INTERFACE_COMPILE_DEFINITIONS`. The focused
+consumer gate now rejects exported targets that leak
+`RUCKIG_C_ENABLE_CALCULATION_DURATION` as a downstream usage requirement while
+preserving the existing static/shared `RUCKIG_C_STATIC_DEFINE` checks and
+duration-enabled library test coverage.
+
+The local checklist is
+`docs/release/checklists/post-v0.16.0-duration-macro-scope-hardening.md`.
+
 ## Post-v0.16.0 Precision Constants Hardening
 
 The `post-v0.16.0-precision-constants-hardening` slice is behavior-preserving

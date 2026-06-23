@@ -226,10 +226,13 @@ the public C ABI:
   candidate boundary.
 - Public `ruckig_calculate`, no-waypoint target solving, and tracking remain
   unchanged by the field.
-- `RUCKIG_C_ENABLE_CALCULATION_DURATION` continues to control only
-  `ruckig_output_get_calculation_duration`; when enabled, that getter reports
-  monotonic elapsed microseconds for `ruckig_update`. Soft interruption still
-  uses the input interrupt budget rather than the public reporting option.
+- `RUCKIG_C_ENABLE_CALCULATION_DURATION` continues to control only the library
+  build of `ruckig_output_get_calculation_duration`; when enabled for the
+  library, that getter reports monotonic elapsed microseconds for
+  `ruckig_update`. The macro is not an installed target public feature macro
+  and must not be propagated as a downstream CMake usage requirement. Soft
+  interruption still uses the input interrupt budget rather than the public
+  reporting option.
 - The internal platform clock abstraction can be overridden at compile time
   with `RUCKIG_C_PLATFORM_CLOCK_HEADER` and
   `RUCKIG_C_CUSTOM_MONOTONIC_TIME_US`. These are build-time implementation

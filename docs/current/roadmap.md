@@ -163,6 +163,10 @@ or default heavy-random CI policy.
   consumer smoke coverage to assert static/shared `RUCKIG_C_STATIC_DEFINE`
   metadata and reject sanitizer or coverage flag leakage from exported target
   usage requirements.
+- `post-v0.16.0-duration-macro-scope-hardening` keeps
+  `RUCKIG_C_ENABLE_CALCULATION_DURATION` private to the library build and
+  extends installed CMake target metadata checks so the duration macro is not
+  exported as a downstream usage requirement.
 - `post-v0.16.0-presets-portability-polish` adds a portable Ninja preset and
   packaging guidance while preserving the maintainer-verified Windows local
   presets.

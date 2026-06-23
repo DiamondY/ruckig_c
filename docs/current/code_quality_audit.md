@@ -156,6 +156,13 @@ targets must propagate `RUCKIG_C_STATIC_DEFINE`, shared installed targets must
 not propagate it, and exported target usage requirements must not contain
 sanitizer or coverage flags for ordinary consumers.
 
+The `post-v0.16.0-duration-macro-scope-hardening` slice completes that
+consumer-boundary cleanup for optional duration builds. The
+`RUCKIG_C_ENABLE_CALCULATION_DURATION` macro is now private to the library
+target, while the installed CMake consumer fixture checks
+`INTERFACE_COMPILE_DEFINITIONS` and rejects any exported target that propagates
+the duration-build macro as a downstream usage requirement.
+
 The `post-v0.16.0-presets-portability-polish` slice keeps the existing
 maintainer-verified Windows LLVM/Ninja presets intact and adds a
 `portable-ninja` preset that relies on the current shell for Ninja and compiler

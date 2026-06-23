@@ -160,7 +160,7 @@ if(BUILD_RUCKIG_C)
     target_compile_definitions(ruckig_c PUBLIC RUCKIG_C_STATIC_DEFINE)
   endif()
   if(RUCKIG_C_ENABLE_CALCULATION_DURATION)
-    target_compile_definitions(ruckig_c PUBLIC RUCKIG_C_ENABLE_CALCULATION_DURATION)
+    target_compile_definitions(ruckig_c PRIVATE RUCKIG_C_ENABLE_CALCULATION_DURATION)
   endif()
 
   if(MSVC)

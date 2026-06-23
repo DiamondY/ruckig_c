@@ -230,6 +230,9 @@ Historical rewrite plans and release evidence are retained for traceability.
   `release/checklists/post-v0.16.0-installed-package-metadata-smoke.md`
   records installed CMake target metadata checks for static/shared defines and
   instrumentation flag leakage.
+  `release/checklists/post-v0.16.0-duration-macro-scope-hardening.md` records
+  keeping the optional duration-build macro private to the library target and
+  rejecting installed target usage-requirement leakage.
   `release/checklists/post-v0.16.0-presets-portability-polish.md` records the
   portable CMake preset guidance slice.
   `release/checklists/post-v0.16.0-precision-constants-hardening.md` records

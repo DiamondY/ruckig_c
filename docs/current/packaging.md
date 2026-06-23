@@ -44,11 +44,14 @@ target_link_libraries(app PRIVATE ruckig_c::ruckig_c)
 ```
 
 The exported target is `ruckig_c::ruckig_c`. Static CMake consumers receive
-`RUCKIG_C_STATIC_DEFINE` from the target and should not add it manually. The
-installed consumer smoke checks this metadata explicitly: static installed
-targets must propagate `RUCKIG_C_STATIC_DEFINE`, shared installed targets must
-not propagate it, and the exported target must not leak sanitizer or coverage
-usage requirements to ordinary consumers.
+`RUCKIG_C_STATIC_DEFINE` from the target and should not add it manually.
+`RUCKIG_C_ENABLE_CALCULATION_DURATION` is a library build option, not a public
+consumer feature macro, so installed targets must not propagate it through
+`INTERFACE_COMPILE_DEFINITIONS`. The installed consumer smoke checks this
+metadata explicitly: static installed targets must propagate
+`RUCKIG_C_STATIC_DEFINE`, shared installed targets must not propagate it, and
+the exported target must not leak sanitizer, coverage, or duration-build usage
+requirements to ordinary consumers.
 The installed CMake package version file uses `SameMinorVersion`
 compatibility: `0.16.x` patch releases are compatible for `find_package`
 version matching, but future `0.17` or `0.18` packages are not accepted as a

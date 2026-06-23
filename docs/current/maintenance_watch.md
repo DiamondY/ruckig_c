@@ -25,6 +25,9 @@ event-driven after `v0.16.0`. It is not an active implementation roadmap.
   developer use; they remain manual evidence, not default CI gates.
 - Static-analysis evidence policy is documented; default CI still excludes
   clang-tidy, cppcheck, CodeQL, formatter gates, and coverage upload.
+- `RUCKIG_C_ENABLE_CALCULATION_DURATION` is a library-build option only. The
+  installed CMake target must not propagate it through public usage
+  requirements.
 - External code-quality review triage is documented; large-file complexity,
   static-analysis CI, platform matrix expansion, and solver documentation work
   remain scoped by concrete triggers rather than broad churn.
