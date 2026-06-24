@@ -15,7 +15,6 @@ static const double profile_p_precision = RUCKIG_C_PROFILE_P_PRECISION;
 static const double profile_v_precision = RUCKIG_C_PROFILE_V_PRECISION;
 static const double profile_a_precision = RUCKIG_C_PROFILE_A_PRECISION;
 static const double profile_first_position_precision = RUCKIG_C_PROFILE_FIRST_POSITION_PRECISION;
-static const double profile_t_max = 1e12;
 
 void ruckig_profile_init(ruckig_profile_t* profile) {
     if (profile) {
@@ -75,7 +74,9 @@ static bool calculate_t_sum(ruckig_profile_t* profile) {
         }
         profile->t_sum[i + 1] = profile->t_sum[i] + profile->t[i + 1];
     }
-    return profile->t_sum[6] <= profile_t_max;
+    /* Reject profiles whose accumulated duration is numerically valid but
+       not usable by the local solver. */
+    return profile->t_sum[6] <= RUCKIG_C_PROFILE_T_MAX;
 }
 
 static bool limits_require_velocity_segment(ruckig_profile_reached_limits_t limits) {
@@ -393,7 +394,7 @@ bool ruckig_profile_check_for_second_order_velocity_ctx(
     profile->t_sum[4] = profile->t[1];
     profile->t_sum[5] = profile->t[1];
     profile->t_sum[6] = profile->t[1];
-    if (profile->t_sum[6] > profile_t_max) {
+    if (profile->t_sum[6] > RUCKIG_C_PROFILE_T_MAX) {
         return false;
     }
 
@@ -452,7 +453,7 @@ bool ruckig_profile_check_for_first_order_ctx(
     profile->t_sum[4] = profile->t[3];
     profile->t_sum[5] = profile->t[3];
     profile->t_sum[6] = profile->t[3];
-    if (profile->t_sum[6] > profile_t_max) {
+    if (profile->t_sum[6] > RUCKIG_C_PROFILE_T_MAX) {
         return false;
     }
 

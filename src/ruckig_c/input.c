@@ -581,10 +581,6 @@ RUCKIG_C_API void ruckig_input_clear_interrupt_calculation_duration(ruckig_input
     }
 }
 
-static ruckig_control_interface_t effective_control_interface(const ruckig_input_t* input, size_t dof) {
-    return input->has_per_dof_control_interface ? input->per_dof_control_interface[dof] : input->control_interface;
-}
-
 static double v_at_a_zero(double v0, double a0, double j) {
     return v0 + (a0 * a0) / (2.0 * j);
 }
@@ -687,7 +683,7 @@ RUCKIG_C_API ruckig_result_t ruckig_validate_input_with_diagnostics(
         const double af = input->target_acceleration[dof];
         const double v0 = input->current_velocity[dof];
         const double vf = input->target_velocity[dof];
-        const ruckig_control_interface_t control_interface = effective_control_interface(input, dof);
+        const ruckig_control_interface_t control_interface = ruckig_effective_control_interface(input, dof);
 
         if (isnan(j_max)) {
             RUCKIG_VALIDATE_DIAGNOSTIC_FAIL(RUCKIG_DIAGNOSTIC_NONFINITE_VALUE, dof, 0u, 0u, 0u, j_max, 0.0);

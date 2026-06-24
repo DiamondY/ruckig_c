@@ -277,6 +277,10 @@ struct ruckig_input {
     double interrupt_calculation_duration;
 };
 
+static inline ruckig_control_interface_t ruckig_effective_control_interface(const ruckig_input_t* input, size_t dof) {
+    return input->has_per_dof_control_interface ? input->per_dof_control_interface[dof] : input->control_interface;
+}
+
 struct ruckig_output {
     size_t dofs;
     struct ruckig_trajectory* trajectory;

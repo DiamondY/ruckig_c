@@ -308,10 +308,17 @@ void ruckig_poly_monic_derivative(const double* monic_coeffs, size_t count, doub
     }
 }
 
+enum {
+    RUCKIG_ROOTS_SHRINK_INTERVAL_MAX_COUNT = 17,
+    RUCKIG_ROOTS_SHRINK_INTERVAL_DERIV_CAPACITY = 17
+};
+
 double ruckig_shrink_interval(const double* p, size_t count, double l, double h) {
     const double tolerance = RUCKIG_C_ROOTS_SHRINK_INTERVAL_TOLERANCE;
     const size_t max_its = 128;
-    double deriv[16];
+    /* Max 17 polynomial coefficients produce 16 derivative coefficients;
+       keep one slot of maintenance margin. */
+    double deriv[RUCKIG_ROOTS_SHRINK_INTERVAL_DERIV_CAPACITY];
     double fl;
     double fh;
     double rts;
@@ -321,7 +328,7 @@ double ruckig_shrink_interval(const double* p, size_t count, double l, double h)
     double df;
     size_t j;
 
-    if (!p || count < 2 || count > 17) {
+    if (!p || count < 2 || count > RUCKIG_ROOTS_SHRINK_INTERVAL_MAX_COUNT) {
         return NAN;
     }
 
@@ -348,6 +355,8 @@ double ruckig_shrink_interval(const double* p, size_t count, double l, double h)
 
     for (j = 0; j < max_its; ++j) {
         double temp;
+        /* Use Newton steps while they stay bracketed and productive;
+           otherwise bisect to preserve the bracket. */
         if ((((rts - h) * df - f) * ((rts - l) * df - f) > 0.0) || (fabs(2.0 * f) > fabs(dxold * df))) {
             dxold = dx;
             dx = (h - l) / 2.0;

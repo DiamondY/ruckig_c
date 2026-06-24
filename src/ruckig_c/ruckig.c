@@ -148,7 +148,7 @@ static bool input_is_no_jerk_velocity(const ruckig_input_t* input) {
         return false;
     }
     for (i = 0; i < input->dofs; ++i) {
-        if ((input->has_per_dof_control_interface ? input->per_dof_control_interface[i] : input->control_interface) != RUCKIG_CONTROL_VELOCITY) {
+        if (ruckig_effective_control_interface(input, i) != RUCKIG_CONTROL_VELOCITY) {
             return false;
         }
         if (!isinf(input->max_jerk[i])) {
@@ -156,10 +156,6 @@ static bool input_is_no_jerk_velocity(const ruckig_input_t* input) {
         }
     }
     return true;
-}
-
-static ruckig_control_interface_t effective_control_interface(const ruckig_input_t* input, size_t dof) {
-    return input->has_per_dof_control_interface ? input->per_dof_control_interface[dof] : input->control_interface;
 }
 
 static ruckig_synchronization_t effective_synchronization(const ruckig_input_t* input, size_t dof) {
@@ -489,7 +485,7 @@ static void prepare_velocity_profile(const ruckig_input_t* input, size_t dof, ru
 }
 
 static void prepare_mixed_profile(const ruckig_input_t* input, size_t dof, ruckig_profile_t* profile) {
-    if (effective_control_interface(input, dof) == RUCKIG_CONTROL_POSITION) {
+    if (ruckig_effective_control_interface(input, dof) == RUCKIG_CONTROL_POSITION) {
         prepare_position_profile(input, dof, profile);
     } else {
         prepare_velocity_profile(input, dof, profile);
@@ -719,7 +715,7 @@ static ruckig_result_t calculate_position_step1(
     double* duration
 ) {
     ruckig_profile_t* profile = &trajectory->profiles[dof];
-    const ruckig_control_interface_t control_interface = effective_control_interface(input, dof);
+    const ruckig_control_interface_t control_interface = ruckig_effective_control_interface(input, dof);
     const double v_min = input->has_min_velocity ? input->min_velocity[dof] : -input->max_velocity[dof];
     const double a_min = input->has_min_acceleration ? input->min_acceleration[dof] : -input->max_acceleration[dof];
     const bool first_order = isinf(input->max_acceleration[dof]);
@@ -776,7 +772,7 @@ static ruckig_result_t calculate_position_step2(
     double sync_duration
 ) {
     ruckig_profile_t* profile = &trajectory->profiles[dof];
-    const ruckig_control_interface_t control_interface = effective_control_interface(input, dof);
+    const ruckig_control_interface_t control_interface = ruckig_effective_control_interface(input, dof);
     const double v_min = input->has_min_velocity ? input->min_velocity[dof] : -input->max_velocity[dof];
     const double a_min = input->has_min_acceleration ? input->min_acceleration[dof] : -input->max_acceleration[dof];
     const bool first_order = isinf(input->max_acceleration[dof]);
