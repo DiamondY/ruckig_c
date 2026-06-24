@@ -1,6 +1,6 @@
 # Ruckig C Rewrite
 
-This repository contains a pure C99 rewrite of the Ruckig Community trajectory generator. The `ruckig_c` library does not link to or require a C++ runtime. The documentation entry point is `docs/index.md`; current implementation scope is defined by this README, the public header, `docs/current/roadmap.md`, and `docs/current/upstream_baseline_policy.md`. `docs/historical/c_rewrite_execution_plan.md` is retained as a historical execution plan. The original C++ implementation under `original/ruckig-main` is kept unchanged and is used only as a frozen oracle in tests, not as part of the C library runtime.
+This repository contains a pure C99 rewrite of the Ruckig Community trajectory generator. The `ruckig_c` library does not link to or require a C++ runtime. The documentation entry point is `docs/index.md`; current implementation scope is defined by this README, the public header, `docs/current/status.md`, `docs/current/roadmap.md`, and `docs/current/upstream_baseline_policy.md`. `docs/historical/c_rewrite_execution_plan.md` is retained as a historical execution plan. The original C++ implementation under `original/ruckig-main` is kept unchanged and is used only as a frozen oracle in tests, not as part of the C library runtime.
 
 The rewrite targets Ruckig Community `0.17.3`. The upstream project in
 `original/ruckig-main` is MIT licensed, and this repository keeps that license
@@ -8,284 +8,25 @@ at the root in `LICENSE`.
 
 ## Current Status
 
-Implemented and covered by fixed C/oracle tests plus deterministic random oracle stress:
+`ruckig_c` is a pure C99 local rewrite of the Ruckig Community trajectory generator. The current stable release is `v0.16.0`, with a 190-symbol public C ABI baseline and opt-in public diagnostics. The short maintainer status entry point is `docs/current/status.md`; the organized documentation map is `docs/index.md`.
 
-- C99 library target `ruckig_c`.
-- Public opaque C ABI in `include/ruckig_c/ruckig.h`.
-- Lifecycle, input/output/trajectory accessors, validation, optional min velocity/min acceleration/minimum duration setters.
-- First-order position trajectories.
-- Second-order position trajectories.
-- Second-order velocity trajectories.
-- Third-order velocity trajectories.
-- Third-order position trajectories, including blocked intervals and brake pre-trajectory handling.
-- Multi-DoF synchronization modes: `Time`, `TimeIfNecessary`, `Phase`, and `None`.
-- Per-DoF control-interface and synchronization overrides.
-- Continuous and discrete duration handling.
-- Directional min velocity/min acceleration limits.
-- Disabled DoF behavior.
-- Offline `ruckig_calculate`, online `ruckig_update`, `ruckig_output_pass_to_input`.
-- Trajectory duration, independent minimum durations, sampling, position extrema, and first-time-at-position helpers.
-- `0.4.x` waypoint-aware C ABI, global position bounds, per-section
-  constraints, intermediate duration queries, and local coupled waypoint
-  optimizer.
-- `v0.5.0` tracking C ABI and local Fast-mode online/offline tracking
-  implementation.
-- `v0.6.0` bounded local `Optimized` tracking MVP, including deterministic
-  candidate search, online lookahead update, offline sliding-window sequence
-  calculation, Fast fallback diagnostics, and Python/Rust prototype smoke
-  coverage.
-- `v0.7.0` Optimized tracking strategy and diagnostics stabilization, adding
-  Stable/Balanced/Aggressive controls, public diagnostics snapshots, stricter
-  deterministic quality gates, and 100k-seed tracking random stress evidence.
-- `0.7.0-alpha.3` test coverage audit evidence, adding a local
-  LLVM coverage runner and original Community test/example coverage matrix.
-- `0.7.0-alpha.4` targeted solver branch coverage evidence, adding
-  fixed oracle cases and a lightweight solver branch CTest gate for the lowest
-  coverage target-solver files from the alpha.3 audit.
-- `0.7.0-readiness` audit evidence, rerunning the full local
-  release-readiness gate set against the current 172-symbol strategy preset
-  and diagnostics ABI candidate before stable closeout.
-- `v0.8.0` visualization/gallery evidence stabilization, adopting the local
-  Matplotlib PNG gallery and verifier while keeping the `v0.7.0` 172-symbol
-  public C ABI unchanged.
-- `0.9.0-alpha` tracking quality baseline evidence, adding a deterministic
-  `--tracking-random-audit` test-runner selector, routine audit CTest, fixed
-  representative diagnostics cases, and local 10k/100k/1M fallback audit
-  summaries without changing public C ABI.
-- `0.9.0-alpha.2` tracking Optimized evaluator quality hardening evidence,
-  tuning the bounded local evaluator, adding private candidate-family
-  attribution, adding `--tracking-quality-hardening`, and passing hard 10k,
-  100k, and 1M per-strategy quality thresholds without changing public C ABI.
-- `0.9.0-alpha.3` tracking stability regression evidence, adding
-  `--tracking-stability` and routine CTest coverage for representative tuned
-  Optimized tracking behavior without further evaluator tuning or public C ABI
-  changes.
-- `v0.9.0` tracking quality/stability evidence stabilization, adopting the
-  deterministic tracking audit, tuned evaluator hardening, and fixed stability
-  regression evidence while keeping the `v0.8.0` 172-symbol public C ABI
-  unchanged.
-- `v0.10.0` Visualization v2 evidence stabilization, adopting the 30-PNG local
-  gallery, local verifier, strict regeneration evidence, and manual-only CI
-  artifact workflow while keeping the `v0.9.0` stable C ABI unchanged.
-- `v0.11.0` waypoint soft-interruption and platform-clock evidence
-  stabilization, adopting waypoint `ruckig_update` soft-interruption V1 and
-  the internal platform clock abstraction while keeping the `v0.9.0` stable C
-  ABI unchanged.
-- `v0.12.0` waypoint soft-interruption true-resume stabilization, adopting
-  background resume/publish semantics and the unified private waypoint
-  optimizer engine while keeping the `v0.9.0` stable C ABI unchanged.
-- `0.13.0-alpha.1` waypoint true-resume stress evidence, adding focused
-  multi-DoF, multi-waypoint, per-section, budget-matrix, fresh-solve
-  reference, long online-loop, and allocation-guard coverage without changing
-  public C ABI.
-- `0.13.0-alpha.2` waypoint true-resume engine hardening, rewriting the
-  private optimizer/resume state into an internal waypoint engine and adding a
-  128-case deterministic quality baseline audit without changing public C ABI.
-- `0.13.0-readiness` local stable-review audit evidence, rerunning build,
-  CTest, oracle, release-random, performance, ABI/export, platform-clock,
-  visualization, wrapper, coverage, and boundary gates for the alpha.1/alpha.2
-  waypoint true-resume evidence without changing public C ABI.
-- `v0.13.0` stable release, adopting the post-`v0.12.0`
-  waypoint true-resume stress coverage and private engine rewrite while
-  keeping the 172-symbol public C ABI unchanged.
-- `0.14.0-alpha.1` API-neutral interrupt boundary audit evidence, adding the
-  focused boundary selector without changing public C ABI.
-- `0.14.0-alpha.2` future interrupt surfaces design evidence, documenting
-  no-waypoint and online tracking interruption boundaries without
-  implementation changes.
-- `0.14.0-alpha.3` interrupt implementation-readiness evidence, approving
-  API-neutral no-waypoint and online tracking implementation slices while
-  keeping public diagnostics and tracking sequence interruption deferred.
-- `0.14.0-alpha.4` no-waypoint complete-trajectory-boundary interruption,
-  using the existing interrupt field and output flag without adding public
-  C ABI.
-- `0.14.0-alpha.5` Optimized online tracking candidate-boundary interruption
-  for tracking update and lookahead update, without public C ABI changes.
-- `0.14.0-readiness` local stable-review audit evidence for alpha.1 through
-  alpha.5, rerunning build, CTest, oracle, release-random, performance,
-  ABI/export, platform-clock, visualization, wrapper, coverage, and boundary
-  gates without version bump, tag, release, push, or manual workflow.
-- `v0.14.0` stable release, adopting the waypoint,
-  no-waypoint, and online tracking interrupt surface evidence while keeping
-  the 172-symbol public C ABI unchanged.
-- `0.15.0-alpha.1` post-release interrupt quality baseline evidence for the
-  `v0.14.0` waypoint, no-waypoint, and Optimized online tracking interrupt
-  surfaces.
-- `0.15.0-alpha.2` tracking sequence interruption API draft evidence,
-  documenting why sequence interruption needs an explicit public carrier.
-- `0.15.0-alpha.3` consumer and wrapper interrupt smoke coverage for the
-  `v0.14.0` no-waypoint and Optimized online tracking interrupt surfaces.
-- `0.15.0-alpha.4` tracking sequence continuation public API scaffold,
-  accepting a design-line public C ABI expansion from 172 to 184 symbols.
-- `0.15.0-alpha.5` Fast tracking sequence continuation behavior for the
-  alpha.4 interruptible/resume API.
-- `0.15.0-alpha.6` Optimized tracking sequence continuation behavior with
-  private candidate-boundary continuation state.
-- `0.15.0-alpha.7` C/Python/Rust prototype smoke coverage for tracking
-  sequence continuation, keeping wrappers prototype-only and adding no further
-  public C ABI beyond the 184-symbol alpha.4 baseline.
-- `0.15.0-alpha.8` tracking sequence continuation hardening, tightening the
-  private `delta_time` resume contract, sharing Optimized candidate enumeration,
-  and adding continuation matrix coverage without new exported C symbols.
-- `0.15.0-readiness` local stable-review audit evidence for alpha.1 through
-  alpha.8, rerunning build, CTest, oracle, release-random, performance,
-  ABI/export, platform-clock, visualization, wrapper, coverage, and boundary
-  gates without version bump, tag, release, or manual workflow.
-- `v0.15.0` stable release, adopting the tracking sequence continuation public
-  C ABI, Fast/Optimized continuation behavior, wrapper smoke evidence, and
-  continuation hardening while promoting the public symbol baseline to 184
-  symbols.
-- `0.16.0-alpha.3` public diagnostics core API, adding
-  `ruckig_diagnostics_init` and validate/calculate/update
-  `_with_diagnostics` entry points while preserving legacy API behavior.
-- `0.16.0-alpha.4` public diagnostics mapping for interruption and waypoint
-  resume state without adding public symbols.
-- `0.16.0-alpha.5` tracking public diagnostics getters for tracking handles
-  and tracking sequence continuation state, exposing stable coarse diagnostics
-  while keeping solver/profile/candidate/queue internals private.
-- `v0.16.0` stable release, adopting the public diagnostics API and raising
-  the public C ABI baseline to 190 symbols without publishing Python/Rust
-  wrappers or package-manager recipes.
-- `0.10.0-alpha` visualization v2 local gallery evidence, replacing the
-  current `main` gallery with 30 project-owned `1400x900` PNGs and a strict
-  local verifier while keeping the `v0.9.0` stable C ABI unchanged.
-- `0.10.0-alpha.2` optional Visualization v2 CI artifact evidence, adding a
-  manual-only `visualization_artifacts=true` workflow path that regenerates the
-  gallery, verifies it, strict-regenerates it, and uploads the regenerated PNGs,
-  manifest, and logs without changing default push/PR CI.
-- `0.10.0-readiness` release readiness audit evidence, rerunning local build,
-  visualization verifier, strict regeneration, routine CTest, performance,
-  ABI/export, wrapper smoke, optional manual visualization artifact, and
-  boundary gates before the Visualization v2 line entered `v0.10.0` stable
-  closeout.
-- C examples for position, offline position, online update, per-DoF overrides,
-  velocity, stop, minimum duration, waypoints, per-section minimum duration,
-  tracking Fast-mode scenarios, Optimized tracking scenarios, sequence
-  continuation, and public diagnostics.
+Current supported scope:
 
-Release-readiness evidence is tracked under `docs/release/`; see
-`docs/index.md` for the organized documentation map. `v0.16.0` is the current
-stable release after completed `0.16.0-readiness`, release-candidate local
-gates, tag CI, tag manual release-random, and GitHub Release publication.
-`v0.16.0` promotes the public diagnostics API and moves the stable public C ABI
-baseline to 190 symbols while preserving legacy API behavior and existing
-result-code numeric values. `v0.15.0` remains the previous stable tracking
-sequence continuation
-release with a 184-symbol public C ABI baseline. `v0.14.0` keeps the `v0.9.0`
-172-symbol public C ABI unchanged while stabilizing API-neutral interrupt
-surfaces. Public
-`ruckig_calculate` still ignores
-`interrupt_calculation_duration` and runs complete solves. On the `0.14.0`
-design line, no-waypoint `ruckig_update` now supports complete-trajectory
-boundary interruption without true-resume, and Optimized online tracking
-update/lookahead now supports best-so-far complete-candidate-boundary
-interruption. On the `0.15.0` design line, the old
-`ruckig_tracking_calculate_sequence` entry point remains complete-only, while
-the new interruptible/resume sequence API uses a continuation handle and
-exposes only complete sequence-step prefixes. Python and Rust wrappers remain
-prototype smoke evidence only; no wheel, crate, package-manager recipe, or
-stable wrapper API is claimed.
+- Opaque public C ABI in `include/ruckig_c/ruckig.h`.
+- First-, second-, and third-order position/velocity trajectories, online update, offline calculate, trajectory sampling, synchronization modes, disabled DoFs, directional limits, and duration discretization.
+- Waypoint-aware APIs with local waypoint optimization, per-section constraints, filtering, interruption, and resume behavior.
+- Fast and bounded local Optimized tracking, including online lookahead, offline sequences, tracking sequence continuation, strategy presets, diagnostics, and examples.
+- CMake install, pkg-config, static/DLL, shared install-tree consumer paths, public examples, ABI/export evidence, and prototype Python/Rust smoke tests.
 
-Minimal public diagnostics usage initializes a caller-owned record, calls the
-diagnostics variant, and reads stable coarse fields:
+Current frozen or excluded scope:
 
-```c
-ruckig_diagnostics_t diagnostics;
-ruckig_diagnostics_init(&diagnostics);
-ruckig_result_t result = ruckig_calculate_with_diagnostics(
-    otg, input, trajectory, &diagnostics);
+- Cloud/remote runtime, proprietary Pro equivalence claims, and formal global optimality claims for local Optimized tracking.
+- Python wheel and Rust crate publication; wrappers remain prototype-only evidence.
+- Package-manager recipes beyond the existing frozen feasibility/prototype notes.
+- Opportunistic upstream baseline updates; `original/ruckig-main` remains the frozen `0.17.3-line` oracle baseline.
+- Default CI expansion for heavy random, coverage upload, static analyzers, sanitizer/platform matrices, or visualization artifacts without a separate owner/cost decision.
 
-printf("result=%d scope=%d code=%d dof=%zu value=%g limit=%g\n",
-    (int)result,
-    (int)diagnostics.scope,
-    (int)diagnostics.code,
-    diagnostics.dof,
-    diagnostics.value,
-    diagnostics.limit);
-```
-
-Passing `NULL` diagnostics to a `_with_diagnostics` API is defined to behave
-like the corresponding legacy API. `examples/c/24_public_diagnostics.c`
-contains a complete validation-failure and successful-calculate example.
-`v0.10.0` adopts the current gallery as 30 `1400x900` Matplotlib `Agg` and
-NumPy PNG assets under `docs/assets/visualization/`. The gallery covers local
-C ABI equivalents of original examples `01-10` and `14-16`, plus tracking
-diagnostics, waypoint diagnostics, trajectory anatomy, and cross-topic summary
-plots; examples `11-13` remain excluded because they demonstrate C++
-Eigen/custom-vector ergonomics rather than C ABI behavior.
-`tools/visualization/verify_gallery.py` verifies the committed PNG/manifest
-assets locally, including an optional strict regeneration check. The optional
-manual CI artifact path can regenerate Visualization v2 PNGs, manifest, and
-logs for review; it is not a default push/PR gate and does not replace
-committed assets. The previous v1 gallery provenance remains available through
-the `v0.9.0` tag rather than being duplicated on `main`. Stable closeout
-evidence, including release-random and Visualization v2 artifact workflow
-runs, is recorded in `docs/release/checklists/0.10.0.md`.
-`v0.11.0` stable closeout evidence, including release-random workflow and tag
-publication evidence, is recorded in `docs/release/checklists/0.11.0.md`.
-The `0.9.0` tracking evidence line
-starts with `docs/current/tracking_quality_audit.md` and a deterministic
-`--tracking-random-audit` C test-runner selector so fallback-heavy Optimized
-tracking behavior can be classified before evaluator tuning. `0.9.0-alpha.2`
-adds `docs/current/tracking_quality_hardening.md`, private evaluator
-attribution, and the `--tracking-quality-hardening` selector to record tuned
-Optimized tracking quality thresholds while keeping the public C ABI unchanged.
-`0.9.0-alpha.3` adds `docs/current/tracking_stability.md` and the
-`--tracking-stability` selector to freeze representative alpha.2 tuned behavior
-as regression evidence before readiness. `0.9.0-readiness` records full local
-readiness evidence for the tracking quality/stability line, and `v0.9.0`
-stabilizes that evidence without changing the 172-symbol public C ABI.
-`0.9.1`, `0.10.1`, `0.11.1`, `0.12.1`, `0.13.1`, and `0.14.1` are reserved
-for emergency patch work only.
-`v0.4.0` added waypoint-aware C ABI entry points, per-section constraints,
-global position bounds, and a local coupled waypoint optimizer; `v0.4.1`
-deepened waypoint optimizer evidence; `v0.4.2` keeps that public C surface
-unchanged while recording the original parity coverage matrix and the
-`0.5.0-design` tracking/soft-interruption preparation work. `v0.5.0`
-stabilizes the tracking public C API and local Fast-mode implementation.
-Tracking public C API is not exposed in `v0.4.2`. `v0.3.0`
-remains the last no-new-C-API hardening release, and `v0.2.5` remains the final
-planned `0.2.x` stabilization baseline.
-
-In `v0.11.0`, waypoint `ruckig_update` implements soft-interruption V1 through
-the existing `interrupt_calculation_duration` field and
-`was_calculation_interrupted` output state. Public `ruckig_calculate`,
-no-waypoint target solving, and tracking remain unchanged by that field.
-`v0.12.0` extends only waypoint `ruckig_update` with private true-resume after
-an interrupted calculation. Later normal `pass_to_input` cycles can continue
-the waypoint optimizer and publish a better complete remaining trajectory; no
-public ABI, no-waypoint interruption, tracking interruption, or runtime clock
-setter is added. The stable release keeps that public boundary and removes the
-internal split between complete waypoint solving and the resumable optimizer
-engine.
-
-Current stable release scope intentionally excludes:
-
-- Cloud and remote calculation runtime; local optimizer and tracking work only.
-- Source-level Cloud/Pro parity. Upstream Cloud/Pro implementation source is
-  not available, so accepted Cloud/Pro-described surfaces are evaluated by
-  local interface/effect behavior instead of source copying.
-- Formal Ruckig Pro/cloud global numerical equivalence claims.
-- Hard real-time guarantees for waypoint optimization.
-- Formal global optimality guarantees for `Optimized` tracking. The `v0.7.0`
-  implementation is a bounded deterministic local evaluator with Fast fallback
-  diagnostics, strategy presets, and diagnostics snapshots; these are local
-  quality controls, not a global optimality claim.
-- Finer-grained interruption expansion beyond complete candidate boundaries.
-  No-waypoint true-resume, tracking sequence interruption, public interrupt
-  diagnostics, hard real-time guarantees, and runtime platform-clock setters
-  remain deferred.
-- Python/Rust binding publication. The Python `cffi` prototype and Rust alpha
-  wrapper remain prototype-only; package publication is frozen until a
-  separate demand decision accepts it.
-- Algorithm visualization as a default CI release gate. `v0.8.0` stabilizes the
-  local `ruckig_c`-owned Matplotlib PNG gallery and verifier evidence, but no
-  original images or PDFs are copied as primary project evidence and no
-  plotting job is added to default CI.
-- Package-manager recipes and new package-manager prototypes are frozen
-  outside the active roadmap. Existing CMake install, pkg-config, static/DLL,
-  and shared install-tree consumption paths remain the supported integration
-  surface.
+Release-readiness evidence is tracked under `docs/release/`. Historical release checklists and evidence files remain useful for traceability, but current maintenance decisions should start from `docs/current/status.md`, `docs/current/roadmap.md`, `docs/current/maintenance_watch.md`, and `docs/current/ci_quality_policy.md`.
 
 ## Build
 

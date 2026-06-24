@@ -1,4 +1,5 @@
 #include "test_common.h"
+#include "test_api_internal.h"
 
 #include "ruckig_c/alloc.h"
 #include "ruckig_c/roots.h"
@@ -180,48 +181,6 @@ void run_roots_numeric_audit_tests(void) {
     test_roots_numeric_cubic_quartic_edges();
     test_roots_numeric_audit_does_not_allocate();
 }
-
-void run_api_tests(void);
-void run_public_diagnostics_tests(void);
-void run_brake_tests(void);
-void run_profile_tests(void);
-void run_roots_numeric_audit_tests(void);
-void run_utils_tests(void);
-void run_waypoint_tests(void);
-void run_waypoint_per_section_tests(void);
-void run_waypoint_quality_tests(void);
-void run_waypoint_resume_stress_tests(void);
-void run_waypoint_resume_quality_tests(void);
-void run_waypoint_resume_quality_baseline_dump(void);
-void run_interrupt_boundary_audit_tests(void);
-void run_no_waypoint_interrupt_audit_tests(void);
-void run_interrupt_post_release_quality_tests(void);
-void run_constructor_boundary_tests(void);
-void run_property_invariant_tests(void);
-void run_state_machine_branch_coverage_tests(void);
-void run_solver_branch_coverage_tests(void);
-void run_tracking_api_tests(void);
-void run_tracking_public_diagnostics_tests(void);
-void run_tracking_sequence_continuation_api_tests(void);
-void run_tracking_sequence_fast_continuation_tests(void);
-void run_tracking_sequence_optimized_continuation_tests(void);
-void run_tracking_validation_tests(void);
-void run_tracking_online_tests(void);
-void run_tracking_interrupt_audit_tests(void);
-void run_tracking_fixed_corpus_tests(void);
-void run_tracking_offline_tests(void);
-void run_tracking_optimized_tests(void);
-void run_tracking_quality_tests(void);
-void run_tracking_quality_hardening_tests(void);
-void run_tracking_stability_tests(void);
-void run_tracking_no_allocation_tests(void);
-void run_tracking_tests(void);
-void run_tracking_random_tests(size_t samples, unsigned seed);
-void run_tracking_random_audit_tests(size_t samples, unsigned seed);
-void run_tracking_random_replay_tests(size_t sample, unsigned seed);
-void run_tracking_random_audit_replay_tests(size_t sample, unsigned seed);
-void run_tracking_random_audit_shrink_tests(size_t sample, unsigned seed);
-void run_tracking_random_audit_failure_shrink_tests(size_t sample, unsigned seed);
 
 int main(int argc, char** argv) {
     if (argc == 5 && strcmp(argv[1], "--tracking-random") == 0 && strcmp(argv[3], "--seed") == 0) {

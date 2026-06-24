@@ -6,6 +6,9 @@ Historical rewrite plans and release evidence are retained for traceability.
 
 ## Current Maintainer Entry Points
 
+- `current/status.md` - short current-state entry point for maintainers:
+  stable baseline, supported/frozen scope, local verification commands, and
+  touched-file verification matrix.
 - `current/roadmap.md` - shipped scope, maintenance queues, current stable
   release scope, the `0.16.0` release line, and future design boundaries.
 - `current/api_compatibility.md` - patch-release API/ABI policy and
@@ -47,7 +50,10 @@ Historical rewrite plans and release evidence are retained for traceability.
 
 ## Release Evidence
 
-- `release/checklists/` - release checklists by version.
+- `release/checklists/` - historical release and maintenance-slice checklists
+  by version. These are evidence archives for the time they were produced, not
+  the current-state entry point; start from `current/status.md` for today's
+  baseline.
   `release/checklists/0.4.0-alpha.md` retains the alpha evidence, and
   `release/checklists/0.4.2.md` records the published original-parity
   coverage/evidence closeout. `release/checklists/0.5.0.md` records the stable
@@ -300,10 +306,10 @@ Historical rewrite plans and release evidence are retained for traceability.
   docs-only readiness decision for starting public diagnostics design.
   `release/checklists/post-v0.15.0-failure-shrinker-prototype.md` records the
   local failure-preserving oracle shrinker prototype.
-- `release/evidence/verification_report.md` - local and CI verification
-  history.
-- `release/evidence/performance_report.md` - performance procedure and release
-  benchmark records.
+- `release/evidence/verification_report.md` - historical local and CI
+  verification records.
+- `release/evidence/performance_report.md` - historical performance procedure
+  and release benchmark records.
 - `release/notes/` - release notes source material, including the stable
   `0.8.0` visualization/gallery evidence release notes, the stable `0.9.0`
   tracking quality/stability evidence release notes, the stable `0.10.0`

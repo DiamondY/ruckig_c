@@ -1,5 +1,12 @@
 # Code Quality Audit
 
+Current maintainer baseline: start from `docs/current/status.md` for the
+latest stable version, default local verification commands, and touched-file
+verification matrix. Gate counts and command results below are historical
+evidence for the slice that recorded them; do not treat old `75/75`, `69/69`,
+or similar counts as the current CTest inventory without checking the status
+entry point or running `ctest -N`.
+
 This audit starts the `post-v0.15.0-quality-audit` slice after the stable
 `v0.15.0` release. It is a quality and testability slice only: it does not
 start `0.16.0-design`, change version metadata, expand the public C ABI, tag a

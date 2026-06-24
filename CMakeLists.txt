@@ -187,12 +187,20 @@ if(BUILD_RUCKIG_C_TESTS)
   enable_language(CXX)
 
   add_executable(ruckig_c_tests
+    test/c/test_allocation_api.c
     test/c/test_api.c
+    test/c/test_diagnostics_api.c
+    test/c/test_interrupt_api.c
+    test/c/test_property_invariants.c
+    test/c/test_public_api.c
     test/c/test_brake.c
     test/c/test_profile.c
     test/c/test_roots.c
     test/c/test_solver_branch_coverage.c
+    test/c/test_tracking_api.c
+    test/c/test_tracking_sequence.c
     test/c/test_utils.c
+    test/c/test_waypoint_api.c
     ${RUCKIG_C_SOURCES}
   )
   target_compile_definitions(ruckig_c_tests PRIVATE RUCKIG_C_STATIC_DEFINE RUCKIG_C_TESTING)

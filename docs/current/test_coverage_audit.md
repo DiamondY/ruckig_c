@@ -1,5 +1,11 @@
 # Test Coverage Audit
 
+Current maintainer baseline: start from `docs/current/status.md` for the
+latest stable version, default local verification commands, and touched-file
+verification matrix. Coverage numbers and CTest counts below are historical
+evidence for the slice that recorded them; preserve those facts as evidence
+and use `ctest -N` or the status entry point for the current test inventory.
+
 This audit records the current `ruckig_c` test coverage evidence against the
 frozen Ruckig Community `0.17.3` source under `original/ruckig-main`. It is an
 engineering evidence record, not a formal proof of behavioral equivalence.
