@@ -30,6 +30,9 @@ void run_utils_tests(void);
 void run_waypoint_tests(void);
 void run_waypoint_per_section_tests(void);
 void run_waypoint_quality_tests(void);
+void run_waypoint_all_regression_tests(void);
+void run_waypoint_per_section_regression_tests(void);
+void run_waypoint_quality_regression_tests(void);
 void run_waypoint_resume_stress_tests(void);
 void run_waypoint_resume_quality_tests(void);
 void run_waypoint_resume_quality_baseline_dump(void);
@@ -53,6 +56,7 @@ void run_tracking_interrupt_audit_tests(void);
 void run_tracking_fixed_corpus_tests(void);
 void run_tracking_offline_tests(void);
 void run_tracking_optimized_tests(void);
+void run_tracking_optimized_quality_regression_tests(void);
 void run_tracking_quality_tests(void);
 void run_tracking_quality_hardening_tests(void);
 void run_tracking_stability_tests(void);
@@ -60,6 +64,7 @@ void run_tracking_no_allocation_tests(void);
 void run_tracking_tests(void);
 void run_tracking_random_tests(size_t samples, unsigned seed);
 void run_tracking_random_audit_tests(size_t samples, unsigned seed);
+void run_tracking_random_audit_fixed_case_tests(void);
 void run_tracking_random_replay_tests(size_t sample, unsigned seed);
 void run_tracking_random_audit_replay_tests(size_t sample, unsigned seed);
 void run_tracking_random_audit_shrink_tests(size_t sample, unsigned seed);
@@ -71,10 +76,29 @@ void configure_alpha1_resume_stress_input(ruckig_input_t* input);
 void configure_interrupt_boundary_no_waypoint_input(ruckig_input_t* input);
 void check_alpha1_resume_stress_trajectory(const ruckig_trajectory_t* trajectory);
 ruckig_result_t ruckig_update_under_allocation_guard(ruckig_t* otg, ruckig_input_t* input, ruckig_output_t* output);
+void check_waypoint_samples(
+    const ruckig_trajectory_t* trajectory,
+    const double* waypoints,
+    size_t waypoint_count,
+    size_t dofs
+);
+void check_waypoint_section_sampled_limits(
+    const ruckig_trajectory_t* trajectory,
+    const double* per_section_min_velocity,
+    const double* per_section_max_velocity,
+    const double* per_section_min_acceleration,
+    const double* per_section_max_acceleration,
+    const double* per_section_max_jerk,
+    const double* per_section_min_position,
+    const double* per_section_max_position,
+    size_t section_count,
+    size_t dofs
+);
 
 void fill_tracking_input_1d(ruckig_input_t* input);
 void fill_tracking_input_nd(ruckig_input_t* input, size_t dofs);
 void fill_tracking_target_ramp(ruckig_target_state_t* target, double time);
+void tracking_signal_value(int signal, size_t dof, double time, double* position, double* velocity, double* acceleration);
 void set_tracking_target_signal(ruckig_target_state_t* target, int signal, size_t dofs, double time);
 void set_tracking_sequence_signal(ruckig_target_state_sequence_t* targets, int signal, size_t dofs, size_t count, double delta_time);
 void check_tracking_output_constraints(const ruckig_output_t* output, const ruckig_input_t* input, size_t dofs);

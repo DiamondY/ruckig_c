@@ -197,10 +197,16 @@ if(BUILD_RUCKIG_C_TESTS)
     test/c/test_profile.c
     test/c/test_roots.c
     test/c/test_solver_branch_coverage.c
+    test/c/test_tracking_allocation_api.c
     test/c/test_tracking_api.c
+    test/c/test_tracking_quality_api.c
+    test/c/test_tracking_random_api.c
     test/c/test_tracking_sequence.c
     test/c/test_utils.c
     test/c/test_waypoint_api.c
+    test/c/test_waypoint_regression_api.c
+    test/c/test_waypoint_resume_quality_api.c
+    test/c/test_waypoint_resume_stress_api.c
     ${RUCKIG_C_SOURCES}
   )
   target_compile_definitions(ruckig_c_tests PRIVATE RUCKIG_C_STATIC_DEFINE RUCKIG_C_TESTING)
@@ -232,6 +238,7 @@ if(BUILD_RUCKIG_C_TESTS)
   add_test(NAME ruckig_c_constructor_boundaries COMMAND ruckig_c_tests --constructor-boundaries)
   add_test(NAME ruckig_c_property_invariants COMMAND ruckig_c_tests --property-invariants)
   add_test(NAME ruckig_c_roots_numeric_audit COMMAND ruckig_c_tests --roots-numeric-audit)
+  add_test(NAME ruckig_c_profile COMMAND ruckig_c_tests --profile)
   add_test(NAME ruckig_c_state_machine_branch_coverage COMMAND ruckig_c_tests --state-machine-branch-coverage)
   add_test(NAME ruckig_c_solver_branch_coverage COMMAND ruckig_c_tests --solver-branch-coverage)
   add_test(NAME ruckig_c_public_diagnostics COMMAND ruckig_c_tests --public-diagnostics)

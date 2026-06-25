@@ -74,7 +74,7 @@ Use this matrix to choose focused checks before relying on full CTest.
 | `src/ruckig_c/ruckig.c` | Default CTest; `ruckig_c_public_diagnostics`; `ruckig_c_interrupt_boundary_audit`; `ruckig_c_no_waypoint_interrupt_audit`; `ruckig_c_constructor_boundaries`; oracle fixed/smoke. |
 | `src/ruckig_c/waypoint.c` | `ruckig_c_waypoint_optimizer`; `ruckig_c_per_section_constraints`; `ruckig_c_waypoint_resume_stress`; `ruckig_c_waypoint_resume_quality_audit`; `ruckig_c_state_machine_branch_coverage`; `ruckig_c_waypoint_section_oracle`. |
 | `src/ruckig_c/tracking_update.c`, `src/ruckig_c/tracking_sequence.c` | `ruckig_c_tracking_api`; `ruckig_c_tracking_public_diagnostics`; `ruckig_c_tracking_sequence_continuation_api`; `ruckig_c_tracking_sequence_fast_continuation`; `ruckig_c_tracking_sequence_optimized_continuation`; `ruckig_c_tracking_no_allocation`; tracking quality/stability selectors when behavior changes. |
-| Solver step files, `src/ruckig_c/roots.c`, `src/ruckig_c/profile.c` | `ruckig_c_solver_branch_coverage`; `ruckig_c_roots_numeric_audit`; profile tests; oracle fixed/smoke. Use heavy random only for regression or release evidence. |
+| Solver step files, `src/ruckig_c/roots.c`, `src/ruckig_c/profile.c` | `ruckig_c_solver_branch_coverage`; `ruckig_c_roots_numeric_audit`; `ruckig_c_profile`; oracle fixed/smoke. Use heavy random only for regression or release evidence. |
 | Public header, CMake, install or package metadata | Header C/C++ tests; `ruckig_c_linked_library_smoke`; installed CMake/pkg-config consumer checks when available; shared ABI/export targets. |
 | Tests only | Matching focused selector plus default CTest; preserve existing CTest names and selector flags. |
 

@@ -498,6 +498,7 @@ ruckig_result_t tracking_optimized_candidate_step(
             break;
         }
         {
+            /* Candidate-family order is diagnostics-visible; keep terminal blends before damping. */
             static const double blend_values[4] = {0.25, 0.5, 0.75, 1.0};
             const size_t terminal_offset = (window_count - 1) * tracking->dofs;
             const double blend = blend_values[*index];

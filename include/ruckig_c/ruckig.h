@@ -235,7 +235,7 @@ typedef struct ruckig_tracking_sequence_continuation ruckig_tracking_sequence_co
 #endif
 
 /*
- * 0.9.0 scope:
+ * Public C ABI scope:
  * - Intermediate waypoints and per-section constraints are exposed through the
  *   C ABI and solved locally by the waypoint optimizer.
  * - Tracking exposes local Fast mode and a bounded local Optimized mode with

@@ -931,6 +931,7 @@ static ruckig_result_t waypoint_engine_run(
             waypoint_engine_update_last_diagnostics(otg);
             return result;
         }
+        /* Interrupt only after a candidate step so resume state and diagnostics stay coherent. */
         if (candidate_evaluated && ruckig_interrupt_context_check(interrupt)) {
             break;
         }
@@ -1014,6 +1015,7 @@ static ruckig_result_t waypoint_engine_publish_best_transaction(
         return result == RUCKIG_WORKING ? RUCKIG_ERROR : result;
     }
 
+    /* Publish via scratch first so failed section validation never corrupts the caller trajectory. */
     return copy_waypoint_trajectory(trajectory, otg->waypoint_engine.scratch_trajectory);
 }
 

@@ -691,6 +691,7 @@ static bool time_acc0_general_uddu(
             const double orig = h0_acc0 / (12.0 * j_max_j_max * t) + t * (h2_acc0 + h1 * (h1 - 2.0 * a_max));
             const double deriv = 2.0 * (h2_acc0 + h1 * (2.0 * h1 - 3.0 * a_max));
             if (fabs(deriv) > DBL_EPSILON) {
+                /* Refine the algebraic root before profile checks, which remain the acceptance gate. */
                 t -= orig / deriv;
             }
         }

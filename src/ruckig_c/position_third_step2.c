@@ -196,6 +196,7 @@ static bool time_vel_general_uddu(
         if (fabs(orig) > RUCKIG_C_POLY_ROOT_REFINEMENT_TOLERANCE) {
             const double d2 = ruckig_poly_eval(dderiv, 4, tz);
             if (fabs(d2) > DBL_EPSILON) {
+                /* Newton only refines the extremum guess; bracket shrink below remains the fallback. */
                 tz -= orig / d2;
             }
         }

@@ -399,10 +399,11 @@ can report an invalid token if it cannot read the user keyring; confirm from a
 keyring-aware command environment before treating the result as a permissions
 problem.
 
-Local test coverage evidence for the `v0.9.0` stable release is recorded in
-`docs/current/test_coverage_audit.md`. The release coverage runner writes raw
-LLVM artifacts under `out/coverage/0.9.0/`; those raw artifacts are local
-evidence only and are not committed.
+Current coverage and test-surface notes start from
+`docs/current/test_coverage_audit.md` and `docs/current/status.md`. Historical
+coverage evidence for the `v0.9.0` stable release is still recorded there; the
+release coverage runner wrote raw LLVM artifacts under `out/coverage/0.9.0/`.
+Those raw artifacts are local evidence only and are not committed.
 
 Visualization gallery evidence is local-only. To verify committed gallery
 assets without regenerating them:
@@ -419,7 +420,7 @@ $env:RUCKIG_C_SHARED_LIBRARY=(Resolve-Path out\build\windows-clang-ninja-shared\
 .\_local\visualization-venv\Scripts\python.exe tools\visualization\verify_gallery.py --output docs\assets\visualization --strict-regenerate
 ```
 
-`docs/release/checklists/0.9.0.md` records the stable release closeout for the
-tracking quality/stability evidence line. Visualization gallery verification
-remains a local evidence tool; it is not wired into default GitHub Actions,
-CMake, or CTest.
+`docs/release/checklists/0.9.0.md` remains historical closeout evidence for the
+tracking quality/stability line. Visualization gallery verification remains a
+local evidence tool; it is not wired into default GitHub Actions, CMake, or
+CTest.

@@ -780,6 +780,7 @@ static ruckig_result_t tracking_sequence_step_optimized_candidate(
     }
     tracking_sequence_copy_best_to_tracking(tracking, continuation);
 
+    /* Rehydrate one persisted candidate step at a time so optimized sequence resume is interruptible. */
     result = tracking_optimized_candidate_step(
         tracking,
         config,
