@@ -4,6 +4,10 @@
 #include <math.h>
 #include <string.h>
 
+enum {
+    RUCKIG_POSITION_SECOND_STEP1_MAX_CANDIDATES = 8
+};
+
 static void clear_times(ruckig_profile_t* profile) {
     memset(profile->t, 0, sizeof(profile->t));
 }
@@ -63,6 +67,7 @@ static bool candidate_time_none_2(
 static size_t append_time_none(
     ruckig_profile_t* valid,
     size_t count,
+    size_t capacity,
     const ruckig_profile_t* input,
     double v0,
     double vf,
@@ -80,7 +85,9 @@ static size_t append_time_none(
 
         ruckig_profile_copy_boundary(&candidate, input);
         if (candidate_time_none_1(&candidate, v0, vf, h1, v_max, v_min, a_max, a_min)) {
-            valid[count++] = candidate;
+            if (count < capacity) {
+                valid[count++] = candidate;
+            }
             if (return_after_found) {
                 return count;
             }
@@ -88,7 +95,9 @@ static size_t append_time_none(
 
         ruckig_profile_copy_boundary(&candidate, input);
         if (candidate_time_none_2(&candidate, v0, vf, h1, v_max, v_min, a_max, a_min)) {
-            valid[count++] = candidate;
+            if (count < capacity) {
+                valid[count++] = candidate;
+            }
         }
     }
     return count;
@@ -97,6 +106,7 @@ static size_t append_time_none(
 static size_t append_time_acc0(
     ruckig_profile_t* valid,
     size_t count,
+    size_t capacity,
     const ruckig_profile_t* input,
     double v0,
     double vf,
@@ -109,7 +119,9 @@ static size_t append_time_acc0(
     ruckig_profile_t candidate;
     ruckig_profile_copy_boundary(&candidate, input);
     if (candidate_time_acc0(&candidate, v0, vf, pd, v_max, v_min, a_max, a_min)) {
-        valid[count++] = candidate;
+        if (count < capacity) {
+            valid[count++] = candidate;
+        }
     }
     return count;
 }
@@ -150,7 +162,7 @@ bool ruckig_position_second_step1_get_profile(
     double a_max,
     double a_min
 ) {
-    ruckig_profile_t valid[4];
+    ruckig_profile_t valid[RUCKIG_POSITION_SECOND_STEP1_MAX_CANDIDATES];
     size_t count = 0;
     const double pd = pf - p0;
 
@@ -183,21 +195,21 @@ bool ruckig_position_second_step1_get_profile(
         const double vMin = positive ? v_min : v_max;
         const double aMax = positive ? a_max : a_min;
         const double aMin = positive ? a_min : a_max;
-        count = append_time_none(valid, count, input, v0, vf, pd, vMax, vMin, aMax, aMin, true);
+        count = append_time_none(valid, count, RUCKIG_POSITION_SECOND_STEP1_MAX_CANDIDATES, input, v0, vf, pd, vMax, vMin, aMax, aMin, true);
         if (count == 0) {
-            count = append_time_acc0(valid, count, input, v0, vf, pd, vMax, vMin, aMax, aMin);
+            count = append_time_acc0(valid, count, RUCKIG_POSITION_SECOND_STEP1_MAX_CANDIDATES, input, v0, vf, pd, vMax, vMin, aMax, aMin);
         }
         if (count == 0) {
-            count = append_time_none(valid, count, input, v0, vf, pd, vMin, vMax, aMin, aMax, true);
+            count = append_time_none(valid, count, RUCKIG_POSITION_SECOND_STEP1_MAX_CANDIDATES, input, v0, vf, pd, vMin, vMax, aMin, aMax, true);
         }
         if (count == 0) {
-            count = append_time_acc0(valid, count, input, v0, vf, pd, vMin, vMax, aMin, aMax);
+            count = append_time_acc0(valid, count, RUCKIG_POSITION_SECOND_STEP1_MAX_CANDIDATES, input, v0, vf, pd, vMin, vMax, aMin, aMax);
         }
     } else {
-        count = append_time_none(valid, count, input, v0, vf, pd, v_max, v_min, a_max, a_min, false);
-        count = append_time_none(valid, count, input, v0, vf, pd, v_min, v_max, a_min, a_max, false);
-        count = append_time_acc0(valid, count, input, v0, vf, pd, v_max, v_min, a_max, a_min);
-        count = append_time_acc0(valid, count, input, v0, vf, pd, v_min, v_max, a_min, a_max);
+        count = append_time_none(valid, count, RUCKIG_POSITION_SECOND_STEP1_MAX_CANDIDATES, input, v0, vf, pd, v_max, v_min, a_max, a_min, false);
+        count = append_time_none(valid, count, RUCKIG_POSITION_SECOND_STEP1_MAX_CANDIDATES, input, v0, vf, pd, v_min, v_max, a_min, a_max, false);
+        count = append_time_acc0(valid, count, RUCKIG_POSITION_SECOND_STEP1_MAX_CANDIDATES, input, v0, vf, pd, v_max, v_min, a_max, a_min);
+        count = append_time_acc0(valid, count, RUCKIG_POSITION_SECOND_STEP1_MAX_CANDIDATES, input, v0, vf, pd, v_min, v_max, a_min, a_max);
     }
 
     if (count == 0) {

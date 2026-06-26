@@ -2,6 +2,7 @@
 
 #include <float.h>
 #include <math.h>
+#include <stdbool.h>
 #include <string.h>
 
 void tracking_mark_error(ruckig_tracking_t* tracking) {
@@ -73,6 +74,13 @@ void copy_best_to_work_input(ruckig_tracking_t* tracking) {
     memcpy(tracking->work_input->target_position, tracking->optimized_best_position, sizeof(double) * tracking->dofs);
     memcpy(tracking->work_input->target_velocity, tracking->optimized_best_velocity, sizeof(double) * tracking->dofs);
     memcpy(tracking->work_input->target_acceleration, tracking->optimized_best_acceleration, sizeof(double) * tracking->dofs);
+}
+
+static bool tracking_terminal_offset(size_t window_count, size_t dofs, size_t* terminal_offset) {
+    if (window_count == 0) {
+        return false;
+    }
+    return ruckig_checked_mul_size(window_count - 1u, dofs, terminal_offset);
 }
 
 ruckig_result_t prepare_fast_tracking_input(
@@ -500,9 +508,12 @@ ruckig_result_t tracking_optimized_candidate_step(
         {
             /* Candidate-family order is diagnostics-visible; keep terminal blends before damping. */
             static const double blend_values[4] = {0.25, 0.5, 0.75, 1.0};
-            const size_t terminal_offset = (window_count - 1) * tracking->dofs;
+            size_t terminal_offset = 0;
             const double blend = blend_values[*index];
             size_t dof;
+            if (!tracking_terminal_offset(window_count, tracking->dofs, &terminal_offset)) {
+                return RUCKIG_ERROR_INVALID_INPUT;
+            }
             result = set_tracking_candidate_prediction(
                 tracking,
                 target_position,
@@ -558,9 +569,12 @@ ruckig_result_t tracking_optimized_candidate_step(
             break;
         }
         {
-            const size_t terminal_offset = (window_count - 1) * tracking->dofs;
+            size_t terminal_offset = 0;
             const double scale = *index == 0 ? 0.75 : (*index == 1 ? 0.5 : 0.0);
             size_t dof;
+            if (!tracking_terminal_offset(window_count, tracking->dofs, &terminal_offset)) {
+                return RUCKIG_ERROR_INVALID_INPUT;
+            }
             result = set_tracking_candidate_prediction(
                 tracking,
                 &target_position[terminal_offset],

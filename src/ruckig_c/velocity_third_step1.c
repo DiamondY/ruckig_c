@@ -4,6 +4,10 @@
 #include <math.h>
 #include <string.h>
 
+enum {
+    RUCKIG_VELOCITY_THIRD_STEP1_MAX_CANDIDATES = 8
+};
+
 static void clear_times(ruckig_profile_t* profile) {
     memset(profile->t, 0, sizeof(profile->t));
 }
@@ -58,6 +62,7 @@ static bool candidate_time_none_2(
 static size_t append_time_none(
     ruckig_profile_t* valid,
     size_t count,
+    size_t capacity,
     const ruckig_profile_t* input,
     double vd,
     double a0,
@@ -74,7 +79,9 @@ static size_t append_time_none(
 
         ruckig_profile_copy_boundary(&candidate, input);
         if (candidate_time_none_1(&candidate, h1, a0, af, a_max, a_min, j_max)) {
-            valid[count++] = candidate;
+            if (count < capacity) {
+                valid[count++] = candidate;
+            }
             if (return_after_found) {
                 return count;
             }
@@ -82,7 +89,9 @@ static size_t append_time_none(
 
         ruckig_profile_copy_boundary(&candidate, input);
         if (candidate_time_none_2(&candidate, h1, a0, af, a_max, a_min, j_max)) {
-            valid[count++] = candidate;
+            if (count < capacity) {
+                valid[count++] = candidate;
+            }
         }
     }
     return count;
@@ -91,6 +100,7 @@ static size_t append_time_none(
 static size_t append_time_acc0(
     ruckig_profile_t* valid,
     size_t count,
+    size_t capacity,
     const ruckig_profile_t* input,
     double vd,
     double a0,
@@ -102,7 +112,9 @@ static size_t append_time_acc0(
     ruckig_profile_t candidate;
     ruckig_profile_copy_boundary(&candidate, input);
     if (candidate_time_acc0(&candidate, vd, a0, af, a_max, a_min, j_max)) {
-        valid[count++] = candidate;
+        if (count < capacity) {
+            valid[count++] = candidate;
+        }
     }
     return count;
 }
@@ -142,7 +154,7 @@ bool ruckig_velocity_third_step1_get_profile(
     double a_min,
     double j_max
 ) {
-    ruckig_profile_t valid[4];
+    ruckig_profile_t valid[RUCKIG_VELOCITY_THIRD_STEP1_MAX_CANDIDATES];
     size_t count = 0;
     const double vd = vf - v0;
 
@@ -175,21 +187,21 @@ bool ruckig_velocity_third_step1_get_profile(
         const double aMin = positive ? a_min : a_max;
         const double jMax = positive ? j_max : -j_max;
 
-        count = append_time_none(valid, count, input, vd, a0, af, aMax, aMin, jMax, true);
+        count = append_time_none(valid, count, RUCKIG_VELOCITY_THIRD_STEP1_MAX_CANDIDATES, input, vd, a0, af, aMax, aMin, jMax, true);
         if (count == 0) {
-            count = append_time_acc0(valid, count, input, vd, a0, af, aMax, aMin, jMax);
+            count = append_time_acc0(valid, count, RUCKIG_VELOCITY_THIRD_STEP1_MAX_CANDIDATES, input, vd, a0, af, aMax, aMin, jMax);
         }
         if (count == 0) {
-            count = append_time_none(valid, count, input, vd, a0, af, aMin, aMax, -jMax, true);
+            count = append_time_none(valid, count, RUCKIG_VELOCITY_THIRD_STEP1_MAX_CANDIDATES, input, vd, a0, af, aMin, aMax, -jMax, true);
         }
         if (count == 0) {
-            count = append_time_acc0(valid, count, input, vd, a0, af, aMin, aMax, -jMax);
+            count = append_time_acc0(valid, count, RUCKIG_VELOCITY_THIRD_STEP1_MAX_CANDIDATES, input, vd, a0, af, aMin, aMax, -jMax);
         }
     } else {
-        count = append_time_none(valid, count, input, vd, a0, af, a_max, a_min, j_max, false);
-        count = append_time_none(valid, count, input, vd, a0, af, a_min, a_max, -j_max, false);
-        count = append_time_acc0(valid, count, input, vd, a0, af, a_max, a_min, j_max);
-        count = append_time_acc0(valid, count, input, vd, a0, af, a_min, a_max, -j_max);
+        count = append_time_none(valid, count, RUCKIG_VELOCITY_THIRD_STEP1_MAX_CANDIDATES, input, vd, a0, af, a_max, a_min, j_max, false);
+        count = append_time_none(valid, count, RUCKIG_VELOCITY_THIRD_STEP1_MAX_CANDIDATES, input, vd, a0, af, a_min, a_max, -j_max, false);
+        count = append_time_acc0(valid, count, RUCKIG_VELOCITY_THIRD_STEP1_MAX_CANDIDATES, input, vd, a0, af, a_max, a_min, j_max);
+        count = append_time_acc0(valid, count, RUCKIG_VELOCITY_THIRD_STEP1_MAX_CANDIDATES, input, vd, a0, af, a_min, a_max, -j_max);
     }
 
     if (count == 0) {

@@ -369,7 +369,7 @@ RUCKIG_C_API ruckig_result_t ruckig_input_set_minimum_duration(
     ruckig_input_t* input,
     double minimum_duration
 ) {
-    if (!input || isnan(minimum_duration) || minimum_duration < 0.0) {
+    if (!input || !isfinite(minimum_duration) || minimum_duration < 0.0) {
         return RUCKIG_ERROR_INVALID_INPUT;
     }
     input->minimum_duration = minimum_duration;
@@ -529,7 +529,7 @@ RUCKIG_C_API ruckig_result_t ruckig_input_set_per_section_minimum_duration(
         return RUCKIG_ERROR_INVALID_INPUT;
     }
     for (i = 0; i < section_count; ++i) {
-        if (isnan(values[i]) || values[i] < 0.0) {
+        if (!isfinite(values[i]) || values[i] < 0.0) {
             return RUCKIG_ERROR_INVALID_INPUT;
         }
     }
@@ -567,7 +567,7 @@ RUCKIG_C_API ruckig_result_t ruckig_input_set_interrupt_calculation_duration(
     ruckig_input_t* input,
     double interrupt_calculation_duration
 ) {
-    if (!input || isnan(interrupt_calculation_duration) || interrupt_calculation_duration < 0.0) {
+    if (!input || !isfinite(interrupt_calculation_duration) || interrupt_calculation_duration < 0.0) {
         return RUCKIG_ERROR_INVALID_INPUT;
     }
     input->interrupt_calculation_duration = interrupt_calculation_duration;
@@ -920,9 +920,9 @@ RUCKIG_C_API ruckig_result_t ruckig_validate_input_with_diagnostics(
             }
             if (input->has_per_section_minimum_duration) {
                 const double minimum_duration = input->per_section_minimum_duration[section];
-                if (isnan(minimum_duration) || minimum_duration < 0.0) {
+                if (!isfinite(minimum_duration) || minimum_duration < 0.0) {
                     RUCKIG_VALIDATE_DIAGNOSTIC_FAIL(
-                        isnan(minimum_duration) ? RUCKIG_DIAGNOSTIC_NONFINITE_VALUE : RUCKIG_DIAGNOSTIC_NEGATIVE_LIMIT,
+                        !isfinite(minimum_duration) ? RUCKIG_DIAGNOSTIC_NONFINITE_VALUE : RUCKIG_DIAGNOSTIC_NEGATIVE_LIMIT,
                         0u,
                         section,
                         0u,

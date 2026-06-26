@@ -42,6 +42,8 @@ event-driven after `v0.16.0`. It is not an active implementation roadmap.
 - The remaining review-adopted brake timing epsilon is named in the private
   precision header; future precision-constant cleanup should stay semantic,
   oracle-backed, and low-risk.
+- Phase-sync near-zero scaling for `pd_limiting` or `scale_limiting` remains
+  an oracle-backed audit item; threshold changes need deterministic evidence.
 - The post-`v0.16.0` quality tightening series is closed out; remaining quality
   expansion is event-driven.
 
@@ -65,6 +67,7 @@ event-driven after `v0.16.0`. It is not an active implementation roadmap.
 | Solver/module splitting | A concrete ownership boundary, duplicated logic, testability blocker, or regression-prone hotspot justifies a small refactor; file length alone is insufficient. |
 | Precision-constant cleanup | A remaining literal has a stable semantic name, the exact value can be preserved, and normal/oracle-backed evidence can prove no numeric behavior change. |
 | Private derived-count cleanup | A touched private helper computes buffer lengths from counts or sections and can be hardened locally without changing candidate order, scoring, or public behavior. |
+| Phase-sync near-zero scaling | A deterministic oracle mismatch, public behavior regression, user report, or stable invariant shows near-zero `pd_limiting` or `scale_limiting` creates invalid synchronized profiles. |
 
 ## Explicit Non-Triggers
 
@@ -95,6 +98,8 @@ event-driven after `v0.16.0`. It is not an active implementation roadmap.
   to reduce line count or literal-count metrics.
 - Do not rename remaining numeric literals unless the semantic name is clear
   and the diff can preserve exact numeric behavior.
+- Do not change phase-sync `DBL_EPSILON` thresholds to arbitrary larger
+  constants without deterministic oracle or public-behavior evidence.
 
 ## Current Default
 

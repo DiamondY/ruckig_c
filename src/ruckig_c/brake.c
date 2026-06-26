@@ -3,7 +3,9 @@
 #include "ruckig_c/precision.h"
 #include "ruckig_c/utils.h"
 
+#include <float.h>
 #include <math.h>
+#include <stdbool.h>
 #include <string.h>
 
 static const double brake_eps = RUCKIG_C_BRAKE_TIME_EPS;
@@ -14,6 +16,18 @@ static double v_at_t(double v0, double a0, double j, double t) {
 
 static double v_at_a_zero(double v0, double a0, double j) {
     return v0 + (a0 * a0) / (2.0 * j);
+}
+
+static bool sqrt_nonnegative_or_zero(double value, double* result) {
+    if (value < 0.0) {
+        if (value < -DBL_EPSILON) {
+            *result = 0.0;
+            return false;
+        }
+        value = 0.0;
+    }
+    *result = sqrt(value);
+    return true;
 }
 
 void ruckig_brake_profile_init(ruckig_brake_profile_t* brake) {
@@ -41,10 +55,19 @@ static void acceleration_brake(
 
     if ((v_at_zero > v_max && j_max > 0.0) || (v_at_zero < v_max && j_max < 0.0)) {
         const double t_to_a_min = (a0 - a_min) / j_max;
-        const double t_to_v_max = a0 / j_max + sqrt(a0 * a0 + 2.0 * j_max * (v0 - v_max)) / fabs(j_max);
-        const double t_to_v_min = a0 / j_max + sqrt(a0 * a0 / 2.0 + j_max * (v0 - v_min)) / fabs(j_max);
+        const double radicand_to_v_max = a0 * a0 + 2.0 * j_max * (v0 - v_max);
+        const double radicand_to_v_min = a0 * a0 / 2.0 + j_max * (v0 - v_min);
+        double sqrt_to_v_max = 0.0;
+        double sqrt_to_v_min = 0.0;
+        const bool has_t_to_v_max = sqrt_nonnegative_or_zero(radicand_to_v_max, &sqrt_to_v_max);
+        const bool has_t_to_v_min = sqrt_nonnegative_or_zero(radicand_to_v_min, &sqrt_to_v_min);
+        const double t_to_v_max = has_t_to_v_max ? a0 / j_max + sqrt_to_v_max / fabs(j_max) : INFINITY;
+        const double t_to_v_min = has_t_to_v_min ? a0 / j_max + sqrt_to_v_min / fabs(j_max) : INFINITY;
         const double t_min_to_v_max = t_to_v_max < t_to_v_min ? t_to_v_max : t_to_v_min;
 
+        if (!has_t_to_v_max && !has_t_to_v_min) {
+            return;
+        }
         if (t_to_a_min < t_min_to_v_max) {
             const double v_at_a_min = v_at_t(v0, a0, -j_max, t_to_a_min);
             const double t_to_v_max_with_constant = -(v_at_a_min - v_max) / a_min;
@@ -78,12 +101,21 @@ static void velocity_brake(
     double j_max
 ) {
     const double t_to_a_min = (a0 - a_min) / j_max;
-    const double t_to_v_max = a0 / j_max + sqrt(a0 * a0 + 2.0 * j_max * (v0 - v_max)) / fabs(j_max);
-    const double t_to_v_min = a0 / j_max + sqrt(a0 * a0 / 2.0 + j_max * (v0 - v_min)) / fabs(j_max);
+    const double radicand_to_v_max = a0 * a0 + 2.0 * j_max * (v0 - v_max);
+    const double radicand_to_v_min = a0 * a0 / 2.0 + j_max * (v0 - v_min);
+    double sqrt_to_v_max = 0.0;
+    double sqrt_to_v_min = 0.0;
+    const bool has_t_to_v_max = sqrt_nonnegative_or_zero(radicand_to_v_max, &sqrt_to_v_max);
+    const bool has_t_to_v_min = sqrt_nonnegative_or_zero(radicand_to_v_min, &sqrt_to_v_min);
+    const double t_to_v_max = has_t_to_v_max ? a0 / j_max + sqrt_to_v_max / fabs(j_max) : INFINITY;
+    const double t_to_v_min = has_t_to_v_min ? a0 / j_max + sqrt_to_v_min / fabs(j_max) : INFINITY;
     const double t_min_to_v_max = t_to_v_max < t_to_v_min ? t_to_v_max : t_to_v_min;
 
     brake->j[0] = -j_max;
 
+    if (!has_t_to_v_max && !has_t_to_v_min) {
+        return;
+    }
     if (t_to_a_min < t_min_to_v_max) {
         const double v_at_a_min = v_at_t(v0, a0, -j_max, t_to_a_min);
         const double t_to_v_max_with_constant = -(v_at_a_min - v_max) / a_min;

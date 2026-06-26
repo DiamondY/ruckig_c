@@ -201,10 +201,13 @@ static void test_optional_setters_and_pass_to_input(void) {
     ruckig_output_t* output = NULL;
     double min_velocity[2] = {-2.0, -3.0};
     double min_acceleration[2] = {-4.0, -5.0};
+    double waypoint[2] = {1.0, 1.0};
+    double per_section_minimum_duration[2] = {0.1, 0.2};
+    double invalid_per_section_minimum_duration[2] = {0.1, INFINITY};
     double* target_position;
     double* max_velocity;
 
-    CHECK_EQ_INT(ruckig_input_create(&input, 2), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_input_create_with_waypoints(&input, 2, 1), RUCKIG_WORKING);
     CHECK_EQ_INT(ruckig_output_create(&output, 2), RUCKIG_WORKING);
 
     CHECK_EQ_INT(ruckig_input_set_min_velocity(input, min_velocity, 2), RUCKIG_WORKING);
@@ -222,7 +225,18 @@ static void test_optional_setters_and_pass_to_input(void) {
     CHECK_EQ_INT(ruckig_input_set_minimum_duration(input, 1.25), RUCKIG_WORKING);
     CHECK_EQ_INT(ruckig_input_set_minimum_duration(input, -1.0), RUCKIG_ERROR_INVALID_INPUT);
     CHECK_EQ_INT(ruckig_input_set_minimum_duration(input, NAN), RUCKIG_ERROR_INVALID_INPUT);
+    CHECK_EQ_INT(ruckig_input_set_minimum_duration(input, INFINITY), RUCKIG_ERROR_INVALID_INPUT);
     ruckig_input_clear_minimum_duration(input);
+
+    CHECK_EQ_INT(ruckig_input_set_interrupt_calculation_duration(input, 0.01), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_input_set_interrupt_calculation_duration(input, INFINITY), RUCKIG_ERROR_INVALID_INPUT);
+    CHECK_EQ_INT(ruckig_input_set_interrupt_calculation_duration(input, -INFINITY), RUCKIG_ERROR_INVALID_INPUT);
+    ruckig_input_clear_interrupt_calculation_duration(input);
+
+    CHECK_EQ_INT(ruckig_input_set_intermediate_positions(input, waypoint, 1, 2), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_input_set_per_section_minimum_duration(input, per_section_minimum_duration, 2), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_input_set_per_section_minimum_duration(input, invalid_per_section_minimum_duration, 2), RUCKIG_ERROR_INVALID_INPUT);
+    ruckig_input_clear_intermediate_positions(input);
 
     target_position = ruckig_input_target_position_data(input);
     max_velocity = ruckig_input_max_velocity_data(input);

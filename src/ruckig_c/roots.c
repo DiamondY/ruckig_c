@@ -127,6 +127,10 @@ int ruckig_solve_resolvent(double x[3], double a, double b, double c) {
         double q = a2 - b / 3.0;
         const double r = (a * (2.0 * a2 - b) + c) / 2.0;
         const double r2 = r * r;
+        if (q < 0.0 && q > -DBL_EPSILON) {
+            q = 0.0;
+        }
+        /* Keep the three-real-root branch away from sqrt of tiny negative q values caused by cancellation. */
         const double q3 = q * q * q;
 
         if (r2 < q3) {
@@ -236,8 +240,22 @@ ruckig_root_set4_t ruckig_solve_quart_monic(double a, double b, double c, double
             const double sqrtD = sqrt(D);
             q1 = (y + sqrtD) / 2.0;
             q2 = (y - sqrtD) / 2.0;
-            p1 = (a * q1 - c) / (q1 - q2);
-            p2 = (c - a * q2) / (q1 - q2);
+            if (fabs(q1 - q2) < eps) {
+                q1 = y / 2.0;
+                q2 = y / 2.0;
+                D = a * a - 4.0 * (b - y);
+                if (fabs(D) < DBL_EPSILON) {
+                    p1 = a / 2.0;
+                    p2 = a / 2.0;
+                } else {
+                    const double sqrt_repeated_D = sqrt(D);
+                    p1 = (a + sqrt_repeated_D) / 2.0;
+                    p2 = (a - sqrt_repeated_D) / 2.0;
+                }
+            } else {
+                p1 = (a * q1 - c) / (q1 - q2);
+                p2 = (c - a * q2) / (q1 - q2);
+            }
         }
 
         D = p1 * p1 - 4.0 * q1;
@@ -357,7 +375,9 @@ double ruckig_shrink_interval(const double* p, size_t count, double l, double h)
         double temp;
         /* Use Newton steps while they stay bracketed and productive;
            otherwise bisect to preserve the bracket. */
-        if ((((rts - h) * df - f) * ((rts - l) * df - f) > 0.0) || (fabs(2.0 * f) > fabs(dxold * df))) {
+        if (fabs(df) < DBL_EPSILON
+            || (((rts - h) * df - f) * ((rts - l) * df - f) > 0.0)
+            || (fabs(2.0 * f) > fabs(dxold * df))) {
             dxold = dx;
             dx = (h - l) / 2.0;
             rts = l + dx;

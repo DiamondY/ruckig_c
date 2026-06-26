@@ -358,6 +358,13 @@ static void test_position_second_step_direct_branches(void) {
     CHECK_TRUE(duration > 0.0);
     expect_position_profile_end(&output, 1.0, 0.0, 0.0);
 
+    ruckig_profile_set_boundary(&input, 0.0, 0.0, 0.0, 1.0, 0.5, 0.0);
+    CHECK_TRUE(ruckig_position_second_step1_get_profile(&input, &output, &block, &duration, 0.0, 0.0, 1.0, 0.5, 2.0, -2.0, 1.0, -1.0));
+    CHECK_TRUE(block.valid);
+    CHECK_TRUE(isfinite(duration));
+    CHECK_TRUE(duration >= 0.0);
+    expect_position_profile_end(&output, 1.0, 0.5, 0.0);
+
     ruckig_profile_set_boundary(&input, 0.0, 0.0, 0.0, 0.25, 0.5, 0.0);
     CHECK_TRUE(!ruckig_position_second_step1_get_profile(&input, &output, &block, &duration, 0.0, 0.0, 0.25, 0.5, 0.0, 0.0, 1.0, -1.0));
 
@@ -503,6 +510,12 @@ static void test_velocity_third_step_direct_branches(void) {
     CHECK_TRUE(ruckig_velocity_third_step1_get_profile(&input, &output, &block, &duration, 1.0, 0.0, -0.5, 0.0, 1.2, -1.2, 1.5));
     CHECK_TRUE(block.valid);
     CHECK_TRUE(duration > 0.0);
+
+    ruckig_profile_set_boundary_for_velocity(&input, 0.0, 0.0, 0.0, 1.0, 0.25);
+    CHECK_TRUE(ruckig_velocity_third_step1_get_profile(&input, &output, &block, &duration, 0.0, 0.0, 1.0, 0.25, 1.2, -1.2, 1.5));
+    CHECK_TRUE(block.valid);
+    CHECK_TRUE(isfinite(duration));
+    CHECK_TRUE(duration >= 0.0);
 
     CHECK_TRUE(!ruckig_velocity_third_step2_get_profile(NULL, 1.0, 0.0, 1.0, 0.5, -1.0, 2.0, -2.0, 2.0));
     ruckig_profile_set_boundary_for_velocity(&output, 0.0, 0.0, 1.0, 0.5, -1.0);
