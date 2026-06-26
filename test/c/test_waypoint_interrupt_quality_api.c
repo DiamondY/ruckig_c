@@ -601,7 +601,58 @@ static void test_waypoint_soft_interruption_alpha2_hardening(void) {
     check_alpha2_invalidation_case(WAYPOINT_ALPHA2_INVALIDATE_CLEAR_INTERRUPT, RUCKIG_WORKING);
 }
 
+static void test_waypoint_resume_publish_failure_propagates(void) {
+    ruckig_t* otg = NULL;
+    ruckig_input_t* input = NULL;
+    ruckig_output_t* output = NULL;
+    ruckig_trajectory_t* trajectory = NULL;
+    double incumbent_remaining_duration;
+    double incumbent_duration;
+    bool was_interrupted = true;
+    bool published = true;
+    ruckig_result_t result;
+
+    CHECK_EQ_INT(ruckig_create_with_waypoints(&otg, 3, 0.02, 2), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_input_create_with_waypoints(&input, 3, 2), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_output_create_with_waypoints(&output, 3, 2), RUCKIG_WORKING);
+    configure_alpha2_resume_input(input);
+    CHECK_EQ_INT(ruckig_input_set_interrupt_calculation_duration(input, 0.0), RUCKIG_WORKING);
+
+    CHECK_EQ_INT(ruckig_update(otg, input, output), RUCKIG_WORKING);
+    CHECK_TRUE(ruckig_output_new_calculation(output));
+    CHECK_TRUE(ruckig_output_was_calculation_interrupted(output));
+    CHECK_TRUE(otg->waypoint_engine.active);
+
+    trajectory = output->trajectory;
+    incumbent_duration = ruckig_trajectory_get_duration(trajectory);
+    incumbent_remaining_duration = incumbent_duration - ruckig_output_get_time(output);
+    CHECK_TRUE(incumbent_remaining_duration > 0.0);
+
+    ruckig_output_pass_to_input(output, input);
+    CHECK_EQ_INT(ruckig_input_set_interrupt_calculation_duration(input, 1000000000.0), RUCKIG_WORKING);
+    otg->waypoint_engine.test_publish_override_result = RUCKIG_ERROR;
+
+    result = ruckig_waypoint_resume_continue(
+        otg,
+        input,
+        trajectory,
+        incumbent_remaining_duration,
+        &was_interrupted,
+        &published);
+    CHECK_EQ_INT(result, RUCKIG_ERROR);
+    CHECK_TRUE(!was_interrupted);
+    CHECK_TRUE(!published);
+    CHECK_TRUE(!otg->waypoint_engine.active);
+    CHECK_EQ_INT(otg->waypoint_engine.test_publish_override_result, RUCKIG_WORKING);
+    CHECK_NEAR(ruckig_trajectory_get_duration(trajectory), incumbent_duration, 0.0);
+
+    ruckig_output_destroy(output);
+    ruckig_input_destroy(input);
+    ruckig_destroy(otg);
+}
+
 void run_waypoint_interrupt_quality_tests(void) {
     test_waypoint_soft_interruption_update();
     test_waypoint_soft_interruption_alpha2_hardening();
+    test_waypoint_resume_publish_failure_propagates();
 }

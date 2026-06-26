@@ -44,6 +44,16 @@ event-driven after `v0.16.0`. It is not an active implementation roadmap.
   oracle-backed, and low-risk.
 - Phase-sync near-zero scaling for `pd_limiting` or `scale_limiting` remains
   an oracle-backed audit item; threshold changes need deterministic evidence.
+- Complex solver formula consistency, including `position_third_step2.c`
+  duplicated time segment terms, remains an oracle-backed watch item. Local
+  denominator guards are acceptable; formula rewrites require deterministic
+  C/C++ oracle evidence.
+- Step1/step2 direction predicate differences such as `>` versus `>=` remain
+  watch-only until a reproducible public behavior regression or oracle
+  mismatch shows that candidate-family order is wrong.
+- Profile extrema cancellation and first/second-order `t_sum` representation
+  remain watch-only. Do not change these representations without a focused
+  deterministic repro and normal/oracle regression evidence.
 - The post-`v0.16.0` quality tightening series is closed out; remaining quality
   expansion is event-driven.
 
@@ -68,6 +78,7 @@ event-driven after `v0.16.0`. It is not an active implementation roadmap.
 | Precision-constant cleanup | A remaining literal has a stable semantic name, the exact value can be preserved, and normal/oracle-backed evidence can prove no numeric behavior change. |
 | Private derived-count cleanup | A touched private helper computes buffer lengths from counts or sections and can be hardened locally without changing candidate order, scoring, or public behavior. |
 | Phase-sync near-zero scaling | A deterministic oracle mismatch, public behavior regression, user report, or stable invariant shows near-zero `pd_limiting` or `scale_limiting` creates invalid synchronized profiles. |
+| Solver formula consistency | A deterministic oracle mismatch, public behavior regression, or minimal repro shows a copied third-order formula, candidate-family predicate, profile extrema calculation, or `t_sum` representation is wrong. |
 
 ## Explicit Non-Triggers
 
@@ -100,6 +111,9 @@ event-driven after `v0.16.0`. It is not an active implementation roadmap.
   and the diff can preserve exact numeric behavior.
 - Do not change phase-sync `DBL_EPSILON` thresholds to arbitrary larger
   constants without deterministic oracle or public-behavior evidence.
+- Do not normalize solver `>`/`>=` predicates, rewrite complex closed-form
+  formulas, or change profile `t_sum` representation from review suspicion
+  alone.
 
 ## Current Default
 

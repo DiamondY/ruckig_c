@@ -12,6 +12,14 @@ static void clear_times(ruckig_profile_t* profile) {
     memset(profile->t, 0, sizeof(profile->t));
 }
 
+static bool usable_denominator(double value) {
+    return isfinite(value) && fabs(value) > DBL_EPSILON;
+}
+
+static bool finite_time_in_bounds(double t, double tf) {
+    return isfinite(t) && t >= 0.0 && t <= tf;
+}
+
 /* Rest-to-rest velocity-limited UDDU family; tf/4 bounds the symmetric four jerk pulses. */
 static bool time_vel_rest_to_rest(
     ruckig_profile_t* profile,
@@ -1227,23 +1235,41 @@ static bool time_none(
         roots = ruckig_solve_quart_monic(polynom[1], polynom[2], polynom[3], polynom[4]);
         for (i = 0; i < roots.count; ++i) {
             double t = roots.values[i];
-            if (t > tf / 2.0 || t > (a_max - a0) / j_max) {
+            double two_t_minus_tf;
+            double j_denom;
+            if (!finite_time_in_bounds(t, tf) || t > tf / 2.0 || t > (a_max - a0) / j_max) {
+                continue;
+            }
+            two_t_minus_tf = 2.0 * t - tf;
+            j_denom = j_max * two_t_minus_tf;
+            if (!usable_denominator(two_t_minus_tf) || !usable_denominator(j_denom)) {
                 continue;
             }
 
             {
-                const double h1 = (j_max * t * (t - tf) + vd) / (j_max * (2.0 * t - tf));
-                const double h2 = (2.0 * j_max * t * (t - tf) + j_max * tf_tf - 2.0 * vd) / (j_max * (2.0 * t - tf) * (2.0 * t - tf));
+                const double h1 = (j_max * t * (t - tf) + vd) / j_denom;
+                const double h2 = (2.0 * j_max * t * (t - tf) + j_max * tf_tf - 2.0 * vd) / (j_denom * two_t_minus_tf);
                 const double orig = (-2.0 * pd + 2.0 * tf * v0 + h1 * h1 * j_max * (tf - 2.0 * t) + j_max * tf * (2.0 * h1 * t - t * t - (h1 - t) * tf)) / 2.0;
                 const double deriv = (j_max * tf * (2.0 * t - tf) * (h2 - 1.0)) / 2.0 + h1 * j_max * (tf - (2.0 * t - tf) * h2 - h1);
-                if (fabs(deriv) > DBL_EPSILON) {
+                if (!isfinite(h1) || !isfinite(h2) || !isfinite(orig)) {
+                    continue;
+                }
+                if (isfinite(deriv) && fabs(deriv) > DBL_EPSILON) {
                     t -= orig / deriv;
                 }
+            }
+            if (!finite_time_in_bounds(t, tf)) {
+                continue;
+            }
+            two_t_minus_tf = 2.0 * t - tf;
+            j_denom = j_max * two_t_minus_tf;
+            if (!usable_denominator(two_t_minus_tf) || !usable_denominator(j_denom)) {
+                continue;
             }
 
             clear_times(profile);
             profile->t[0] = t;
-            profile->t[2] = (j_max * t * (t - tf) + vd) / (j_max * (2.0 * t - tf));
+            profile->t[2] = (j_max * t * (t - tf) + vd) / j_denom;
             profile->t[3] = tf - 2.0 * t;
             profile->t[4] = t - profile->t[2];
 
@@ -1275,24 +1301,41 @@ static bool time_none(
             roots = ruckig_solve_quart_monic(polynom[1], polynom[2], polynom[3], polynom[4]);
             for (i = 0; i < roots.count; ++i) {
                 double t = roots.values[i];
-                if (t < t_min || t > t_max) {
+                double h0;
+                double j_h0;
+                if (!finite_time_in_bounds(t, tf) || t < t_min || t > t_max) {
+                    continue;
+                }
+                h0 = j_max * (2.0 * t - tf) - ad;
+                j_h0 = j_max * h0;
+                if (!usable_denominator(h0) || !usable_denominator(j_h0)) {
                     continue;
                 }
 
                 {
-                    const double h0 = j_max * (2.0 * t - tf) - ad;
-                    const double h1 = (ad_ad - 2.0 * af * j_max * t + 2.0 * a0 * j_max * (t - tf) + 2.0 * j_max * (j_max * t * (t - tf) + vd)) / (2.0 * j_max * h0);
+                    const double h1 = (ad_ad - 2.0 * af * j_max * t + 2.0 * a0 * j_max * (t - tf) + 2.0 * j_max * (j_max * t * (t - tf) + vd)) / (2.0 * j_h0);
                     const double h2 = (-ad_ad + 2.0 * j_max_j_max * (tf_tf + t * (t - tf)) + (a0 + af) * j_max * tf - ad * h0 - 2.0 * j_max * vd) / (h0 * h0);
                     const double orig = (-a0_p3 + af_p3 + 3.0 * ad_ad * j_max * (h1 - t) + 3.0 * ad * j_max_j_max * (h1 - t) * (h1 - t) - 3.0 * a0 * af * ad + 3.0 * j_max_j_max * (a0 * tf_tf - 2.0 * pd + 2.0 * tf * v0 + h1 * h1 * j_max * (tf - 2.0 * t) + j_max * tf * (2.0 * h1 * t - t * t - (h1 - t) * tf))) / (6.0 * j_max_j_max);
                     const double deriv = (h0 * (-ad + j_max * tf) * (h2 - 1.0)) / (2.0 * j_max) + h1 * (-ad + j_max * (tf - h1) - h0 * h2);
-                    if (fabs(deriv) > DBL_EPSILON) {
+                    if (!isfinite(h1) || !isfinite(h2) || !isfinite(orig)) {
+                        continue;
+                    }
+                    if (isfinite(deriv) && fabs(deriv) > DBL_EPSILON) {
                         t -= orig / deriv;
                     }
+                }
+                if (!finite_time_in_bounds(t, tf) || t < t_min || t > t_max) {
+                    continue;
+                }
+                h0 = j_max * (2.0 * t - tf) - ad;
+                j_h0 = j_max * h0;
+                if (!usable_denominator(h0) || !usable_denominator(j_h0)) {
+                    continue;
                 }
 
                 clear_times(profile);
                 profile->t[0] = t;
-                profile->t[2] = (ad_ad + 2.0 * j_max * (-a0 * tf - ad * t + j_max * t * (t - tf) + vd)) / (2.0 * j_max * (-ad + j_max * (2.0 * t - tf)));
+                profile->t[2] = (ad_ad + 2.0 * j_max * (-a0 * tf - ad * t + j_max * t * (t - tf) + vd)) / (2.0 * j_h0);
                 profile->t[3] = ad / j_max + tf - 2.0 * t;
                 profile->t[4] = tf - (t + profile->t[2] + profile->t[3]);
 
@@ -1416,6 +1459,9 @@ static bool time_none(
             }
             jf = ad / (tf - t);
             if (fabs(jf) < DBL_EPSILON) {
+                continue;
+            }
+            if (!usable_denominator(2.0 * jf * t)) {
                 continue;
             }
 

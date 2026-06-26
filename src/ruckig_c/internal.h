@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdint.h>
 #include <string.h>
 
 #ifdef RUCKIG_C_ENABLE_INTERNAL_ASSERTS
@@ -33,7 +34,7 @@
 #endif
 
 static inline bool ruckig_checked_add_size(size_t lhs, size_t rhs, size_t* out) {
-    if (!out || lhs > ((size_t)-1) - rhs) {
+    if (!out || lhs > SIZE_MAX - rhs) {
         return false;
     }
     *out = lhs + rhs;
@@ -41,7 +42,7 @@ static inline bool ruckig_checked_add_size(size_t lhs, size_t rhs, size_t* out) 
 }
 
 static inline bool ruckig_checked_mul_size(size_t lhs, size_t rhs, size_t* out) {
-    if (!out || (lhs != 0u && rhs > ((size_t)-1) / lhs)) {
+    if (!out || (lhs != 0u && rhs > SIZE_MAX / lhs)) {
         return false;
     }
     *out = lhs * rhs;
@@ -212,6 +213,9 @@ typedef struct ruckig_waypoint_optimizer_engine {
     double last_best_lower_bound;
     size_t last_candidate_evaluations;
     bool last_improved_baseline;
+#ifdef RUCKIG_C_TESTING
+    ruckig_result_t test_publish_override_result;
+#endif
 } ruckig_waypoint_optimizer_engine_t;
 
 struct ruckig_trajectory {

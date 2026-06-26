@@ -172,6 +172,9 @@ void ruckig_waypoint_resume_clear(ruckig_t* otg) {
     otg->waypoint_engine.branch_index = 0;
     otg->waypoint_engine.branch_queue_valid = false;
     otg->waypoint_engine.branch_improved_any = false;
+#ifdef RUCKIG_C_TESTING
+    otg->waypoint_engine.test_publish_override_result = RUCKIG_WORKING;
+#endif
     waypoint_engine_assert_consistent(otg);
 }
 
@@ -1009,6 +1012,12 @@ static ruckig_result_t waypoint_engine_publish_best_transaction(
         return RUCKIG_ERROR_INVALID_INPUT;
     }
 
+#ifdef RUCKIG_C_TESTING
+    if (otg->waypoint_engine.test_publish_override_result != RUCKIG_WORKING) {
+        return otg->waypoint_engine.test_publish_override_result;
+    }
+#endif
+
     result = write_best_trajectory(otg, input, otg->waypoint_engine.scratch_trajectory);
     if (result != RUCKIG_WORKING || !otg->waypoint_engine.scratch_trajectory->valid) {
         return result == RUCKIG_WORKING ? RUCKIG_ERROR : result;
@@ -1158,7 +1167,7 @@ ruckig_result_t ruckig_waypoint_resume_continue(
         if (result != RUCKIG_WORKING) {
             ruckig_waypoint_resume_clear(otg);
             waypoint_engine_assert_consistent(otg);
-            return result == RUCKIG_ERROR ? RUCKIG_WORKING : result;
+            return result;
         }
         otg->waypoint_engine.published_duration = trajectory->duration;
         if (published) {
@@ -1197,7 +1206,7 @@ RUCKIG_C_API ruckig_result_t ruckig_filter_intermediate_positions(
         }
     }
 
-    if (input->waypoint_count > ((size_t)-1) - 2u) {
+    if (input->waypoint_count > SIZE_MAX - 2u) {
         return RUCKIG_ERROR_INVALID_INPUT;
     }
 

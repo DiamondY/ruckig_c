@@ -14,11 +14,24 @@ static double v_at_t(double v0, double a0, double j, double t) {
     return v0 + t * (a0 + j * t / 2.0);
 }
 
-static double v_at_a_zero(double v0, double a0, double j) {
-    return v0 + (a0 * a0) / (2.0 * j);
+static bool v_at_a_zero(double v0, double a0, double j, double* result) {
+    double value;
+    if (fabs(j) < RUCKIG_C_PROFILE_J_EPS || !result) {
+        return false;
+    }
+    value = v0 + (a0 * a0) / (2.0 * j);
+    if (!isfinite(value)) {
+        return false;
+    }
+    *result = value;
+    return true;
 }
 
 static bool sqrt_nonnegative_or_zero(double value, double* result) {
+    if (!isfinite(value)) {
+        *result = 0.0;
+        return false;
+    }
     if (value < 0.0) {
         if (value < -DBL_EPSILON) {
             *result = 0.0;
@@ -27,7 +40,7 @@ static bool sqrt_nonnegative_or_zero(double value, double* result) {
         value = 0.0;
     }
     *result = sqrt(value);
-    return true;
+    return isfinite(*result);
 }
 
 void ruckig_brake_profile_init(ruckig_brake_profile_t* brake) {
@@ -52,6 +65,9 @@ static void acceleration_brake(
     const double v_at_zero = v_at_t(v0, a0, -j_max, t_to_a_zero);
 
     brake->j[0] = -j_max;
+    if (!isfinite(t_to_a_max) || !isfinite(t_to_a_zero) || !isfinite(v_at_a_max) || !isfinite(v_at_zero)) {
+        return;
+    }
 
     if ((v_at_zero > v_max && j_max > 0.0) || (v_at_zero < v_max && j_max < 0.0)) {
         const double t_to_a_min = (a0 - a_min) / j_max;
@@ -65,7 +81,7 @@ static void acceleration_brake(
         const double t_to_v_min = has_t_to_v_min ? a0 / j_max + sqrt_to_v_min / fabs(j_max) : INFINITY;
         const double t_min_to_v_max = t_to_v_max < t_to_v_min ? t_to_v_max : t_to_v_min;
 
-        if (!has_t_to_v_max && !has_t_to_v_min) {
+        if ((!has_t_to_v_max && !has_t_to_v_min) || !isfinite(t_min_to_v_max)) {
             return;
         }
         if (t_to_a_min < t_min_to_v_max) {
@@ -73,6 +89,10 @@ static void acceleration_brake(
             const double t_to_v_max_with_constant = -(v_at_a_min - v_max) / a_min;
             const double t_to_v_min_with_constant = a_min / (2.0 * j_max) - (v_at_a_min - v_min) / a_min;
 
+            if (!isfinite(t_to_a_min) || !isfinite(v_at_a_min)
+                || !isfinite(t_to_v_max_with_constant) || !isfinite(t_to_v_min_with_constant)) {
+                return;
+            }
             brake->t[0] = fmax(t_to_a_min - brake_eps, 0.0);
             brake->t[1] = fmax(fmin(t_to_v_max_with_constant, t_to_v_min_with_constant), 0.0);
         } else {
@@ -83,6 +103,9 @@ static void acceleration_brake(
         const double t_to_v_min = -(v_at_a_max - v_min) / a_max;
         const double t_to_v_max = -a_max / (2.0 * j_max) - (v_at_a_max - v_max) / a_max;
 
+        if (!isfinite(t_to_v_min) || !isfinite(t_to_v_max)) {
+            return;
+        }
         brake->t[0] = t_to_a_max + brake_eps;
         brake->t[1] = fmax(fmin(t_to_v_min, t_to_v_max - brake_eps), 0.0);
 
@@ -113,7 +136,7 @@ static void velocity_brake(
 
     brake->j[0] = -j_max;
 
-    if (!has_t_to_v_max && !has_t_to_v_min) {
+    if ((!has_t_to_v_max && !has_t_to_v_min) || !isfinite(t_min_to_v_max)) {
         return;
     }
     if (t_to_a_min < t_min_to_v_max) {
@@ -121,6 +144,10 @@ static void velocity_brake(
         const double t_to_v_max_with_constant = -(v_at_a_min - v_max) / a_min;
         const double t_to_v_min_with_constant = a_min / (2.0 * j_max) - (v_at_a_min - v_min) / a_min;
 
+        if (!isfinite(t_to_a_min) || !isfinite(v_at_a_min)
+            || !isfinite(t_to_v_max_with_constant) || !isfinite(t_to_v_min_with_constant)) {
+            return;
+        }
         brake->t[0] = fmax(t_to_a_min - brake_eps, 0.0);
         brake->t[1] = fmax(fmin(t_to_v_max_with_constant, t_to_v_min_with_constant), 0.0);
     } else {
@@ -138,13 +165,17 @@ void ruckig_brake_get_position_trajectory(
     double a_min,
     double j_max
 ) {
+    double v_zero_negative_jerk = 0.0;
+    double v_zero_positive_jerk = 0.0;
+    const bool has_v_zero_negative_jerk = v_at_a_zero(v0, a0, -j_max, &v_zero_negative_jerk);
+    const bool has_v_zero_positive_jerk = v_at_a_zero(v0, a0, j_max, &v_zero_positive_jerk);
     if (!brake) {
         return;
     }
     ruckig_brake_profile_init(brake);
 
     /* Brake pre-trajectories move invalid or inevitably invalid states back inside limits before the main profile. */
-    if (j_max == 0.0 || a_max == 0.0 || a_min == 0.0) {
+    if (fabs(j_max) < RUCKIG_C_PROFILE_J_EPS || a_max == 0.0 || a_min == 0.0) {
         return;
     }
 
@@ -152,9 +183,11 @@ void ruckig_brake_get_position_trajectory(
         acceleration_brake(brake, v0, a0, v_max, v_min, a_max, a_min, j_max);
     } else if (a0 < a_min) {
         acceleration_brake(brake, v0, a0, v_min, v_max, a_min, a_max, -j_max);
-    } else if ((v0 > v_max && v_at_a_zero(v0, a0, -j_max) > v_min) || (a0 > 0.0 && v_at_a_zero(v0, a0, j_max) > v_max)) {
+    } else if ((v0 > v_max && has_v_zero_negative_jerk && v_zero_negative_jerk > v_min)
+        || (a0 > 0.0 && has_v_zero_positive_jerk && v_zero_positive_jerk > v_max)) {
         velocity_brake(brake, v0, a0, v_max, v_min, a_min, j_max);
-    } else if ((v0 < v_min && v_at_a_zero(v0, a0, j_max) < v_max) || (a0 < 0.0 && v_at_a_zero(v0, a0, -j_max) < v_min)) {
+    } else if ((v0 < v_min && has_v_zero_positive_jerk && v_zero_positive_jerk < v_max)
+        || (a0 < 0.0 && has_v_zero_negative_jerk && v_zero_negative_jerk < v_min)) {
         velocity_brake(brake, v0, a0, v_min, v_max, a_max, -j_max);
     }
 }
@@ -199,7 +232,7 @@ void ruckig_brake_get_velocity_trajectory(
     ruckig_brake_profile_init(brake);
 
     /* Velocity control only brakes acceleration violations before solving the target velocity profile. */
-    if (j_max == 0.0) {
+    if (fabs(j_max) < RUCKIG_C_PROFILE_J_EPS) {
         return;
     }
 

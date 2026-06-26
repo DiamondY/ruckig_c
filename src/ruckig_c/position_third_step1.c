@@ -884,6 +884,10 @@ static bool collect_position_third_step1_all_none_acc0_acc1(
     return *valid_profile_count > start_count;
 }
 
+enum {
+    RUCKIG_POSITION_THIRD_STEP1_CANDIDATE_CAPACITY = 8
+};
+
 bool ruckig_position_third_step1_get_profile(
     const ruckig_profile_t* input,
     ruckig_profile_t* output,
@@ -913,7 +917,7 @@ bool ruckig_position_third_step1_get_profile(
     const double reverse_a_max = up_first ? a_min : a_max;
     const double reverse_a_min = up_first ? a_max : a_min;
     const double reverse_j_max = up_first ? -j_max : j_max;
-    ruckig_profile_t valid_profiles[8];
+    ruckig_profile_t valid_profiles[RUCKIG_POSITION_THIRD_STEP1_CANDIDATE_CAPACITY];
     size_t valid_profile_count = 0;
 
     if (!input || !output || !block || !duration) {
@@ -939,61 +943,61 @@ bool ruckig_position_third_step1_get_profile(
     } else {
         if (fabs(vf) < DBL_EPSILON && fabs(af) < DBL_EPSILON) {
             if (fabs(v0) < DBL_EPSILON && fabs(a0) < DBL_EPSILON && fabs(pd) < DBL_EPSILON) {
-                collect_position_third_step1_all_none_acc0_acc1(input, valid_profiles, &valid_profile_count, 6, pd, v0, a0, vf, af, oriented_v_max, oriented_v_min, oriented_a_max, oriented_a_min, oriented_j_max, true);
+                collect_position_third_step1_all_none_acc0_acc1(input, valid_profiles, &valid_profile_count, RUCKIG_POSITION_THIRD_STEP1_CANDIDATE_CAPACITY, pd, v0, a0, vf, af, oriented_v_max, oriented_v_min, oriented_a_max, oriented_a_min, oriented_j_max, true);
             } else {
-                try_add_family(input, valid_profiles, &valid_profile_count, 6, time_symmetric_rest_to_rest, pd, v0, a0, vf, af, oriented_v_max, oriented_v_min, oriented_a_max, oriented_a_min, oriented_j_max);
+                try_add_family(input, valid_profiles, &valid_profile_count, RUCKIG_POSITION_THIRD_STEP1_CANDIDATE_CAPACITY, time_symmetric_rest_to_rest, pd, v0, a0, vf, af, oriented_v_max, oriented_v_min, oriented_a_max, oriented_a_min, oriented_j_max);
                 if (valid_profile_count == 0) {
-                    try_add_family(input, valid_profiles, &valid_profile_count, 6, time_vel_rest_to_rest, pd, v0, a0, vf, af, oriented_v_max, oriented_v_min, oriented_a_max, oriented_a_min, oriented_j_max);
+                    try_add_family(input, valid_profiles, &valid_profile_count, RUCKIG_POSITION_THIRD_STEP1_CANDIDATE_CAPACITY, time_vel_rest_to_rest, pd, v0, a0, vf, af, oriented_v_max, oriented_v_min, oriented_a_max, oriented_a_min, oriented_j_max);
                 }
-                try_add_family(input, valid_profiles, &valid_profile_count, 6, time_all_vel_uddu, pd, v0, a0, vf, af, oriented_v_max, oriented_v_min, oriented_a_max, oriented_a_min, oriented_j_max);
+                try_add_family(input, valid_profiles, &valid_profile_count, RUCKIG_POSITION_THIRD_STEP1_CANDIDATE_CAPACITY, time_all_vel_uddu, pd, v0, a0, vf, af, oriented_v_max, oriented_v_min, oriented_a_max, oriented_a_min, oriented_j_max);
                 if (valid_profile_count == 0) {
-                    collect_position_third_step1_all_none_acc0_acc1(input, valid_profiles, &valid_profile_count, 6, pd, v0, a0, vf, af, oriented_v_max, oriented_v_min, oriented_a_max, oriented_a_min, oriented_j_max, true);
-                }
-                if (valid_profile_count == 0) {
-                    try_add_family(input, valid_profiles, &valid_profile_count, 6, time_acc0_acc1_uddu, pd, v0, a0, vf, af, oriented_v_max, oriented_v_min, oriented_a_max, oriented_a_min, oriented_j_max);
+                    collect_position_third_step1_all_none_acc0_acc1(input, valid_profiles, &valid_profile_count, RUCKIG_POSITION_THIRD_STEP1_CANDIDATE_CAPACITY, pd, v0, a0, vf, af, oriented_v_max, oriented_v_min, oriented_a_max, oriented_a_min, oriented_j_max, true);
                 }
                 if (valid_profile_count == 0) {
-                    try_add_family(input, valid_profiles, &valid_profile_count, 6, time_all_vel_uddu, pd, v0, a0, vf, af, reverse_v_max, reverse_v_min, reverse_a_max, reverse_a_min, reverse_j_max);
+                    try_add_family(input, valid_profiles, &valid_profile_count, RUCKIG_POSITION_THIRD_STEP1_CANDIDATE_CAPACITY, time_acc0_acc1_uddu, pd, v0, a0, vf, af, oriented_v_max, oriented_v_min, oriented_a_max, oriented_a_min, oriented_j_max);
                 }
                 if (valid_profile_count == 0) {
-                    collect_position_third_step1_all_none_acc0_acc1(input, valid_profiles, &valid_profile_count, 6, pd, v0, a0, vf, af, reverse_v_max, reverse_v_min, reverse_a_max, reverse_a_min, reverse_j_max, true);
+                    try_add_family(input, valid_profiles, &valid_profile_count, RUCKIG_POSITION_THIRD_STEP1_CANDIDATE_CAPACITY, time_all_vel_uddu, pd, v0, a0, vf, af, reverse_v_max, reverse_v_min, reverse_a_max, reverse_a_min, reverse_j_max);
                 }
                 if (valid_profile_count == 0) {
-                    try_add_family(input, valid_profiles, &valid_profile_count, 6, time_acc0_acc1_uddu, pd, v0, a0, vf, af, reverse_v_max, reverse_v_min, reverse_a_max, reverse_a_min, reverse_j_max);
+                    collect_position_third_step1_all_none_acc0_acc1(input, valid_profiles, &valid_profile_count, RUCKIG_POSITION_THIRD_STEP1_CANDIDATE_CAPACITY, pd, v0, a0, vf, af, reverse_v_max, reverse_v_min, reverse_a_max, reverse_a_min, reverse_j_max, true);
+                }
+                if (valid_profile_count == 0) {
+                    try_add_family(input, valid_profiles, &valid_profile_count, RUCKIG_POSITION_THIRD_STEP1_CANDIDATE_CAPACITY, time_acc0_acc1_uddu, pd, v0, a0, vf, af, reverse_v_max, reverse_v_min, reverse_a_max, reverse_a_min, reverse_j_max);
                 }
             }
         } else {
-            collect_position_third_step1_all_none_acc0_acc1(input, valid_profiles, &valid_profile_count, 6, pd, v0, a0, vf, af, v_max, v_min, a_max, a_min, j_max, false);
-            collect_position_third_step1_all_none_acc0_acc1(input, valid_profiles, &valid_profile_count, 6, pd, v0, a0, vf, af, v_min, v_max, a_min, a_max, -j_max, false);
-            try_add_family(input, valid_profiles, &valid_profile_count, 6, time_acc0_acc1_uddu, pd, v0, a0, vf, af, v_max, v_min, a_max, a_min, j_max);
-            try_add_family(input, valid_profiles, &valid_profile_count, 6, time_acc0_acc1_uddu, pd, v0, a0, vf, af, v_min, v_max, a_min, a_max, -j_max);
-            try_add_family(input, valid_profiles, &valid_profile_count, 6, time_all_vel_uddu, pd, v0, a0, vf, af, v_max, v_min, a_max, a_min, j_max);
-            try_add_family(input, valid_profiles, &valid_profile_count, 6, time_all_vel_uddu, pd, v0, a0, vf, af, v_min, v_max, a_min, a_max, -j_max);
+            collect_position_third_step1_all_none_acc0_acc1(input, valid_profiles, &valid_profile_count, RUCKIG_POSITION_THIRD_STEP1_CANDIDATE_CAPACITY, pd, v0, a0, vf, af, v_max, v_min, a_max, a_min, j_max, false);
+            collect_position_third_step1_all_none_acc0_acc1(input, valid_profiles, &valid_profile_count, RUCKIG_POSITION_THIRD_STEP1_CANDIDATE_CAPACITY, pd, v0, a0, vf, af, v_min, v_max, a_min, a_max, -j_max, false);
+            try_add_family(input, valid_profiles, &valid_profile_count, RUCKIG_POSITION_THIRD_STEP1_CANDIDATE_CAPACITY, time_acc0_acc1_uddu, pd, v0, a0, vf, af, v_max, v_min, a_max, a_min, j_max);
+            try_add_family(input, valid_profiles, &valid_profile_count, RUCKIG_POSITION_THIRD_STEP1_CANDIDATE_CAPACITY, time_acc0_acc1_uddu, pd, v0, a0, vf, af, v_min, v_max, a_min, a_max, -j_max);
+            try_add_family(input, valid_profiles, &valid_profile_count, RUCKIG_POSITION_THIRD_STEP1_CANDIDATE_CAPACITY, time_all_vel_uddu, pd, v0, a0, vf, af, v_max, v_min, a_max, a_min, j_max);
+            try_add_family(input, valid_profiles, &valid_profile_count, RUCKIG_POSITION_THIRD_STEP1_CANDIDATE_CAPACITY, time_all_vel_uddu, pd, v0, a0, vf, af, v_min, v_max, a_min, a_max, -j_max);
         }
 
         if (valid_profile_count == 0) {
-            try_add_family(input, valid_profiles, &valid_profile_count, 6, time_none_two_step, pd, v0, a0, vf, af, v_max, v_min, a_max, a_min, j_max);
+            try_add_family(input, valid_profiles, &valid_profile_count, RUCKIG_POSITION_THIRD_STEP1_CANDIDATE_CAPACITY, time_none_two_step, pd, v0, a0, vf, af, v_max, v_min, a_max, a_min, j_max);
         }
         if (valid_profile_count == 0) {
-            try_add_family(input, valid_profiles, &valid_profile_count, 6, time_none_two_step, pd, v0, a0, vf, af, v_min, v_max, a_min, a_max, -j_max);
+            try_add_family(input, valid_profiles, &valid_profile_count, RUCKIG_POSITION_THIRD_STEP1_CANDIDATE_CAPACITY, time_none_two_step, pd, v0, a0, vf, af, v_min, v_max, a_min, a_max, -j_max);
         }
         if (valid_profile_count == 0) {
-            try_add_family(input, valid_profiles, &valid_profile_count, 6, time_acc0_uddu, pd, v0, a0, vf, af, v_max, v_min, a_max, a_min, j_max);
+            try_add_family(input, valid_profiles, &valid_profile_count, RUCKIG_POSITION_THIRD_STEP1_CANDIDATE_CAPACITY, time_acc0_uddu, pd, v0, a0, vf, af, v_max, v_min, a_max, a_min, j_max);
         }
         if (valid_profile_count == 0) {
-            try_add_family(input, valid_profiles, &valid_profile_count, 6, time_acc0_uddu, pd, v0, a0, vf, af, v_min, v_max, a_min, a_max, -j_max);
+            try_add_family(input, valid_profiles, &valid_profile_count, RUCKIG_POSITION_THIRD_STEP1_CANDIDATE_CAPACITY, time_acc0_uddu, pd, v0, a0, vf, af, v_min, v_max, a_min, a_max, -j_max);
         }
         if (valid_profile_count == 0) {
-            try_add_family(input, valid_profiles, &valid_profile_count, 6, time_vel_two_step, pd, v0, a0, vf, af, v_max, v_min, a_max, a_min, j_max);
+            try_add_family(input, valid_profiles, &valid_profile_count, RUCKIG_POSITION_THIRD_STEP1_CANDIDATE_CAPACITY, time_vel_two_step, pd, v0, a0, vf, af, v_max, v_min, a_max, a_min, j_max);
         }
         if (valid_profile_count == 0) {
-            try_add_family(input, valid_profiles, &valid_profile_count, 6, time_vel_two_step, pd, v0, a0, vf, af, v_min, v_max, a_min, a_max, -j_max);
+            try_add_family(input, valid_profiles, &valid_profile_count, RUCKIG_POSITION_THIRD_STEP1_CANDIDATE_CAPACITY, time_vel_two_step, pd, v0, a0, vf, af, v_min, v_max, a_min, a_max, -j_max);
         }
         if (valid_profile_count == 0) {
-            try_add_family(input, valid_profiles, &valid_profile_count, 6, time_acc1_vel_two_step, pd, v0, a0, vf, af, v_max, v_min, a_max, a_min, j_max);
+            try_add_family(input, valid_profiles, &valid_profile_count, RUCKIG_POSITION_THIRD_STEP1_CANDIDATE_CAPACITY, time_acc1_vel_two_step, pd, v0, a0, vf, af, v_max, v_min, a_max, a_min, j_max);
         }
         if (valid_profile_count == 0) {
-            try_add_family(input, valid_profiles, &valid_profile_count, 6, time_acc1_vel_two_step, pd, v0, a0, vf, af, v_min, v_max, a_min, a_max, -j_max);
+            try_add_family(input, valid_profiles, &valid_profile_count, RUCKIG_POSITION_THIRD_STEP1_CANDIDATE_CAPACITY, time_acc1_vel_two_step, pd, v0, a0, vf, af, v_min, v_max, a_min, a_max, -j_max);
         }
 
         if (valid_profile_count == 0 || !ruckig_block_calculate(block, valid_profiles, valid_profile_count)) {
