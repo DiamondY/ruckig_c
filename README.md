@@ -253,7 +253,14 @@ match the captured continuation contract.
 
 Create functions allocate handles and all vectors owned by those handles. The intended release contract is that `ruckig_calculate`, `ruckig_update`, trajectory sampling, and root solvers do not allocate heap memory.
 
-The current implementation includes an internal allocation counter hook used by C tests. It verifies representative `ruckig_calculate`, `ruckig_update`, and `ruckig_trajectory_at_time` paths do not call the library's allocation helpers after lifecycle setup. CTest also runs a source-level allocation audit that rejects direct `malloc`/`calloc`/`realloc`/`free` calls outside `src/ruckig_c/alloc.c`.
+Test builds define `RUCKIG_C_TESTING` to enable internal allocation counters
+used by C white-box audit selectors. Those counters verify representative
+`ruckig_calculate`, `ruckig_update`, and `ruckig_trajectory_at_time` paths do
+not call the library's allocation helpers after lifecycle setup. Production
+builds do not maintain those aggregate counters; the allocation helpers call
+`calloc`/`free` directly. CTest also runs a source-level allocation audit that
+rejects direct `malloc`/`calloc`/`realloc`/`free` calls outside
+`src/ruckig_c/alloc.c`.
 
 `ruckig_output_get_calculation_duration` returns `0.0` by default. Define `RUCKIG_C_ENABLE_CALCULATION_DURATION` or configure CMake with `-DRUCKIG_C_ENABLE_CALCULATION_DURATION=ON` to measure `ruckig_update` monotonic elapsed calculation duration in microseconds.
 
@@ -269,6 +276,10 @@ Ownership rules:
 ## Thread Safety
 
 Independent handles can be used from independent threads. A single handle is not internally synchronized; callers must not mutate or use the same `ruckig_t`, input, output, or trajectory concurrently without external synchronization.
+
+Allocation audit counters are test-only `RUCKIG_C_TESTING` instrumentation, not
+production runtime statistics. They do not change the handle-level thread
+safety contract above.
 
 ## Result Codes
 

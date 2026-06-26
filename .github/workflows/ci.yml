@@ -26,6 +26,7 @@ jobs:
   build-test:
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
@@ -107,6 +108,7 @@ jobs:
   linux-sanitizers:
     name: Linux Clang ASan UBSan
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
 
@@ -133,6 +135,7 @@ jobs:
   linux-valgrind:
     name: Linux Valgrind
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
 
@@ -163,6 +166,7 @@ jobs:
   linux-performance:
     name: Linux Clang performance
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
 
@@ -261,6 +265,7 @@ jobs:
   windows-mingw-consumers:
     name: ${{ matrix.name }}
     runs-on: windows-latest
+    timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
@@ -310,6 +315,7 @@ jobs:
   abi-exported-symbols:
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
@@ -414,6 +420,7 @@ jobs:
   python-prototype-smoke:
     name: Python prototype smoke (${{ matrix.name }})
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
@@ -491,6 +498,7 @@ jobs:
   rust-alpha-smoke:
     name: Rust alpha wrapper smoke
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
 
@@ -525,6 +533,7 @@ jobs:
   visualization-artifacts:
     name: Visualization v2 artifacts
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     if: github.event_name == 'workflow_dispatch' && inputs.visualization_artifacts == 'true'
     steps:
       - uses: actions/checkout@v4
@@ -624,6 +633,7 @@ jobs:
   release-random-oracle:
     name: Manual release random oracle
     runs-on: ubuntu-latest
+    timeout-minutes: 180
     if: github.event_name == 'workflow_dispatch' && inputs.release_random == 'true'
     steps:
       - uses: actions/checkout@v4

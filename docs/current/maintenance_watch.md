@@ -84,8 +84,8 @@ event-driven after `v0.16.0`. It is not an active implementation roadmap.
   because local configuration exists.
 - Do not block a slice solely because local `clang-tidy` is unavailable for
   touched-file evidence; record the unavailability in the checklist.
-- Do not add locks or atomics to allocation counters for hypothetical threaded
-  audit use without a concrete consumer.
+- Do not add locks or atomics to `RUCKIG_C_TESTING` allocation counters for
+  hypothetical threaded audit use without a concrete consumer.
 - Do not expand default CI for coverage upload, static analysis, sanitizer
   matrix, or platform-matrix polish without an accepted CI policy slice.
 - Do not open solver white-box coverage work solely to improve percentages.

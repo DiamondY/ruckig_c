@@ -13,6 +13,9 @@ at the time they were produced; this page summarizes the current baseline.
   `0.17.3-line` baseline and is used only for tests.
 - Supported integration surface: CMake install, pkg-config, static/DLL,
   shared install-tree consumers, examples, and prototype Python/Rust smoke.
+- Exported-symbol policy: Linux and Windows shared builds compare against the
+  baseline symbol snapshots; macOS currently uploads a Mach-O export snapshot
+  as bootstrap evidence and is not yet a baseline diff gate.
 
 ## Supported Scope
 

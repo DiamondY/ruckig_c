@@ -340,7 +340,6 @@ static void apply_section_input(
     section_input->waypoint_count = 0;
 
     for (dof = 0; dof < input->dofs; ++dof) {
-        const size_t section_index = section * input->dofs + dof;
         const double max_velocity = section_max_velocity(input, section, dof);
         const double max_acceleration = section_max_acceleration(input, section, dof);
         section_input->current_position[dof] = point_position(input, section, dof);
@@ -367,7 +366,6 @@ static void apply_section_input(
         section_input->enabled[dof] = input->enabled[dof];
         section_input->per_dof_control_interface[dof] = RUCKIG_CONTROL_POSITION;
         section_input->per_dof_synchronization[dof] = RUCKIG_SYNCHRONIZATION_TIME;
-        (void)section_index;
     }
 }
 
@@ -381,7 +379,8 @@ static bool section_respects_position_bounds(
         const ruckig_bound_t bound = ruckig_profile_get_position_extrema(&section_trajectory->profiles[dof]);
         const double max_position = section_max_position(input, section, dof);
         const double min_position = section_min_position(input, section, dof);
-        if (bound.max > max_position + 1.0e-9 || bound.min < min_position - 1.0e-9) {
+        if (bound.max > max_position + RUCKIG_C_WAYPOINT_POSITION_BOUND_EPS
+            || bound.min < min_position - RUCKIG_C_WAYPOINT_POSITION_BOUND_EPS) {
             return false;
         }
     }

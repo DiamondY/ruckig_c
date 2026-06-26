@@ -193,6 +193,11 @@ if(BUILD_RUCKIG_C_TESTS)
     test/c/test_interrupt_api.c
     test/c/test_property_invariants.c
     test/c/test_public_api.c
+    test/c/test_public_constructor_api.c
+    test/c/test_public_core_api.c
+    test/c/test_public_input_api.c
+    test/c/test_public_trajectory_api.c
+    test/c/test_public_validation_api.c
     test/c/test_brake.c
     test/c/test_profile.c
     test/c/test_roots.c
@@ -201,12 +206,17 @@ if(BUILD_RUCKIG_C_TESTS)
     test/c/test_tracking_api.c
     test/c/test_tracking_quality_api.c
     test/c/test_tracking_random_api.c
+    test/c/test_tracking_random_audit_api.c
+    test/c/test_tracking_random_regression_api.c
+    test/c/test_tracking_random_shrink_api.c
     test/c/test_tracking_sequence.c
     test/c/test_utils.c
     test/c/test_waypoint_api.c
+    test/c/test_waypoint_interrupt_quality_api.c
     test/c/test_waypoint_regression_api.c
     test/c/test_waypoint_resume_quality_api.c
     test/c/test_waypoint_resume_stress_api.c
+    test/c/test_waypoint_shared_api.c
     ${RUCKIG_C_SOURCES}
   )
   target_compile_definitions(ruckig_c_tests PRIVATE RUCKIG_C_STATIC_DEFINE RUCKIG_C_TESTING)
@@ -264,7 +274,20 @@ if(BUILD_RUCKIG_C_TESTS)
   add_test(NAME ruckig_c_tracking_random_audit_replay_smoke COMMAND ruckig_c_tests --tracking-random-audit-replay 22 --seed 1)
   add_test(NAME ruckig_c_tracking_random_audit_shrink_smoke COMMAND ruckig_c_tests --tracking-random-audit-shrink 22 --seed 1)
   add_test(NAME ruckig_c_tracking_random_audit_shrink_failure_smoke COMMAND ruckig_c_tests --tracking-random-audit-shrink-failure 22 --seed 1)
-  set_tests_properties(ruckig_c_tracking_random_audit_shrink_failure_smoke PROPERTIES WILL_FAIL TRUE)
+  set_tests_properties(
+    ruckig_c_tracking_random_seed_1
+    ruckig_c_tracking_random_seed_2
+    ruckig_c_tracking_random_seed_41
+    PROPERTIES TIMEOUT 90
+  )
+  set_tests_properties(ruckig_c_tracking_random_audit PROPERTIES TIMEOUT 45)
+  set_tests_properties(
+    ruckig_c_tracking_random_replay_smoke
+    ruckig_c_tracking_random_audit_replay_smoke
+    ruckig_c_tracking_random_audit_shrink_smoke
+    PROPERTIES TIMEOUT 30
+  )
+  set_tests_properties(ruckig_c_tracking_random_audit_shrink_failure_smoke PROPERTIES WILL_FAIL TRUE TIMEOUT 30)
   add_test(NAME ruckig_c_tracking_no_allocation COMMAND ruckig_c_tests --tracking-no-allocation)
   add_test(NAME ruckig_c_allocation_audit
     COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/test/c/audit_allocations.cmake
@@ -594,6 +617,8 @@ if(BUILD_RUCKIG_C_ORACLE_TESTS)
   set_tests_properties(ruckig_c_oracle_random_per_dof_shrink_smoke_failure_expected PROPERTIES WILL_FAIL TRUE)
   add_test(NAME ruckig_c_oracle_random_development COMMAND ruckig_c_oracle_tests --random 100000 --seed 1)
   add_test(NAME ruckig_c_oracle_random_release COMMAND ruckig_c_oracle_tests --random 1000000 --seed 1)
+  set_tests_properties(ruckig_c_oracle_random_development PROPERTIES TIMEOUT 900)
+  set_tests_properties(ruckig_c_oracle_random_release PROPERTIES TIMEOUT 7200)
 endif()
 
 if(BUILD_RUCKIG_C_PERFORMANCE_TESTS)

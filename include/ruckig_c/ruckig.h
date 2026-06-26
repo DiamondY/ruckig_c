@@ -258,51 +258,76 @@ typedef struct ruckig_tracking_sequence_continuation ruckig_tracking_sequence_co
  * validation. `dofs` must be non-zero. Negative, NaN, and infinite
  * `delta_time` values are invalid; `0.0` remains accepted for offline
  * compatibility but is rejected later with discrete duration.
+ *
+ * Returns `RUCKIG_WORKING` on success. Common failures include
+ * `RUCKIG_ERROR_INVALID_INPUT` for invalid arguments or unsupported
+ * capacities, and `RUCKIG_ERROR` for failed internal storage allocation.
  */
 RUCKIG_C_API ruckig_result_t ruckig_create(ruckig_t** otg, size_t dofs, double delta_time);
-/** Create an OTG solver with intermediate waypoint capacity. */
+/** Create an OTG solver with intermediate waypoint capacity; see `ruckig_create` for return-code conventions. */
 RUCKIG_C_API ruckig_result_t ruckig_create_with_waypoints(
     ruckig_t** otg,
     size_t dofs,
     double delta_time,
     size_t max_number_of_waypoints
 );
-/** Destroy an OTG solver; accepts `NULL`. */
+/** Destroy an OTG solver; `NULL` is a no-op. */
 RUCKIG_C_API void ruckig_destroy(ruckig_t* otg);
 /** Return the waypoint capacity of an OTG solver, or `0` for `NULL`. */
 RUCKIG_C_API size_t ruckig_get_max_number_of_waypoints(const ruckig_t* otg);
 
-/** Create an input handle for `dofs` degrees of freedom. */
+/**
+ * Create an input handle for `dofs` degrees of freedom.
+ *
+ * Returns `RUCKIG_WORKING` on success. Common failures include
+ * `RUCKIG_ERROR_INVALID_INPUT` for a `NULL` output pointer, zero DoFs, or
+ * unsupported capacity, and `RUCKIG_ERROR` for failed internal storage
+ * allocation.
+ */
 RUCKIG_C_API ruckig_result_t ruckig_input_create(ruckig_input_t** input, size_t dofs);
-/** Create an input handle with intermediate waypoint capacity. */
+/** Create an input handle with intermediate waypoint capacity; see `ruckig_input_create` for return-code conventions. */
 RUCKIG_C_API ruckig_result_t ruckig_input_create_with_waypoints(
     ruckig_input_t** input,
     size_t dofs,
     size_t max_number_of_waypoints
 );
-/** Destroy an input handle; accepts `NULL`. */
+/** Destroy an input handle; `NULL` is a no-op. */
 RUCKIG_C_API void ruckig_input_destroy(ruckig_input_t* input);
 
-/** Create an online output handle for `dofs` degrees of freedom. */
+/**
+ * Create an online output handle for `dofs` degrees of freedom.
+ *
+ * Returns `RUCKIG_WORKING` on success. Common failures include
+ * `RUCKIG_ERROR_INVALID_INPUT` for a `NULL` output pointer, zero DoFs, or
+ * unsupported capacity, and `RUCKIG_ERROR` for failed internal storage
+ * allocation.
+ */
 RUCKIG_C_API ruckig_result_t ruckig_output_create(ruckig_output_t** output, size_t dofs);
-/** Create an online output handle with trajectory waypoint capacity. */
+/** Create an online output handle with trajectory waypoint capacity; see `ruckig_output_create` for return-code conventions. */
 RUCKIG_C_API ruckig_result_t ruckig_output_create_with_waypoints(
     ruckig_output_t** output,
     size_t dofs,
     size_t max_number_of_waypoints
 );
-/** Destroy an output handle; accepts `NULL`. */
+/** Destroy an output handle; `NULL` is a no-op. */
 RUCKIG_C_API void ruckig_output_destroy(ruckig_output_t* output);
 
-/** Create an offline trajectory handle for `dofs` degrees of freedom. */
+/**
+ * Create an offline trajectory handle for `dofs` degrees of freedom.
+ *
+ * Returns `RUCKIG_WORKING` on success. Common failures include
+ * `RUCKIG_ERROR_INVALID_INPUT` for a `NULL` output pointer, zero DoFs, or
+ * unsupported capacity, and `RUCKIG_ERROR` for failed internal storage
+ * allocation.
+ */
 RUCKIG_C_API ruckig_result_t ruckig_trajectory_create(ruckig_trajectory_t** trajectory, size_t dofs);
-/** Create an offline trajectory handle with waypoint section capacity. */
+/** Create an offline trajectory handle with waypoint section capacity; see `ruckig_trajectory_create` for return-code conventions. */
 RUCKIG_C_API ruckig_result_t ruckig_trajectory_create_with_waypoints(
     ruckig_trajectory_t** trajectory,
     size_t dofs,
     size_t max_number_of_waypoints
 );
-/** Destroy a trajectory handle; accepts `NULL`. */
+/** Destroy a trajectory handle; `NULL` is a no-op. */
 RUCKIG_C_API void ruckig_trajectory_destroy(ruckig_trajectory_t* trajectory);
 
 /** Initialize a caller-owned diagnostics record; passing `NULL` is a no-op. */
@@ -313,6 +338,9 @@ RUCKIG_C_API void ruckig_diagnostics_init(ruckig_diagnostics_t* diagnostics);
  *
  * `check_current_state_within_limits` checks the current state against limits.
  * `check_target_state_within_limits` checks the target state against limits.
+ * Returns `RUCKIG_WORKING` when validation passes. Common failures include
+ * `RUCKIG_ERROR_INVALID_INPUT`, `RUCKIG_ERROR_ZERO_LIMITS`, and
+ * `RUCKIG_ERROR_POSITIONAL_LIMITS`.
  */
 RUCKIG_C_API ruckig_result_t ruckig_validate_input(
     const ruckig_t* otg,
@@ -321,7 +349,7 @@ RUCKIG_C_API ruckig_result_t ruckig_validate_input(
     bool check_target_state_within_limits
 );
 
-/** Validate an input and fill stable coarse diagnostics when provided. */
+/** Validate an input and fill stable coarse diagnostics when provided; return codes match `ruckig_validate_input`. */
 RUCKIG_C_API ruckig_result_t ruckig_validate_input_with_diagnostics(
     const ruckig_t* otg,
     const ruckig_input_t* input,
@@ -330,14 +358,21 @@ RUCKIG_C_API ruckig_result_t ruckig_validate_input_with_diagnostics(
     ruckig_diagnostics_t* diagnostics
 );
 
-/** Calculate a complete offline trajectory into `trajectory`. */
+/**
+ * Calculate a complete offline trajectory into `trajectory`.
+ *
+ * Returns `RUCKIG_WORKING` when the trajectory is valid. Common failures
+ * include invalid input or limits, trajectory-duration failures,
+ * execution-time calculation failures, and synchronization calculation
+ * failures.
+ */
 RUCKIG_C_API ruckig_result_t ruckig_calculate(
     ruckig_t* otg,
     const ruckig_input_t* input,
     ruckig_trajectory_t* trajectory
 );
 
-/** Calculate a complete offline trajectory and fill diagnostics when provided. */
+/** Calculate a complete offline trajectory and fill diagnostics when provided; return codes match `ruckig_calculate`. */
 RUCKIG_C_API ruckig_result_t ruckig_calculate_with_diagnostics(
     ruckig_t* otg,
     const ruckig_input_t* input,
@@ -345,14 +380,21 @@ RUCKIG_C_API ruckig_result_t ruckig_calculate_with_diagnostics(
     ruckig_diagnostics_t* diagnostics
 );
 
-/** Advance one online step into `output`. */
+/**
+ * Advance one online step into `output`.
+ *
+ * Returns `RUCKIG_WORKING` while the online trajectory is still in progress
+ * and `RUCKIG_FINISHED` when the sampled trajectory has completed. Common
+ * failures match the calculation path and include invalid input, limit,
+ * trajectory-duration, execution-time, and synchronization errors.
+ */
 RUCKIG_C_API ruckig_result_t ruckig_update(
     ruckig_t* otg,
     const ruckig_input_t* input,
     ruckig_output_t* output
 );
 
-/** Advance one online step and fill diagnostics when provided. */
+/** Advance one online step and fill diagnostics when provided; return codes match `ruckig_update`. */
 RUCKIG_C_API ruckig_result_t ruckig_update_with_diagnostics(
     ruckig_t* otg,
     const ruckig_input_t* input,
@@ -473,7 +515,7 @@ RUCKIG_C_API ruckig_result_t ruckig_input_set_per_dof_control_interface(
     size_t count
 );
 
-/** Clear per-DoF control-interface overrides; accepts `NULL`. */
+/** Clear per-DoF control-interface overrides; `NULL` is a no-op. */
 RUCKIG_C_API void ruckig_input_clear_per_dof_control_interface(ruckig_input_t* input);
 
 /** Set per-DoF synchronization overrides; `count` must equal input DoF count. */
@@ -483,7 +525,7 @@ RUCKIG_C_API ruckig_result_t ruckig_input_set_per_dof_synchronization(
     size_t count
 );
 
-/** Clear per-DoF synchronization overrides; accepts `NULL`. */
+/** Clear per-DoF synchronization overrides; `NULL` is a no-op. */
 RUCKIG_C_API void ruckig_input_clear_per_dof_synchronization(ruckig_input_t* input);
 
 /** Set duration discretization mode. */
@@ -506,7 +548,7 @@ RUCKIG_C_API ruckig_result_t ruckig_input_set_min_velocity(
     size_t count
 );
 
-/** Clear optional minimum velocity limits; accepts `NULL`. */
+/** Clear optional minimum velocity limits; `NULL` is a no-op. */
 RUCKIG_C_API void ruckig_input_clear_min_velocity(ruckig_input_t* input);
 
 /** Set optional minimum acceleration limits; `count` must equal input DoF count. */
@@ -516,7 +558,7 @@ RUCKIG_C_API ruckig_result_t ruckig_input_set_min_acceleration(
     size_t count
 );
 
-/** Clear optional minimum acceleration limits; accepts `NULL`. */
+/** Clear optional minimum acceleration limits; `NULL` is a no-op. */
 RUCKIG_C_API void ruckig_input_clear_min_acceleration(ruckig_input_t* input);
 
 /** Set a global minimum trajectory duration. */
@@ -525,7 +567,7 @@ RUCKIG_C_API ruckig_result_t ruckig_input_set_minimum_duration(
     double minimum_duration
 );
 
-/** Clear the global minimum trajectory duration; accepts `NULL`. */
+/** Clear the global minimum trajectory duration; `NULL` is a no-op. */
 RUCKIG_C_API void ruckig_input_clear_minimum_duration(ruckig_input_t* input);
 
 /** Set flattened intermediate waypoint positions as `waypoint_count * dofs` doubles. */
@@ -535,7 +577,7 @@ RUCKIG_C_API ruckig_result_t ruckig_input_set_intermediate_positions(
     size_t waypoint_count,
     size_t dofs
 );
-/** Clear intermediate waypoint positions; accepts `NULL`. */
+/** Clear intermediate waypoint positions; `NULL` is a no-op. */
 RUCKIG_C_API void ruckig_input_clear_intermediate_positions(ruckig_input_t* input);
 /** Return the active intermediate waypoint count, or `0` for `NULL`. */
 RUCKIG_C_API size_t ruckig_input_get_intermediate_position_count(const ruckig_input_t* input);
@@ -553,7 +595,7 @@ RUCKIG_C_API ruckig_result_t ruckig_input_set_per_section_max_velocity(
     size_t section_count,
     size_t dofs
 );
-/** Clear per-section maximum velocity limits; accepts `NULL`. */
+/** Clear per-section maximum velocity limits; `NULL` is a no-op. */
 RUCKIG_C_API void ruckig_input_clear_per_section_max_velocity(ruckig_input_t* input);
 /** Return whether per-section maximum velocity limits are active. */
 RUCKIG_C_API bool ruckig_input_has_per_section_max_velocity(const ruckig_input_t* input);
@@ -571,7 +613,7 @@ RUCKIG_C_API ruckig_result_t ruckig_input_set_per_section_min_velocity(
     size_t section_count,
     size_t dofs
 );
-/** Clear per-section minimum velocity limits; accepts `NULL`. */
+/** Clear per-section minimum velocity limits; `NULL` is a no-op. */
 RUCKIG_C_API void ruckig_input_clear_per_section_min_velocity(ruckig_input_t* input);
 /** Return whether per-section minimum velocity limits are active. */
 RUCKIG_C_API bool ruckig_input_has_per_section_min_velocity(const ruckig_input_t* input);
@@ -589,7 +631,7 @@ RUCKIG_C_API ruckig_result_t ruckig_input_set_per_section_max_acceleration(
     size_t section_count,
     size_t dofs
 );
-/** Clear per-section maximum acceleration limits; accepts `NULL`. */
+/** Clear per-section maximum acceleration limits; `NULL` is a no-op. */
 RUCKIG_C_API void ruckig_input_clear_per_section_max_acceleration(ruckig_input_t* input);
 /** Return whether per-section maximum acceleration limits are active. */
 RUCKIG_C_API bool ruckig_input_has_per_section_max_acceleration(const ruckig_input_t* input);
@@ -607,7 +649,7 @@ RUCKIG_C_API ruckig_result_t ruckig_input_set_per_section_min_acceleration(
     size_t section_count,
     size_t dofs
 );
-/** Clear per-section minimum acceleration limits; accepts `NULL`. */
+/** Clear per-section minimum acceleration limits; `NULL` is a no-op. */
 RUCKIG_C_API void ruckig_input_clear_per_section_min_acceleration(ruckig_input_t* input);
 /** Return whether per-section minimum acceleration limits are active. */
 RUCKIG_C_API bool ruckig_input_has_per_section_min_acceleration(const ruckig_input_t* input);
@@ -625,7 +667,7 @@ RUCKIG_C_API ruckig_result_t ruckig_input_set_per_section_max_jerk(
     size_t section_count,
     size_t dofs
 );
-/** Clear per-section maximum jerk limits; accepts `NULL`. */
+/** Clear per-section maximum jerk limits; `NULL` is a no-op. */
 RUCKIG_C_API void ruckig_input_clear_per_section_max_jerk(ruckig_input_t* input);
 /** Return whether per-section maximum jerk limits are active. */
 RUCKIG_C_API bool ruckig_input_has_per_section_max_jerk(const ruckig_input_t* input);
@@ -643,7 +685,7 @@ RUCKIG_C_API ruckig_result_t ruckig_input_set_per_section_max_position(
     size_t section_count,
     size_t dofs
 );
-/** Clear per-section maximum position limits; accepts `NULL`. */
+/** Clear per-section maximum position limits; `NULL` is a no-op. */
 RUCKIG_C_API void ruckig_input_clear_per_section_max_position(ruckig_input_t* input);
 /** Return whether per-section maximum position limits are active. */
 RUCKIG_C_API bool ruckig_input_has_per_section_max_position(const ruckig_input_t* input);
@@ -661,7 +703,7 @@ RUCKIG_C_API ruckig_result_t ruckig_input_set_per_section_min_position(
     size_t section_count,
     size_t dofs
 );
-/** Clear per-section minimum position limits; accepts `NULL`. */
+/** Clear per-section minimum position limits; `NULL` is a no-op. */
 RUCKIG_C_API void ruckig_input_clear_per_section_min_position(ruckig_input_t* input);
 /** Return whether per-section minimum position limits are active. */
 RUCKIG_C_API bool ruckig_input_has_per_section_min_position(const ruckig_input_t* input);
@@ -678,7 +720,7 @@ RUCKIG_C_API ruckig_result_t ruckig_input_set_per_section_minimum_duration(
     const double* values,
     size_t section_count
 );
-/** Clear per-section minimum durations; accepts `NULL`. */
+/** Clear per-section minimum durations; `NULL` is a no-op. */
 RUCKIG_C_API void ruckig_input_clear_per_section_minimum_duration(ruckig_input_t* input);
 /** Return whether per-section minimum durations are active. */
 RUCKIG_C_API bool ruckig_input_has_per_section_minimum_duration(const ruckig_input_t* input);
@@ -694,7 +736,7 @@ RUCKIG_C_API ruckig_result_t ruckig_input_set_interrupt_calculation_duration(
     ruckig_input_t* input,
     double interrupt_calculation_duration
 );
-/** Clear the optional calculation interrupt budget; accepts `NULL`. */
+/** Clear the optional calculation interrupt budget; `NULL` is a no-op. */
 RUCKIG_C_API void ruckig_input_clear_interrupt_calculation_duration(ruckig_input_t* input);
 
 /** Return trajectory DoF count, or `0` for `NULL`. */
@@ -706,21 +748,34 @@ RUCKIG_C_API double ruckig_trajectory_get_duration(const ruckig_trajectory_t* tr
 RUCKIG_C_API size_t ruckig_trajectory_get_section_count(const ruckig_trajectory_t* trajectory);
 /** Return number of intermediate section durations. */
 RUCKIG_C_API size_t ruckig_trajectory_get_intermediate_duration_count(const ruckig_trajectory_t* trajectory);
-/** Copy intermediate section durations into caller storage. */
+/**
+ * Copy intermediate section durations into caller storage.
+ *
+ * Returns `RUCKIG_WORKING` on success and commonly
+ * `RUCKIG_ERROR_INVALID_INPUT` for `NULL` handles/storage or mismatched
+ * `duration_count`.
+ */
 RUCKIG_C_API ruckig_result_t ruckig_trajectory_get_intermediate_durations(
     const ruckig_trajectory_t* trajectory,
     double* durations,
     size_t duration_count
 );
 
-/** Copy per-DoF independent minimum durations into caller storage. */
+/** Copy per-DoF independent minimum durations into caller storage; returns `RUCKIG_WORKING` or commonly `RUCKIG_ERROR_INVALID_INPUT`. */
 RUCKIG_C_API ruckig_result_t ruckig_trajectory_get_independent_min_durations(
     const ruckig_trajectory_t* trajectory,
     double* durations,
     size_t duration_count
 );
 
-/** Sample trajectory state at `time`; `position` is required, other outputs may be `NULL`. */
+/**
+ * Sample trajectory state at `time`; `position` is required, other outputs may
+ * be `NULL`.
+ *
+ * Returns `RUCKIG_WORKING` on success. Common failures include
+ * `RUCKIG_ERROR_INVALID_INPUT` for invalid handles/storage and
+ * `RUCKIG_ERROR_TRAJECTORY_DURATION` for invalid sample times.
+ */
 RUCKIG_C_API ruckig_result_t ruckig_trajectory_at_time(
     const ruckig_trajectory_t* trajectory,
     double time,
@@ -731,14 +786,14 @@ RUCKIG_C_API ruckig_result_t ruckig_trajectory_at_time(
     size_t* section
 );
 
-/** Copy per-DoF position extrema into caller storage. */
+/** Copy per-DoF position extrema into caller storage; returns `RUCKIG_WORKING` or commonly `RUCKIG_ERROR_INVALID_INPUT`. */
 RUCKIG_C_API ruckig_result_t ruckig_trajectory_get_position_extrema(
     const ruckig_trajectory_t* trajectory,
     ruckig_position_extrema_t* extrema,
     size_t extrema_count
 );
 
-/** Find the first time at which one DoF reaches `position` after `time_after`. */
+/** Find the first time at which one DoF reaches `position` after `time_after`; returns `RUCKIG_WORKING` or commonly `RUCKIG_ERROR_INVALID_INPUT`. */
 RUCKIG_C_API ruckig_result_t ruckig_trajectory_get_first_time_at_position(
     const ruckig_trajectory_t* trajectory,
     size_t dof,
@@ -748,7 +803,13 @@ RUCKIG_C_API ruckig_result_t ruckig_trajectory_get_first_time_at_position(
     bool* found
 );
 
-/** Filter flattened intermediate positions by per-DoF distance threshold. */
+/**
+ * Filter flattened intermediate positions by per-DoF distance threshold.
+ *
+ * Returns `RUCKIG_WORKING` on success and commonly
+ * `RUCKIG_ERROR_INVALID_INPUT` for invalid handles, counts, capacity, storage,
+ * or non-finite/negative threshold values.
+ */
 RUCKIG_C_API ruckig_result_t ruckig_filter_intermediate_positions(
     const ruckig_t* otg,
     const ruckig_input_t* input,
@@ -759,34 +820,41 @@ RUCKIG_C_API ruckig_result_t ruckig_filter_intermediate_positions(
     size_t* written_waypoints
 );
 
-/** Create a tracking solver for `dofs` degrees of freedom and positive `delta_time`. */
+/**
+ * Create a tracking solver for `dofs` degrees of freedom and positive
+ * `delta_time`.
+ *
+ * Returns `RUCKIG_WORKING` on success. Common failures include
+ * `RUCKIG_ERROR_INVALID_INPUT` for invalid arguments and `RUCKIG_ERROR` for
+ * failed internal storage allocation.
+ */
 RUCKIG_C_API ruckig_result_t ruckig_tracking_create(ruckig_tracking_t** tracking, size_t dofs, double delta_time);
-/** Destroy a tracking solver; accepts `NULL`. */
+/** Destroy a tracking solver; `NULL` is a no-op. */
 RUCKIG_C_API void ruckig_tracking_destroy(ruckig_tracking_t* tracking);
 /** Return tracking DoF count, or `0` for `NULL`. */
 RUCKIG_C_API size_t ruckig_tracking_get_dof_count(const ruckig_tracking_t* tracking);
 /** Return tracking control-cycle duration, or `0.0` for `NULL`. */
 RUCKIG_C_API double ruckig_tracking_get_delta_time(const ruckig_tracking_t* tracking);
-/** Set tracking mode. */
+/** Set tracking mode; returns `RUCKIG_WORKING` or commonly `RUCKIG_ERROR_INVALID_INPUT`. */
 RUCKIG_C_API ruckig_result_t ruckig_tracking_set_mode(ruckig_tracking_t* tracking, ruckig_tracking_mode_t mode);
 /** Return current tracking mode, or Fast for `NULL`. */
 RUCKIG_C_API ruckig_tracking_mode_t ruckig_tracking_get_mode(const ruckig_tracking_t* tracking);
-/** Set tracking reactiveness. */
+/** Set tracking reactiveness; returns `RUCKIG_WORKING` or commonly `RUCKIG_ERROR_INVALID_INPUT`. */
 RUCKIG_C_API ruckig_result_t ruckig_tracking_set_reactiveness(ruckig_tracking_t* tracking, double reactiveness);
 /** Return tracking reactiveness, or `0.0` for `NULL`. */
 RUCKIG_C_API double ruckig_tracking_get_reactiveness(const ruckig_tracking_t* tracking);
-/** Set tracking look-ahead cycle count. */
+/** Set tracking look-ahead cycle count; returns `RUCKIG_WORKING` or commonly `RUCKIG_ERROR_INVALID_INPUT`. */
 RUCKIG_C_API ruckig_result_t ruckig_tracking_set_look_ahead_cycles(ruckig_tracking_t* tracking, size_t look_ahead_cycles);
 /** Return tracking look-ahead cycle count, or `0` for `NULL`. */
 RUCKIG_C_API size_t ruckig_tracking_get_look_ahead_cycles(const ruckig_tracking_t* tracking);
-/** Set maximum optimized tracking candidate count. */
+/** Set maximum optimized tracking candidate count; returns `RUCKIG_WORKING` or commonly `RUCKIG_ERROR_INVALID_INPUT`. */
 RUCKIG_C_API ruckig_result_t ruckig_tracking_set_max_optimized_candidates(
     ruckig_tracking_t* tracking,
     size_t max_candidates
 );
 /** Return maximum optimized tracking candidate count, or `0` for `NULL`. */
 RUCKIG_C_API size_t ruckig_tracking_get_max_optimized_candidates(const ruckig_tracking_t* tracking);
-/** Set optimized tracking strategy. */
+/** Set optimized tracking strategy; returns `RUCKIG_WORKING` or commonly `RUCKIG_ERROR_INVALID_INPUT`. */
 RUCKIG_C_API ruckig_result_t ruckig_tracking_set_optimized_strategy(
     ruckig_tracking_t* tracking,
     ruckig_tracking_optimized_strategy_t strategy
@@ -801,38 +869,50 @@ RUCKIG_C_API ruckig_tracking_calculation_status_t ruckig_tracking_get_last_calcu
 );
 /** Return last tracking candidate count, or `0` for `NULL`. */
 RUCKIG_C_API size_t ruckig_tracking_get_last_candidate_count(const ruckig_tracking_t* tracking);
-/** Copy specialized tracking diagnostics into caller storage. */
+/** Copy specialized tracking diagnostics into caller storage; returns `RUCKIG_WORKING` or commonly `RUCKIG_ERROR_INVALID_INPUT`. */
 RUCKIG_C_API ruckig_result_t ruckig_tracking_get_last_diagnostics(
     const ruckig_tracking_t* tracking,
     ruckig_tracking_diagnostics_t* diagnostics
 );
-/** Copy stable coarse tracking diagnostics into caller storage. */
+/** Copy stable coarse tracking diagnostics into caller storage; returns `RUCKIG_WORKING` or commonly `RUCKIG_ERROR_INVALID_INPUT`. */
 RUCKIG_C_API ruckig_result_t ruckig_tracking_get_last_public_diagnostics(
     const ruckig_tracking_t* tracking,
     ruckig_diagnostics_t* diagnostics
 );
-/** Run one tracking update against a single target state. */
+/**
+ * Run one tracking update against a single target state.
+ *
+ * Returns `RUCKIG_WORKING` or `RUCKIG_FINISHED` for normal online control flow.
+ * Common failures include invalid input, limit, execution-time, and
+ * synchronization errors from the underlying OTG calculation.
+ */
 RUCKIG_C_API ruckig_result_t ruckig_tracking_update(
     ruckig_tracking_t* tracking,
     const ruckig_target_state_t* target_state,
     const ruckig_input_t* input,
     ruckig_output_t* output
 );
-/** Run one tracking update using a look-ahead target sequence. */
+/** Run one tracking update using a look-ahead target sequence; return codes match `ruckig_tracking_update`. */
 RUCKIG_C_API ruckig_result_t ruckig_tracking_update_with_lookahead(
     ruckig_tracking_t* tracking,
     const ruckig_target_state_sequence_t* target_sequence,
     const ruckig_input_t* input,
     ruckig_output_t* output
 );
-/** Calculate a complete tracking output sequence. */
+/**
+ * Calculate a complete tracking output sequence.
+ *
+ * Returns `RUCKIG_WORKING` on successful sequence calculation. Common failures
+ * include invalid handles/capacity and calculation errors from the underlying
+ * tracking update path.
+ */
 RUCKIG_C_API ruckig_result_t ruckig_tracking_calculate_sequence(
     ruckig_tracking_t* tracking,
     const ruckig_target_state_sequence_t* target_sequence,
     const ruckig_input_t* input,
     ruckig_tracking_output_sequence_t* output_sequence
 );
-/** Start an interruptible tracking sequence calculation. */
+/** Start an interruptible tracking sequence calculation; returns `RUCKIG_WORKING` on a complete or resumable start, or commonly invalid-input/calculation errors. */
 RUCKIG_C_API ruckig_result_t ruckig_tracking_calculate_sequence_interruptible(
     ruckig_tracking_t* tracking,
     const ruckig_target_state_sequence_t* target_sequence,
@@ -840,16 +920,22 @@ RUCKIG_C_API ruckig_result_t ruckig_tracking_calculate_sequence_interruptible(
     ruckig_tracking_output_sequence_t* output_sequence,
     ruckig_tracking_sequence_continuation_t* continuation
 );
-/** Resume an interrupted tracking sequence calculation. */
+/** Resume an interrupted tracking sequence calculation; returns `RUCKIG_WORKING` on successful progress or commonly invalid-input/calculation errors. */
 RUCKIG_C_API ruckig_result_t ruckig_tracking_resume_sequence(
     ruckig_tracking_t* tracking,
     ruckig_tracking_sequence_continuation_t* continuation,
     ruckig_tracking_output_sequence_t* output_sequence
 );
 
-/** Create a single tracking target-state handle. */
+/**
+ * Create a single tracking target-state handle.
+ *
+ * Returns `RUCKIG_WORKING` on success. Common failures include
+ * `RUCKIG_ERROR_INVALID_INPUT` for invalid arguments and `RUCKIG_ERROR` for
+ * failed internal storage allocation.
+ */
 RUCKIG_C_API ruckig_result_t ruckig_target_state_create(ruckig_target_state_t** target_state, size_t dofs);
-/** Destroy a target-state handle; accepts `NULL`. */
+/** Destroy a target-state handle; `NULL` is a no-op. */
 RUCKIG_C_API void ruckig_target_state_destroy(ruckig_target_state_t* target_state);
 /** Return target-state DoF count, or `0` for `NULL`. */
 RUCKIG_C_API size_t ruckig_target_state_get_dof_count(const ruckig_target_state_t* target_state);
@@ -866,13 +952,19 @@ RUCKIG_C_API const double* ruckig_target_state_velocity_const_data(const ruckig_
 /** Return const target acceleration array of length DoF, or `NULL` for `NULL`. */
 RUCKIG_C_API const double* ruckig_target_state_acceleration_const_data(const ruckig_target_state_t* target_state);
 
-/** Create a fixed-capacity target-state sequence. */
+/**
+ * Create a fixed-capacity target-state sequence.
+ *
+ * Returns `RUCKIG_WORKING` on success. Common failures include
+ * `RUCKIG_ERROR_INVALID_INPUT` for invalid arguments or unsupported capacity,
+ * and `RUCKIG_ERROR` for failed internal storage allocation.
+ */
 RUCKIG_C_API ruckig_result_t ruckig_target_state_sequence_create(
     ruckig_target_state_sequence_t** sequence,
     size_t dofs,
     size_t capacity
 );
-/** Destroy a target-state sequence; accepts `NULL`. */
+/** Destroy a target-state sequence; `NULL` is a no-op. */
 RUCKIG_C_API void ruckig_target_state_sequence_destroy(ruckig_target_state_sequence_t* sequence);
 /** Return target-state sequence DoF count, or `0` for `NULL`. */
 RUCKIG_C_API size_t ruckig_target_state_sequence_get_dof_count(const ruckig_target_state_sequence_t* sequence);
@@ -880,9 +972,9 @@ RUCKIG_C_API size_t ruckig_target_state_sequence_get_dof_count(const ruckig_targ
 RUCKIG_C_API size_t ruckig_target_state_sequence_get_capacity(const ruckig_target_state_sequence_t* sequence);
 /** Return active target-state sequence count, or `0` for `NULL`. */
 RUCKIG_C_API size_t ruckig_target_state_sequence_get_count(const ruckig_target_state_sequence_t* sequence);
-/** Set active target-state sequence count; must not exceed capacity. */
+/** Set active target-state sequence count; must not exceed capacity; returns `RUCKIG_WORKING` or commonly `RUCKIG_ERROR_INVALID_INPUT`. */
 RUCKIG_C_API ruckig_result_t ruckig_target_state_sequence_set_count(ruckig_target_state_sequence_t* sequence, size_t count);
-/** Clear active target-state sequence count and storage; accepts `NULL`. */
+/** Clear active target-state sequence count and storage; `NULL` is a no-op. */
 RUCKIG_C_API void ruckig_target_state_sequence_clear(ruckig_target_state_sequence_t* sequence);
 /** Return mutable flattened sequence position array of `capacity * dofs` doubles. */
 RUCKIG_C_API double* ruckig_target_state_sequence_position_data(ruckig_target_state_sequence_t* sequence);
@@ -897,13 +989,19 @@ RUCKIG_C_API const double* ruckig_target_state_sequence_velocity_const_data(cons
 /** Return const flattened sequence acceleration array of `capacity * dofs` doubles. */
 RUCKIG_C_API const double* ruckig_target_state_sequence_acceleration_const_data(const ruckig_target_state_sequence_t* sequence);
 
-/** Create a fixed-capacity tracking output sequence. */
+/**
+ * Create a fixed-capacity tracking output sequence.
+ *
+ * Returns `RUCKIG_WORKING` on success. Common failures include
+ * `RUCKIG_ERROR_INVALID_INPUT` for invalid arguments or unsupported capacity,
+ * and `RUCKIG_ERROR` for failed internal storage allocation.
+ */
 RUCKIG_C_API ruckig_result_t ruckig_tracking_output_sequence_create(
     ruckig_tracking_output_sequence_t** sequence,
     size_t dofs,
     size_t capacity
 );
-/** Destroy a tracking output sequence; accepts `NULL`. */
+/** Destroy a tracking output sequence; `NULL` is a no-op. */
 RUCKIG_C_API void ruckig_tracking_output_sequence_destroy(ruckig_tracking_output_sequence_t* sequence);
 /** Return tracking output sequence DoF count, or `0` for `NULL`. */
 RUCKIG_C_API size_t ruckig_tracking_output_sequence_get_dof_count(const ruckig_tracking_output_sequence_t* sequence);
@@ -911,7 +1009,7 @@ RUCKIG_C_API size_t ruckig_tracking_output_sequence_get_dof_count(const ruckig_t
 RUCKIG_C_API size_t ruckig_tracking_output_sequence_get_capacity(const ruckig_tracking_output_sequence_t* sequence);
 /** Return active tracking output sequence count, or `0` for `NULL`. */
 RUCKIG_C_API size_t ruckig_tracking_output_sequence_get_count(const ruckig_tracking_output_sequence_t* sequence);
-/** Clear active tracking output sequence state; accepts `NULL`. */
+/** Clear active tracking output sequence state; `NULL` is a no-op. */
 RUCKIG_C_API void ruckig_tracking_output_sequence_clear(ruckig_tracking_output_sequence_t* sequence);
 /** Return const flattened output position array of `capacity * dofs` doubles. */
 RUCKIG_C_API const double* ruckig_tracking_output_sequence_new_position_const_data(const ruckig_tracking_output_sequence_t* sequence);
@@ -928,17 +1026,23 @@ RUCKIG_C_API const size_t* ruckig_tracking_output_sequence_section_const_data(co
 /** Return const output result-code array of length capacity. */
 RUCKIG_C_API const ruckig_result_t* ruckig_tracking_output_sequence_result_const_data(const ruckig_tracking_output_sequence_t* sequence);
 
-/** Create an interruptible tracking sequence continuation handle. */
+/**
+ * Create an interruptible tracking sequence continuation handle.
+ *
+ * Returns `RUCKIG_WORKING` on success. Common failures include
+ * `RUCKIG_ERROR_INVALID_INPUT` for invalid arguments or unsupported capacity,
+ * and `RUCKIG_ERROR` for failed internal storage allocation.
+ */
 RUCKIG_C_API ruckig_result_t ruckig_tracking_sequence_continuation_create(
     ruckig_tracking_sequence_continuation_t** continuation,
     size_t dofs,
     size_t capacity
 );
-/** Destroy a tracking sequence continuation; accepts `NULL`. */
+/** Destroy a tracking sequence continuation; `NULL` is a no-op. */
 RUCKIG_C_API void ruckig_tracking_sequence_continuation_destroy(
     ruckig_tracking_sequence_continuation_t* continuation
 );
-/** Reset a tracking sequence continuation state; accepts `NULL`. */
+/** Reset a tracking sequence continuation state; `NULL` is a no-op. */
 RUCKIG_C_API void ruckig_tracking_sequence_continuation_reset(
     ruckig_tracking_sequence_continuation_t* continuation
 );
@@ -970,7 +1074,7 @@ RUCKIG_C_API size_t ruckig_tracking_sequence_continuation_get_completed_count(
 RUCKIG_C_API size_t ruckig_tracking_sequence_continuation_get_target_count(
     const ruckig_tracking_sequence_continuation_t* continuation
 );
-/** Copy stable coarse continuation diagnostics into caller storage. */
+/** Copy stable coarse continuation diagnostics into caller storage; returns `RUCKIG_WORKING` or commonly `RUCKIG_ERROR_INVALID_INPUT`. */
 RUCKIG_C_API ruckig_result_t ruckig_tracking_sequence_continuation_get_last_diagnostics(
     const ruckig_tracking_sequence_continuation_t* continuation,
     ruckig_diagnostics_t* diagnostics
