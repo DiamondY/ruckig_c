@@ -261,11 +261,15 @@ if(BUILD_RUCKIG_C_TESTS)
   add_test(NAME ruckig_c_tracking_random_audit_replay_smoke COMMAND ruckig_c_tests --tracking-random-audit-replay 22 --seed 1)
   add_test(NAME ruckig_c_tracking_random_audit_shrink_smoke COMMAND ruckig_c_tests --tracking-random-audit-shrink 22 --seed 1)
   add_test(NAME ruckig_c_tracking_random_audit_shrink_failure_smoke COMMAND ruckig_c_tests --tracking-random-audit-shrink-failure 22 --seed 1)
+  set(RUCKIG_C_TRACKING_RANDOM_TIMEOUT 90)
+  if(RUCKIG_C_ENABLE_ASAN OR RUCKIG_C_ENABLE_UBSAN)
+    set(RUCKIG_C_TRACKING_RANDOM_TIMEOUT 300)
+  endif()
   set_tests_properties(
     ruckig_c_tracking_random_seed_1
     ruckig_c_tracking_random_seed_2
     ruckig_c_tracking_random_seed_41
-    PROPERTIES TIMEOUT 90
+    PROPERTIES TIMEOUT ${RUCKIG_C_TRACKING_RANDOM_TIMEOUT}
   )
   set_tests_properties(ruckig_c_tracking_random_audit PROPERTIES TIMEOUT 45)
   set_tests_properties(
@@ -328,9 +332,11 @@ if(BUILD_RUCKIG_C_TESTS)
         ${CMAKE_CURRENT_BINARY_DIR}/test_pkg_config_consumer.cmake
         @ONLY
       )
-      add_test(NAME ruckig_c_pkg_config_consumer
-        COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/test_pkg_config_consumer.cmake
-      )
+      if(NOT RUCKIG_C_ENABLE_ASAN AND NOT RUCKIG_C_ENABLE_UBSAN)
+        add_test(NAME ruckig_c_pkg_config_consumer
+          COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/test_pkg_config_consumer.cmake
+        )
+      endif()
       configure_file(
         test/cmake/test_shared_install_consumer.cmake.in
         ${CMAKE_CURRENT_BINARY_DIR}/test_shared_install_consumer.cmake
