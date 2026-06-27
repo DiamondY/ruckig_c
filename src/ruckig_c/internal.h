@@ -85,6 +85,7 @@ static inline size_t ruckig_diagnostics_min_size(size_t lhs, size_t rhs) {
     return lhs < rhs ? lhs : rhs;
 }
 
+/* NULL diagnostics means the caller opted out of diagnostics, not invalid input. */
 static inline ruckig_result_t ruckig_diagnostics_validate_or_null(const ruckig_diagnostics_t* diagnostics) {
     if (!diagnostics) {
         return RUCKIG_WORKING;
@@ -125,6 +126,7 @@ static inline void ruckig_diagnostics_record(
     double value,
     double limit
 ) {
+    /* validate_or_null accepts NULL, so keep an explicit write guard for opt-out callers. */
     if (ruckig_diagnostics_validate_or_null(diagnostics) != RUCKIG_WORKING || !diagnostics) {
         return;
     }

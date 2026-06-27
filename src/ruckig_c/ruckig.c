@@ -278,6 +278,15 @@ static void select_limiting_dof_for_duration(
     }
 }
 
+static size_t adjustment_iteration_budget(size_t dofs) {
+    size_t budget;
+    if (dofs > (SIZE_MAX - 8u) / 4u) {
+        return SIZE_MAX;
+    }
+    budget = 4u * dofs + 8u;
+    return budget == 0u ? 1u : budget;
+}
+
 static double adjust_duration_for_blocks(
     double duration,
     const ruckig_input_t* input,
@@ -285,6 +294,7 @@ static double adjust_duration_for_blocks(
 ) {
     bool changed = true;
     const double eps = RUCKIG_DBL_EPSILON;
+    size_t remaining_iterations = adjustment_iteration_budget(input->dofs);
 
     if (!has_synchronized_dof(input)
         && input->duration_discretization == RUCKIG_DURATION_CONTINUOUS) {
@@ -294,6 +304,11 @@ static double adjust_duration_for_blocks(
     /* Step1 profiles define forbidden synchronization intervals; advance to the next valid synchronization duration candidate. */
     while (changed) {
         size_t dof;
+        if (remaining_iterations == 0u) {
+            RUCKIG_C_INTERNAL_ASSERT(false);
+            break;
+        }
+        --remaining_iterations;
         changed = false;
         for (dof = 0; dof < input->dofs; ++dof) {
             const ruckig_block_t* block = &trajectory->blocks[dof];

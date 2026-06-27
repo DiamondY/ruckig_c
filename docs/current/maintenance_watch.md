@@ -48,8 +48,14 @@ event-driven after `v0.16.0`. It is not an active implementation roadmap.
 - The remaining review-adopted brake timing epsilon is named in the private
   precision header; future precision-constant cleanup should stay semantic,
   oracle-backed, and low-risk.
+- Synchronized duration adjustment now has an explicit defensive iteration
+  budget. Exhaustion is treated as an internal invariant breach in test builds;
+  production builds keep the existing best-effort duration-return behavior.
 - Phase-sync near-zero scaling for `pd_limiting` or `scale_limiting` remains
   an oracle-backed audit item; threshold changes need deterministic evidence.
+- Cubic/Cardano near-multiple-root behavior remains oracle-aligned watch-only
+  work. Formula changes need deterministic public-behavior or C/C++ oracle
+  evidence.
 - Complex solver formula consistency, including `position_third_step2.c`
   duplicated time segment terms, remains an oracle-backed watch item. Local
   denominator guards are acceptable; formula rewrites require deterministic
@@ -63,6 +69,9 @@ event-driven after `v0.16.0`. It is not an active implementation roadmap.
 - Profile extrema cancellation and first/second-order `t_sum` representation
   remain watch-only. Do not change these representations without a focused
   deterministic repro and normal/oracle regression evidence.
+- Near-zero acceleration sign-flip policy in profile checks remains
+  oracle-aligned watch-only behavior; do not change the predicate from review
+  suspicion alone.
 - The post-`v0.16.0` quality tightening series is closed out; remaining quality
   expansion is event-driven.
 - White-box tests that mutate internal state remain intentional corrupted-state
@@ -133,6 +142,8 @@ event-driven after `v0.16.0`. It is not an active implementation roadmap.
 - Do not normalize solver `>`/`>=` predicates, rewrite complex closed-form
   formulas, or change profile `t_sum` representation from review suspicion
   alone.
+- Do not change `ruckig_input_equals` exact floating-point comparison into an
+  epsilon comparison without a separately accepted public semantics change.
 
 ## Current Default
 
