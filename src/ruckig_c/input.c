@@ -1024,6 +1024,7 @@ bool ruckig_input_same_dofs(const ruckig_input_t* input, size_t dofs) {
     return input && input->dofs == dofs;
 }
 
+/* Input equality is exact identity for reuse decisions, not a numeric tolerance comparison. */
 static bool double_arrays_equal(const double* lhs, const double* rhs, size_t count) {
     size_t i;
     for (i = 0; i < count; ++i) {

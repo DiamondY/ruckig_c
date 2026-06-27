@@ -387,6 +387,8 @@ bool ruckig_profile_check_for_second_order_velocity_ctx(
     limits = check->limits;
     a_up = check->a_up;
 
+    /* Second-order velocity profiles are single-segment constant-acceleration profiles;
+       later t_sum slots intentionally share the same end time. */
     profile->t_sum[0] = 0.0;
     profile->t_sum[1] = profile->t[1];
     profile->t_sum[2] = profile->t[1];

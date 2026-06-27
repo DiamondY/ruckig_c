@@ -39,6 +39,8 @@ event-driven after `v0.16.0`. It is not an active implementation roadmap.
 - Installed pkg-config metadata only carries normal downstream link
   requirements. Local sanitizer instrumentation remains target-scoped and is
   not propagated through `Libs.private`.
+- Input equality remains exact input identity for trajectory reuse decisions;
+  epsilon comparison would be a separate public-semantics decision.
 - External code-quality review triage is documented; large-file complexity,
   static-analysis CI, platform matrix expansion, and solver documentation work
   remain scoped by concrete triggers rather than broad churn.
@@ -69,6 +71,9 @@ event-driven after `v0.16.0`. It is not an active implementation roadmap.
 - Profile extrema cancellation and first/second-order `t_sum` representation
   remain watch-only. Do not change these representations without a focused
   deterministic repro and normal/oracle regression evidence.
+- Second-order velocity profiles intentionally store a single segment end time
+  across later `t_sum` slots; this is a compact representation, not a missing
+  seven-segment accumulation.
 - Near-zero acceleration sign-flip policy in profile checks remains
   oracle-aligned watch-only behavior; do not change the predicate from review
   suspicion alone.
