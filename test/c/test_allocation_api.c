@@ -99,8 +99,26 @@ static void test_allocation_audit_counter_sequence(void) {
     CHECK_EQ_INT(ruckig_allocation_forbidden_count(), 0);
 }
 
+static void test_allocation_overflow_returns_null(void) {
+    void* raw = NULL;
+    double* vector = NULL;
+
+    ruckig_allocation_counters_reset();
+    ruckig_allocation_forbidden_set(true);
+    raw = ruckig_calloc(SIZE_MAX, 2u);
+    vector = ruckig_allocate_double_vector(SIZE_MAX / sizeof(double) + 1u);
+    ruckig_allocation_forbidden_set(false);
+
+    CHECK_TRUE(raw == NULL);
+    CHECK_TRUE(vector == NULL);
+    CHECK_EQ_INT(ruckig_allocation_count(), 0);
+    CHECK_EQ_INT(ruckig_free_count(), 0);
+    CHECK_EQ_INT(ruckig_allocation_forbidden_count(), 0);
+}
+
 
 void run_allocation_api_tests(void) {
     test_no_allocation_in_realtime_paths();
     test_allocation_audit_counter_sequence();
+    test_allocation_overflow_returns_null();
 }

@@ -1,5 +1,6 @@
 #include "ruckig_c/alloc.h"
 
+#include <stdint.h>
 #include <stdlib.h>
 
 #ifdef RUCKIG_C_TESTING
@@ -10,7 +11,11 @@ static bool allocation_forbidden = false;
 #endif
 
 void* ruckig_calloc(size_t count, size_t size) {
-    void* ptr = calloc(count, size);
+    void* ptr;
+    if (count != 0u && size > SIZE_MAX / count) {
+        return NULL;
+    }
+    ptr = calloc(count, size);
 #ifdef RUCKIG_C_TESTING
     if (ptr) {
         ++allocation_count;

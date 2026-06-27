@@ -23,6 +23,9 @@ event-driven after `v0.16.0`. It is not an active implementation roadmap.
 - Allocation audit counters are documented as local, non-thread-safe
   instrumentation; no atomics or locks are planned unless a future threaded
   audit requirement is accepted.
+- The private allocator rejects `count * size` overflow before calling the
+  system allocator; this is the final allocation-size defense after public
+  constructor derived-count checks.
 - Local `.clang-tidy` and portable preset guidance are available for targeted
   developer use; they remain manual evidence, not default CI gates.
 - Static-analysis evidence policy is documented; default CI still excludes
@@ -33,6 +36,9 @@ event-driven after `v0.16.0`. It is not an active implementation roadmap.
 - `RUCKIG_C_ENABLE_CALCULATION_DURATION` is a library-build option only. The
   installed CMake target must not propagate it through public usage
   requirements.
+- Installed pkg-config metadata only carries normal downstream link
+  requirements. Local sanitizer instrumentation remains target-scoped and is
+  not propagated through `Libs.private`.
 - External code-quality review triage is documented; large-file complexity,
   static-analysis CI, platform matrix expansion, and solver documentation work
   remain scoped by concrete triggers rather than broad churn.
@@ -102,6 +108,8 @@ event-driven after `v0.16.0`. It is not an active implementation roadmap.
   hypothetical threaded audit use without a concrete consumer.
 - Do not expand default CI for coverage upload, static analysis, sanitizer
   matrix, or platform-matrix polish without an accepted CI policy slice.
+- Do not add CI cache, MSVC `cl.exe` default matrix, GCC UBSan, or full
+  waypoint oracle parity without an accepted CI or oracle policy slice.
 - Do not open solver white-box coverage work solely to improve percentages.
 - Do not reintroduce `clock()` CPU-time fallback for duration or interruption
   timing.

@@ -66,54 +66,31 @@
       "name": "windows-clang-ninja-shared",
       "displayName": "Windows LLVM clang + Ninja shared library",
       "description": "Windows shared-library build under out/build/windows-clang-ninja-shared using the verified LLVM clang toolchain and Visual Studio bundled Ninja.",
-      "generator": "Ninja",
+      "inherits": "windows-clang-ninja",
       "binaryDir": "${sourceDir}/out/build/${presetName}",
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release",
-        "CMAKE_MAKE_PROGRAM": "C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe",
-        "CMAKE_C_COMPILER": "D:/Program Files/LLVM/bin/clang.exe",
-        "CMAKE_CXX_COMPILER": "D:/Program Files/LLVM/bin/clang++.exe",
-        "BUILD_SHARED_LIBS": "ON",
-        "BUILD_RUCKIG_C": "ON",
-        "BUILD_RUCKIG_C_TESTS": "ON",
-        "BUILD_RUCKIG_C_EXAMPLES": "ON",
-        "BUILD_RUCKIG_C_ORACLE_TESTS": "OFF",
-        "BUILD_RUCKIG_C_PERFORMANCE_TESTS": "OFF"
+        "BUILD_SHARED_LIBS": "ON"
       }
     },
     {
       "name": "windows-clang-ninja-oracle",
       "displayName": "Windows LLVM clang + Ninja oracle tests",
       "description": "Windows oracle differential build under out/build/windows-clang-ninja-oracle using the verified LLVM clang toolchain.",
-      "generator": "Ninja",
+      "inherits": "windows-clang-ninja",
       "binaryDir": "${sourceDir}/out/build/${presetName}",
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release",
-        "CMAKE_MAKE_PROGRAM": "C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe",
-        "CMAKE_C_COMPILER": "D:/Program Files/LLVM/bin/clang.exe",
-        "CMAKE_CXX_COMPILER": "D:/Program Files/LLVM/bin/clang++.exe",
-        "BUILD_RUCKIG_C": "ON",
-        "BUILD_RUCKIG_C_TESTS": "ON",
-        "BUILD_RUCKIG_C_EXAMPLES": "ON",
-        "BUILD_RUCKIG_C_ORACLE_TESTS": "ON",
-        "BUILD_RUCKIG_C_PERFORMANCE_TESTS": "OFF"
+        "BUILD_RUCKIG_C_ORACLE_TESTS": "ON"
       }
     },
     {
       "name": "windows-clang-ninja-performance",
       "displayName": "Windows LLVM clang + Ninja performance benchmark",
       "description": "Windows performance benchmark build under out/build/windows-clang-ninja-performance using the verified LLVM clang toolchain.",
-      "generator": "Ninja",
+      "inherits": "windows-clang-ninja",
       "binaryDir": "${sourceDir}/out/build/${presetName}",
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release",
-        "CMAKE_MAKE_PROGRAM": "C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe",
-        "CMAKE_C_COMPILER": "D:/Program Files/LLVM/bin/clang.exe",
-        "CMAKE_CXX_COMPILER": "D:/Program Files/LLVM/bin/clang++.exe",
-        "BUILD_RUCKIG_C": "ON",
         "BUILD_RUCKIG_C_TESTS": "OFF",
         "BUILD_RUCKIG_C_EXAMPLES": "OFF",
-        "BUILD_RUCKIG_C_ORACLE_TESTS": "OFF",
         "BUILD_RUCKIG_C_PERFORMANCE_TESTS": "ON"
       }
     },
@@ -121,18 +98,11 @@
       "name": "windows-clang-ninja-coverage",
       "displayName": "Windows LLVM clang + Ninja local coverage",
       "description": "Windows local LLVM source coverage build under out/build/windows-clang-ninja-coverage. This preset is local evidence only and is not a CI gate.",
-      "generator": "Ninja",
+      "inherits": "windows-clang-ninja",
       "binaryDir": "${sourceDir}/out/build/${presetName}",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
-        "CMAKE_MAKE_PROGRAM": "C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe",
-        "CMAKE_C_COMPILER": "D:/Program Files/LLVM/bin/clang.exe",
-        "CMAKE_CXX_COMPILER": "D:/Program Files/LLVM/bin/clang++.exe",
-        "BUILD_RUCKIG_C": "ON",
-        "BUILD_RUCKIG_C_TESTS": "ON",
-        "BUILD_RUCKIG_C_EXAMPLES": "ON",
         "BUILD_RUCKIG_C_ORACLE_TESTS": "ON",
-        "BUILD_RUCKIG_C_PERFORMANCE_TESTS": "OFF",
         "RUCKIG_C_ENABLE_COVERAGE": "ON"
       }
     },

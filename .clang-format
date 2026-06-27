@@ -1,6 +1,6 @@
 BasedOnStyle: LLVM
 Language: Cpp
-Standard: c++03
+Standard: Auto
 ColumnLimit: 100
 IndentWidth: 2
 TabWidth: 2
