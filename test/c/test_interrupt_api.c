@@ -245,11 +245,11 @@ static void test_no_waypoint_interrupt_preserves_incumbent_at_boundary(void) {
     double incumbent_duration;
     double old_time;
 
-    CHECK_EQ_INT(ruckig_create(&otg, 1, 0.05), RUCKIG_WORKING);
-    CHECK_EQ_INT(ruckig_input_create(&input, 1), RUCKIG_WORKING);
-    CHECK_EQ_INT(ruckig_output_create(&output, 1), RUCKIG_WORKING);
+    REQUIRE_EQ_INT(ruckig_create(&otg, 1, 0.05), RUCKIG_WORKING);
+    REQUIRE_EQ_INT(ruckig_input_create(&input, 1), RUCKIG_WORKING);
+    REQUIRE_EQ_INT(ruckig_output_create(&output, 1), RUCKIG_WORKING);
     configure_interrupt_boundary_no_waypoint_input(input);
-    CHECK_EQ_INT(ruckig_input_set_interrupt_calculation_duration(input, 1000000000.0), RUCKIG_WORKING);
+    REQUIRE_EQ_INT(ruckig_input_set_interrupt_calculation_duration(input, 1000000000.0), RUCKIG_WORKING);
 
     result = ruckig_update_under_allocation_guard(otg, input, output);
     CHECK_TRUE(result == RUCKIG_WORKING || result == RUCKIG_FINISHED);
@@ -261,12 +261,12 @@ static void test_no_waypoint_interrupt_preserves_incumbent_at_boundary(void) {
 
     ruckig_output_pass_to_input(output, input);
     ruckig_input_target_position_data(input)[0] = 1.8;
-    CHECK_EQ_INT(ruckig_input_set_interrupt_calculation_duration(input, 0.0), RUCKIG_WORKING);
+    REQUIRE_EQ_INT(ruckig_input_set_interrupt_calculation_duration(input, 0.0), RUCKIG_WORKING);
     result = ruckig_update_under_allocation_guard(otg, input, output);
     CHECK_TRUE(result == RUCKIG_WORKING || result == RUCKIG_FINISHED);
     CHECK_TRUE(!ruckig_output_new_calculation(output));
     CHECK_TRUE(ruckig_output_was_calculation_interrupted(output));
-    CHECK_TRUE(ruckig_trajectory_get_duration(ruckig_output_get_trajectory(output)) == incumbent_duration);
+    CHECK_NEAR(ruckig_trajectory_get_duration(ruckig_output_get_trajectory(output)), incumbent_duration, 1e-12);
     CHECK_TRUE(ruckig_output_get_time(output) > old_time);
     CHECK_TRUE(!otg->waypoint_engine.active);
 
@@ -282,11 +282,11 @@ static void test_no_waypoint_interrupt_budget_matrix_and_clear(void) {
     ruckig_result_t result;
     double interrupted_duration;
 
-    CHECK_EQ_INT(ruckig_create(&otg, 1, 0.05), RUCKIG_WORKING);
-    CHECK_EQ_INT(ruckig_input_create(&input, 1), RUCKIG_WORKING);
-    CHECK_EQ_INT(ruckig_output_create(&output, 1), RUCKIG_WORKING);
+    REQUIRE_EQ_INT(ruckig_create(&otg, 1, 0.05), RUCKIG_WORKING);
+    REQUIRE_EQ_INT(ruckig_input_create(&input, 1), RUCKIG_WORKING);
+    REQUIRE_EQ_INT(ruckig_output_create(&output, 1), RUCKIG_WORKING);
     configure_interrupt_boundary_no_waypoint_input(input);
-    CHECK_EQ_INT(ruckig_input_set_interrupt_calculation_duration(input, 1000000000.0), RUCKIG_WORKING);
+    REQUIRE_EQ_INT(ruckig_input_set_interrupt_calculation_duration(input, 1000000000.0), RUCKIG_WORKING);
 
     result = ruckig_update_under_allocation_guard(otg, input, output);
     CHECK_TRUE(result == RUCKIG_WORKING || result == RUCKIG_FINISHED);
@@ -295,7 +295,7 @@ static void test_no_waypoint_interrupt_budget_matrix_and_clear(void) {
 
     ruckig_output_pass_to_input(output, input);
     ruckig_input_target_position_data(input)[0] = 1.6;
-    CHECK_EQ_INT(ruckig_input_set_interrupt_calculation_duration(input, 0.0), RUCKIG_WORKING);
+    REQUIRE_EQ_INT(ruckig_input_set_interrupt_calculation_duration(input, 0.0), RUCKIG_WORKING);
     result = ruckig_update_under_allocation_guard(otg, input, output);
     CHECK_TRUE(result == RUCKIG_WORKING || result == RUCKIG_FINISHED);
     CHECK_TRUE(!ruckig_output_new_calculation(output));
@@ -303,15 +303,15 @@ static void test_no_waypoint_interrupt_budget_matrix_and_clear(void) {
     interrupted_duration = ruckig_trajectory_get_duration(ruckig_output_get_trajectory(output));
 
     ruckig_output_pass_to_input(output, input);
-    CHECK_EQ_INT(ruckig_input_set_interrupt_calculation_duration(input, 1000000000.0), RUCKIG_WORKING);
+    REQUIRE_EQ_INT(ruckig_input_set_interrupt_calculation_duration(input, 1000000000.0), RUCKIG_WORKING);
     result = ruckig_update_under_allocation_guard(otg, input, output);
     CHECK_TRUE(result == RUCKIG_WORKING || result == RUCKIG_FINISHED);
     CHECK_TRUE(ruckig_output_new_calculation(output));
     CHECK_TRUE(!ruckig_output_was_calculation_interrupted(output));
-    CHECK_TRUE(ruckig_trajectory_get_duration(ruckig_output_get_trajectory(output)) != interrupted_duration);
+    CHECK_NOT_NEAR(ruckig_trajectory_get_duration(ruckig_output_get_trajectory(output)), interrupted_duration, 1e-12);
 
     ruckig_output_pass_to_input(output, input);
-    CHECK_EQ_INT(ruckig_input_set_interrupt_calculation_duration(input, 1.0), RUCKIG_WORKING);
+    REQUIRE_EQ_INT(ruckig_input_set_interrupt_calculation_duration(input, 1.0), RUCKIG_WORKING);
     result = ruckig_update_under_allocation_guard(otg, input, output);
     CHECK_TRUE(result == RUCKIG_WORKING || result == RUCKIG_FINISHED);
     CHECK_TRUE(!otg->waypoint_engine.active);

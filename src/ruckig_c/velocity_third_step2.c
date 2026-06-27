@@ -22,7 +22,7 @@ static bool time_acc0(
 
     {
         const double radicand = (-ad * ad + 2.0 * j_max * ((a0 + af) * tf - 2.0 * vd)) / (j_max * j_max) + tf * tf;
-        if (radicand >= 0.0) {
+        if (isfinite(radicand) && radicand >= 0.0) {
             const double h1 = sqrt(radicand);
             clear_times(profile);
             profile->t[0] = ad / (2.0 * j_max) + (tf - h1) / 2.0;

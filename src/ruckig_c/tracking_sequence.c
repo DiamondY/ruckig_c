@@ -498,7 +498,7 @@ static ruckig_result_t tracking_sequence_process_fast(
     ruckig_tracking_sequence_continuation_t* continuation,
     ruckig_tracking_output_sequence_t* output_sequence
 ) {
-    ruckig_result_t result;
+    ruckig_result_t result = RUCKIG_WORKING;
     ruckig_tracking_diagnostics_t aggregate = continuation->diagnostics;
     ruckig_tracking_mode_t saved_mode = tracking->mode;
     ruckig_tracking_optimized_strategy_t saved_strategy = tracking->optimized_strategy;
@@ -518,9 +518,7 @@ static ruckig_result_t tracking_sequence_process_fast(
         aggregate.optimized_strategy = continuation->optimized_strategy;
         continuation->diagnostics = aggregate;
         tracking_sequence_set_diagnostics(tracking, continuation);
-        tracking->mode = saved_mode;
-        tracking->optimized_strategy = saved_strategy;
-        return RUCKIG_WORKING;
+        goto restore_and_return;
     }
 
     if (ruckig_input_copy_state(continuation->input, tracking->work_input) != RUCKIG_WORKING) {
@@ -531,9 +529,8 @@ static ruckig_result_t tracking_sequence_process_fast(
         aggregate.optimized_strategy = continuation->optimized_strategy;
         continuation->diagnostics = aggregate;
         tracking_sequence_set_diagnostics(tracking, continuation);
-        tracking->mode = saved_mode;
-        tracking->optimized_strategy = saved_strategy;
-        return RUCKIG_ERROR_INVALID_INPUT;
+        result = RUCKIG_ERROR_INVALID_INPUT;
+        goto restore_and_return;
     }
     ruckig_reset(tracking->otg);
 
@@ -550,9 +547,8 @@ static ruckig_result_t tracking_sequence_process_fast(
             continuation->was_interrupted = false;
             continuation->diagnostics = aggregate;
             tracking_sequence_set_diagnostics(tracking, continuation);
-            tracking->mode = saved_mode;
-            tracking->optimized_strategy = saved_strategy;
-            return RUCKIG_ERROR_INVALID_INPUT;
+            result = RUCKIG_ERROR_INVALID_INPUT;
+            goto restore_and_return;
         }
         tracking_reset_diagnostics(tracking);
         result = prepare_fast_tracking_input(
@@ -583,9 +579,7 @@ static ruckig_result_t tracking_sequence_process_fast(
             continuation->was_interrupted = false;
             continuation->diagnostics = aggregate;
             tracking_sequence_set_diagnostics(tracking, continuation);
-            tracking->mode = saved_mode;
-            tracking->optimized_strategy = saved_strategy;
-            return result;
+            goto restore_and_return;
         }
 
         tracking_accumulate_diagnostics(&aggregate, &tracking->diagnostics);
@@ -607,9 +601,8 @@ static ruckig_result_t tracking_sequence_process_fast(
                 continuation->was_interrupted = false;
                 continuation->diagnostics = aggregate;
                 tracking_sequence_set_diagnostics(tracking, continuation);
-                tracking->mode = saved_mode;
-                tracking->optimized_strategy = saved_strategy;
-                return store_result;
+                result = store_result;
+                goto restore_and_return;
             }
         }
         ++continuation->completed_count;
@@ -628,9 +621,8 @@ static ruckig_result_t tracking_sequence_process_fast(
             continuation->diagnostics = aggregate;
             tracking_sequence_copy_prefix(output_sequence, continuation->output_prefix);
             tracking_sequence_set_diagnostics(tracking, continuation);
-            tracking->mode = saved_mode;
-            tracking->optimized_strategy = saved_strategy;
-            return RUCKIG_WORKING;
+            result = RUCKIG_WORKING;
+            goto restore_and_return;
         }
     }
 
@@ -643,9 +635,12 @@ static ruckig_result_t tracking_sequence_process_fast(
     continuation->diagnostics = aggregate;
     tracking_sequence_copy_prefix(output_sequence, continuation->output_prefix);
     tracking_sequence_set_diagnostics(tracking, continuation);
+    result = RUCKIG_WORKING;
+
+restore_and_return:
     tracking->mode = saved_mode;
     tracking->optimized_strategy = saved_strategy;
-    return RUCKIG_WORKING;
+    return result;
 }
 
 static void tracking_sequence_copy_best_to_continuation(

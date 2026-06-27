@@ -54,6 +54,9 @@ event-driven after `v0.16.0`. It is not an active implementation roadmap.
   duplicated time segment terms, remains an oracle-backed watch item. Local
   denominator guards are acceptable; formula rewrites require deterministic
   C/C++ oracle evidence.
+- Third-order position Newton-step clamp direction and interval-scan cursor
+  handling remain oracle-backed watch items. Do not change either from review
+  suspicion alone without a deterministic repro or C/C++ oracle mismatch.
 - Step1/step2 direction predicate differences such as `>` versus `>=` remain
   watch-only until a reproducible public behavior regression or oracle
   mismatch shows that candidate-family order is wrong.
@@ -62,6 +65,12 @@ event-driven after `v0.16.0`. It is not an active implementation roadmap.
   deterministic repro and normal/oracle regression evidence.
 - The post-`v0.16.0` quality tightening series is closed out; remaining quality
   expansion is event-driven.
+- White-box tests that mutate internal state remain intentional corrupted-state
+  and audit coverage. Migrating those cases to public-only scenarios requires a
+  separate test-strategy slice, not incidental cleanup.
+- Local non-finite radicand guards are acceptable at direct `sqrt` boundaries
+  when they preserve the existing candidate skip/fail behavior. Wider solver
+  formula, threshold, or predicate changes still require oracle-backed evidence.
 
 ## Watch Triggers
 
@@ -85,6 +94,8 @@ event-driven after `v0.16.0`. It is not an active implementation roadmap.
 | Private derived-count cleanup | A touched private helper computes buffer lengths from counts or sections and can be hardened locally without changing candidate order, scoring, or public behavior. |
 | Phase-sync near-zero scaling | A deterministic oracle mismatch, public behavior regression, user report, or stable invariant shows near-zero `pd_limiting` or `scale_limiting` creates invalid synchronized profiles. |
 | Solver formula consistency | A deterministic oracle mismatch, public behavior regression, or minimal repro shows a copied third-order formula, candidate-family predicate, profile extrema calculation, or `t_sum` representation is wrong. |
+| Third-order Newton/interval scan | A deterministic oracle mismatch, public behavior regression, or minimal repro shows Newton-step clamping or interval-cursor advancement misses a valid profile or accepts an invalid one. |
+| White-box test migration | A maintainer accepts replacing corrupted-state/audit coverage with equivalent public-only fixtures without losing the failure mode being exercised. |
 
 ## Explicit Non-Triggers
 

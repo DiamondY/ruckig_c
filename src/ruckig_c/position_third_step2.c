@@ -92,7 +92,7 @@ static bool check_time_vel_general_uddu_root(
     double radicand;
 
     radicand = (a0_a0 + af_af) / (2.0 * j_max_j_max) + (2.0 * a0 * t + j_max * t * t - vd) / j_max;
-    if (radicand < 0.0) {
+    if (!isfinite(radicand) || radicand < 0.0) {
         return false;
     }
     h1 = sqrt(radicand);
@@ -116,7 +116,7 @@ static bool check_time_vel_general_uddu_root(
     }
 
     radicand = (a0_a0 + af_af) / (2.0 * j_max_j_max) + (t * (2.0 * a0 + j_max * t) - vd) / j_max;
-    if (radicand < 0.0) {
+    if (!isfinite(radicand) || radicand < 0.0) {
         return false;
     }
     h1 = sqrt(radicand);
@@ -265,7 +265,7 @@ static bool check_time_vel_general_udud_root(
     double deriv_newton;
 
     radicand = (af_af - a0_a0) / (2.0 * j_max_j_max) - ((2.0 * a0 + j_max * t) * t - vd) / j_max;
-    if (radicand < 0.0) {
+    if (!isfinite(radicand) || radicand < 0.0) {
         return false;
     }
     h1 = sqrt(radicand);
@@ -278,7 +278,7 @@ static bool check_time_vel_general_udud_root(
     }
 
     radicand = (af_af - a0_a0) / (2.0 * j_max_j_max) - ((2.0 * a0 + j_max * t) * t - vd) / j_max;
-    if (radicand < 0.0) {
+    if (!isfinite(radicand) || radicand < 0.0) {
         return false;
     }
     h1 = sqrt(radicand);
@@ -293,7 +293,7 @@ static bool check_time_vel_general_udud_root(
     }
 
     radicand = (af_af - a0_a0) / (2.0 * j_max_j_max) - ((2.0 * a0 + j_max * t) * t - vd) / j_max;
-    if (radicand < 0.0 || isnan(t)) {
+    if (!isfinite(radicand) || radicand < 0.0 || !isfinite(t)) {
         return false;
     }
     h1 = sqrt(radicand);
@@ -475,7 +475,7 @@ static bool time_acc0_acc1_vel(
             + 4.0 * j_max * (a_min - a_max + j_max * tf - 2.0 * af) * tf;
         double h1;
 
-        if (radicand >= 0.0) {
+        if (isfinite(radicand) && radicand >= 0.0) {
             h1 = sqrt(radicand) * fabs(j_max) / j_max;
 
             clear_times(profile);
@@ -911,7 +911,7 @@ static bool time_acc0(
             - ad * (a_max - a0) / j_max_j_max
             + (a_max * tf - vd) / j_max;
 
-        if (radicand >= 0.0) {
+        if (isfinite(radicand) && radicand >= 0.0) {
             const double h1 = sqrt(radicand);
 
             clear_times(profile);
@@ -937,7 +937,7 @@ static bool time_acc0(
         const double radicand = 4.0 * h0b * h0b - 18.0 * h0a * h0a * h0a;
         const double h1 = 3.0 * j_max * h0a;
 
-        if (radicand >= 0.0 && fabs(h1) > DBL_EPSILON) {
+        if (isfinite(radicand) && radicand >= 0.0 && fabs(h1) > DBL_EPSILON) {
             const double h0 = fabs(j_max) * sqrt(radicand);
 
             clear_times(profile);
@@ -972,7 +972,7 @@ static bool time_acc0(
         const double radicand = 4.0 * h0a * h0a - 18.0 * h0b * h0b * h0b;
         const double h2 = 6.0 * j_max * h0b;
 
-        if (radicand >= 0.0 && fabs(h2) > DBL_EPSILON) {
+        if (isfinite(radicand) && radicand >= 0.0 && fabs(h2) > DBL_EPSILON) {
             const double h1 = fabs(j_max) / j_max * sqrt(radicand);
 
             clear_times(profile);
@@ -1049,7 +1049,7 @@ static bool time_acc0_acc1(
             + a0_a0 * (3.0 * af - 4.0 * (2.0 * a_max + a_min));
         const double radicand = 144.0 * h_a * h_a + 48.0 * ad * h_b * h_den;
 
-        if (radicand >= 0.0 && fabs(h_den) > DBL_EPSILON) {
+        if (isfinite(radicand) && radicand >= 0.0 && fabs(h_den) > DBL_EPSILON) {
             const double h1 = sqrt(radicand);
             jf = -(3.0 * af_af * a_max * tf - 3.0 * a0_a0 * a_min * tf
                     - 6.0 * ad * a_max * a_min * tf
@@ -1137,7 +1137,7 @@ static bool time_none_udud_t0246(
         - 4.0 * a0 * (af_p3 + 3.0 * af_af * j_max * tf - 9.0 * af * j_max_j_max * tf_tf
             - 3.0 * j_max_j_max * (8.0 * pd + j_max * tf_p3 - 8.0 * tf * vf));
     h0_radicand = 2.0 * j_max_j_max * (2.0 * h0a * h0a - 3.0 * h0b * h0c);
-    if (h0_radicand < 0.0) {
+    if (!isfinite(h0_radicand) || h0_radicand < 0.0) {
         return false;
     }
 
@@ -1350,7 +1350,7 @@ static bool time_none(
         const double h1 = 3.0 * j_max * (ad_ad + 2.0 * j_max * (a0 * tf - vd));
         const double h2 = ad_ad + 2.0 * j_max * (a0 * tf - vd);
         const double radicand = 4.0 * ruckig_pow2(2.0 * (a0_p3 - af_p3) - 6.0 * a0_a0 * (af - j_max * tf) + 6.0 * j_max_j_max * g1 + 3.0 * a0 * (2.0 * af_af - 2.0 * j_max * af * tf + j_max_j_max * tf_tf) + 6.0 * ad * j_max * vd) - 18.0 * h2 * h2 * h2;
-        if (radicand >= 0.0 && fabs(h1) > DBL_EPSILON) {
+        if (isfinite(radicand) && radicand >= 0.0 && fabs(h1) > DBL_EPSILON) {
             const double h0 = sqrt(radicand) / h1 * fabs(j_max) / j_max;
 
             clear_times(profile);
@@ -1407,7 +1407,7 @@ static bool time_none(
 
                 {
                     const double radicand = 2.0 * ad_ad + 4.0 * j_max * (ad * t + a0 * tf + j_max * t * (t - tf) - vd);
-                    if (radicand < 0.0) {
+                    if (!isfinite(radicand) || radicand < 0.0) {
                         continue;
                     }
                     const double h1 = sqrt(radicand) / fabs(j_max);
@@ -1428,7 +1428,7 @@ static bool time_none(
 
     {
         const double radicand = -ad_ad + j_max * (2.0 * (a0 + af) * tf - 4.0 * vd + j_max * tf_tf);
-        if (radicand >= 0.0) {
+        if (isfinite(radicand) && radicand >= 0.0) {
             const double h1 = sqrt(radicand) / fabs(j_max);
 
             clear_times(profile);

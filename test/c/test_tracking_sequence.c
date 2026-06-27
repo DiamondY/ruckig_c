@@ -106,8 +106,12 @@ static void test_tracking_sequence_fast_continuation_resume_budget(void) {
     CHECK_EQ_INT(ruckig_tracking_output_sequence_get_count(outputs), 1);
     CHECK_EQ_INT(ruckig_tracking_sequence_continuation_get_completed_count(continuation), 1);
 
+    CHECK_EQ_INT(ruckig_tracking_set_mode(tracking, RUCKIG_TRACKING_OPTIMIZED), RUCKIG_WORKING);
+    CHECK_EQ_INT(ruckig_tracking_set_optimized_strategy(tracking, RUCKIG_TRACKING_OPTIMIZED_AGGRESSIVE), RUCKIG_WORKING);
     for (expected_count = 2; expected_count <= count; ++expected_count) {
         CHECK_EQ_INT(tracking_resume_sequence_under_allocation_guard(tracking, continuation, outputs), RUCKIG_WORKING);
+        CHECK_EQ_INT(ruckig_tracking_get_mode(tracking), RUCKIG_TRACKING_OPTIMIZED);
+        CHECK_EQ_INT(ruckig_tracking_get_optimized_strategy(tracking), RUCKIG_TRACKING_OPTIMIZED_AGGRESSIVE);
         CHECK_EQ_INT(ruckig_tracking_output_sequence_get_count(outputs), expected_count);
         CHECK_EQ_INT(ruckig_tracking_sequence_continuation_get_completed_count(continuation), expected_count);
         if (expected_count < count) {
